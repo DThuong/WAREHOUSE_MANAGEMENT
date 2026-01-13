@@ -1,10 +1,10 @@
-# 📦 InApp - Dashboard Quản Lý Kho
+# Dashboard Quản Lý Kho
 
 Dashboard quản lý kho hiện đại được xây dựng với **Vue.js 3**, **Pinia**, **Composition API**, **Vue Router**, và **PrimeVue**.
 
-## ✨ Tính năng
+## Tính năng
 
-### 📊 Dashboard Chính
+### Dashboard Chính
 - 4 stat cards hiển thị metrics chính (Sales, Purchase, Expenses, Invoice Due)
 - 3 detailed stats cards với icons và thay đổi phần trăm
 - **Sales vs Purchase Chart** - Line chart với animation mượt mà
@@ -14,28 +14,28 @@ Dashboard quản lý kho hiện đại được xây dựng với **Vue.js 3**, 
 - **Low Stock Products** - Cảnh báo sản phẩm tồn kho thấp
 - **Recent Sales** - Đơn hàng gần đây với trạng thái
 
-### 📦 Quản lý hàng tồn kho
+### Quản lý hàng tồn kho
 - DataTable với pagination, sorting, filtering
 - Hiển thị hình ảnh, thông tin chi tiết sản phẩm
 - Badges cho trạng thái và số lượng tồn kho
 - Actions: Edit, Delete
 
-### ➕ Thêm sản phẩm
+### Thêm sản phẩm
 - Form validation hoàn chỉnh
 - Upload hình ảnh (drag & drop)
 - Dropdowns cho Category và Supplier
 - Grid layout responsive
 
-### 📈 Báo cáo
+### Báo cáo
 - Cards hiển thị các loại báo cáo
 - Ready for implementation
 
-### 👥 Nhà cung cấp & Khách hàng
+### Nhà cung cấp & Khách hàng
 - DataTable quản lý danh sách
 - Avatar cho customers
 - Badges phân loại (VIP, Regular)
 
-## 🎨 Design System
+## Design System
 
 ### Colors
 - **Primary**: `#6366f1` (Indigo)
@@ -54,7 +54,7 @@ Dashboard quản lý kho hiện đại được xây dựng với **Vue.js 3**, 
 - Content: Max-width 1600px, centered
 - Grid: 4 columns responsive
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Vue.js 3** - Progressive JavaScript Framework
 - **Pinia** - State Management
@@ -64,7 +64,7 @@ Dashboard quản lý kho hiện đại được xây dựng với **Vue.js 3**, 
 - **Vue-ChartJS** - Vue wrapper cho Chart.js
 - **Vite** - Build tool
 
-## 📦 Cài đặt
+## Cài đặt
 
 ### 1. Clone project
 ```bash
@@ -126,7 +126,7 @@ warehouse-dashboard/
 └── vite.config.js
 ```
 
-## 🎯 Các trang chính
+## Các trang chính
 
 1. **Dashboard** (`/`) - Trang chủ với overview metrics
 2. **Inventory** (`/inventory`) - Quản lý hàng tồn kho
@@ -135,7 +135,7 @@ warehouse-dashboard/
 5. **Suppliers** (`/suppliers`) - Quản lý nhà cung cấp
 6. **Customers** (`/customers`) - Quản lý khách hàng
 
-## 🔑 Pinia Store
+## Pinia Store
 
 ### Dashboard Store
 ```javascript
@@ -155,7 +155,7 @@ totalRevenue          // Computed total revenue
 updateStats()         // Cập nhật stats
 ```
 
-## 🎨 Custom CSS Classes
+## Custom CSS Classes
 
 ```css
 .stat-card            // Card cho statistics
@@ -169,20 +169,20 @@ updateStats()         // Cập nhật stats
 .badge-info           // Blue badge
 ```
 
-## 📱 Responsive Design
+## Responsive Design
 
 - **Desktop**: 1280px+ (4 columns)
 - **Tablet**: 768px-1279px (2 columns)
 - **Mobile**: <768px (1 column, collapsible sidebar)
 
-## 🚀 Performance
+## Performance
 
 - **Lazy loading** cho routes
 - **Code splitting** automatic bởi Vite
 - **Tree shaking** loại bỏ unused code
 - **CSS optimization** với custom properties
 
-## 🎯 Tính năng tiếp theo (TODO)
+## Tính năng tiếp theo (TODO)
 
 - [ ] Authentication & Authorization
 - [ ] Real-time updates với WebSocket
@@ -193,7 +193,7 @@ updateStats()         // Cập nhật stats
 - [ ] Email notifications
 - [ ] Mobile app với Capacitor
 
-## 📝 Notes
+## Notes
 
 - Tất cả data hiện tại là **mock data**
 - Cần kết nối với backend API để lấy real data
@@ -201,14 +201,3 @@ updateStats()         // Cập nhật stats
 - PrimeVue theme: Lara Light Indigo
 - Icons: PrimeIcons
 
-## 🤝 Contributing
-
-Feel free to submit issues and pull requests!
-
-## 📄 License
-
-MIT License
-
----
-
-**Developed with ❤️ by DThuong**
