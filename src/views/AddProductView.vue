@@ -1,7 +1,7 @@
 <template>
   <MainLayout>
-    <div class="animate-fade-in" style="max-width: 900px;">
-      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">Thêm sản phẩm mới</h2>
+    <div class="animate-fade-in" style="max-width: 800px; margin: 0 auto;">
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Thêm sản phẩm mới</h2>
 
       <Card>
         <template #content>
@@ -84,9 +84,9 @@
               </div>
             </div>
 
-            <div class="flex gap-3 justify-end" style="padding-top: 1rem; border-top: 1px solid var(--gray-200);">
-              <Button label="Hủy" severity="secondary" outlined />
-              <Button label="Lưu sản phẩm" type="submit" icon="pi pi-check" />
+            <div class="flex gap-2" style="padding-top: 1rem; border-top: 1px solid var(--gray-200); justify-content: center;">
+              <Button label="Hủy" style="font-size: 0.875rem;" severity="secondary" outlined />
+              <Button label="Lưu sản phẩm" style="font-size: 0.875rem;" type="submit" icon="pi pi-check" size="large" class="save-button" />
             </div>
           </form>
         </template>
@@ -145,3 +145,9 @@ const handleSubmit = () => {
   // Handle form submission logic here
 }
 </script>
+
+<style scoped>
+  .save-button :deep(.pi) {
+  font-size: 0.875rem; /* Kích thước icon */
+}
+</style>

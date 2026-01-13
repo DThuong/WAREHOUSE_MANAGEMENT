@@ -9,5 +9,12 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  }
+  },
+  server: {
+    host: '0.0.0.0', // Quan trọng cho Docker
+    port: 5174,
+    watch: {
+      usePolling: true // Quan trọng cho hot reload trong Docker
+    }
+  },
 })

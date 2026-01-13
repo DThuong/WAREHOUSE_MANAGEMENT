@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="stat-card">
     <div class="stat-label">{{ label }}</div>
     <div class="stat-value">${{ formatNumber(value) }}</div>
@@ -19,4 +19,4 @@ defineProps({
 const formatNumber = (num) => {
   return new Intl.NumberFormat('vi-VN').format(num)
 }
-</script>
+</script> -->

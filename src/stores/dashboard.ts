@@ -1,9 +1,73 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+// Types
+interface StatItem {
+  value: number
+  change: number
+  label: string
+}
+
+interface Stats {
+  totalSales: StatItem
+  totalPurchase: StatItem
+  totalExpenses: StatItem
+  invoiceDue: StatItem
+}
+
+interface DetailedStat {
+  title: string
+  value: number
+  change: number
+  label: string
+}
+
+interface Product {
+  id: number
+  name: string
+  price: number
+  units: number
+  percentage: number
+  image: string
+}
+
+interface LowStockProduct {
+  id: number
+  name: string
+  stock: number
+  image: string
+}
+
+interface RecentSale {
+  id: number
+  name: string
+  category: string
+  price: number
+  quantity: number
+  status: 'completed' | 'processing' | 'pending' | 'cancelled'
+  image: string
+}
+
+interface OverviewStats {
+  suppliers: number
+  customers: number
+  orders: number
+}
+
+interface CustomerOverview {
+  firstTime: {
+    count: number
+    percentage: number
+  }
+  return: {
+    count: number
+    percentage: number
+  }
+}
+
 export const useDashboardStore = defineStore('dashboard', () => {
   // State
-  const stats = ref({
+  const stats = ref<Stats>({
     totalSales: {
       value: 25000,
       change: 5,
@@ -26,7 +90,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   })
 
-  const detailedStats = ref([
+  const detailedStats = ref<DetailedStat[]>([
     {
       title: 'Tổng lợi nhuận',
       value: 25458,
@@ -47,7 +111,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   ])
 
-  const topProducts = ref([
+  const topProducts = ref<Product[]>([
     {
       id: 1,
       name: 'Tai nghe không dây',
@@ -90,7 +154,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   ])
 
-  const lowStockProducts = ref([
+  const lowStockProducts = ref<LowStockProduct[]>([
     {
       id: 554433,
       name: 'Tai nghe không dây',
@@ -123,7 +187,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   ])
 
-  const recentSales = ref([
+  const recentSales = ref<RecentSale[]>([
     {
       id: 1,
       name: 'MacBook Pro 16"',
@@ -171,24 +235,24 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   ])
 
-  const overviewStats = ref({
+  const overviewStats = ref<OverviewStats>({
     suppliers: 6987,
     customers: 4896,
     orders: 487
   })
 
-  const customerOverview = ref({
+  const customerOverview = ref<CustomerOverview>({
     firstTime: { count: 5500, percentage: 25 },
     return: { count: 3500, percentage: 21 }
   })
 
   // Getters
-  const totalRevenue = computed(() => {
+  const totalRevenue = computed<number>(() => {
     return stats.value.totalSales.value - stats.value.totalExpenses.value
   })
 
   // Actions
-  const updateStats = (newStats) => {
+  const updateStats = (newStats: Partial<Stats>): void => {
     stats.value = { ...stats.value, ...newStats }
   }
 

@@ -17,7 +17,7 @@
         <!-- Navigation -->
         <nav>
           <div style="margin-bottom: 1.5rem;">
-            <p style="font-size: 0.75rem; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; padding-left: 1rem;">
+            <p style="font-size: 0.75rem; font-weight: 600; color: var(--gray-500); letter-spacing: 0.05em; margin-bottom: 0.75rem; padding-left: 1rem;">
               Main
             </p>
             <router-link 
@@ -56,7 +56,7 @@
       <header class="navbar">
         <div class="flex items-center gap-4">
           <Button 
-            icon="pi pi-bars" 
+            :icon="sidebarOpen ? 'pi pi-angle-double-left' : 'pi pi-angle-double-right'"
             text 
             rounded 
             @click="toggleSidebar"
@@ -67,27 +67,59 @@
           </h1>
         </div>
 
-        <div class="flex items-center gap-2">
-
+        <div class="flex items-center gap-2" style="">
           <!-- Notifications -->
-          <Button 
-            icon="pi pi-bell" 
-            text 
-            rounded
-            badge="2"
-            badgeClass="p-badge-danger"
-            style="position: relative; color: var(--gray-600);"
-            @click="toggleNotifications"
-          />
+          <div style="position: relative; display: inline-block; margin-right: 0.2rem;">
+            <Button 
+              icon="pi pi-bell" 
+              text 
+              rounded
+              severity="secondary"
+              style="color: var(--gray-600);"
+              @click="toggleNotifications"
+            />
+            <span 
+              style="
+                position: absolute;
+                top: 1px;
+                right: 5px;
+                background: #ef4444;
+                color: white;
+                border-radius: 50%;
+                width: 18px;
+                height: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 11px;
+                font-weight: 600;
+                border: 2px solid white;
+              "
+            >
+              2
+            </span>
+          </div>
 
           <!-- User Menu -->
-          <div class="flex items-center gap-2 cursor-pointer" @click="toggleUserMenu" style="padding: 0.5rem; border-radius: 8px; transition: background 0.2s;" @mouseover="$event.currentTarget.style.background = 'var(--gray-50)'" @mouseleave="$event.currentTarget.style.background = 'transparent'">
-            <Avatar 
-              image="https://i.pravatar.cc/150?img=1" 
-              shape="circle" 
-              size="large"
-            />
-          </div>
+          <Avatar 
+            image="https://i.pravatar.cc/150?img=1" 
+            shape="circle" 
+            size="medium"
+            @click="toggleMenu"
+            style="cursor: pointer; margin-right: 1rem;"
+          />
+          
+          <Menu ref="menu" :model="menuItems" :popup="true">
+            <template #start>
+              <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 0.75rem;">
+                <Avatar image="https://i.pravatar.cc/150?img=1" shape="circle" size="large"/>
+                <div>
+                  <div style="font-weight: 600;">Thượng</div>
+                  <div style="font-size: 0.875rem; color: var(--gray-600);">@Thuongnehihi</div>
+                </div>
+              </div>
+            </template>
+          </Menu>
         </div>
       </header>
 
@@ -122,12 +154,29 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
-import logoImg from '../assets/images/logo.png'
+import Menu from 'primevue/menu'
+import Avatar from 'primevue/avatar'
+import Button from 'primevue/button'
+import OverlayPanel from 'primevue/overlaypanel'
+import logoImg from '../assets/images/newLogo.jpg'
 
 const route = useRoute()
 const sidebarOpen = ref(true)
 const mobileSidebarOpen = ref(false)
 const notificationPanel = ref(null)
+const menu = ref()
+
+const toggleMenu = (event) => {
+  menu.value.toggle(event)
+}
+
+const menuItems = [
+  { label: 'Home', icon: 'pi pi-home' },
+  { label: 'Inbox', icon: 'pi pi-inbox' },
+  { label: 'Chat', icon: 'pi pi-comments' },
+  { label: 'Activity', icon: 'pi pi-chart-line' },
+  { label: 'Account Settings', icon: 'pi pi-cog' },
+]
 
 const mainLinks = [
   { path: '/', label: 'Dashboard', icon: 'pi pi-home' },
@@ -140,7 +189,6 @@ const mainLinks = [
 
 const accountLinks = [
   { path: '/signin', label: 'Đăng nhập', icon: 'pi pi-sign-in' },
-  { path: '/signup', label: 'Đăng ký', icon: 'pi pi-user-plus' }
 ]
 
 const notifications = [
@@ -182,10 +230,6 @@ const toggleSidebar = () => {
 
 const toggleNotifications = (event) => {
   notificationPanel.value.toggle(event)
-}
-
-const toggleUserMenu = () => {
-  // Handle user menu toggle
 }
 </script>
 

@@ -1,8 +1,8 @@
 <template>
   <MainLayout>
     <div class="animate-fade-in">
-      <div class="flex justify-between items-center mb-6">
-        <h2 style="font-size: 1.5rem; font-weight: 700;">Nhà cung cấp</h2>
+      <div class="flex justify-between items-center mb-4">
+        <h2 style="font-size: 1.5rem; font-weight: 700;"></h2>
         <Button label="Thêm nhà cung cấp" icon="pi pi-plus" />
       </div>
 
@@ -42,3 +42,10 @@ const suppliers = ref([
   { id: 5, name: 'Dell Technologies', contact: 'Michael Dell', email: 'contact@dell.com', phone: '+1-512-338-4400', products: 52 }
 ])
 </script>
+
+<style scoped>
+:deep(nav.p-datatable-paginator-bottom) {
+  margin-top: 20px;
+  
+}
+</style>

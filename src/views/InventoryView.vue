@@ -3,8 +3,8 @@
     <div class="animate-fade-in">
       <div class="flex justify-between items-center mb-4">
         <div>
-          <h2 class="text-2xl font-bold mb-4 text-gray-900">Quản lý hàng tồn kho</h2>
-          <p class="text-gray-600">Quản lý tất cả sản phẩm trong kho</p>
+          <h2 class="text-2xl font-bold mb-4 text-gray-900"></h2>
+          <p class="text-gray-600"></p>
         </div>
         <Button label="Thêm sản phẩm mới" icon="pi pi-plus" class="btn-primary" />
       </div>
@@ -15,10 +15,8 @@
             :value="products" 
             :paginator="true" 
             :rows="10"
-            :rowsPerPageOptions="[5, 10, 20, 50]"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            currentPageReportTemplate="Hiển thị {first} đến {last} trong tổng số {totalRecords} sản phẩm"
             responsiveLayout="scroll"
+            class="custom-datatable"
           >
             <Column field="id" header="ID" sortable class="w-20"></Column>
             <Column header="Sản phẩm">
@@ -27,11 +25,12 @@
                   <img 
                     :src="slotProps.data.image" 
                     :alt="slotProps.data.name" 
-                    class="w-12 h-12 rounded-lg object-cover" 
+                    class="w-12 h-12 object-cover" 
+                    style="border-radius: 10px; object-fit: cover;"
                   />
                   <div>
                     <p class="font-semibold text-gray-900">{{ slotProps.data.name }}</p>
-                    <p class="text-sm text-gray-500">{{ slotProps.data.category }}</p>
+                    <p class="text-gray-500" style="font-size: small;">{{ slotProps.data.category }}</p>
                   </div>
                 </div>
               </template>
@@ -122,3 +121,9 @@ const products = ref([
   }
 ])
 </script>
+
+<style scoped>
+:deep(nav.p-datatable-paginator-bottom) {
+  border-bottom: none !important;
+}
+</style>

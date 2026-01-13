@@ -1,18 +1,18 @@
 <template>
   <MainLayout>
     <div class="animate-fade-in">
-      <div class="flex justify-between items-center mb-6">
-        <h2 style="font-size: 1.5rem; font-weight: 700;">Khách hàng</h2>
+      <div class="flex justify-between items-center mb-4">
+        <h2 style="font-size: 1.5rem; font-weight: 700;"></h2>
         <Button label="Thêm khách hàng" icon="pi pi-plus" />
       </div>
 
       <Card>
         <template #content>
-          <DataTable :value="customers" :paginator="true" :rows="10">
+          <DataTable :value="customers" :paginator="true" :rows="10"  paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown">
             <Column field="id" header="ID" sortable></Column>
             <Column header="Khách hàng">
               <template #body="slotProps">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
                   <Avatar :image="slotProps.data.avatar" shape="circle" />
                   <div>
                     <p style="font-weight: 600;">{{ slotProps.data.name }}</p>
@@ -110,3 +110,9 @@ const customers = ref([
   }
 ])
 </script>
+
+<style scoped>
+:deep(nav.p-datatable-paginator-bottom) {
+  border-bottom: none !important;
+}
+</style>

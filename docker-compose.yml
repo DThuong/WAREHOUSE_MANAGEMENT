@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  warehouse-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: warehouse-dashboard
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
