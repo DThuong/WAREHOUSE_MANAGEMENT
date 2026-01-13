@@ -6,84 +6,73 @@
         v-model="selectedPeriod" 
         :options="periods" 
         optionLabel="label" 
-        placeholder="Chọn kỳ"
+        placeholder="This Year"
         style="width: 180px;"
       />
     </div>
-    <div style="height: 300px;">
-      <Line :data="chartData" :options="chartOptions" />
+    <div style="height: 320px;">
+      <Bar :data="chartData" :options="chartOptions" />
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Line } from 'vue-chartjs'
+import { Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Title,
   Tooltip,
-  Legend,
-  Filler
+  Legend
 } from 'chart.js'
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Title,
   Tooltip,
-  Legend,
-  Filler
+  Legend
 )
+
+interface Period {
+  label: string
+  value: string
+}
 
 defineProps({
   title: {
     type: String,
-    default: 'Doanh thu vs Mua hàng'
+    default: 'Sales vs Purchase'
   }
 })
 
-const selectedPeriod = ref({ label: 'Năm nay', value: 'year' })
-const periods = [
-  { label: 'Năm nay', value: 'year' },
-  { label: 'Tháng này', value: 'month' },
-  { label: 'Tuần này', value: 'week' }
+const selectedPeriod = ref<Period>({ label: 'This Year', value: 'year' })
+const periods: Period[] = [
+  { label: 'This Year', value: 'year' },
+  { label: 'This Month', value: 'month' },
+  { label: 'This Week', value: 'week' }
 ]
 
 const chartData = computed(() => ({
-  labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+  labels: ['28 Jan', '29 Jan', '30 Jan', '31 Jan', '1 Feb', '2 Feb', '3 Feb', '4 Feb', '5 Feb'],
   datasets: [
     {
-      label: 'Doanh thu',
-      data: [12000, 19000, 15000, 25000, 22000, 30000, 28000, 32000, 29000, 35000, 38000, 42000],
-      borderColor: '#6366f1',
-      backgroundColor: 'rgba(99, 102, 241, 0.1)',
-      fill: true,
-      tension: 0.4,
-      pointRadius: 4,
-      pointHoverRadius: 6,
-      pointBackgroundColor: '#6366f1',
-      pointBorderColor: '#fff',
-      pointBorderWidth: 2
+      label: 'Sales',
+      data: [45, 55, 58, 98, 60, 85, 58, 105, 60, 95],
+      backgroundColor: '#f7a085',
+      borderRadius: 4,
+      barThickness: 24
     },
     {
-      label: 'Mua hàng',
-      data: [8000, 12000, 10000, 18000, 16000, 22000, 20000, 24000, 21000, 26000, 28000, 30000],
-      borderColor: '#ec4899',
-      backgroundColor: 'rgba(236, 72, 153, 0.1)',
-      fill: true,
-      tension: 0.4,
-      pointRadius: 4,
-      pointHoverRadius: 6,
-      pointBackgroundColor: '#ec4899',
-      pointBorderColor: '#fff',
-      pointBorderWidth: 2
+      label: 'Purchase',
+      data: [75, 85, 58, 95, 60, 85, 105, 60, 115, 95],
+      backgroundColor: '#e66239', 
+      borderRadius: 4,
+      barThickness: 24
     }
   ]
 }))
@@ -93,15 +82,17 @@ const chartOptions = {
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      position: 'top',
-      align: 'end',
+      position: 'bottom' as const,
+      align: 'center' as const,
       labels: {
         usePointStyle: true,
-        padding: 15,
+        pointStyle: 'rect',
+        padding: 20,
         font: {
           size: 13,
-          family: 'Inter'
-        }
+          family: 'Inter, system-ui, sans-serif'
+        },
+        color: '#6b7280'
       }
     },
     tooltip: {
@@ -109,15 +100,15 @@ const chartOptions = {
       padding: 12,
       titleFont: {
         size: 13,
-        family: 'Inter'
+        family: 'Inter, system-ui, sans-serif'
       },
       bodyFont: {
         size: 13,
-        family: 'Inter'
+        family: 'Inter, system-ui, sans-serif'
       },
       callbacks: {
-        label: function(context) {
-          return context.dataset.label + ': $' + context.parsed.y.toLocaleString('vi-VN')
+        label: function(context: any) {
+          return context.dataset.label + ': $' + context.parsed.y.toLocaleString('en-US') + 'k'
         }
       }
     }
@@ -129,26 +120,60 @@ const chartOptions = {
       },
       ticks: {
         font: {
-          size: 12,
-          family: 'Inter'
-        }
+          size: 11,
+          family: 'Inter, system-ui, sans-serif'
+        },
+        color: '#6b7280'
       }
     },
     y: {
       beginAtZero: true,
+      max: 120,
       grid: {
-        color: '#f3f4f6'
+        color: '#f3f4f6',
+        drawBorder: false
       },
       ticks: {
+        stepSize: 20,
         font: {
-          size: 12,
-          family: 'Inter'
+          size: 11,
+          family: 'Inter, system-ui, sans-serif'
         },
-        callback: function(value) {
-          return '$' + (value / 1000) + 'k'
+        color: '#6b7280',
+        callback: function(value: any) {
+          return value + 'k'
         }
       }
     }
+  },
+  interaction: {
+    mode: 'index' as const,
+    intersect: false
   }
 }
 </script>
+
+<style scoped>
+.chart-container {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.chart-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+</style>

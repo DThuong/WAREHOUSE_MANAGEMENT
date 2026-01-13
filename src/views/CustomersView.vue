@@ -8,7 +8,7 @@
 
       <Card>
         <template #content>
-          <DataTable :value="customers" :paginator="true" :rows="10"  paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown">
+          <DataTable :value="customers" :paginator="true" :rows="10" responsiveLayout="scroll">
             <Column field="id" header="ID" sortable></Column>
             <Column header="Khách hàng">
               <template #body="slotProps">
