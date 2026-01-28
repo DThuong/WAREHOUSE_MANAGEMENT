@@ -7,59 +7,65 @@
         <h2 class="logo-text">Dongyang</h2>
       </div>
 
+      <!-- Error Message -->
+      <Message v-if="authError" severity="error" :closable="true" @close="clearAuthError">
+        {{ authError }}
+      </Message>
+
       <!-- Form -->
       <form @submit.prevent="handleSignIn" class="auth-form">
+        <!-- Username Field -->
         <div class="form-group">
-        <label for="username" class="form-label">Username</label>
-        <InputText 
+          <label for="username" class="form-label">Username</label>
+          <InputText 
             id="username"
             v-model="username"
             type="text"
             placeholder="Enter your username"
             class="form-input"
             :class="{ 'p-invalid': usernameError }"
-        />
-        <small v-if="usernameError" class="error-message">{{ usernameError }}</small>
+            :disabled="authLoading"
+          />
+          <small v-if="usernameError" class="error-message">{{ usernameError }}</small>
         </div>
-
-        <!-- Password Field -->
         <div class="form-group">
-          <div class="flex justify-between items-center mb-2">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
             <label for="password" class="form-label">Password</label>
           </div>
-          <InputText 
+          <Password 
             id="password"
             v-model="password"
-            type="password"
             placeholder="Password"
-            class="form-input"
             :class="{ 'p-invalid': passwordError }"
+            :disabled="authLoading"
+            :feedback="false"
+            toggleMask
           />
           <small v-if="passwordError" class="error-message">{{ passwordError }}</small>
         </div>
 
-        <!-- Remember Me -->
-          
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
-                <input 
-                type="checkbox" 
-                id="remember" 
-                v-model="rememberMe"
-                class="checkbox-input"
+        <!-- Remember Me & Forgot Password -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <input 
+              type="checkbox" 
+              id="remember" 
+              v-model="rememberMe"
+              class="checkbox-input"
+              :disabled="authLoading"
             />
             <label for="remember" class="checkbox-label">Remember me</label>
-            </div>
-            <a href="#" class="forgot-link">Forgot Password?</a>
           </div>
-        
+          <a href="#" class="forgot-link">Forgot Password?</a>
+        </div>
 
         <!-- Sign In Button -->
         <Button 
           type="submit"
-          label="Sign in"
+          label="Đăng Nhập"
           class="btn-signin"
-          :loading="loading"
+          :loading="authLoading"
+          :disabled="authLoading"
         />
 
         <!-- Sign Up Link -->
@@ -69,43 +75,77 @@
         </p>
       </form>
     </div>
+
+    <!-- Toast for notifications -->
+    <Toast />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUser } from '@/composables/useUser'
 import InputText from 'primevue/inputtext'
+import Password from 'primevue/password' 
 import Button from 'primevue/button'
-import logoImg from '../assets/images/newLogo.jpg'
+import Message from 'primevue/message'
+import Toast from 'primevue/toast'
+import { useToast } from 'primevue/usetoast'
+import logoImg from '@/assets/images/newLogo.jpg'
+import { useUserStore } from '@/stores/userStore'
 
 const router = useRouter()
+const toast = useToast()
+const userStore = useUserStore()
+
+// Composable
+const { 
+  login, 
+  logout,
+  authLoading, 
+  authError,
+  clearError 
+} = useUser()
 
 // Form state
 const username = ref<string>('')
-const usernameError = ref<string>('')
 const password = ref<string>('')
 const rememberMe = ref<boolean>(false)
-const loading = ref<boolean>(false)
 
-// Error state
+// Validation errors
+const usernameError = ref<string>('')
 const passwordError = ref<string>('')
+
+// Get device info for login
+const getDeviceInfo = (): string => {
+  const userAgent = navigator.userAgent
+  const platform = navigator.platform
+  
+  let browser = 'Unknown'
+  if (userAgent.indexOf('Chrome') > -1) browser = 'Chrome'
+  else if (userAgent.indexOf('Firefox') > -1) browser = 'Firefox'
+  else if (userAgent.indexOf('Safari') > -1) browser = 'Safari'
+  else if (userAgent.indexOf('Edge') > -1) browser = 'Edge'
+  
+  return `${browser} on ${platform}`
+}
 
 // Validation
 const validateForm = (): boolean => {
-    let isValid = true
+  let isValid = true
   
-    usernameError.value = ''
-    passwordError.value = ''
+  // Reset errors
+  usernameError.value = ''
+  passwordError.value = ''
 
-    // Validate username
-    if (!username.value) {
+  // Validate username
+  if (!username.value) {
     usernameError.value = 'Username is required'
     isValid = false
-    } else if (username.value.length < 3) {
+  } else if (username.value.length < 3) {
     usernameError.value = 'Username must be at least 3 characters'
     isValid = false
-    }
+  }
 
   // Validate password
   if (!password.value) {
@@ -121,29 +161,76 @@ const validateForm = (): boolean => {
 
 // Handle sign in
 const handleSignIn = async (): Promise<void> => {
+  clearAuthError()
+  
   if (!validateForm()) {
     return
   }
 
-  loading.value = true
-
   try {
-    // TODO: Implement your sign in logic here
-    // Example:
-    // await authService.signIn(email.value, password.value)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Redirect to dashboard
-    router.push('/')
+    const result = await login({
+      username: username.value,
+      password: password.value,
+      deviceInfo: getDeviceInfo()
+    })
+
+    if (result.success) {
+      const user = userStore.currentUser
+      if(!user) return
+      if (user.role !== 'admin') {
+        toast.add({
+          severity: 'warn',
+          summary: 'Không có quyền',
+          detail: 'Tài khoản của bạn không có quyền truy cập hệ thống',
+          life: 3000
+        })
+
+        await logout()
+        return
+      }
+
+      // Redirect to original destination or home
+      const redirectPath = '/'
+      
+      // Thêm delay nhỏ để đảm bảo token đã được lưu
+      setTimeout(() => {
+        router.push(redirectPath)
+      }, 100)
+    } else {
+      if (result.error?.toLowerCase().includes('username')) {
+        usernameError.value = result.error
+      } else if (result.error?.toLowerCase().includes('password')) {
+        passwordError.value = result.error
+      }
+    }
   } catch (error) {
     console.error('Sign in error:', error)
-    passwordError.value = 'Invalid email or password'
-  } finally {
-    loading.value = false
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi',
+      detail: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+      life: 3000
+    })
   }
 }
+
+// Clear auth error
+const clearAuthError = () => {
+  clearError()
+  usernameError.value = ''
+  passwordError.value = ''
+}
+
+// Load saved username if remember me was checked
+onMounted(() => {
+  const rememberMeEnabled = localStorage.getItem('remember_me') === 'true'
+  const savedUsername = localStorage.getItem('saved_username')
+  
+  if (rememberMeEnabled && savedUsername) {
+    rememberMe.value = true
+    username.value = savedUsername
+  }
+})
 </script>
 
 <style scoped>
@@ -186,14 +273,6 @@ const handleSignIn = async (): Promise<void> => {
   margin: 0;
 }
 
-.auth-title {
-  text-align: center;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 2rem 0;
-}
-
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -208,7 +287,7 @@ const handleSignIn = async (): Promise<void> => {
   font-size: 0.875rem;
   font-weight: 500;
   color: #374151;
-  margin-bottom: 0.5rem;
+  margin: 0;
 }
 
 .form-input {
@@ -260,6 +339,7 @@ const handleSignIn = async (): Promise<void> => {
   color: #374151;
   cursor: pointer;
   user-select: none;
+  margin: 0;
 }
 
 .btn-signin {
@@ -276,12 +356,13 @@ const handleSignIn = async (): Promise<void> => {
   margin-bottom: 1.5rem;
 }
 
-.btn-signin:hover {
-  opacity: 0.8 !important;
+.btn-signin:enabled:hover {
+  opacity: 0.8;
 }
 
-.btn-signin:active {
-  transform: scale(0.98);
+.btn-signin:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .signup-text {
@@ -291,14 +372,72 @@ const handleSignIn = async (): Promise<void> => {
   margin: 0;
 }
 
-.signup-link {
-  color: #ea580c;
-  text-decoration: none;
-  font-weight: 600;
+/* Password */
+/* Wrapper */
+:deep(.p-password) {
+  width: 100%;
 }
 
-.signup-link:hover {
-  color: #dc2626;
+/* Input thật */
+:deep(.p-password input) {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+/* Focus */
+:deep(.p-password input:focus) {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Error */
+:deep(.p-password.p-invalid input) {
+  border-color: #ef4444;
+}
+
+/* Disabled */
+:deep(.p-password input:disabled) {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+/* Message styling */
+:deep(.p-message) {
+  margin-bottom: 1.5rem;
+}
+
+/* Button */
+:deep(.p-button.btn-signin) {
+  background: #ea580c;
+  border: none !important;
+  color: white;
+}
+
+/* Hover */
+:deep(.p-button.btn-signin:hover) {
+  background: #ca3001; /* giữ nguyên */
+  opacity: 0.85;
+}
+
+/* Focus */
+:deep(.p-button.btn-signin:focus) {
+  background: #ea580c;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.3);
+}
+
+/* Active (click) */
+:deep(.p-button.btn-signin:active) {
+  background: #c2410c;
+}
+
+/* Disabled */
+:deep(.p-button.btn-signin:disabled) {
+  background: #ea580c;
+  opacity: 0.6;
 }
 
 /* Responsive */

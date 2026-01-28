@@ -224,6 +224,11 @@ const menuItems = [
     icon: 'pi pi-home',
     command: () => router.push('/')
   },
+  { 
+    label: 'Cài đặt tài khoản', 
+    icon: 'pi pi-cog',
+    command: () => router.push('/settings')
+  },
   { separator: true },
   { 
     label: 'Đăng xuất', 

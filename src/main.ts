@@ -18,6 +18,8 @@ import Chart from 'primevue/chart'
 import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
 import OverlayPanel from 'primevue/overlaypanel'
+import { ToastService } from 'primevue'
+import { ConfirmationService } from 'primevue'
 
 // Import PrimeIcons
 import 'primeicons/primeicons.css'
@@ -25,11 +27,12 @@ import 'primeicons/primeicons.css'
 // Custom styles
 import './style.css'
 
-const app = createApp(App)
 const pinia = createPinia()
-
+const app = createApp(App)
 app.use(pinia)
 app.use(router)
+app.use(ToastService)
+app.use(ConfirmationService)
 app.use(PrimeVue, {
   theme: {
     preset: Aura,
