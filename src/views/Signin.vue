@@ -177,7 +177,7 @@ const handleSignIn = async (): Promise<void> => {
     if (result.success) {
       const user = userStore.currentUser
       if(!user) return
-      if (user.role !== 'admin') {
+      if (user.role !== 'Admin') {
         toast.add({
           severity: 'warn',
           summary: 'Không có quyền',

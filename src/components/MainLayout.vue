@@ -36,6 +36,17 @@
             <p style="font-size: 0.75rem; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; padding-left: 1rem;">
               Tài khoản
             </p>
+            <template v-if="userStore.isAuthenticated">
+               <a 
+                href="/signin"
+                class="nav-link"
+                @click.prevent="handleLogout"
+              >
+                <i class="pi pi-sign-out"></i>
+                <span>Đăng xuất</span>
+              </a>
+            </template>
+            <template v-else>
             <router-link 
               v-for="link in accountLinks" 
               :key="link.path"
@@ -45,6 +56,7 @@
               <i :class="link.icon"></i>
               <span>{{ link.label }}</span>
             </router-link>
+            </template>
           </div>
         </nav>
       </div>
@@ -102,24 +114,25 @@
 
           <!-- User Menu -->
           <Avatar 
-            :image="userStore.currentUser?.avatar || 'https://i.pravatar.cc/150?img=1'" 
+            :label="userAvatar"
             shape="circle" 
             size="medium"
             @click="toggleMenu"
-            style="cursor: pointer; margin-right: 1rem;"
+            style="cursor: pointer; margin-right: 1rem; background-color: #6366f1; color: white; font-weight: 600;"
           />
           
           <Menu ref="menu" :model="menuItems" :popup="true">
             <template #start>
               <div style="padding: 1rem; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; gap: 0.75rem;">
                 <Avatar 
-                  :image="userStore.currentUser?.avatar || 'https://i.pravatar.cc/150?img=1'" 
+                  :label="userAvatar"
                   shape="circle" 
                   size="large"
+                  style="background-color: #6366f1; color: white; font-weight: 600;"
                 />
                 <div>
-                  <div style="font-weight: 600;">{{ userStore.currentUser?.userName || 'User' }}</div>
-                  <div style="font-size: 0.875rem; color: var(--gray-600);">@{{ userStore.currentUser?.userName || 'username' }}</div>
+                  <div style="font-weight: 600;">{{ currentUser?.username || 'unkow' }}</div>
+                  <div style="font-size: 0.875rem; color: var(--gray-600);">@{{ currentUser?.role || 'username' }}</div>
                 </div>
               </div>
             </template>
@@ -156,7 +169,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 import Menu from 'primevue/menu'
@@ -169,6 +182,8 @@ import logoImg from '../assets/images/newLogo.jpg'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+// computed current user
+const currentUser = computed(() => userStore.currentUser)
 const toast = useToast()
 
 const sidebarOpen = ref(true)
@@ -176,36 +191,21 @@ const mobileSidebarOpen = ref(false)
 const notificationPanel = ref(null)
 const menu = ref()
 
+const userAvatar = computed(() => {
+  return currentUser?.value?.username.charAt(0).toUpperCase()
+})
+
 const toggleMenu = (event: Event) => {
   menu.value.toggle(event)
 }
 
-// ✅ Handle logout
+// Handle logout
 const handleLogout = async () => {
   try {
-    const result = await userStore.logout()
-    
-    if (result.success) {
-      toast.add({
-        severity: 'success',
-        summary: 'Đăng xuất thành công',
-        detail: 'Hẹn gặp lại!',
-        life: 3000
-      })
-      
-      router.push('/signin')
-    } else {
-      toast.add({
-        severity: 'warn',
-        summary: 'Lỗi đăng xuất',
-        detail: result.error || 'Đã xảy ra lỗi',
-        life: 3000
-      })
-      
-      // Vẫn redirect về signin dù có lỗi
-      router.push('/signin')
-    }
-  } catch (error) {
+    await userStore.logout()
+    router.push('signin')
+  }
+  catch (error) {
     console.error('Logout error:', error)
     toast.add({
       severity: 'error',
@@ -213,8 +213,6 @@ const handleLogout = async () => {
       detail: 'Không thể đăng xuất',
       life: 3000
     })
-    
-    router.push('/signin')
   }
 }
 
@@ -289,5 +287,30 @@ const toggleNotifications = (event: Event) => {
 <style scoped>
 .notification-item:hover {
   background: var(--gray-50);
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--gray-700);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s;
+  margin-bottom: 0.25rem;
+}
+
+.nav-link:hover {
+  background: var(--gray-100);
+  color: var(--primary-color);
+}
+
+.nav-link.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.nav-link i {
+  font-size: 1.125rem;
 }
 </style>

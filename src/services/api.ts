@@ -1,30 +1,38 @@
-import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios'
+import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import type { ApiError } from '@/types/user.types'
 import { useUserStore } from '@/stores/userStore'
 import { isTokenExpired } from '@/utils/checkToken'
 import router from '@/router'
 
-const api: AxiosInstance = axios.create({
-  baseURL: 'http://172.16.162.103:5028/',
+// Custom API Instance Type - return data directly, not AxiosResponse
+interface CustomAxiosInstance extends Omit<AxiosInstance, 'get' | 'post' | 'put' | 'delete' | 'patch'> {
+  get<T = any>(url: string, config?: any): Promise<T>
+  post<T = any>(url: string, data?: any, config?: any): Promise<T>
+  put<T = any>(url: string, data?: any, config?: any): Promise<T>
+  delete<T = any>(url: string, config?: any): Promise<T>
+  patch<T = any>(url: string, data?: any, config?: any): Promise<T>
+}
+
+const axiosInstance = axios.create({
+  baseURL: 'http://172.16.162.103:5002/',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   }
 })
 
-//Biến flag để tránh loop redirect
+// Biến flag để tránh loop redirect
 let isRedirecting = false
 
 // Request interceptor
-api.interceptors.request.use(
-  (config) => {
+axiosInstance.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
     const userStore = useUserStore()
     const token = localStorage.getItem('auth_token')
     
     // Check token expiration TRƯỚC khi gửi request
     if (userStore.currentUser?.expiresAt) {
       if (isTokenExpired(userStore.currentUser.expiresAt)) {
-        
         // Clear localStorage và store
         localStorage.removeItem('auth_token')
         localStorage.removeItem('user_info')
@@ -50,8 +58,8 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Response interceptor
-api.interceptors.response.use(
+// Response interceptor - return data directly
+axiosInstance.interceptors.response.use(
   (response: AxiosResponse): any => {
     return response.data
   },
@@ -85,5 +93,8 @@ api.interceptors.response.use(
     return Promise.reject(apiError)
   }
 )
+
+// 🎯 Cast to custom type
+const api = axiosInstance as CustomAxiosInstance
 
 export default api

@@ -12,7 +12,7 @@
       </div>
 
       <!-- Error Message -->
-      <Message v-if="error" severity="error" :closable="true" @close="clearError">
+      <Message class="margin-bottom" v-if="error" severity="error" :closable="true" @close="clearError">
         {{ error }}
       </Message>
 
@@ -661,6 +661,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.margin-bottom{
+  margin-bottom: 1rem;
+}
 :deep(.p-password) {
   width: 100%;
 }

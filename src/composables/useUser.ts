@@ -32,7 +32,7 @@ export function useUser() {
     return result
   }
 
-  // FIXED - Logout method with async/await
+  // Logout method with async/await
   const logout = async (): Promise<ApiResponse> => {
     const result = await userStore.logout()
     return result
@@ -59,8 +59,6 @@ export function useUser() {
     
     return result
   }
-
-  // ... rest of methods remain the same ...
 
   const fetchAccounts = async (): Promise<ApiResponse<User[]>> => {
     const result = await userStore.fetchAccounts()
