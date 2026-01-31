@@ -54,5 +54,66 @@ export const itemAPI = {
       console.error('Error deleting item:', error)
       throw error
     }
+  },
+
+  // Upload SINGLE image - PUT /api/Item/image/{id}
+uploadImage: async (itemId: number, image: File): Promise<void> => {
+  try {
+    const formData = new FormData()
+    formData.append('image', image)
+
+    await api.put<void>(`/api/Item/image/${itemId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  } catch (error: any) {
+    console.error('Error uploading image:', error)
+    throw error
+  }
+},
+
+// Upload MULTIPLE images sequentially
+uploadImagesSequentially: async (itemId: number, images: File[]): Promise<{
+  success: number;
+  failed: number;
+  errors: string[];
+}> => {
+  let success = 0
+  let failed = 0
+  const errors: string[] = []
+
+  for (const image of images) {
+    try {
+      await itemAPI.uploadImage(itemId, image)
+      success++
+    } catch (error: any) {
+      failed++
+      errors.push(`${image.name}: ${error.message}`)
+    }
+  }
+
+  return { success, failed, errors }
+},
+  // Get image by filename - GET /api/Item/image/{fileName}
+  getImage: async (fileName: string) => {
+    try {
+      const res = await api.get<Item>(`/api/Item/image/${fileName}`)
+      return res
+    } catch (error: any) {
+      console.error('Error deleting image:', error)
+      throw error
+    }
+  },
+
+  // Delete image - DELETE /api/Item/image/{id}/{imageName}
+  deleteImage: async (itemId: number, imageName: string): Promise<void> => {
+    try {
+      const res = await api.delete<void>(`/api/Item/image/${itemId}/${imageName}`)
+      return res
+    } catch (error: any) {
+      console.error('Error deleting image:', error)
+      throw error
+    }
   }
 }

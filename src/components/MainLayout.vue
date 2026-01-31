@@ -172,6 +172,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import { Toast } from 'primevue'
 import Menu from 'primevue/menu'
 import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'
@@ -282,6 +283,25 @@ const toggleSidebar = () => {
 const toggleNotifications = (event: Event) => {
   notificationPanel.value?.toggle(event)
 }
+
+// onMounted(() => {
+//   console.log(userStore.justLogin, userStore.currentUser)
+//   if (userStore.justLogin && userStore.currentUser) {
+    
+//     setTimeout(() => {
+//       toast.add({
+//         severity: 'success',
+//         summary: 'Đăng nhập thành công',
+//         detail: `Chào mừng ${userStore.currentUser?.username}!`,
+//         life: 3000
+//       })
+      
+//       userStore.clearLoginFlag()
+//     }, 300)
+//   } else {
+//     console.log('Not showing login toast')
+//   }
+// })
 </script>
 
 <style scoped>

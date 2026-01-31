@@ -1,17 +1,40 @@
 <template>
-  <div id="app">
+  <Toast />
+  <div id="app-root">
     <router-view />
   </div>
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue'
+import { watch, onMounted} from 'vue'
 import { useUserStore } from '@/stores/userStore'
+import Toast from 'primevue/toast'
+import { useToast } from 'primevue/usetoast'
 import { useTokenMonitor } from '@/composables/useToken'
 
 const userStore = useUserStore()
+const toast = useToast()
 const { scheduleExactExpiry } = useTokenMonitor()
 
+onMounted(() => {
+  watch(
+    () => userStore.justLogin,
+    (val) => {
+      console.log('LOGIN WATCH:', val, userStore.currentUser)
+
+      if (val && userStore.currentUser) {
+        toast.add({
+          summary: 'Đăng nhập thành công',
+          detail: `Chào mừng ${userStore.currentUser.username}!`,
+          life: 2000
+        })
+
+        userStore.clearLoginFlag()
+      }
+    },
+    { immediate: true }
+  )
+})
 watch(
   () => userStore.isAuthenticated,
   (isAuth) => {

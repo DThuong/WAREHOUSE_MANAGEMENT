@@ -18,7 +18,7 @@ import Chart from 'primevue/chart'
 import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
 import OverlayPanel from 'primevue/overlaypanel'
-import { ToastService } from 'primevue'
+import ToastService from 'primevue/toastservice'
 import { ConfirmationService } from 'primevue'
 
 // Import PrimeIcons

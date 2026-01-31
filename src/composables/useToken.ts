@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores/userStore'
 import { useRouter } from 'vue-router'
 import { getTokenTimeRemaining } from '@/utils/checkToken'
 
-const SAFETY_BUFFER = 8000 // 8s (5–10s là đẹp)
+const SAFETY_BUFFER = 8000 // 8s
 
 export function useTokenMonitor() {
   const userStore = useUserStore()

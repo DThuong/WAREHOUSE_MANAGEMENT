@@ -8,8 +8,8 @@
       </div>
 
       <!-- Error Message -->
-      <Message v-if="authError" severity="error" :closable="true" @close="clearAuthError">
-        {{ authError }}
+      <Message v-if="userStore.authError" severity="error" :closable="true" @close="userStore.clearError">
+        {{ userStore.authError }}
       </Message>
 
       <!-- Form -->
@@ -24,10 +24,12 @@
             placeholder="Enter your username"
             class="form-input"
             :class="{ 'p-invalid': usernameError }"
-            :disabled="authLoading"
+            :disabled="userStore.authLoading"
           />
           <small v-if="usernameError" class="error-message">{{ usernameError }}</small>
         </div>
+
+        <!-- Password Field -->
         <div class="form-group">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
             <label for="password" class="form-label">Password</label>
@@ -37,7 +39,7 @@
             v-model="password"
             placeholder="Password"
             :class="{ 'p-invalid': passwordError }"
-            :disabled="authLoading"
+            :disabled="userStore.authLoading"
             :feedback="false"
             toggleMask
           />
@@ -52,7 +54,7 @@
               id="remember" 
               v-model="rememberMe"
               class="checkbox-input"
-              :disabled="authLoading"
+              :disabled="userStore.authLoading"
             />
             <label for="remember" class="checkbox-label">Remember me</label>
           </div>
@@ -64,8 +66,8 @@
           type="submit"
           label="Đăng Nhập"
           class="btn-signin"
-          :loading="authLoading"
-          :disabled="authLoading"
+          :loading="userStore.authLoading"
+          :disabled="userStore.authLoading"
         />
 
         <!-- Sign Up Link -->
@@ -84,7 +86,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useUser } from '@/composables/useUser'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password' 
 import Button from 'primevue/button'
@@ -94,29 +95,21 @@ import { useToast } from 'primevue/usetoast'
 import logoImg from '@/assets/images/newLogo.jpg'
 import { useUserStore } from '@/stores/userStore'
 
+//  Khởi tạo
 const router = useRouter()
 const toast = useToast()
-const userStore = useUserStore()
+const userStore = useUserStore()  //  Gọi trực tiếp store
 
-// Composable
-const { 
-  login, 
-  logout,
-  authLoading, 
-  authError,
-  clearError 
-} = useUser()
-
-// Form state
+//  Form state
 const username = ref<string>('')
 const password = ref<string>('')
 const rememberMe = ref<boolean>(false)
 
-// Validation errors
+//  Validation errors
 const usernameError = ref<string>('')
 const passwordError = ref<string>('')
 
-// Get device info for login
+//  Get device info for login
 const getDeviceInfo = (): string => {
   const userAgent = navigator.userAgent
   const platform = navigator.platform
@@ -130,7 +123,7 @@ const getDeviceInfo = (): string => {
   return `${browser} on ${platform}`
 }
 
-// Validation
+//  Validation
 const validateForm = (): boolean => {
   let isValid = true
   
@@ -159,24 +152,41 @@ const validateForm = (): boolean => {
   return isValid
 }
 
-// Handle sign in
+//  Handle sign in - GỌI TRỰC TIẾP STORE
 const handleSignIn = async (): Promise<void> => {
-  clearAuthError()
+  // Clear errors
+  userStore.clearError()
+  usernameError.value = ''
+  passwordError.value = ''
   
+  // Validate form
   if (!validateForm()) {
     return
   }
 
   try {
-    const result = await login({
+    //  GỌI TRỰC TIẾP userStore.login
+    const result = await userStore.login({
       username: username.value,
       password: password.value,
       deviceInfo: getDeviceInfo()
     })
 
     if (result.success) {
+      //  Kiểm tra role
       const user = userStore.currentUser
-      if(!user) return
+      
+      if (!user) {
+        toast.add({
+          severity: 'error',
+          summary: 'Lỗi',
+          detail: 'Không thể lấy thông tin user',
+          life: 3000
+        })
+        return
+      }
+
+      //  Kiểm tra quyền Admin
       if (user.role !== 'Admin') {
         toast.add({
           severity: 'warn',
@@ -185,26 +195,44 @@ const handleSignIn = async (): Promise<void> => {
           life: 3000
         })
 
-        await logout()
+        //  Đăng xuất nếu không phải Admin
+        await userStore.logout()
         return
       }
 
-      // Redirect to original destination or home
-      const redirectPath = '/'
-      
-      // Thêm delay nhỏ để đảm bảo token đã được lưu
-      setTimeout(() => {
-        router.push(redirectPath)
-      }, 100)
+      //  Lưu username nếu remember me
+      if (rememberMe.value) {
+        localStorage.setItem('remember_me', 'true')
+        localStorage.setItem('saved_username', username.value)
+      } else {
+        localStorage.removeItem('remember_me')
+        localStorage.removeItem('saved_username')
+      }
+
+      //  Redirect với delay nhỏ
+        router.push('/')
+
     } else {
+      //  Xử lý lỗi từ store
+      console.error('❌ Login failed:', result.error)
+      
+      // Hiển thị lỗi vào field tương ứng
       if (result.error?.toLowerCase().includes('username')) {
         usernameError.value = result.error
       } else if (result.error?.toLowerCase().includes('password')) {
         passwordError.value = result.error
+      } else {
+        // Lỗi chung
+        toast.add({
+          severity: 'error',
+          summary: 'Đăng nhập thất bại',
+          detail: result.error || 'Vui lòng kiểm tra lại thông tin',
+          life: 3000
+        })
       }
     }
   } catch (error) {
-    console.error('Sign in error:', error)
+    console.error('❌ Sign in error:', error)
     toast.add({
       severity: 'error',
       summary: 'Lỗi',
@@ -214,15 +242,9 @@ const handleSignIn = async (): Promise<void> => {
   }
 }
 
-// Clear auth error
-const clearAuthError = () => {
-  clearError()
-  usernameError.value = ''
-  passwordError.value = ''
-}
-
-// Load saved username if remember me was checked
+//  Load saved username if remember me was checked
 onMounted(() => {
+  
   const rememberMeEnabled = localStorage.getItem('remember_me') === 'true'
   const savedUsername = localStorage.getItem('saved_username')
   
@@ -373,12 +395,10 @@ onMounted(() => {
 }
 
 /* Password */
-/* Wrapper */
 :deep(.p-password) {
   width: 100%;
 }
 
-/* Input thật */
 :deep(.p-password input) {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -387,19 +407,16 @@ onMounted(() => {
   border-radius: 8px;
 }
 
-/* Focus */
 :deep(.p-password input:focus) {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Error */
 :deep(.p-password.p-invalid input) {
   border-color: #ef4444;
 }
 
-/* Disabled */
 :deep(.p-password input:disabled) {
   background-color: #f3f4f6;
   cursor: not-allowed;
@@ -417,24 +434,20 @@ onMounted(() => {
   color: white;
 }
 
-/* Hover */
 :deep(.p-button.btn-signin:hover) {
-  background: #ca3001; /* giữ nguyên */
+  background: #ca3001;
   opacity: 0.85;
 }
 
-/* Focus */
 :deep(.p-button.btn-signin:focus) {
   background: #ea580c;
   box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.3);
 }
 
-/* Active (click) */
 :deep(.p-button.btn-signin:active) {
   background: #c2410c;
 }
 
-/* Disabled */
 :deep(.p-button.btn-signin:disabled) {
   background: #ea580c;
   opacity: 0.6;

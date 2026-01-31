@@ -3,11 +3,15 @@ import { ref, computed } from 'vue'
 import type { Item } from '@/types/item.types'
 
 export const useItemStore = defineStore('item', () => {
-  // State - PHẢI dùng ref để reactive
+  // State
   const items = ref<Item[]>([])
   const currentItem = ref<Item | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
+  
+  // State for image operations
+  const uploadingImages = ref(false)
+  const deletingImage = ref(false)
 
   // Getters
   const totalItems = computed(() => items.value.length)
@@ -26,7 +30,7 @@ export const useItemStore = defineStore('item', () => {
 
   // Actions
   const setItems = (newItems: Item[]) => {
-    items.value = [...newItems]  // Tạo mảng mới để trigger reactivity
+    items.value = [...newItems] 
   }
 
   const setCurrentItem = (item: Item | null) => {
@@ -41,12 +45,54 @@ export const useItemStore = defineStore('item', () => {
     const index = items.value.findIndex(item => item.id === id)
     if (index !== -1) {
       items.value[index] = { ...items.value[index], ...updatedItem }
-      items.value = [...items.value]  // Trigger reactivity
+      items.value = [...items.value]
     }
   }
 
   const removeItem = (id: number) => {
     items.value = items.value.filter(item => item.id !== id)
+  }
+
+  // ===================== IMAGE Actions =====================
+  
+  // Update images in store after upload
+  const updateItemImages = (itemId: number, newImages: string[]) => {
+    const index = items.value.findIndex(item => item.id === itemId)
+    if (index !== -1) {
+      items.value[index].picture = newImages
+      items.value = [...items.value]
+    }
+    
+    // Update currentItem if it's the same
+    if (currentItem.value?.id === itemId) {
+      currentItem.value.picture = newImages
+    }
+  }
+
+  // Remove specific image from item
+  const removeItemImage = (itemId: number, imageName: string) => {
+    const index = items.value.findIndex(item => item.id === itemId)
+    if (index !== -1) {
+      items.value[index].picture = items.value[index].picture.filter(
+        img => !img.includes(imageName)
+      )
+      items.value = [...items.value]
+    }
+    
+    // Update currentItem if it's the same
+    if (currentItem.value?.id === itemId) {
+      currentItem.value.picture = currentItem.value.picture.filter(
+        img => !img.includes(imageName)
+      )
+    }
+  }
+
+  const setUploadingImages = (value: boolean) => {
+    uploadingImages.value = value
+  }
+
+  const setDeletingImage = (value: boolean) => {
+    deletingImage.value = value
   }
 
   const setLoading = (value: boolean) => {
@@ -72,6 +118,8 @@ export const useItemStore = defineStore('item', () => {
     currentItem,
     loading,
     error,
+    uploadingImages,
+    deletingImage,
     
     // Getters
     totalItems,
@@ -85,6 +133,10 @@ export const useItemStore = defineStore('item', () => {
     addItem,
     updateItemInStore,
     removeItem,
+    updateItemImages,
+    removeItemImage,
+    setUploadingImages,
+    setDeletingImage,
     setLoading,
     setError,
     clearError,
