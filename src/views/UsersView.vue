@@ -661,9 +661,7 @@ const formatDate = (dateString: string): string => {
 
 // ==================== LIFECYCLE ====================
 onMounted(async () => {
-  console.log('🚀 UserView mounted, loading users...')
   await userStore.fetchUsers()
-  console.log('✅ Users loaded:', userStore.users.length)
 })
 </script>
 

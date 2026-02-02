@@ -94,7 +94,6 @@ axiosInstance.interceptors.response.use(
   }
 )
 
-// 🎯 Cast to custom type
 const api = axiosInstance as CustomAxiosInstance
 
 export default api

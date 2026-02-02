@@ -28,3 +28,9 @@ export interface ChangePasswordByAdminData {
   accountId: number
   newPassword: string
 }
+
+export interface ApiError {
+  message: string
+  status: number | undefined
+  data: any
+}

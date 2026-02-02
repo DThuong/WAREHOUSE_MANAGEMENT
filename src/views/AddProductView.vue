@@ -72,7 +72,7 @@
                   </div>
                 </div>
 
-                <!--  FIXED Image Upload Section -->
+                <!-- ✅ FIXED Image Upload Section -->
                 <div>
                   <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
                     Product Images
@@ -81,9 +81,9 @@
                     </span>
                   </label>
                   
-                  <!--  FIXED Upload Area -->
+                  <!-- ✅ FIXED Upload Area -->
                   <div class="image-upload-container">
-                    <!--  FIXED Grid with consistent sizing -->
+                    <!-- ✅ FIXED Grid with consistent sizing -->
                     <div class="image-grid">
                       <!-- Uploaded Images (from server) -->
                       <div 
@@ -231,9 +231,223 @@
               </form>
             </TabPanel>
 
-            <!-- Consumer Tab (copy same structure) -->
+            <!-- Consumer Tab -->
             <TabPanel header="Hàng tiêu dùng">
-              <!-- Same structure as Engineer Tab -->
+              <form @submit.prevent="handleSubmit" class="grid gap-6">
+                <!-- Common Fields -->
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                      Type <span style="color: #ef4444;">*</span>
+                    </label>
+                    <InputText 
+                      value="Consumer"
+                      disabled
+                      style="width: 100%; background-color: var(--surface-100); cursor: not-allowed;"
+                    />
+                  </div>
+                  <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Unit <span style="color: #ef4444;">*</span></label>
+                    <InputText v-model="form.unit" placeholder="VD: cái, hộp, kg" style="width: 100%;" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                  <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Price <span style="color: #ef4444;">*</span></label>
+                    <InputText v-model="form.price" type="number" placeholder="0" style="width: 100%;" />
+                  </div>
+                  <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Safe Quantity <span style="color: #ef4444;">*</span></label>
+                    <InputText v-model.number="form.saveQuantity" type="number" placeholder="0" style="width: 100%;" />
+                  </div>
+                  <div>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Inventory Quantity <span style="color: #ef4444;">*</span></label>
+                    <InputText v-model.number="form.stockQty" type="number" placeholder="0" style="width: 100%;" />
+                  </div>
+                </div>
+
+                <!-- Consumer Specific Fields -->
+                <div style="border-top: 2px solid var(--gray-200); padding-top: 1.5rem; margin-top: 1rem;">
+                  <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; color: var(--primary-color);">
+                    <i class="pi pi-shopping-cart" style="margin-right: 0.5rem;"></i>
+                    Thông tin hàng tiêu dùng
+                  </h3>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Product name <span style="color: #ef4444;">*</span></label>
+                      <InputText v-model="form.com.name" placeholder="Nhập tên sản phẩm" style="width: 100%;" />
+                    </div>
+                    <div>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Location <span style="color: #ef4444;">*</span></label>
+                      <InputText v-model="form.com.location" placeholder="Nhập vị trí" style="width: 100%;" />
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4" style="margin-top: 1rem;">
+                    <div>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Manufacturer <span style="color: #ef4444;">*</span></label>
+                      <InputText v-model="form.com.manufacturer" placeholder="Nhập nhà sản xuất" style="width: 100%;" />
+                    </div>
+                    <div>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Product Specifications <span style="color: #ef4444;">*</span></label>
+                      <InputText v-model="form.com.specifications" placeholder="Nhập thông số" style="width: 100%;" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Image Upload Section -->
+                <div>
+                  <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                    Product Images
+                    <span v-if="itemStore.uploadingImages" style="color: var(--primary-color); font-size: 0.875rem; margin-left: 0.5rem;">
+                      <i class="pi pi-spin pi-spinner"></i> Đang tải lên {{ uploadProgress.current }}/{{ uploadProgress.total }}...
+                    </span>
+                  </label>
+                  
+                  <div class="image-upload-container">
+                    <div class="image-grid">
+                      <!-- Uploaded Images (from server) -->
+                      <div 
+                        v-for="item in uploadedImagesWithKeys" 
+                        :key="item.key"
+                        class="image-item uploaded"
+                      >
+                        <img 
+                          :src="getImageUrl(item.src)" 
+                          class="image-thumbnail"
+                        />
+                        
+                        <div class="image-badge success">
+                          <i class="pi pi-check"></i>
+                          Đã lưu
+                        </div>
+                        
+                        <Button 
+                          icon="pi pi-trash" 
+                          rounded 
+                          text
+                          severity="danger"
+                          size="small"
+                          :loading="itemStore.deletingImage"
+                          class="image-delete-btn"
+                          @click="handleDeleteImage(item.src)"
+                        />
+                      </div>
+
+                      <!-- Selected Files (waiting to upload) -->
+                      <div 
+                        v-for="item in selectedFilesWithKeys" 
+                        :key="item.key"
+                        class="image-item pending"
+                      >
+                        <img 
+                          :src="item.preview" 
+                          class="image-thumbnail"
+                        />
+                        
+                        <div class="image-badge pending">
+                          <i class="pi pi-clock"></i>
+                          Chờ up
+                        </div>
+                        
+                        <Button 
+                          icon="pi pi-times" 
+                          rounded 
+                          text
+                          severity="danger"
+                          size="small"
+                          class="image-delete-btn"
+                          @click="removeSelectedFile(item.index)"
+                        />
+                      </div>
+
+                      <!-- Add More Button -->
+                      <div 
+                        class="add-image-btn"
+                        :class="{ disabled: itemStore.uploadingImages }"
+                        @click="triggerFileInput"
+                      >
+                        <i class="pi pi-plus"></i>
+                        <span>Thêm ảnh</span>
+                      </div>
+                    </div>
+
+                    <!-- Empty State (when no images) -->
+                    <div 
+                      v-if="allImages.length === 0"
+                      class="empty-state"
+                      :class="{ disabled: itemStore.uploadingImages }"
+                      @click="triggerFileInput"
+                    >
+                      <i class="pi pi-cloud-upload"></i>
+                      <p class="title">Kéo thả hình ảnh vào đây hoặc click để chọn</p>
+                      <p class="subtitle">PNG, JPG, WEBP (Max. 5MB mỗi file)</p>
+                      <p class="subtitle">Upload từng ảnh một, có thể chọn nhiều ảnh cùng lúc</p>
+                    </div>
+
+                    <!-- Hidden File Input -->
+                    <input 
+                      ref="fileInput" 
+                      type="file" 
+                      accept="image/png,image/jpeg,image/jpg,image/webp"
+                      multiple
+                      :disabled="itemStore.uploadingImages"
+                      style="display: none;" 
+                      @change="handleFileChange"
+                    />
+                  </div>
+
+                  <!-- Image Count & Actions -->
+                  <div v-if="allImages.length > 0" class="image-actions">
+                    <div class="image-stats">
+                      <span class="stat-item">
+                        <i class="pi pi-check-circle"></i>
+                        <strong>{{ (itemStore.currentItem?.picture || []).length }}</strong> đã lưu
+                      </span>
+                      <span class="stat-item">
+                        <i class="pi pi-clock"></i>
+                        <strong>{{ selectedFiles.length }}</strong> chờ upload
+                      </span>
+                    </div>
+                    
+                    <Button 
+                      v-if="selectedFiles.length > 0"
+                      label="Xóa file chờ" 
+                      icon="pi pi-trash" 
+                      text 
+                      size="small"
+                      severity="danger"
+                      @click="clearSelectedFiles"
+                    />
+                  </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex gap-2" style="padding-top: 1rem; border-top: 1px solid var(--gray-200); justify-content: flex-end;">
+                  <Button 
+                    label="Hủy" 
+                    severity="secondary" 
+                    outlined 
+                    @click="handleCancel" 
+                  />
+                  <Button 
+                    v-if="selectedFiles.length > 0 && createdItemId"
+                    label="Tải lên hình ảnh" 
+                    icon="pi pi-upload"
+                    severity="info"
+                    :loading="itemStore.uploadingImages"
+                    @click="handleUploadImages"
+                  />
+                  <Button 
+                    label="Lưu sản phẩm" 
+                    type="submit" 
+                    icon="pi pi-check" 
+                    :loading="itemStore.loading" 
+                  />
+                </div>
+              </form>
             </TabPanel>
           </TabView>
         </template>
@@ -626,7 +840,7 @@ watch(activeTab, (tab) => {
 }
 
 /* ========================================
-    FIXED IMAGE UPLOAD STYLES
+   ✅ FIXED IMAGE UPLOAD STYLES
    ======================================== */
 
 .image-upload-container {
@@ -637,7 +851,7 @@ watch(activeTab, (tab) => {
   overflow: hidden;
 }
 
-/*  FIXED: Consistent grid with fixed columns */
+/* ✅ FIXED: Consistent grid with fixed columns */
 .image-grid {
   display: grid;
   /* FIX: Use fixed 120px columns instead of minmax */
@@ -647,7 +861,7 @@ watch(activeTab, (tab) => {
   justify-content: start; /* FIX: Align items to start */
 }
 
-/*  FIXED: Image item with fixed aspect ratio */
+/* ✅ FIXED: Image item with fixed aspect ratio */
 .image-item {
   position: relative;
   width: 120px; /* FIX: Fixed width */
@@ -666,7 +880,7 @@ watch(activeTab, (tab) => {
   border: 2px solid var(--orange-400);
 }
 
-/*  Image thumbnail */
+/* ✅ Image thumbnail */
 .image-thumbnail {
   position: absolute;
   inset: 0;
@@ -675,7 +889,7 @@ watch(activeTab, (tab) => {
   object-fit: cover;
 }
 
-/*  Image badges */
+/* ✅ Image badges */
 .image-badge {
   position: absolute;
   top: 4px;
@@ -703,7 +917,7 @@ watch(activeTab, (tab) => {
   font-size: 0.625rem;
 }
 
-/*  Delete button */
+/* ✅ Delete button */
 .image-delete-btn {
   position: absolute !important;
   top: 4px !important;
@@ -714,7 +928,7 @@ watch(activeTab, (tab) => {
   z-index: 2;
 }
 
-/*  FIXED: Add image button with fixed size */
+/* ✅ FIXED: Add image button with fixed size */
 .add-image-btn {
   position: relative;
   width: 120px; /* FIX: Match image item size */
@@ -754,7 +968,7 @@ watch(activeTab, (tab) => {
   font-weight: 500;
 }
 
-/*  Empty state */
+/* ✅ Empty state */
 .empty-state {
   padding: 3rem 2rem;
   text-align: center;
@@ -791,7 +1005,7 @@ watch(activeTab, (tab) => {
   margin-top: 0.25rem;
 }
 
-/*  Image actions */
+/* ✅ Image actions */
 .image-actions {
   display: flex;
   justify-content: space-between;

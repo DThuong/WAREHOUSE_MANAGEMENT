@@ -234,6 +234,7 @@ const menuItems = [
 const mainLinks = [
   { path: '/', label: 'Dashboard', icon: 'pi pi-home' },
   { path: '/inventory', label: 'Hàng tồn kho', icon: 'pi pi-box' },
+  { path: '/stockin', label: 'Nhập kho', icon: 'pi pi-plus-circle' },
   { path: '/add-product', label: 'Thêm sản phẩm', icon: 'pi pi-plus-circle' },
   { path: '/users', label: 'Người dùng', icon: 'pi pi-user' },
   { path: '/reports', label: 'Báo cáo', icon: 'pi pi-chart-bar' },
@@ -284,24 +285,6 @@ const toggleNotifications = (event: Event) => {
   notificationPanel.value?.toggle(event)
 }
 
-// onMounted(() => {
-//   console.log(userStore.justLogin, userStore.currentUser)
-//   if (userStore.justLogin && userStore.currentUser) {
-    
-//     setTimeout(() => {
-//       toast.add({
-//         severity: 'success',
-//         summary: 'Đăng nhập thành công',
-//         detail: `Chào mừng ${userStore.currentUser?.username}!`,
-//         life: 3000
-//       })
-      
-//       userStore.clearLoginFlag()
-//     }, 300)
-//   } else {
-//     console.log('Not showing login toast')
-//   }
-// })
 </script>
 
 <style scoped>

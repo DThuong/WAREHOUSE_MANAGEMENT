@@ -21,6 +21,12 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: 'Thêm sản phẩm', requiresAuth: true, role: 'Admin'  }
   },
   {
+    path: '/stockin',
+    name: 'Stockin',
+    component: () => import('@/views/Stockin.vue' as string),
+    meta: { title: 'Nhập hàng', requiresAuth: true, role: 'Admin'  }
+  },
+  {
     path: '/reports',
     name: 'Reports',
     component: () => import('@/views/ReportsView.vue' as string),

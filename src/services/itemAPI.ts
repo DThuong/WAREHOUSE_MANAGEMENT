@@ -57,44 +57,44 @@ export const itemAPI = {
   },
 
   // Upload SINGLE image - PUT /api/Item/image/{id}
-uploadImage: async (itemId: number, image: File): Promise<void> => {
-  try {
-    const formData = new FormData()
-    formData.append('image', image)
-
-    await api.put<void>(`/api/Item/image/${itemId}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-  } catch (error: any) {
-    console.error('Error uploading image:', error)
-    throw error
-  }
-},
-
-// Upload MULTIPLE images sequentially
-uploadImagesSequentially: async (itemId: number, images: File[]): Promise<{
-  success: number;
-  failed: number;
-  errors: string[];
-}> => {
-  let success = 0
-  let failed = 0
-  const errors: string[] = []
-
-  for (const image of images) {
+  uploadImage: async (itemId: number, image: File): Promise<void> => {
     try {
-      await itemAPI.uploadImage(itemId, image)
-      success++
-    } catch (error: any) {
-      failed++
-      errors.push(`${image.name}: ${error.message}`)
-    }
-  }
+      const formData = new FormData()
+      formData.append('image', image)
 
-  return { success, failed, errors }
-},
+      await api.put<void>(`/api/Item/image/${itemId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+    } catch (error: any) {
+      console.error('Error uploading image:', error)
+      throw error
+    }
+  },
+
+  // Upload MULTIPLE images sequentially
+  uploadImagesSequentially: async (itemId: number, images: File[]): Promise<{
+    success: number;
+    failed: number;
+    errors: string[];
+  }> => {
+    let success = 0
+    let failed = 0
+    const errors: string[] = []
+
+    for (const image of images) {
+      try {
+        await itemAPI.uploadImage(itemId, image)
+        success++
+      } catch (error: any) {
+        failed++
+        errors.push(`${image.name}: ${error.message}`)
+      }
+    }
+
+    return { success, failed, errors }
+  },
   // Get image by filename - GET /api/Item/image/{fileName}
   getImage: async (fileName: string) => {
     try {
