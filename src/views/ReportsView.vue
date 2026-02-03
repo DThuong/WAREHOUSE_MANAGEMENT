@@ -7,9 +7,9 @@
         <Card>
           <template #content>
             <div style="text-align: center; padding: 2rem;">
-              <i class="pi pi-chart-line" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Báo cáo doanh thu</h3>
-              <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">Xem chi tiết doanh thu theo thời gian</p>
+              <i class="pi pi pi-cart-arrow-down" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Báo cáo nhập kho</h3>
+              <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">Xem chi tiết nhập kho theo thời gian</p>
               <Button label="Xem báo cáo" outlined />
             </div>
           </template>
@@ -31,7 +31,7 @@
             <div style="text-align: center; padding: 2rem;">
               <i class="pi pi-box" style="font-size: 3rem; color: #f59e0b; margin-bottom: 1rem;"></i>
               <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Báo cáo tồn kho</h3>
-              <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">Theo dõi hàng tồn kho theo sản phẩm</p>
+              <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">Theo dõi hàng tồn kho theo thời gian</p>
               <Button label="Xem báo cáo" outlined />
             </div>
           </template>

@@ -96,7 +96,7 @@
             
             <Column field="note" header="Ghi chú">
               <template #body="{ data }">
-                <span class="text-gray-700">{{ data.note || '-' }}</span>
+                <span class="text-gray-700">{{ data.note || 'Chưa có' }}</span>
               </template>
             </Column>
             

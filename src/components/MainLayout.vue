@@ -232,10 +232,11 @@ const menuItems = [
 ]
 
 const mainLinks = [
-  { path: '/', label: 'Dashboard', icon: 'pi pi-home' },
-  { path: '/inventory', label: 'Hàng tồn kho', icon: 'pi pi-box' },
-  { path: '/stockin', label: 'Nhập kho', icon: 'pi pi-plus-circle' },
-  { path: '/add-product', label: 'Thêm sản phẩm', icon: 'pi pi-plus-circle' },
+  { path: '/', label: 'Bảng điều khiển', icon: 'pi pi-home' },
+  { path: '/orders', label: 'Quản lý đơn hàng', icon: 'pi pi-flag' },
+  { path: '/inventory', label: 'Quản lý tồn kho', icon: 'pi pi-box' },
+  { path: '/stockin', label: 'Quản lý nhập kho', icon: 'pi pi-cart-arrow-down' },
+  { path: '/add-product', label: 'Thêm tồn kho', icon: 'pi pi-plus-circle' },
   { path: '/users', label: 'Người dùng', icon: 'pi pi-user' },
   { path: '/reports', label: 'Báo cáo', icon: 'pi pi-chart-bar' },
 ]

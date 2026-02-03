@@ -43,6 +43,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Signin',
     component: () => import('@/views/Signin.vue'),
     meta: { title: 'Đăng nhập', requiresAuth: false }
+  },
+  {
+    path: '/orders',
+    name: 'Orders',
+    component: () => import('@/views/OrdersView.vue' as string),
+    meta: { title: 'Đơn hàng', requiresAuth: true, role: 'Admin' }
   }
 ]
 

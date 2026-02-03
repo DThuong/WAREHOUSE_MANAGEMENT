@@ -1,9 +1,17 @@
 <template>
   <MainLayout>
+    <!-- Loading Overlay -->
+    <div v-if="loading" class="loading-overlay">
+      <div class="loading-spinner">
+        <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: #8B7AB8;"></i>
+        <p>Đang tải dữ liệu...</p>
+      </div>
+    </div>
+
     <!-- Stats Cards Row -->
     <div class="stats-grid">
       <div 
-        v-for="(stat, key, index) in dashboardStore.stats" 
+        v-for="(stat, key, index) in dashboardStore.dashboardStats" 
         :key="key"
         class="stat-card-compact"
         :class="getStatCardClass(index)"
@@ -13,208 +21,424 @@
         </div>
         <div class="stat-content">
           <div class="stat-label-compact">{{ stat.label }}</div>
-          <div class="stat-value-compact">${{ formatNumber(stat.value) }}</div>
-          <div class="stat-change-compact" :class="stat.change >= 0 ? 'positive' : 'negative'">
-            +{{ stat.change }}% kể từ tháng trước
+          <div class="stat-value-compact">
+            {{ key === 'totalPurchase' ? formatCurrency(stat.value) : stat.value }}
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Detailed Stats Row -->
-    <div class="detailed-stats-grid">
-      <div 
-        v-for="(stat, index) in dashboardStore.detailedStats" 
-        :key="index"
-        class="detailed-stat-card"
-      >
-        <div class="flex justify-between items-start mb-3">
-          <div class="flex-1">
-            <p class="detailed-stat-value">${{ formatNumber(stat.value) }}</p>
-            <p class="detailed-stat-label">{{ stat.title }}</p>
-          </div>
-          <div 
-            class="detailed-icon-wrapper"
-            :style="{ background: getDetailedBgColor(index) }"
-          >
-            <i 
-              :class="getDetailedIconClass(index)"
-              :style="{ color: getDetailedIconColor(index) }"
-            ></i>
-          </div>
+    <!-- Order Status Summary Row -->
+    <div class="order-status-grid">
+      <div class="status-card status-pending">
+        <div class="status-icon">
+          <i class="pi pi-clock"></i>
         </div>
-        <div class="detailed-stat-change" :class="stat.change >= 0 ? 'positive' : 'negative'">
-          <i :class="stat.change >= 0 ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"></i>
-          <span>{{ Math.abs(stat.change) }}% {{ stat.label }}</span>
+        <div class="status-content">
+          <div class="status-value">{{ dashboardStore.orderStatusSummary.pending }}</div>
+          <div class="status-label">Đơn chờ duyệt</div>
+        </div>
+      </div>
+
+      <div class="status-card status-approved">
+        <div class="status-icon">
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <div class="status-content">
+          <div class="status-value">{{ dashboardStore.orderStatusSummary.approved }}</div>
+          <div class="status-label">Đơn đã duyệt</div>
+        </div>
+      </div>
+
+      <div class="status-card status-completed">
+        <div class="status-icon">
+          <i class="pi pi-check"></i>
+        </div>
+        <div class="status-content">
+          <div class="status-value">{{ dashboardStore.orderStatusSummary.completed }}</div>
+          <div class="status-label">Đơn hoàn thành</div>
+        </div>
+      </div>
+
+      <div class="status-card status-rejected">
+        <div class="status-icon">
+          <i class="pi pi-times-circle"></i>
+        </div>
+        <div class="status-content">
+          <div class="status-value">{{ dashboardStore.orderStatusSummary.rejected }}</div>
+          <div class="status-label">Đơn bị từ chối</div>
         </div>
       </div>
     </div>
 
     <!-- Charts Row -->
-    <div class="grid grid-cols-2" style="margin-bottom: 24px; gap: 1.5rem;">
-      <SalesChart title="Doanh thu vs Mua hàng" />
-      
+    <div class="charts-row">
+      <!-- Orders Status Chart -->
       <div class="chart-container">
         <div class="chart-header">
-          <h3 class="chart-title">Thông tin tổng quan</h3>
-          <Dropdown 
-            v-model="selectedOverviewPeriod" 
-            :options="overviewPeriods" 
-            optionLabel="label" 
-            placeholder="6 tháng gần đây"
-            style="width: 180px;"
+          <h3 class="chart-title">Thống kê đơn hàng theo trạng thái</h3>
+        </div>
+        <div class="chart-wrapper">
+          <DoughnutChart 
+            :chartData="dashboardStore.ordersByStatusChartData"
+            :height="300"
           />
         </div>
-
-        <!-- Customers Overview Section -->
-        <div class="customers-overview-section">
-          <h4 class="section-subtitle">Tổng quan khách hàng</h4>
-          
-          <div class="overview-content-horizontal">
-            <!-- Donut Chart -->
-            <div class="donut-chart-section">
-              <div class="donut-chart-wrapper">
-                <DoughnutChart />
-              </div>
-            </div>
-
-            <!-- Stats Cards -->
-            <div class="stats-cards-horizontal">
-              <!-- First Time Card -->
-              <div class="stat-card-horizontal">
-                <div class="stat-value-large">5.5K</div>
-                <div class="stat-label-green">Lần đầu</div>
-                <div class="stat-badge-green">
-                  <i class="pi pi-arrow-up"></i>
-                  25%
-                </div>
-              </div>
-
-              <!-- Return Card -->
-              <div class="stat-card-horizontal">
-                <div class="stat-value-large">3.5K</div>
-                <div class="stat-label-orange">Quay lại</div>
-                <div class="stat-badge-green">
-                  <i class="pi pi-arrow-up"></i>
-                  21%
-                </div>
-              </div>
-            </div>
+        <div class="chart-legend">
+          <div class="legend-item">
+            <span class="legend-color" style="background: #FFD6A5;"></span>
+            <span>Pending</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #A0C4FF;"></span>
+            <span>Approved</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #CAFFBF;"></span>
+            <span>Completed</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #FFADAD;"></span>
+            <span>Rejected</span>
           </div>
         </div>
+      </div>
 
-        <!-- Bottom Stats Row -->
-        <div class="bottom-stats">
-          <div class="bottom-stat-item">
-            <div class="stat-number">{{ formatNumber(dashboardStore.overviewStats.suppliers) }}</div>
-            <div class="stat-text">Nhà cung cấp</div>
+      <!-- Stock Value Chart -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <h3 class="chart-title">Giá trị kho theo phân loại</h3>
+        </div>
+        <div class="chart-wrapper">
+          <DoughnutChart 
+            :chartData="dashboardStore.stockValueChartData"
+            :height="300"
+          />
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item">
+            <span class="legend-color" style="background: #BDB2FF;"></span>
+            <span>Engineer</span>
           </div>
-          <div class="bottom-stat-divider"></div>
-          <div class="bottom-stat-item">
-            <div class="stat-number">{{ formatNumber(dashboardStore.overviewStats.customers) }}</div>
-            <div class="stat-text">Khách hàng</div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #FFC6FF;"></span>
+            <span>Consumer</span>
           </div>
-          <div class="bottom-stat-divider"></div>
-          <div class="bottom-stat-item">
-            <div class="stat-number">{{ formatNumber(dashboardStore.overviewStats.orders) }}</div>
-            <div class="stat-text">Đơn hàng</div>
+        </div>
+      </div>
+
+      <!-- Overview Stats -->
+      <div class="overview-container">
+        <div class="chart-header">
+          <h3 class="chart-title">Tổng quan hệ thống</h3>
+        </div>
+        <div class="overview-grid">
+          <div class="overview-item overview-blue">
+            <div class="overview-icon">
+              <i class="pi pi-box"></i>
+            </div>
+            <div class="overview-content">
+              <div class="overview-value">{{ dashboardStore.overviewStats.totalItems }}</div>
+              <div class="overview-label">Tổng vật tư</div>
+            </div>
+          </div>
+
+          <div class="overview-item overview-pink">
+            <div class="overview-icon">
+              <i class="pi pi-users"></i>
+            </div>
+            <div class="overview-content">
+              <div class="overview-value">{{ dashboardStore.overviewStats.totalUsers }}</div>
+              <div class="overview-label">Người dùng</div>
+            </div>
+          </div>
+
+          <div class="overview-item overview-green">
+            <div class="overview-icon">
+              <i class="pi pi-sign-in"></i>
+            </div>
+            <div class="overview-content">
+              <div class="overview-value">{{ dashboardStore.overviewStats.totalStockins }}</div>
+              <div class="overview-label">Phiếu nhập</div>
+            </div>
+          </div>
+
+          <div class="overview-item overview-yellow">
+            <div class="overview-icon">
+              <i class="pi pi-exclamation-triangle"></i>
+            </div>
+            <div class="overview-content">
+              <div class="overview-value">{{ dashboardStore.overviewStats.lowStockCount }}</div>
+              <div class="overview-label">Tồn kho thấp</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Products & Sales Row -->
-    <div class="grid grid-cols-3" style="gap: 1.5rem;">
-      <ProductList 
-        title="Top sản phẩm bán chạy"
-        :products="dashboardStore.topProducts"
-        :show-price="true"
-        :show-percentage="true"
-        :show-filter="true"
-      />
-      
-      <ProductList 
-        title="Sản phẩm tồn kho thấp"
-        :products="dashboardStore.lowStockProducts"
-        :show-stock="true"
-        :show-filter="false"
-        :show-view-all="true"
-      />
-      
-      <ProductList 
-        title="Trạng thái đơn hàng"
-        :products="dashboardStore.recentSales"
-        :show-category="true"
-        :show-status="true"
-        :show-filter="true"
-      />
+    <!-- Products & Orders Row -->
+    <div class="lists-row">
+      <!-- Top Ordered Items -->
+      <div class="list-container">
+        <div class="list-header">
+          <h3 class="list-title">
+            <i class="pi pi-chart-line"></i>
+            Top vật tư được order nhiều nhất
+          </h3>
+        </div>
+        <div class="list-content">
+          <div 
+            v-for="item in dashboardStore.topOrderedItems" 
+            :key="item.id"
+            class="list-item"
+          >
+            <img :src="item.image" :alt="item.name" class="item-image" />
+            <div class="item-info">
+              <div class="item-name">{{ item.name }}</div>
+              <div class="item-code">{{ item.code }}</div>
+            </div>
+            <div class="item-stats">
+              <div class="item-qty">{{ item.totalOrdered }} lần order</div>
+              <div class="progress-bar">
+                <div class="progress-fill" :style="{ width: item.percentage + '%' }"></div>
+              </div>
+            </div>
+          </div>
+          <div v-if="dashboardStore.topOrderedItems.length === 0" class="empty-state">
+            <i class="pi pi-cart-arrow-down"></i>
+            <p>Chưa có đơn hàng nào</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Low Stock Items -->
+      <div class="list-container">
+        <div class="list-header">
+          <h3 class="list-title">
+            <i class="pi pi-exclamation-triangle"></i>
+            Vật tư tồn kho thấp
+          </h3>
+        </div>
+        <div class="list-content">
+          <div 
+            v-for="item in dashboardStore.lowStockItems.slice(0, 5)" 
+            :key="item.id"
+            class="list-item"
+          >
+            <img :src="item.image" :alt="item.name" class="item-image" />
+            <div class="item-info">
+              <div class="item-name">{{ item.name }}</div>
+              <div class="item-code">{{ item.code }}</div>
+            </div>
+            <div class="item-stock">
+              <div class="stock-badge" :class="'badge-' + item.status">
+                {{ item.stockQty }}/{{ item.safetyStock }}
+              </div>
+              <div class="stock-label">{{ getStockStatusLabel(item.status) }}</div>
+            </div>
+          </div>
+          <div v-if="dashboardStore.lowStockItems.length === 0" class="empty-state">
+            <i class="pi pi-check-circle"></i>
+            <p>Tồn kho ổn định</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Orders -->
+      <div class="list-container">
+        <div class="list-header">
+          <h3 class="list-title">
+            <i class="pi pi-list"></i>
+            Đơn hàng gần đây
+          </h3>
+        </div>
+        <div class="list-content">
+          <div 
+            v-for="order in dashboardStore.recentOrderStatus.slice(0, 5)" 
+            :key="order.id"
+            class="list-item"
+          >
+            <div class="order-icon" :class="'order-icon-' + order.status.toLowerCase()">
+              <i :class="getOrderStatusIcon(order.status)"></i>
+            </div>
+            <div class="order-info">
+              <div class="order-number">Order ID: {{ order.id }}</div>
+              <div class="order-meta">
+                {{ order.workerName }} - {{ order.totalItems }} items - {{ order.totalQty }} qty
+              </div>
+            </div>
+            <div class="order-status">
+              <span class="status-badge" :class="'status-' + order.status.toLowerCase()">
+                {{ order.status }}
+              </span>
+              <div class="order-date">{{ formatDate(order.orderDate) }}</div>
+            </div>
+          </div>
+          <div v-if="dashboardStore.recentOrderStatus.length === 0" class="empty-state">
+            <i class="pi pi-cart-arrow-down"></i>
+            <p>Chưa có đơn hàng nào</p>
+          </div>
+        </div>
+      </div>
     </div>
   </MainLayout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useDashboardStore } from '@/stores/dashboard'
+import { useItemStore } from '@/stores/itemStore'
+import { useOrderStore } from '@/stores/orderStore'
+import { useStockinStore } from '@/stores/stockinStore'
+import { useUserStore } from '@/stores/userStore'
+import { itemAPI } from '@/services/itemAPI'
+import { orderAPI } from '@/services/orderAPI'
+import { stockinAPI } from '@/services/stockinAPI'
+import { userAPI } from '@/services/userAPI'
 import MainLayout from '@/components/MainLayout.vue'
-import SalesChart from '@/components/SalesChart.vue'
 import DoughnutChart from '@/components/DoughnutChart.vue'
-import ProductList from '@/components/ProductList.vue'
-
-interface OverviewPeriod {
-  label: string
-  value: string
-}
+import { useToast } from 'primevue/usetoast'
 
 const dashboardStore = useDashboardStore()
+const itemStore = useItemStore()
+const orderStore = useOrderStore()
+const stockinStore = useStockinStore()
+const userStore = useUserStore()
+const toast = useToast()
 
-const selectedOverviewPeriod = ref<OverviewPeriod>({ 
-  label: '6 tháng gần đây', 
-  value: '6months' 
+const loading = ref(false)
+
+const fetchAllData = async () => {
+  loading.value = true
+  
+  try {
+    const [items, orders, stockins, users] = await Promise.all([
+      itemAPI.getAll(),
+      orderAPI.getAll(),
+      stockinAPI.getAllStockin(),
+      userAPI.getAllAccounts()
+    ])
+
+    itemStore.setItems(items)
+    orderStore.setOrders(orders)
+    stockinStore.setStockins(stockins)
+    userStore.users = users
+
+    console.log('✅ Dashboard data loaded:', {
+      items: items.length,
+      orders: orders.length,
+      stockins: stockins.length,
+      users: users.length
+    })
+
+  } catch (error: any) {
+    console.error('❌ Error loading dashboard data:', error)
+    toast.add({
+      severity: 'error',
+      summary: 'Lỗi tải dữ liệu',
+      detail: 'Không thể tải dữ liệu dashboard',
+      life: 3000
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(async () => {
+  await fetchAllData()
+  dashboardStore.refreshDashboard()
 })
 
-const overviewPeriods: OverviewPeriod[] = [
-  { label: '6 tháng gần đây', value: '6months' },
-  { label: 'Tháng này', value: 'month' },
-  { label: 'Tuần này', value: 'week' }
-]
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND'
+  }).format(value)
+}
 
-const formatNumber = (num: number): string => {
-  return new Intl.NumberFormat('vi-VN').format(num)
+const formatDate = (dateStr: string): string => {
+  const date = new Date(dateStr)
+  return new Intl.DateTimeFormat('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).format(date)
 }
 
 const getStatCardClass = (index: number): string => {
-  const classes = ['card-orange', 'card-green', 'card-cyan', 'card-yellow']
-  return classes[index] || 'card-orange'
+  const classes = ['card-blue', 'card-pink', 'card-yellow', 'card-purple']
+  return classes[index] || 'card-blue'
 }
 
 const getIconBgClass = (index: number): string => {
-  const classes = ['icon-bg-orange', 'icon-bg-green', 'icon-bg-cyan', 'icon-bg-yellow']
-  return classes[index] || 'icon-bg-orange'
+  const classes = ['icon-bg-blue', 'icon-bg-pink', 'icon-bg-yellow', 'icon-bg-purple']
+  return classes[index] || 'icon-bg-blue'
 }
 
 const getIconClass = (index: number): string => {
-  const icons = ['pi pi-shopping-bag', 'pi pi-refresh', 'pi pi-dollar', 'pi pi-file']
-  return icons[index] || 'pi pi-shopping-bag'
+  const icons = ['pi pi-shopping-cart', 'pi pi-file', 'pi pi-sign-in', 'pi pi-database']
+  return icons[index] || 'pi pi-shopping-cart'
 }
 
-const getDetailedBgColor = (index: number): string => {
-  const colors = ['#fef3c7', '#fee2e2', '#fef3c7']
-  return colors[index] || '#fef3c7'
+const getStockStatusLabel = (status: string): string => {
+  const labels: Record<string, string> = {
+    critical: 'Rất thấp',
+    low: 'Thấp',
+    warning: 'Cảnh báo'
+  }
+  return labels[status] || status
 }
 
-const getDetailedIconColor = (index: number): string => {
-  const colors = ['#f59e0b', '#ef4444', '#f59e0b']
-  return colors[index] || '#f59e0b'
-}
-
-const getDetailedIconClass = (index: number): string => {
-  const icons = ['pi pi-chart-line', 'pi pi-credit-card', 'pi pi-wallet']
-  return icons[index] || 'pi pi-chart-line'
+const getOrderStatusIcon = (status: string): string => {
+  const icons: Record<string, string> = {
+    Pending: 'pi pi-clock',
+    Approved: 'pi pi-check-circle',
+    Completed: 'pi pi-check',
+    Rejected: 'pi pi-times-circle'
+  }
+  return icons[status] || 'pi pi-file'
 }
 </script>
 
 <style scoped>
-/* Stats Cards Grid */
+/* Pastel Color Palette */
+:root {
+  --pastel-blue: #A0C4FF;
+  --pastel-pink: #FFC6FF;
+  --pastel-yellow: #FFD6A5;
+  --pastel-purple: #BDB2FF;
+  --pastel-green: #CAFFBF;
+  --pastel-red: #FFADAD;
+  --pastel-orange: #FDFFB6;
+  --pastel-mint: #9BF6FF;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  text-align: center;
+}
+
+.loading-spinner p {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: #8B7AB8;
+  font-weight: 500;
+}
+
+/* Stats Grid */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -222,49 +446,47 @@ const getDetailedIconClass = (index: number): string => {
   margin-bottom: 1.5rem;
 }
 
-/* Compact Stat Cards */
-.stat-card-compact {
-  background: white;
-  border-radius: 8px;
-  padding: 1.25rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
+/* Stat Cards - Pastel Colors */
+.stat-card-compact[data-v-336c5134] {
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    /* border: 2px solid transparent; */
+    transition: all 0.3s ease;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .stat-card-compact:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* Card Color Variants */
-.card-orange {
-  border-left: 3px solid #fb923c;
-  background: linear-gradient(135deg, #fff7ed 0%, white 100%);
+.card-blue { 
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  /* border-color: var(--pastel-blue); */
 }
 
-.card-green {
-  border-left: 3px solid #4ade80;
-  background: linear-gradient(135deg, #f0fdf4 0%, white 100%);
+.card-pink { 
+  background: linear-gradient(135deg, #FCE4EC 0%, #F8BBD0 100%);
+  /* border-color: var(--pastel-pink); */
 }
 
-.card-cyan {
-  border-left: 3px solid #22d3ee;
-  background: linear-gradient(135deg, #ecfeff 0%, white 100%);
+.card-yellow { 
+  background: linear-gradient(135deg, #FFF9C4 0%, #FFECB3 100%);
+  /* border-color: var(--pastel-yellow); */
 }
 
-.card-yellow {
-  border-left: 3px solid #facc15;
-  background: linear-gradient(135deg, #fefce8 0%, white 100%);
+.card-purple { 
+  background: linear-gradient(135deg, #EDE7F6 0%, #D1C4E9 100%);
+  /* border-color: var(--pastel-purple); */
 }
 
-/* Icon Styling */
 .stat-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -272,295 +494,556 @@ const getDetailedIconClass = (index: number): string => {
 }
 
 .stat-icon i {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   color: white;
 }
 
-.icon-bg-orange {
-  background: #fb923c;
+.icon-bg-blue { 
+  background: linear-gradient(135deg, #1976D2, #1565C0);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
 }
 
-.icon-bg-green {
-  background: #4ade80;
+.icon-bg-pink { 
+  background: linear-gradient(135deg, #D81B60, #C2185B);
+  box-shadow: 0 4px 12px rgba(216, 27, 96, 0.3);
 }
 
-.icon-bg-cyan {
-  background: #22d3ee;
+.icon-bg-yellow { 
+  background: linear-gradient(135deg, #F57C00, #EF6C00);
+  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
 }
 
-.icon-bg-yellow {
-  background: #facc15;
+.icon-bg-purple { 
+  background: linear-gradient(135deg, #7B1FA2, #6A1B9A);
+  box-shadow: 0 4px 12px rgba(123, 31, 162, 0.3);
 }
 
-/* Stat Content */
 .stat-content {
   flex: 1;
-  min-width: 0;
 }
 
 .stat-label-compact {
-  font-size: 0.8125rem;
-  color: #64748b;
-  font-weight: 500;
-  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  color: #5A4A7A;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 .stat-value-compact {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 0.25rem;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #2D2D2D;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
-.stat-change-compact {
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.stat-change-compact.positive {
-  color: #16a34a;
-}
-
-.stat-change-compact.negative {
-  color: #dc2626;
-}
-
-/* Detailed Stats Grid */
-.detailed-stats-grid {
+/* Order Status Grid - Pastel */
+.order-status-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
-/* Detailed Stat Cards */
-.detailed-stat-card {
-  background: white;
-  border-radius: 8px;
+.status-card {
+  border-radius: 16px;
   padding: 1.5rem;
-  border: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 2px solid transparent;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.detailed-stat-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+.status-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
 }
 
-.detailed-stat-value {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 0.25rem;
+.status-pending { 
+  background-color:#FFECB3;
+  /* border-color: var(--pastel-yellow); */
 }
 
-.detailed-stat-label {
-  font-size: 0.875rem;
-  color: #64748b;
-  font-weight: 500;
+.status-approved { 
+  background-color: #BBDEFB;
+  /* border-color: var(--pastel-blue); */
 }
 
-.detailed-icon-wrapper {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
+.status-completed { 
+  background-color: #C8E6C9;
+  /* border-color: var(--pastel-green); */
+}
+
+.status-rejected { 
+  background-color: #FFCDD2;
+  /* border-color: var(--pastel-red); */
+}
+
+.status-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.detailed-icon-wrapper i {
-  font-size: 1.125rem;
+.status-pending .status-icon {
+  background: linear-gradient(135deg, #F57C00, #EF6C00);
+  color: white;
 }
 
-.detailed-stat-change {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid #f1f5f9;
+.status-approved .status-icon {
+  background: linear-gradient(135deg, #1976D2, #1565C0);
+  color: white;
 }
 
-.detailed-stat-change.positive {
-  color: #16a34a;
+.status-completed .status-icon {
+  background: linear-gradient(135deg, #388E3C, #2E7D32);
+  color: white;
 }
 
-.detailed-stat-change.negative {
-  color: #dc2626;
+.status-rejected .status-icon {
+  background: linear-gradient(135deg, #D32F2F, #C62828);
+  color: white;
 }
 
-.detailed-stat-change i {
-  font-size: 0.75rem;
+.status-icon i {
+  font-size: 1.75rem;
 }
 
-/* Chart Container */
-.chart-container {
+.status-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #2D2D2D;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.status-label {
+  font-size: 0.875rem;
+  color: #5A4A7A;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* Charts Row */
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chart-container,
+.overview-container {
   background: white;
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 1.5rem;
-  border: 1px solid #e5e7eb;
+  border: 2px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 2px solid #F5F3FF;
 }
 
-.chart-title {
+.chart-title,
+.list-title {
   font-size: 1.125rem;
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 700;
+  color: #4A4A4A;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.customers-overview-section {
-  margin-bottom: 2rem;
+.chart-title i,
+.list-title i {
+  color: var(--pastel-purple);
 }
 
-.section-subtitle {
-  font-size: 0.9375rem;
+.chart-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6B6B6B;
   font-weight: 500;
-  color: #475569;
-  margin: 0 0 1.5rem 0;
 }
 
-.overview-content-horizontal {
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Overview Grid - Pastel */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.overview-item {
   display: flex;
   align-items: center;
-  gap: 3rem;
-  width: 100%;
-}
-
-.donut-chart-section {
-  flex-shrink: 0;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.donut-chart-wrapper {
-  width: 220px;
-  height: 220px;
-  position: relative;
-}
-
-.stats-cards-horizontal {
-  display: flex;
-  gap: 1.5rem;
-  flex: 1;
-}
-
-.stat-card-horizontal {
-  flex: 1;
-  text-align: center;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 2rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 12px;
   transition: all 0.3s ease;
 }
 
-.stat-card-horizontal:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+.overview-item:hover {
+  transform: scale(1.02);
 }
 
-.stat-value-large {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  line-height: 1;
-  margin-bottom: 0.5rem;
+.overview-blue {
+  background: linear-gradient(135deg, #F0F7FF 0%, #E0EFFF 100%);
 }
 
-.stat-label-green {
-  font-size: 0.875rem;
-  color: #10b981;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
+.overview-pink {
+  background: linear-gradient(135deg, #FFF0FF 0%, #FFE0FF 100%);
 }
 
-.stat-label-orange {
-  font-size: 0.875rem;
-  color: #f59e0b;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
+.overview-green {
+  background: linear-gradient(135deg, #F0FFF0 0%, #E0FFE0 100%);
 }
 
-.stat-badge-green {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.375rem 0.875rem;
-  border-radius: 16px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: #d1fae5;
-  color: #059669;
+.overview-yellow {
+  background: linear-gradient(135deg, #FFF8E8 0%, #FFE8C8 100%);
 }
 
-.stat-badge-green i {
-  font-size: 0.625rem;
-}
-
-.bottom-stats {
+.overview-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  padding: 1.5rem 0 0.5rem;
-  border-top: 1px solid #f1f5f9;
+  justify-content: center;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
-.bottom-stat-item {
-  text-align: center;
-  flex: 1;
+.overview-blue .overview-icon i {
+  color: var(--pastel-blue);
+  font-size: 1.5rem;
 }
 
-.stat-number {
-  font-size: 1.75rem;
+.overview-pink .overview-icon i {
+  color: var(--pastel-pink);
+  font-size: 1.5rem;
+}
+
+.overview-green .overview-icon i {
+  color: var(--pastel-green);
+  font-size: 1.5rem;
+}
+
+.overview-yellow .overview-icon i {
+  color: var(--pastel-yellow);
+  font-size: 1.5rem;
+}
+
+.overview-value {
+  font-size: 2rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #4A4A4A;
   margin-bottom: 0.25rem;
 }
 
-.stat-text {
-  font-size: 0.875rem;
-  color: #64748b;
+.overview-label {
+  font-size: 0.8125rem;
+  color: #8B7AB8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Lists Row */
+.lists-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.list-container {
+  background: white;
+  border-radius: 16px;
+  border: 2px solid #f0f0f0;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.list-header {
+  padding: 1.25rem 1.5rem;
+  background: #abafe9;
+  border-bottom: 2px solid var(--pastel-purple);
+}
+
+.list-content {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #F5F3FF;
+  transition: background 0.2s;
+}
+
+.list-item:hover {
+  background: linear-gradient(135deg, #FAFAFA 0%, #F5F5F5 100%);
+}
+
+.list-item:last-child {
+  border-bottom: none;
+}
+
+.item-image {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid var(--pastel-purple);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #4A4A4A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.25rem;
+}
+
+.item-code {
+  font-size: 0.8125rem;
+  color: #8B7AB8;
   font-weight: 500;
 }
 
-.bottom-stat-divider {
-  width: 1px;
-  height: 40px;
-  background: #e2e8f0;
+.item-stats {
+  text-align: right;
+}
+
+.item-qty {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--pastel-purple);
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+  width: 90px;
+  height: 8px;
+  background: #F0F0F0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--pastel-purple), var(--pastel-pink));
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.item-stock {
+  text-align: right;
+}
+
+.stock-badge {
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 0.5rem 0.875rem;
+  border-radius: 8px;
+  margin-bottom: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.badge-critical {
+  background: var(--pastel-red);
+  color: #B84A4A;
+}
+
+.badge-low {
+  background: var(--pastel-yellow);
+  color: #B8860B;
+}
+
+.badge-warning {
+  background: var(--pastel-orange);
+  color: #B89F0B;
+}
+
+.stock-label {
+  font-size: 0.75rem;
+  color: #8B7AB8;
+  font-weight: 500;
+}
+
+.order-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.order-icon i {
+  font-size: 1.25rem;
+}
+
+.order-icon-pending {
+  background: var(--pastel-yellow);
+  color: #B8860B;
+}
+
+.order-icon-approved {
+  background: var(--pastel-blue);
+  color: #4A80C0;
+}
+
+.order-icon-completed {
+  background: var(--pastel-green);
+  color: #5FA85F;
+}
+
+.order-icon-rejected {
+  background: var(--pastel-red);
+  color: #D66B6B;
+}
+
+.order-info {
+  flex: 1;
+}
+
+.order-number {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #4A4A4A;
+  margin-bottom: 0.25rem;
+}
+
+.order-meta {
+  font-size: 0.8125rem;
+  color: #8B7AB8;
+  font-weight: 500;
+}
+
+.order-status {
+  text-align: right;
+}
+
+.status-badge {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 0.375rem 0.875rem;
+  border-radius: 8px;
+  display: inline-block;
+  margin-bottom: 0.25rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.status-pending {
+  background: var(--pastel-yellow);
+  color: #B8860B;
+}
+
+.status-approved {
+  background: var(--pastel-blue);
+  color: #4A80C0;
+}
+
+.status-completed {
+  background: var(--pastel-green);
+  color: #5FA85F;
+}
+
+.status-rejected {
+  background: var(--pastel-red);
+  color: #D66B6B;
+}
+
+.order-date {
+  font-size: 0.75rem;
+  color: #8B7AB8;
+  font-weight: 500;
+}
+
+.empty-state {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--pastel-purple);
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  margin: 0;
+  font-weight: 500;
 }
 
 /* Responsive */
 @media (max-width: 1280px) {
-  .stats-grid {
+  .stats-grid,
+  .order-status-grid,
+  .charts-row,
+  .lists-row {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
   .stats-grid,
-  .detailed-stats-grid {
+  .order-status-grid,
+  .charts-row,
+  .lists-row {
     grid-template-columns: 1fr;
   }
 }
