@@ -172,7 +172,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
-import { Toast } from 'primevue'
 import Menu from 'primevue/menu'
 import Avatar from 'primevue/avatar'
 import Button from 'primevue/button'

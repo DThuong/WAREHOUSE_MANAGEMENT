@@ -2,7 +2,6 @@ import api from './api'
 import type { 
   Order,
   CreateOrderRequest, 
-  OrderStatus,
 } from '@/types/order.types'
 
 export const orderAPI = {
@@ -12,6 +11,33 @@ export const orderAPI = {
       return await api.get<Order[]>(`/api/Order`)
     } catch (error: any) {
       console.error('Error fetching orders:', error)
+      return []
+    }
+  },
+
+  // Filter orders - GET /api/Order/filter
+  filterOrders: async (params: {
+    id?: number
+    fromDate?: string
+    toDate?: string
+    status?: string
+    department?: string
+  }): Promise<Order[]> => {
+    try {
+      const queryParams = new URLSearchParams()
+      
+      if (params.id) queryParams.append('Id', params.id.toString())
+      if (params.fromDate) queryParams.append('FromDate', params.fromDate)
+      if (params.toDate) queryParams.append('ToDate', params.toDate)
+      if (params.status) queryParams.append('Status', params.status)
+      if (params.department) queryParams.append('Department', params.department)
+      
+      const queryString = queryParams.toString()
+      const url = `/api/Order/filter${queryString ? `?${queryString}` : ''}`
+      
+      return await api.get<Order[]>(url)
+    } catch (error: any) {
+      console.error('Error filtering orders:', error)
       return []
     }
   },

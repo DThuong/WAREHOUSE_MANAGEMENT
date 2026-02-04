@@ -10,11 +10,17 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+  optimizeDeps: {
+    exclude: ['html2canvas', 'jspdf'] // Loại trừ khỏi pre-bundling
+  },
   server: {
     host: '0.0.0.0', // Quan trọng cho Docker
     port: 5174,
     watch: {
       usePolling: true // Quan trọng cho hot reload trong Docker
+    },
+    hmr: {
+      overlay: true
     }
   },
 })

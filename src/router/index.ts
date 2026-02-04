@@ -33,6 +33,24 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: 'Báo cáo', requiresAuth: true, role: 'Admin'  }
   },
   {
+    path: '/reports/stockin',
+    name: 'StockinReport',
+    component: () => import('@/views/reports/StockinReportView.vue' as string),
+    meta: { title: 'Báo cáo nhập kho', requiresAuth: true, role: 'Admin' }
+  },
+  {
+    path: '/reports/orders',
+    name: 'OrdersReport',
+    component: () => import('@/views/reports/OrdersReportView.vue' as string),
+    meta: { title: 'Báo cáo đơn hàng', requiresAuth: true, role: 'Admin' }
+  },
+  {
+    path: '/reports/inventory',
+    name: 'InventoryReport',
+    component: () => import('@/views/reports/InventoryReportView.vue' as string),
+    meta: { title: 'Báo cáo tồn kho', requiresAuth: true, role: 'Admin' }
+  },
+  {
     path: '/users',
     name: 'Người dùng',
     component: () => import('@/views/UsersView.vue' as string),

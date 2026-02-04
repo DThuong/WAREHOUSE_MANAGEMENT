@@ -324,13 +324,6 @@ const fetchAllData = async () => {
     stockinStore.setStockins(stockins)
     userStore.users = users
 
-    console.log('✅ Dashboard data loaded:', {
-      items: items.length,
-      orders: orders.length,
-      stockins: stockins.length,
-      users: users.length
-    })
-
   } catch (error: any) {
     console.error('❌ Error loading dashboard data:', error)
     toast.add({
@@ -447,13 +440,12 @@ const getOrderStatusIcon = (status: string): string => {
 }
 
 /* Stat Cards - Pastel Colors */
-.stat-card-compact[data-v-336c5134] {
+.stat-card-compact {
     border-radius: 16px;
-    padding: 1.5rem;
+    padding: 2rem;
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    /* border: 2px solid transparent; */
     transition: all 0.3s ease;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -465,22 +457,18 @@ const getOrderStatusIcon = (status: string): string => {
 
 .card-blue { 
   background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-  /* border-color: var(--pastel-blue); */
 }
 
 .card-pink { 
   background: linear-gradient(135deg, #FCE4EC 0%, #F8BBD0 100%);
-  /* border-color: var(--pastel-pink); */
 }
 
 .card-yellow { 
   background: linear-gradient(135deg, #FFF9C4 0%, #FFECB3 100%);
-  /* border-color: var(--pastel-yellow); */
 }
 
 .card-purple { 
   background: linear-gradient(135deg, #EDE7F6 0%, #D1C4E9 100%);
-  /* border-color: var(--pastel-purple); */
 }
 
 .stat-icon {

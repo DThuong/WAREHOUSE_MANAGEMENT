@@ -5,7 +5,7 @@ import { useOrderStore } from './orderStore'
 import { useStockinStore } from './stockinStore'
 import { useUserStore } from './userStore'
 import type { Item } from '@/types/item.types'
-import type { Order, OrderStatus } from '@/types/order.types'
+import type { OrderStatus } from '@/types/order.types'
 
 // Dashboard specific types
 interface DashboardStats {
@@ -74,7 +74,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   }
 
   const getItemCode = (item: Item): string => {
-    return `ITEM-${String(item.id).padStart(5, '0')}`
+    return `ITEM-${String(item.id)}`
   }
 
   const getItemPrice = (item: Item): number => {
@@ -90,7 +90,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (firstPicture.startsWith('http')) {
       return firstPicture
     }
-    return `${import.meta.env.VITE_API_BASE_URL}${firstPicture}`
+    return `${import.meta.env.WAREHOUSE_URL}${firstPicture}`
   }
 
   // ============ COMPUTED STATS ============
@@ -134,9 +134,9 @@ export const useDashboardStore = defineStore('dashboard', () => {
       label: 'Tổng nhập kho'
     },
     totalStock: {
-      value: totalStockQuantity.value,
+      value: itemStore.totalItems,
       change: 3,
-      label: 'Tổng số lượng tồn kho'
+      label: 'Tổng tồn kho'
     }
   }))
 

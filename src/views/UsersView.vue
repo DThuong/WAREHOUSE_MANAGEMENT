@@ -28,7 +28,7 @@
             :value="userStore.users" 
             :loading="userStore.loading"
             :paginator="true" 
-            :rows="10"
+            :rows="5"
             responsiveLayout="scroll"
             v-model:filters="filters"
             :globalFilterFields="['username', 'phoneNumber', 'role', 'department']"
