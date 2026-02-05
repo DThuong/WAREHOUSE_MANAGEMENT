@@ -535,7 +535,7 @@ const form = ref<CreateItemRequest>({
 const getImageUrl = (filename: string) => {
   if (!filename) return ''
   if (filename.startsWith('http')) return filename
-  return `${import.meta.env.VITE_API_BASE_URL}/api/Item/image/${filename}`
+  return `${process.env.VUE_APP_WAREHOUSE_URL}/api/Item/image/${filename}`
 }
 
 const triggerFileInput = () => {

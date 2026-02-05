@@ -90,15 +90,20 @@ const createChart = () => {
       borderWidth: 0,
       spacing: 2,
       hoverOffset: 8,
-      animation: {
-        animateRotate: true,
-        animateScale: true,
-        duration: 800,
-        easing: 'easeInOutQuart'
-      }
     }
   })
 }
+
+// const resetAnimation = () => {
+//   if (chartInstance) {
+//     chartInstance.update('reset') // Reset về trạng thái ban đầu
+//     chartInstance.update('active') // Trigger animation mới
+//   }
+// }
+
+// defineExpose({
+//   resetAnimation
+// })
 
 onMounted(() => {
   createChart()

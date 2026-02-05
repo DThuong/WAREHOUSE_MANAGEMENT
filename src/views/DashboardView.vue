@@ -107,7 +107,7 @@
       <!-- Stock Value Chart -->
       <div class="chart-container">
         <div class="chart-header">
-          <h3 class="chart-title">Giá trị kho theo phân loại</h3>
+          <h3 class="chart-title">Thống kê kho theo phân loại</h3>
         </div>
         <div class="chart-wrapper">
           <DoughnutChart 
@@ -340,6 +340,11 @@ const fetchAllData = async () => {
 onMounted(async () => {
   await fetchAllData()
   dashboardStore.refreshDashboard()
+
+  setTimeout(() => {
+    ordersByStatusChartRef.value?.resetAnimation()
+    stockValueChartRef.value?.resetAnimation()
+  }, 200)
 })
 
 const formatCurrency = (value: number): string => {

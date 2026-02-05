@@ -13,12 +13,12 @@
         </div>
         
         <div style="display: flex; gap: 0.5rem;">
-          <Button 
+          <!-- <Button 
             label="Tải PDF" 
             icon="pi pi-download" 
             @click="downloadPDF"
             :loading="downloading"
-          />
+          /> -->
           <Button 
             label="In báo cáo" 
             icon="pi pi-print" 
@@ -455,44 +455,44 @@ const getStatusLabel = (status: string) => {
 
 
 // Download PDF using html2canvas + jsPDF
-const downloadPDF = async () => {
-  if (!reportContent.value) return
+// const downloadPDF = async () => {
+//   if (!reportContent.value) return
   
-  downloading.value = true
-  try {
-    const canvas = await html2canvas(reportContent.value, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff'
-    })
+//   downloading.value = true
+//   try {
+//     const canvas = await html2canvas(reportContent.value, {
+//       scale: 2,
+//       useCORS: true,
+//       logging: false,
+//       backgroundColor: '#ffffff'
+//     })
     
-    const imgData = canvas.toDataURL('image/png')
-    const imgWidth = 210
-    const pageHeight = 297
-    const imgHeight = (canvas.height * imgWidth) / canvas.width
-    let heightLeft = imgHeight
+//     const imgData = canvas.toDataURL('image/png')
+//     const imgWidth = 210
+//     const pageHeight = 297
+//     const imgHeight = (canvas.height * imgWidth) / canvas.width
+//     let heightLeft = imgHeight
     
-    const pdf = new jsPDF('p', 'mm', 'a4')
-    let position = 0
+//     const pdf = new jsPDF('p', 'mm', 'a4')
+//     let position = 0
     
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-    heightLeft -= pageHeight
+//     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+//     heightLeft -= pageHeight
     
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight
-      pdf.addPage()
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-    }
+//     while (heightLeft > 0) {
+//       position = heightLeft - imgHeight
+//       pdf.addPage()
+//       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+//       heightLeft -= pageHeight
+//     }
     
-    pdf.save(`bao-cao-don-hang-${new Date().getTime()}.pdf`)
-  } catch (error) {
-    console.error('Error generating PDF:', error)
-  } finally {
-    downloading.value = false
-  }
-}
+//     pdf.save(`bao-cao-don-hang-${new Date().getTime()}.pdf`)
+//   } catch (error) {
+//     console.error('Error generating PDF:', error)
+//   } finally {
+//     downloading.value = false
+//   }
+// }
 
 // Print report
 const printReport = () => {

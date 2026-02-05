@@ -90,7 +90,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (firstPicture.startsWith('http')) {
       return firstPicture
     }
-    return `${import.meta.env.WAREHOUSE_URL}${firstPicture}`
+    return `${process.env.VUE_APP_WAREHOUSE_URL}${firstPicture}`
   }
 
   // ============ COMPUTED STATS ============
@@ -103,11 +103,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
   })
 
   // Tổng số lượng tồn kho (tổng stockQty của tất cả items)
-  const totalStockQuantity = computed(() => {
-    return itemStore.items.reduce((total, item) => {
-      return total + item.stockQty
-    }, 0)
-  })
+  // const totalStockQuantity = computed(() => {
+  //   return itemStore.items.reduce((total, item) => {
+  //     return total + item.stockQty
+  //   }, 0)
+  // })
 
   const orderStatusSummary = computed<OrderStatusSummary>(() => ({
     pending: orderStore.pendingOrders.length,

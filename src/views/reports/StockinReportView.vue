@@ -13,12 +13,12 @@
         </div>
         
         <div style="display: flex; gap: 0.5rem;">
-          <Button 
+          <!-- <Button 
             label="Tải PDF" 
             icon="pi pi-download" 
             @click="downloadPDF"
             :loading="downloading"
-          />
+          /> -->
           <Button 
             label="In báo cáo" 
             icon="pi pi-print" 
@@ -120,18 +120,18 @@
 
         <!-- Data Table -->
         <div v-else>
-          <table class="report-table" style="width: 100%; border-collapse: collapse;">
+          <table class="report-table" style="width: 100%; border-collapse: collapse; text-align: center;">
             <thead>
               <tr style="background: #f9fafb;">
-                <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Mã phiếu</th>
-                <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Ngày nhập</th>
-                <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Người nhập</th>
-                <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Sản phẩm</th>
-                <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Hình ảnh</th>
-                <th style="padding: 0.75rem; text-align: right; border: 1px solid #e5e7eb;">Đơn giá</th>
-                <th style="padding: 0.75rem; text-align: right; border: 1px solid #e5e7eb;">SL</th>
-                <th style="padding: 0.75rem; text-align: right; border: 1px solid #e5e7eb;">Thành tiền</th>
-                <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Ghi chú</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Mã phiếu</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Ngày nhập</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Người nhập</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Sản phẩm</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Hình ảnh</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Đơn giá</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Số lượng</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Thành tiền</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Ghi chú</th>
               </tr>
             </thead>
             <tbody>
@@ -156,49 +156,71 @@
                   </td>
                   
                   <!-- Product info -->
-                  <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">
+                  <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: left;">
                     <div style="font-weight: 600;">
                       {{ detail.item.eng?.partname || detail.item.com?.name }}
                     </div>
                     <div style="font-size: 0.75rem; color: #666;">
-                      Mã: {{ detail.item.itemIndentifyId }}
+                      Id: {{ detail.item.itemIndentifyId }}
                     </div>
                     <div style="font-size: 0.75rem; color: #666;">
-                      Vị trí: {{ detail.item.eng?.location || detail.item.com?.location }}
+                      Distinguish: {{ detail.item?.eng?.partname || detail.item?.com?.specifications || '-' }}
                     </div>
                   </td>
                   
                   <!-- Image -->
-                  <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: center;">
-                    <img 
-                      v-if="detail.item.picture && detail.item.picture.length > 0"
-                      :src="detail.item.picture[0]" 
-                      alt="Product"
-                      style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;"
-                      crossorigin="anonymous"
-                    />
-                    <span v-else style="color: #999; font-size: 0.75rem;">Không có ảnh</span>
+                  <td
+                    style="
+                      padding: 0.75rem;
+                      border: 1px solid #e5e7eb;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100%;
+                      "
+                    >
+                      <img
+                        v-if="detail.item.picture && detail.item.picture.length > 0"
+                        :src="detail.item.picture[0]"
+                        alt="Product"
+                        style="
+                          width: 60px;
+                          height: 60px;
+                          object-fit: cover;
+                          border-radius: 4px;
+                          display: block;
+                        "
+                        crossorigin="anonymous"
+                      />
+                      <span v-else style="color: #999; font-size: 0.75rem;">
+                        Không có ảnh
+                      </span>
+                    </div>
                   </td>
                   
                   <!-- Price -->
-                  <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: right;">
+                  <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: center;">
                     {{ formatCurrency(parseFloat(detail.item.price || '0')) }}
                   </td>
                   
                   <!-- Quantity -->
-                  <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: right;">
+                  <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: center;">
                     <strong>{{ detail.quantity }}</strong> {{ detail.item.unit }}
                   </td>
                   
                   <!-- Total -->
-                  <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: right;">
+                  <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: center;">
                     <strong>{{ formatCurrency(detail.quantity * parseFloat(detail.item.price || '0')) }}</strong>
                   </td>
                   
                   <!-- Note (merged) -->
                   <td v-if="index === 0" 
                       :rowspan="stockin.stockInDetails.length" 
-                      style="padding: 0.75rem; border: 1px solid #e5e7eb; vertical-align: top;">
+                      style="padding: 0.75rem; border: 1px solid #e5e7eb; vertical-align: top; text-align: left;">
                     {{ stockin.note || '-' }}
                   </td>
                 </tr>
@@ -295,13 +317,9 @@ const filteredStockins = computed(() => stockinStore.stockins)
 const totalItems = computed(() => {
   if (!Array.isArray(filteredStockins.value)) return 0
   
-  const uniqueItems = new Set()
-  filteredStockins.value.forEach(stockin => {
-    stockin.stockInDetails?.forEach(detail => {
-      uniqueItems.add(detail.itemId)
-    })
-  })
-  return uniqueItems.size
+  return filteredStockins.value.reduce((total, stockin) => {
+    return total + (stockin.stockInDetails?.length || 0)
+  }, 0)
 })
 
 const totalQuantity = computed(() => {
@@ -338,51 +356,51 @@ const formatCurrency = (value: number) => {
 }
 
 // Download PDF using html2canvas + jsPDF
-const downloadPDF = async () => {
-  if (!reportContent.value) return
+// const downloadPDF = async () => {
+//   if (!reportContent.value) return
   
-  downloading.value = true
-  try {
-    // Capture the content as canvas
-    const canvas = await html2canvas(reportContent.value, {
-      scale: 2, // Higher quality
-      useCORS: true, // Enable cross-origin images
-      logging: false,
-      backgroundColor: '#ffffff'
-    })
+//   downloading.value = true
+//   try {
+//     // Capture the content as canvas
+//     const canvas = await html2canvas(reportContent.value, {
+//       scale: 2, // Higher quality
+//       useCORS: true, // Enable cross-origin images
+//       logging: false,
+//       backgroundColor: '#ffffff'
+//     })
     
-    const imgData = canvas.toDataURL('image/png')
+//     const imgData = canvas.toDataURL('image/png')
     
-    // Calculate PDF dimensions
-    const imgWidth = 210 // A4 width in mm
-    const pageHeight = 297 // A4 height in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width
-    let heightLeft = imgHeight
+//     // Calculate PDF dimensions
+//     const imgWidth = 210 // A4 width in mm
+//     const pageHeight = 297 // A4 height in mm
+//     const imgHeight = (canvas.height * imgWidth) / canvas.width
+//     let heightLeft = imgHeight
     
-    // Create PDF
-    const pdf = new jsPDF('p', 'mm', 'a4')
-    let position = 0
+//     // Create PDF
+//     const pdf = new jsPDF('p', 'mm', 'a4')
+//     let position = 0
     
-    // Add first page
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-    heightLeft -= pageHeight
+//     // Add first page
+//     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+//     heightLeft -= pageHeight
     
-    // Add additional pages if needed
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight
-      pdf.addPage()
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-    }
+//     // Add additional pages if needed
+//     while (heightLeft > 0) {
+//       position = heightLeft - imgHeight
+//       pdf.addPage()
+//       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+//       heightLeft -= pageHeight
+//     }
     
-    // Save PDF
-    pdf.save(`bao-cao-nhap-kho-${new Date().getTime()}.pdf`)
-  } catch (error) {
-    console.error('Error generating PDF:', error)
-  } finally {
-    downloading.value = false
-  }
-}
+//     // Save PDF
+//     pdf.save(`bao-cao-nhap-kho-${new Date().getTime()}.pdf`)
+//   } catch (error) {
+//     console.error('Error generating PDF:', error)
+//   } finally {
+//     downloading.value = false
+//   }
+// }
 
 // Print report
 const printReport = () => {
@@ -413,17 +431,49 @@ onMounted(() => {
 }
 
 @media print {
+   /* Ẩn toàn bộ sidebar và navbar */
+  :deep(.sidebar),
+  :deep(.navbar),
+  :deep(aside),
+  :deep(header) {
+    display: none !important;
+  }
+  
+  /* Ẩn main-content wrapper và chỉ show report-content */
+  :deep(.main-content) {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  :deep(.content-area) {
+    padding: 0 !important;
+  }
+  
+  /* Ẩn animate-fade-in children trừ Card cuối */
+  :deep(.animate-fade-in) > *:not(:last-child) {
+    display: none !important;
+  }
+  
+  /* Ẩn Card wrapper chỉ giữ nội dung bên trong */
+  :deep(.p-card) {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  :deep(.p-card-body),
+  :deep(.p-card-content) {
+    padding: 0 !important;
+  }
+  
   .report-content {
     background: white !important;
+    padding: 1rem !important;
   }
   
   .report-table {
     font-size: 10pt !important;
-  }
-  
-  .report-table img {
-    max-width: 50px !important;
-    max-height: 50px !important;
   }
 }
 </style>

@@ -17,7 +17,6 @@ export const authGuard = (
       const user = JSON.parse(userInfo)
 
       if (isTokenExpired(user.expiresAt)) {
-        console.log('⚠️ Token expired')
         localStorage.clear()
         next({ path: '/signin', query: { redirect: to.fullPath, reason: 'expired' } })
         return
@@ -27,9 +26,8 @@ export const authGuard = (
       userStore.currentUser = user
       userStore.authToken = token
       
-      console.log('✅ Store synced from localStorage')
     } catch (error) {
-      console.error('❌ Failed to parse user_info:', error)
+      console.error('Failed to parse user_info:', error)
       localStorage.clear()
       userStore.resetStore()
     }
@@ -44,7 +42,6 @@ export const authGuard = (
 
   // Chưa login nhưng route cần auth
   if (to.meta.requiresAuth && !userStore.isAuthenticated) {
-    console.log('🔒 Route requires auth, redirecting to signin')
     next({ path: '/signin', query: { redirect: to.fullPath } })
     return
   }
@@ -52,9 +49,7 @@ export const authGuard = (
   // CHECK ROLE
   if (to.meta.roles) {
     const allowedRoles = to.meta.roles as string[]
-
     if (!userStore.currentUser || !allowedRoles.includes(userStore.currentUser.role)) {
-      console.log('⛔ User role not allowed')
       next('/')
       return
     }

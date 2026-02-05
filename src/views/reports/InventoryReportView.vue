@@ -13,12 +13,12 @@
         </div>
         
         <div style="display: flex; gap: 0.5rem;">
-          <Button 
+          <!-- <Button 
             label="Tải PDF" 
             icon="pi pi-download" 
             @click="downloadPDF"
             :loading="downloading"
-          />
+          /> -->
           <Button 
             label="In báo cáo" 
             icon="pi pi-print" 
@@ -127,18 +127,18 @@
         <div v-else>
           <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem;">Chi tiết tồn kho</h3>
           
-          <table class="report-table" style="width: 100%; border-collapse: collapse;">
+          <table class="report-table" style="width: 100%; border-collapse: collapse; text-align: center;">
             <thead>
               <tr style="background: #f9fafb;">
-                <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Mã SP</th>
-                <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Hình ảnh</th>
-                <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Tên sản phẩm</th>
-                <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Loại</th>
-                <th style="padding: 0.75rem; text-align: right; border: 1px solid #e5e7eb;">Tồn kho</th>
-                <th style="padding: 0.75rem; text-align: right; border: 1px solid #e5e7eb;">Tồn an toàn</th>
-                <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Trạng thái</th>
-                <th style="padding: 0.75rem; text-align: right; border: 1px solid #e5e7eb;">Đơn giá</th>
-                <th style="padding: 0.75rem; text-align: right; border: 1px solid #e5e7eb;">Giá trị tồn</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Mã SP</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Hình ảnh</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Tên sản phẩm</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Loại</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Tồn kho</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Tồn an toàn</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Trạng thái</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Đơn giá</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Giá trị tồn</th>
               </tr>
             </thead>
             <tbody>
@@ -152,16 +152,39 @@
                 </td>
                 
                 <!-- Hình ảnh -->
-                <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: center;">
-                  <img 
-                    v-if="item.picture && item.picture.length > 0"
-                    :src="item.picture[0]" 
-                    alt="Product"
-                    style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;"
-                    crossorigin="anonymous"
-                  />
-                  <span v-else style="color: #999; font-size: 0.75rem;">Không có ảnh</span>
+                <td
+                  style="
+                    padding: 0.75rem;
+                    border: 1px solid #e5e7eb;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      height: 100%;
+                    "
+                  >
+                    <img 
+                      v-if="item.picture && item.picture.length > 0"
+                      :src="item.picture[0]" 
+                      alt="Product"
+                      style="
+                        width: 60px;
+                        height: 60px;
+                        object-fit: cover;
+                        border-radius: 4px;
+                        display: block;
+                      "
+                      crossorigin="anonymous"
+                    />
+                    <span v-else style="color: #999; font-size: 0.75rem;">
+                      Không có ảnh
+                    </span>
+                  </div>
                 </td>
+
                 
                 <!-- Tên sản phẩm -->
                 <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">
@@ -169,7 +192,7 @@
                     {{ item.eng?.partname || item.com?.name }}
                   </div>
                   <div style="font-size: 0.75rem; color: #666;">
-                    Vị trí: {{ item.eng?.location || item.com?.location }}
+                    Distinguish: {{ item?.eng?.partname || item?.com?.specifications || '-' }}
                   </div>
                 </td>
                 
@@ -190,12 +213,12 @@
                 </td>
                 
                 <!-- Tồn kho -->
-                <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: right;">
+                <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: center;">
                   <strong>{{ item.stockQty }}</strong> {{ item.unit }}
                 </td>
                 
                 <!-- Tồn an toàn -->
-                <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: right;">
+                <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: center;">
                   {{ item.saveQuantity }} {{ item.unit }}
                 </td>
                 
@@ -216,12 +239,12 @@
                 </td>
                 
                 <!-- Đơn giá -->
-                <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: right;">
+                <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: center;">
                   {{ formatCurrency(parseFloat(item.price || '0')) }}
                 </td>
                 
                 <!-- Giá trị tồn -->
-                <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: right;">
+                <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: center;">
                   <strong>
                     {{ formatCurrency(item.stockQty * parseFloat(item.price || '0')) }}
                   </strong>
@@ -454,51 +477,51 @@ const getStockStatusColor = (item: any) => {
 }
 
 // Download PDF using html2canvas + jsPDF
-const downloadPDF = async () => {
-  if (!reportContent.value) return
+// const downloadPDF = async () => {
+//   if (!reportContent.value) return
   
-  downloading.value = true
-  try {
-    // Capture the content as canvas
-    const canvas = await html2canvas(reportContent.value, {
-      scale: 2, // Higher quality
-      useCORS: true, // Enable cross-origin images
-      logging: false,
-      backgroundColor: '#ffffff'
-    })
+//   downloading.value = true
+//   try {
+//     // Capture the content as canvas
+//     const canvas = await html2canvas(reportContent.value, {
+//       scale: 2, // Higher quality
+//       useCORS: true, // Enable cross-origin images
+//       logging: false,
+//       backgroundColor: '#ffffff'
+//     })
     
-    const imgData = canvas.toDataURL('image/png')
+//     const imgData = canvas.toDataURL('image/png')
     
-    // Calculate PDF dimensions
-    const imgWidth = 210 // A4 width in mm
-    const pageHeight = 297 // A4 height in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width
-    let heightLeft = imgHeight
+//     // Calculate PDF dimensions
+//     const imgWidth = 210 // A4 width in mm
+//     const pageHeight = 297 // A4 height in mm
+//     const imgHeight = (canvas.height * imgWidth) / canvas.width
+//     let heightLeft = imgHeight
     
-    // Create PDF
-    const pdf = new jsPDF('p', 'mm', 'a4')
-    let position = 0
+//     // Create PDF
+//     const pdf = new jsPDF('p', 'mm', 'a4')
+//     let position = 0
     
-    // Add first page
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-    heightLeft -= pageHeight
+//     // Add first page
+//     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+//     heightLeft -= pageHeight
     
-    // Add additional pages if needed
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight
-      pdf.addPage()
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-    }
+//     // Add additional pages if needed
+//     while (heightLeft > 0) {
+//       position = heightLeft - imgHeight
+//       pdf.addPage()
+//       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+//       heightLeft -= pageHeight
+//     }
     
-    // Save PDF
-    pdf.save(`bao-cao-ton-kho-${new Date().getTime()}.pdf`)
-  } catch (error) {
-    console.error('Error generating PDF:', error)
-  } finally {
-    downloading.value = false
-  }
-}
+//     // Save PDF
+//     pdf.save(`bao-cao-ton-kho-${new Date().getTime()}.pdf`)
+//   } catch (error) {
+//     console.error('Error generating PDF:', error)
+//   } finally {
+//     downloading.value = false
+//   }
+// }
 
 // Print report
 const printReport = () => {
@@ -529,17 +552,49 @@ onMounted(() => {
 }
 
 @media print {
+   /* Ẩn toàn bộ sidebar và navbar */
+  :deep(.sidebar),
+  :deep(.navbar),
+  :deep(aside),
+  :deep(header) {
+    display: none !important;
+  }
+  
+  /* Ẩn main-content wrapper và chỉ show report-content */
+  :deep(.main-content) {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  :deep(.content-area) {
+    padding: 0 !important;
+  }
+  
+  /* Ẩn animate-fade-in children trừ Card cuối */
+  :deep(.animate-fade-in) > *:not(:last-child) {
+    display: none !important;
+  }
+  
+  /* Ẩn Card wrapper chỉ giữ nội dung bên trong */
+  :deep(.p-card) {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  :deep(.p-card-body),
+  :deep(.p-card-content) {
+    padding: 0 !important;
+  }
+  
   .report-content {
     background: white !important;
+    padding: 1rem !important;
   }
   
   .report-table {
-    font-size: 9pt !important;
-  }
-  
-  .report-table img {
-    max-width: 50px !important;
-    max-height: 50px !important;
+    font-size: 10pt !important;
   }
 }
 </style>
