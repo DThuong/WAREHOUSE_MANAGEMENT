@@ -11,10 +11,28 @@ import { useUserStore } from '@/stores/userStore'
 import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
 import { useTokenMonitor } from '@/composables/useToken'
+import { signalRService } from './services/signalrService'
 
 const userStore = useUserStore()
 const toast = useToast()
 const { scheduleExactExpiry } = useTokenMonitor()
+
+watch(
+  () => userStore.isAuthenticated,
+  async (isAuthenticated) => {
+    if (isAuthenticated) {
+      await signalRService.start()
+    } else {
+      await signalRService.stop()
+    }
+  },
+  { immediate: true }
+)
+onMounted(async () => {
+  if (userStore.isAuthenticated) {
+    await signalRService.start()
+  }
+})
 
 onMounted(() => {
   watch(

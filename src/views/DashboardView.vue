@@ -139,7 +139,7 @@
             </div>
             <div class="overview-content">
               <div class="overview-value">{{ dashboardStore.overviewStats.totalItems }}</div>
-              <div class="overview-label">Tổng vật tư</div>
+              <div class="overview-label">Vật tư</div>
             </div>
           </div>
 
@@ -170,6 +170,26 @@
             <div class="overview-content">
               <div class="overview-value">{{ dashboardStore.overviewStats.lowStockCount }}</div>
               <div class="overview-label">Tồn kho thấp</div>
+            </div>
+          </div>
+
+          <div class="overview-item overview-purple">
+            <div class="overview-icon">
+              <i class="pi pi-database" style="font-size: 1.5rem;"></i>
+            </div>
+            <div class="overview-content">
+              <div class="overview-value">{{ totalOrders }}</div>
+              <div class="overview-label">Đơn hàng</div>
+            </div>
+          </div>
+
+          <div class="overview-item overview-gray">
+            <div class="overview-icon">
+              <i class="pi pi-cart-arrow-down" style="font-size: 1.5rem;"></i>
+            </div>
+            <div class="overview-content">
+              <div class="overview-value">{{ dashboardStore.topOrderedItems.length }}</div>
+              <div class="overview-label">Top order</div>
             </div>
           </div>
         </div>
@@ -285,7 +305,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useItemStore } from '@/stores/itemStore'
 import { useOrderStore } from '@/stores/orderStore'
@@ -307,6 +327,8 @@ const userStore = useUserStore()
 const toast = useToast()
 
 const loading = ref(false)
+
+const totalOrders = computed(() => orderStore.totalOrders)
 
 const fetchAllData = async () => {
   loading.value = true
@@ -731,6 +753,13 @@ const getOrderStatusIcon = (status: string): string => {
 
 .overview-yellow {
   background: linear-gradient(135deg, #FFF8E8 0%, #FFE8C8 100%);
+}
+
+.overview-purple{
+  background: linear-gradient(135deg, #BDB2FF 0%, #BDB2FF 100%);
+}
+.overview-gray{
+  background: linear-gradient(135deg, #E0E0E0 0%, #E0E0E0 100%);
 }
 
 .overview-icon {

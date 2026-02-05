@@ -111,9 +111,9 @@
               </template>
             </Column>
 
-            <Column field="nameWorker" header="Người đặt" sortable>
+            <Column field="nameWorker" header="Tài khoản" sortable>
               <template #body="{ data }">
-                <span class="font-medium">{{ data.nameWorker || data.account?.username || '-' }}</span>
+                <span class="font-medium">{{ data.account?.username || '-' }}</span>
               </template>
             </Column>
 
@@ -198,7 +198,7 @@
         <div class="grid grid-cols-2 gap-4 mb-4 p-4! bg-gray-50 rounded-lg">
           <div>
             <p class="text-sm text-gray-600">Người đặt</p>
-            <p class="font-semibold">{{ selectedOrder.nameWorker || selectedOrder.account?.username || '-' }}</p>
+            <p class="font-semibold">{{ selectedOrder.nameWorker || '-' }}</p>
           </div>
           <div>
             <p class="text-sm text-gray-600">Phòng ban</p>
