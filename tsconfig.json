@@ -23,7 +23,8 @@
     /* Path mapping */
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["node", "vite/client"]
   },
   "include": [
     "src/**/*.ts",

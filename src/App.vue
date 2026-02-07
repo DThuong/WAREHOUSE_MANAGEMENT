@@ -41,12 +41,13 @@ onMounted(() => {
       console.log('LOGIN WATCH:', val, userStore.currentUser)
 
       if (val && userStore.currentUser) {
-        toast.add({
-          summary: 'Đăng nhập thành công',
-          detail: `Chào mừng ${userStore.currentUser.username}!`,
-          life: 2000
-        })
-
+        if(userStore.currentUser.role === "Admin"){
+          toast.add({
+            summary: 'Đăng nhập thành công',
+            detail: `Chào mừng ${userStore.currentUser.username}!`,
+            life: 2000
+          })
+        }
         userStore.clearLoginFlag()
       }
     },

@@ -90,7 +90,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (firstPicture.startsWith('http')) {
       return firstPicture
     }
-    return `${process.env.VUE_APP_WAREHOUSE_URL}${firstPicture}`
+    return `${import.meta.env.VUE_APP_WAREHOUSE_URL}${firstPicture}`
   }
 
   // ============ COMPUTED STATS ============

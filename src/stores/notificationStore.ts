@@ -39,10 +39,9 @@ export const useNotificationStore = defineStore('notification', () => {
   }
 
   const addNotification = (notification: Notification) => {
-    // Kiểm tra xem thông báo đã tồn tại chưa
     const exists = notifications.value.some(n => n.id === notification.id)
     if (!exists) {
-      notifications.value.unshift(notification)
+      notifications.value = [notification, ...notifications.value]
     }
   }
 

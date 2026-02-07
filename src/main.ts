@@ -19,7 +19,7 @@ import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
 import OverlayPanel from 'primevue/overlaypanel'
 import ToastService from 'primevue/toastservice'
-import { ConfirmationService } from 'primevue'
+import { ConfirmationService, Ripple } from 'primevue'
 
 // Import PrimeIcons
 import 'primeicons/primeicons.css'
@@ -39,7 +39,8 @@ app.use(PrimeVue, {
     options: {
       prefix: 'p',
       darkModeSelector: '.dark-mode',
-      cssLayer: false
+      cssLayer: false,
+      Ripple: false
     }
   },
   ripple: true
