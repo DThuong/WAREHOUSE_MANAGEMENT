@@ -15,6 +15,75 @@
         />
       </div>
 
+              <!-- Search & Filter -->
+        <Card class="mb-4">
+          <template #content>
+            <div class="flex flex-col gap-4">
+              <!-- Date Range -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block mb-2 text-sm font-semibold text-gray-700">Từ ngày</label>
+                  <Calendar 
+                    v-model="fromDate" 
+                    dateFormat="dd/mm/yy"
+                    showIcon
+                    showTime
+                    hourFormat="24"
+                    :stepMinute="15"
+                    class="w-full calendar-full-width"
+                  />
+                </div>
+                
+                <div>
+                  <label class="block mb-2 text-sm font-semibold text-gray-700">Đến ngày</label>
+                  <Calendar 
+                    v-model="toDate" 
+                    dateFormat="dd/mm/yy"
+                    showIcon
+                    showTime
+                    hourFormat="24"
+                    :stepMinute="15"
+                    class="w-full calendar-full-width"
+                  />
+                </div>
+              </div>
+              
+              <!-- Search & Actions -->
+              <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                  <span class="text-lg font-semibold text-gray-900">
+                    Tổng: {{ totalFilteredOrders }} đơn hàng
+                  </span>
+                </div>
+                
+                <div class="flex gap-3">
+                  <span class="p-input-icon-left w-80">
+                    <InputText 
+                      v-model="searchQuery" 
+                      placeholder="Tìm kiếm theo ID, người đặt..." 
+                      class="w-full"
+                    />
+                  </span>
+                  
+                  <Button 
+                    label="Lọc" 
+                    icon="pi pi-filter"
+                    @click="applyFilter"
+                    :loading="orderStore.loading"
+                  />
+                  
+                  <Button 
+                    label="Reset" 
+                    icon="pi pi-refresh"
+                    severity="secondary"
+                    @click="resetFilter"
+                  />
+                </div>
+              </div>
+            </div>
+          </template>
+        </Card>
+
       <Card>
         <!-- Statistics -->
         <div class="grid grid-cols-4 gap-4 mb-6">
@@ -59,35 +128,7 @@
           </div>
         </div>
 
-        <!-- Search & Filter -->
-        <div class="flex justify-between items-center mb-6">
-          <div class="flex items-center gap-4">
-            <span class="text-lg font-semibold text-gray-900">
-              Tổng: {{ totalFilteredOrders }} đơn hàng
-            </span>
-          </div>
-          
-          <div class="flex gap-3">
-            <Dropdown 
-              v-model="selectedStatus" 
-              :options="statusOptions" 
-              optionLabel="label" 
-              placeholder="Lọc theo trạng thái"
-              class="w-56"
-              showClear
-            />
-            
-            <span class="p-input-icon-left w-80">
-              <i class="pi pi-search" />
-              <InputText 
-                v-model="searchQuery" 
-                placeholder="Tìm kiếm theo ID, người đặt..." 
-                class="w-full"
-              />
-            </span>
-          </div>
-        </div>
-
+        <!-- Orders Table -->
         <template #content>
           <DataTable 
             :value="filteredOrders" 
@@ -95,6 +136,7 @@
             :rows="10"
             :loading="orderStore.loading"
             responsiveLayout="scroll"
+            :rowClass="getRowClass"
           >
             <template #empty>
               <div class="text-center py-8">
@@ -103,7 +145,11 @@
               </div>
             </template>
 
-            <Column field="id" header="ID" sortable class="w-20"></Column>
+            <Column field="id" header="ID" sortable class="w-20">
+              <template #body="{ data }">
+                <span :data-order-id="data.id">{{ data.id }}</span>
+              </template>
+            </Column>
             
             <Column field="orderDate" header="Ngày đặt" sortable>
               <template #body="{ data }">
@@ -643,7 +689,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useOrderStore } from '@/stores/orderStore'
 import { useItemStore } from '@/stores/itemStore'
 import { orderAPI } from '@/services/orderAPI'
@@ -663,15 +709,47 @@ import InputNumber from 'primevue/inputnumber'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import type { Order } from '@/types/order.types'
+import Calendar from 'primevue/calendar'
+import { useRoute, useRouter } from 'vue-router'
 
 const confirm = useConfirm()
 const toast = useToast()
 const orderStore = useOrderStore()
 const itemStore = useItemStore()
+const route = useRoute()
+const router = useRouter()
 
 // Search & Filter
 const searchQuery = ref('')
 const selectedStatus = ref<{label: string, value: string} | null>(null)
+
+const fromDate = ref<Date>(new Date(new Date().getFullYear(), 0, 1, 0, 0, 0))
+const toDate = ref<Date>(new Date(new Date().setHours(23, 59, 59)))
+const selectedDepartment = ref<string | null>(null)
+
+// Filter theo phòng ban
+const departmentOptions = computed(() => {
+  const departments = new Set<string>()
+  orderStore.orders.forEach(order => {
+    if (order.account?.department) {
+      departments.add(order.account.department)
+    }
+  })
+  return [
+    { label: 'Tất cả phòng ban', value: null },
+    ...Array.from(departments).map(dept => ({ label: dept, value: dept }))
+  ]
+})
+
+const formatDateTimeForAPI = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}`
+}
 
 const statusOptions = [
   { label: 'Chờ xử lý', value: 'Pending' },
@@ -788,17 +866,20 @@ const pendingImages = ref<File[]>([])
 const pendingImagePreviews = ref<string[]>([])
 const imageFileInput = ref<HTMLInputElement | null>(null)
 
-onMounted(async () => {
-  await Promise.all([
-    fetchAllOrders(),
-    fetchAllItems()
-  ])
-})
 
 const fetchAllOrders = async () => {
   orderStore.setLoading(true)
   try {
-    const orders = await orderAPI.getAll()
+    const from = formatDateTimeForAPI(fromDate.value)
+    const to = formatDateTimeForAPI(toDate.value)
+    
+    const orders = await orderAPI.filterOrders({
+      fromDate: from,
+      toDate: to,
+      status: selectedStatus.value?.value || undefined,
+      department: selectedDepartment.value || undefined
+    })
+    
     orderStore.setOrders(orders)
   } catch (error: any) {
     toast.add({
@@ -810,6 +891,19 @@ const fetchAllOrders = async () => {
   } finally {
     orderStore.setLoading(false)
   }
+}
+
+const applyFilter = () => {
+  fetchAllOrders()
+}
+
+const resetFilter = () => {
+  fromDate.value = new Date(new Date().getFullYear(), 0, 1, 0, 0, 0)
+  toDate.value = new Date(new Date().setHours(23, 59, 59))
+  selectedStatus.value = null
+  selectedDepartment.value = null
+  searchQuery.value = ''
+  fetchAllOrders()
 }
 
 const fetchAllItems = async () => {
@@ -1250,6 +1344,109 @@ const confirmDeleteImage = (imageName: string) => {
 const viewImageFullscreen = (imageUrl: string) => {
   window.open(getImageUrl(imageUrl), '_blank')
 }
+
+onMounted(async () => {
+  await Promise.all([
+    fetchAllOrders(),
+    fetchAllItems()
+  ])
+  
+  // Kiểm tra và auto-open order nếu có orderId trong query
+  checkAndOpenOrder()
+})
+
+// Watch route query changes để handle khi navigate từ notification
+watch(() => route.query.orderId, (newOrderId) => {
+  if (newOrderId) {
+    checkAndOpenOrder()
+  }
+}, { immediate: true })
+
+// Function để tự động mở order detail từ query parameter
+const checkAndOpenOrder = async () => {
+  const orderIdFromQuery = route.query.orderId
+  
+  if (!orderIdFromQuery) return
+  
+  const orderId = parseInt(orderIdFromQuery as string)
+  
+  if (isNaN(orderId)) {
+    console.warn('Invalid orderId:', orderIdFromQuery)
+    return
+  }
+  
+  // Hiển thị toast đang tìm
+  toast.add({
+    severity: 'info',
+    summary: 'Đang tìm kiếm',
+    detail: `Đang mở đơn hàng #${orderId}...`,
+    life: 1500
+  })
+  
+  // Đợi một chút để đảm bảo orders đã load xong
+  await new Promise(resolve => setTimeout(resolve, 300))
+  
+  // Tìm order trong danh sách
+  let order = orderStore.orders.find(o => o.id === orderId)
+  
+  if (!order) {
+    console.log('📡 Order not in store, fetching from API...')
+    // Nếu không tìm thấy, thử load lại từ API
+    try {
+      order = await orderAPI.getById(orderId)
+      
+      if (order) {
+        // Thêm vào store nếu chưa có
+        const exists = orderStore.orders.find(o => o.id === orderId)
+        if (!exists) {
+          orderStore.orders.push(order)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading order:', error)
+      toast.add({
+        severity: 'warn',
+        summary: 'Không tìm thấy',
+        detail: `Không tìm thấy đơn hàng #${orderId}`,
+        life: 3000
+      })
+      router.replace({ query: {} })
+      return
+    }
+  }
+  
+  if (order) {
+    // Mở dialog chi tiết
+    viewOrderDetails(order)
+    // Scroll đến order trong bảng (optional)
+    scrollToOrder(orderId)
+  }
+  
+  // Clear query parameter sau khi xử lý xong
+  router.replace({ query: {} })
+}
+// Optional: Scroll đến order trong DataTable
+const scrollToOrder = (orderId: number) => {
+  setTimeout(() => {
+    const orderRow = document.querySelector(`[data-order-id="${orderId}"]`)
+    
+    if (orderRow) {
+      // Scroll đến row
+      orderRow.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      
+      // Highlight row với animation
+      const parentRow = orderRow.closest('tr')
+      if (parentRow) {
+        parentRow.classList.add('highlight-flash')
+        setTimeout(() => {
+          parentRow.classList.remove('highlight-flash')
+        }, 2000)
+      }
+    } else {
+      console.warn('⚠️ Order row not found:', orderId)
+    }
+  }, 800)
+}
 </script>
 
 <style scoped>
@@ -1280,21 +1477,25 @@ const viewImageFullscreen = (imageUrl: string) => {
   font-size: 1.5rem;
 }
 
+/* Pending - Vàng Pastel */
 .stat-card.pending .stat-icon {
   background: #fef3c7;
   color: #f59e0b;
 }
 
+/* Approved - Xanh Blue Pastel */
 .stat-card.approved .stat-icon {
   background: #dbeafe;
   color: #3b82f6;
 }
 
+/* Completed - Xanh Lá Pastel */
 .stat-card.completed .stat-icon {
   background: #dcfce7;
   color: #22c55e;
 }
 
+/* Rejected - Đỏ Pastel */
 .stat-card.rejected .stat-icon {
   background: #fee2e2;
   color: #ef4444;
@@ -1310,6 +1511,35 @@ const viewImageFullscreen = (imageUrl: string) => {
   font-size: 1.5rem;
   font-weight: 700;
   color: #111827;
+}
+
+/* Chip Status Styles - Pastel Colors */
+:deep(.p-chip-warning) {
+  background: #fef3c7 !important;
+  color: #d97706 !important;
+  border: 1px solid #fde68a !important;
+  font-weight: 600 !important;
+}
+
+:deep(.p-chip-info) {
+  background: #dbeafe !important;
+  color: #2563eb !important;
+  border: 1px solid #bfdbfe !important;
+  font-weight: 600 !important;
+}
+
+:deep(.p-chip-success) {
+  background: #dcfce7 !important;
+  color: #16a34a !important;
+  border: 1px solid #bbf7d0 !important;
+  font-weight: 600 !important;
+}
+
+:deep(.p-chip-danger) {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+  font-weight: 600 !important;
 }
 
 /* Image Container */
@@ -1353,5 +1583,61 @@ const viewImageFullscreen = (imageUrl: string) => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Calendar Full Width Fix */
+.calendar-full-width {
+  width: 100% !important;
+}
+
+:deep(.calendar-full-width .p-calendar) {
+  width: 100% !important;
+  display: flex !important;
+}
+
+:deep(.calendar-full-width .p-inputtext) {
+  width: 100% !important;
+  flex: 1 1 auto !important;
+}
+
+:deep(.calendar-full-width .p-datepicker-trigger) {
+  flex-shrink: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* Đảm bảo grid item không overflow */
+.grid > div {
+  min-width: 0;
+}
+
+/* Highlight animation khi navigate từ notification */
+:deep(.highlight-flash) {
+  animation: highlightPulse 1.5s ease-in-out;
+}
+
+@keyframes highlightPulse {
+  0% { 
+    background: #dbeafe;
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  50% { 
+    background: #bfdbfe;
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% { 
+    background: transparent;
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Selected row style */
+:deep(.selected-row) {
+  background: #eff6ff !important;
+}
+
+/* Hover state cho rows */
+:deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background: #f8fafc;
+  cursor: pointer;
 }
 </style>

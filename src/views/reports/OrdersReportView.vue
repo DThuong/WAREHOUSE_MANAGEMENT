@@ -411,20 +411,6 @@ const pieChartData = computed(() => ({
   }]
 }))
 
-const pieChartOptions = ref({
-  responsive: true,
-  maintainAspectRatio: true,
-  plugins: {
-    legend: {
-      position: 'bottom' as const,
-      labels: {
-        padding: 20,
-        usePointStyle: true
-      }
-    }
-  }
-})
-
 // Helper functions
 const formatDate = (date: Date | string) => {
   if (!date) return ''

@@ -15,59 +15,75 @@
         />
       </div>
 
-      <Card>
-        <!-- Search & Filter Header -->
-        <div class="flex flex-col gap-4 mb-6">
-          <div class="flex justify-between items-center">
-            <div class="flex items-center gap-4">
-              <span class="text-lg font-semibold text-gray-900">
-                Tổng: {{ totalFilteredItems }} phiếu nhập
-              </span>
+      <!-- Filter Section -->
+      <Card class="mb-6">
+        <template #content>
+          <div class="flex flex-col gap-4">
+            <!-- Date Range -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Từ ngày</label>
+                <Calendar 
+                  v-model="fromDate" 
+                  dateFormat="dd/mm/yy"
+                  showIcon
+                  showTime
+                  hourFormat="24"
+                  :stepMinute="15"
+                  class="w-full calendar-full-width"
+                />
+              </div>
+              
+              <div>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Đến ngày</label>
+                <Calendar 
+                  v-model="toDate" 
+                  dateFormat="dd/mm/yy"
+                  showIcon
+                  showTime
+                  hourFormat="24"
+                  :stepMinute="15"
+                  class="w-full calendar-full-width"
+                />
+              </div>
             </div>
-            
-            <span class="p-input-icon-left w-80">
-              <i class="pi pi-search" />
-              <InputText 
-                v-model="searchQuery" 
-                placeholder="Tìm kiếm theo ghi chú, người tạo..." 
-                class="w-full"
-              />
-            </span>
+            <!-- Summary & Actions Row -->
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-4">
+                <span class="text-lg font-semibold text-gray-900">
+                  Tổng: {{ totalFilteredItems }} phiếu nhập
+                </span>
+              </div>
+              
+              <div class="flex gap-3">
+                <span class="p-input-icon-left w-80">
+                  <InputText 
+                    v-model="searchQuery" 
+                    placeholder="Tìm kiếm theo ghi chú, người tạo..." 
+                    class="w-full"
+                  />
+                </span>
+                
+                <Button 
+                  label="Lọc" 
+                  icon="pi pi-filter"
+                  @click="applyDateFilter"
+                  :loading="stockinStore.loading"
+                />
+                
+                <Button 
+                  label="Reset" 
+                  icon="pi pi-refresh"
+                  severity="secondary"
+                  @click="clearDateFilter"
+                />
+              </div>
+            </div>
           </div>
+        </template>
+      </Card>
 
-          <!-- Date Filter -->
-          <div class="flex items-center gap-4">
-            <label class="font-medium text-gray-700">Lọc theo ngày:</label>
-            <Calendar 
-              v-model="fromDate" 
-              placeholder="Từ ngày" 
-              dateFormat="dd/mm/yy"
-              :showIcon="true"
-              class="w-60"
-            />
-            <Calendar 
-              v-model="toDate" 
-              placeholder="Đến ngày" 
-              dateFormat="dd/mm/yy"
-              :showIcon="true"
-              class="w-60"
-            />
-            <Button 
-              label="Lọc" 
-              icon="pi pi-filter" 
-              @click="applyDateFilter"
-              :loading="stockinStore.loading"
-            />
-            <Button 
-              label="Xóa lọc" 
-              icon="pi pi-filter-slash" 
-              severity="secondary"
-              text
-              @click="clearDateFilter"
-            />
-          </div>
-        </div>
-
+      <Card>
         <template #content>
           <DataTable 
             :value="filteredStockins" 
@@ -593,9 +609,7 @@ import Calendar from 'primevue/calendar'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import type { Stockin, CreateStockinDetail } from '@/types/stockin.types'
-import type { Item } from '@/types/item.types'
 
-const router = useRouter()
 const confirm = useConfirm()
 const toast = useToast()
 const stockinStore = useStockinStore()
@@ -603,8 +617,36 @@ const itemStore = useItemStore()
 
 // Search & Filter
 const searchQuery = ref('')
-const fromDate = ref<Date | null>(null)
-const toDate = ref<Date | null>(null)
+const fromDate = ref<Date>(new Date(new Date().getFullYear(), 0, 1, 0, 0, 0))
+const toDate = ref<Date>(new Date(new Date().setHours(23, 59, 59)))
+
+const formatDateTimeForAPI = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  
+  return `${year}-${month}-${day} ${hours}:${minutes}`
+}
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+}
+
+const formatDateTime = (dateString: string) => {
+  return new Date(dateString).toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 
 const filteredStockins = computed(() => {
   if (!stockinStore.stockins?.length) return []
@@ -686,10 +728,19 @@ onUnmounted(() => {
 })
 
 // Fetch all stockins
-const fetchAllStockins = async () => {
+const fetchAllStockins = async (useFilter: boolean = false) => {
   stockinStore.setLoading(true)
   try {
-    const stockins = await stockinAPI.getAllStockin()
+    let stockins
+    
+    if (useFilter) {
+      const from = formatDateTimeForAPI(fromDate.value)
+      const to = formatDateTimeForAPI(toDate.value)
+      stockins = await stockinAPI.filterStockin(from, to)
+    } else {
+      stockins = await stockinAPI.getAllStockin()
+    }
+    
     stockinStore.setStockins(stockins)
   } catch (error: any) {
     toast.add({
@@ -720,20 +771,10 @@ const fetchAllItems = async () => {
 
 // Date Filter
 const applyDateFilter = async () => {
-  if (!fromDate.value && !toDate.value) {
-    toast.add({
-      severity: 'warn',
-      summary: 'Cảnh báo',
-      detail: 'Vui lòng chọn ít nhất một ngày',
-      life: 3000
-    })
-    return
-  }
-
   stockinStore.setLoading(true)
   try {
-    const from = fromDate.value ? fromDate.value.toISOString().split('T')[0] : undefined
-    const to = toDate.value ? toDate.value.toISOString().split('T')[0] : undefined
+    const from = formatDateTimeForAPI(fromDate.value)
+    const to = formatDateTimeForAPI(toDate.value)
     
     const stockins = await stockinAPI.filterStockin(from, to)
     stockinStore.setStockins(stockins)
@@ -757,28 +798,9 @@ const applyDateFilter = async () => {
 }
 
 const clearDateFilter = async () => {
-  fromDate.value = null
-  toDate.value = null
+  fromDate.value = new Date(new Date().getFullYear(), 0, 1, 0, 0, 0)
+  toDate.value = new Date(new Date().setHours(23, 59, 59))
   await fetchAllStockins()
-}
-
-// Helper Functions
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
-}
-
-const formatDateTime = (dateString: string) => {
-  return new Date(dateString).toLocaleString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
 }
 
 const getImageUrl = (filename: string) => {
@@ -1270,12 +1292,32 @@ const viewImageFullscreen = (imageUrl: string) => {
   border-top: 1px solid #e2e8f0;
 }
 
-:deep(.p-input-icon-left > i) {
-  left: 0.75rem;
-  color: #94a3b8;
+:deep(.p-input-icon-left > .p-inputtext) {
+  padding-left: 1rem;
 }
 
-:deep(.p-input-icon-left > .p-inputtext) {
-  padding-left: 2.5rem;
+/* Calendar Full Width Fix */
+.calendar-full-width {
+  width: 100% !important;
+}
+
+:deep(.calendar-full-width .p-calendar) {
+  width: 100% !important;
+  display: flex !important;
+}
+
+:deep(.calendar-full-width .p-inputtext) {
+  width: 100% !important;
+  flex: 1 1 auto !important;
+}
+
+:deep(.calendar-full-width .p-datepicker-trigger) {
+  flex-shrink: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* Đảm bảo grid item không overflow */
+.grid > div {
+  min-width: 0;
 }
 </style>

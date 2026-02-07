@@ -15,31 +15,75 @@
         />
       </div>
 
-      <Card>
-        <!-- Search Header -->
-        <div class="flex justify-between items-center mb-6">
-          <div class="flex items-center gap-4">
-            <span class="text-lg font-semibold text-gray-900">
-              Tổng: {{ totalFilteredItems }} sản phẩm
-            </span>
-            <Chip 
-              v-if="lowStockCount > 0"
-              :label="`${lowStockCount} sản phẩm sắp hết`" 
-              severity="danger"
-              icon="pi pi-exclamation-triangle"
-            />
+      <Card class="mb-6">
+        <template #content>
+          <div class="flex flex-col gap-4">
+            <!-- Filters Row -->
+            <div class="grid grid-cols-3 gap-3">
+              <div>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Loại sản phẩm</label>
+                <Dropdown 
+                  v-model="selectedType" 
+                  :options="typeOptions" 
+                  optionLabel="label" 
+                  optionValue="value"
+                  placeholder="Tất cả loại"
+                  class="w-full"
+                  showClear
+                />
+              </div>
+              
+              <div>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Trạng thái tồn kho</label>
+                <Dropdown 
+                  v-model="selectedStockStatus" 
+                  :options="stockStatusOptions" 
+                  optionLabel="label" 
+                  optionValue="value"
+                  placeholder="Tất cả"
+                  class="w-full"
+                  showClear
+                />
+              </div>
+              
+              <div>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">Tìm kiếm</label>
+                <div class="p-input-icon-left w-full">
+                  <InputText 
+                    v-model="searchQuery" 
+                    placeholder="Tên sản phẩm, ID..." 
+                    class="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <!-- Summary & Actions Row -->
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-4">
+                <span class="text-lg font-semibold text-gray-900">
+                  Tổng: {{ totalFilteredItems }} sản phẩm
+                </span>
+                <Chip 
+                  v-if="lowStockCount > 0"
+                  :label="`${lowStockCount} sản phẩm sắp hết`" 
+                  severity="danger"
+                  icon="pi pi-exclamation-triangle"
+                />
+              </div>
+              
+              <Button 
+                label="Reset" 
+                icon="pi pi-refresh"
+                severity="secondary"
+                @click="resetFilter"
+              />
+            </div>
           </div>
-          
-          <span class="p-input-icon-left w-80">
-            <i class="pi pi-search" />
-            <InputText 
-              v-model="searchQuery" 
-              placeholder="Tìm kiếm theo tên, loại, ID..." 
-              class="w-full"
-            />
-          </span>
-        </div>
+        </template>
+      </Card>
 
+      <Card>
         <template #content>
           <DataTable 
             :value="filteredItems" 
@@ -323,6 +367,7 @@ import InputText from 'primevue/inputtext'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import type { Item } from '@/types/item.types'
+import Dropdown from 'primevue/dropdown'
 
 const router = useRouter()
 const confirm = useConfirm()
@@ -332,21 +377,66 @@ const itemStore = useItemStore()
 // Search & Filter
 const searchQuery = ref('')
 
+const selectedType = ref<string | null>(null)
+const selectedStockStatus = ref<string | null>(null)
+
+const typeOptions = [
+  { label: 'Tất cả loại', value: null },
+  { label: 'Engineer', value: 'eng' },
+  { label: 'Consumer', value: 'com' }
+]
+
+const stockStatusOptions = [
+  { label: 'Tất cả', value: null },
+  { label: 'Còn hàng', value: 'in-stock' },
+  { label: 'Sắp hết', value: 'low-stock' },
+  { label: 'Hết hàng', value: 'out-of-stock' }
+]
+
+const resetFilter = () => {
+  selectedType.value = null
+  selectedStockStatus.value = null
+  searchQuery.value = ''
+}
+
 const filteredItems = computed(() => {
   if (!itemStore.items?.length) return []
-  if (!searchQuery.value) return itemStore.items
+  
+  let items = itemStore.items
 
-  const term = searchQuery.value.toLowerCase()
-  return itemStore.items.filter(item => {
-    const name = getProductName(item).toLowerCase()
-    const category = getProductCategory(item).toLowerCase()
-    return (
-      name.includes(term) ||
-      category.includes(term) ||
-      item.type.toLowerCase().includes(term) ||
-      item.id?.toString().includes(term)
-    )
-  })
+  // Filter by type
+  if (selectedType.value === 'eng') {
+    items = items.filter(item => item.eng !== null)
+  } else if (selectedType.value === 'com') {
+    items = items.filter(item => item.com !== null)
+  }
+
+  // Filter by stock status
+  if (selectedStockStatus.value === 'in-stock') {
+    items = items.filter(item => item.stockQty > item.saveQuantity)
+  } else if (selectedStockStatus.value === 'low-stock') {
+    items = items.filter(item => item.stockQty > 0 && item.stockQty <= item.saveQuantity)
+  } else if (selectedStockStatus.value === 'out-of-stock') {
+    items = items.filter(item => item.stockQty === 0)
+  }
+
+  // Filter by search query
+  if (searchQuery.value) {
+    const term = searchQuery.value.toLowerCase()
+    items = items.filter(item => {
+      const name = getProductName(item).toLowerCase()
+      const category = getProductCategory(item).toLowerCase()
+      return (
+        name.includes(term) ||
+        category.includes(term) ||
+        item.type.toLowerCase().includes(term) ||
+        item.id?.toString().includes(term) ||
+        item.itemIndentifyId?.toLowerCase().includes(term)
+      )
+    })
+  }
+
+  return items
 })
 
 const totalFilteredItems = computed(() => filteredItems.value.length)
@@ -745,13 +835,8 @@ const viewImageFullscreen = (imageUrl: string) => {
   border-top: 1px solid #e2e8f0;
 }
 
-:deep(.p-input-icon-left > i) {
-  left: 0.75rem;
-  color: #94a3b8;
-}
-
 :deep(.p-input-icon-left > .p-inputtext) {
-  padding-left: 2.5rem;
+  padding-left: 1rem;
 }
 
 /* Dialog Fix - Smooth animations */
