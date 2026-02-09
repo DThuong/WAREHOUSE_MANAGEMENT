@@ -33,11 +33,11 @@
                     <InputText type="number" v-model="form.price" placeholder="0" style="width: 100%;" />
                   </div>
                   <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Safe Quantity <span style="color: #ef4444;">*</span></label>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Safe Quantity</label>
                     <InputText v-model.number="form.saveQuantity" type="number" placeholder="0" style="width: 100%;" />
                   </div>
                   <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Inventory Quantity <span style="color: #ef4444;">*</span></label>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Inventory Quantity</label>
                     <InputText v-model.number="form.stockQty" type="number" placeholder="0" style="width: 100%;" />
                   </div>
                 </div>
@@ -55,14 +55,14 @@
                       <InputText v-model="form.eng.partname" placeholder="Nhập tên part" style="width: 100%;" />
                     </div>
                     <div>
-                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Location <span style="color: #ef4444;">*</span></label>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Location</label>
                       <InputText v-model="form.eng.location" placeholder="Nhập vị trí" style="width: 100%;" />
                     </div>
                   </div>
 
                   <div class="grid grid-cols-2 gap-4" style="margin-top: 1rem;">
                     <div>
-                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Vendor <span style="color: #ef4444;">*</span></label>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Vendor</label>
                       <InputText v-model="form.eng.vender" placeholder="Nhập nhà cung cấp" style="width: 100%;" />
                     </div>
                     <div>
@@ -72,7 +72,7 @@
                   </div>
                 </div>
 
-                <!-- ✅ FIXED Image Upload Section -->
+                <!-- Image Upload Section -->
                 <div>
                   <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
                     Product Images
@@ -81,9 +81,9 @@
                     </span>
                   </label>
                   
-                  <!-- ✅ FIXED Upload Area -->
+                  <!-- Upload Area -->
                   <div class="image-upload-container">
-                    <!-- ✅ FIXED Grid with consistent sizing -->
+                    <!-- Grid with consistent sizing -->
                     <div class="image-grid">
                       <!-- Uploaded Images (from server) -->
                       <div 
@@ -258,11 +258,11 @@
                     <InputText v-model="form.price" type="number" placeholder="0" style="width: 100%;" />
                   </div>
                   <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Safe Quantity <span style="color: #ef4444;">*</span></label>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Safe Quantity</label>
                     <InputText v-model.number="form.saveQuantity" type="number" placeholder="0" style="width: 100%;" />
                   </div>
                   <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Inventory Quantity <span style="color: #ef4444;">*</span></label>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Inventory Quantity</label>
                     <InputText v-model.number="form.stockQty" type="number" placeholder="0" style="width: 100%;" />
                   </div>
                 </div>
@@ -280,18 +280,18 @@
                       <InputText v-model="form.com.name" placeholder="Nhập tên sản phẩm" style="width: 100%;" />
                     </div>
                     <div>
-                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Location <span style="color: #ef4444;">*</span></label>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Location</label>
                       <InputText v-model="form.com.location" placeholder="Nhập vị trí" style="width: 100%;" />
                     </div>
                   </div>
 
                   <div class="grid grid-cols-2 gap-4" style="margin-top: 1rem;">
                     <div>
-                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Manufacturer <span style="color: #ef4444;">*</span></label>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Manufacturer</label>
                       <InputText v-model="form.com.manufacturer" placeholder="Nhập nhà sản xuất" style="width: 100%;" />
                     </div>
                     <div>
-                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Product Specifications <span style="color: #ef4444;">*</span></label>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Product Specifications</label>
                       <InputText v-model="form.com.specifications" placeholder="Nhập thông số" style="width: 100%;" />
                     </div>
                   </div>
@@ -702,7 +702,7 @@ const validateForm = (): boolean => {
   }
 
   if (activeTab.value === 0) {
-    if (!form.value.eng.partname || !form.value.eng.location || !form.value.eng.vender) {
+    if (!form.value.eng.partname) {
       toast.add({
         severity: 'warn',
         summary: 'Cảnh báo',
@@ -714,7 +714,7 @@ const validateForm = (): boolean => {
   }
 
   if (activeTab.value === 1) {
-    if (!form.value.com.name || !form.value.com.location || !form.value.com.manufacturer) {
+    if (!form.value.com.name) {
       toast.add({
         severity: 'warn',
         summary: 'Cảnh báo',
