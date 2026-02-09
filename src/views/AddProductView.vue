@@ -291,7 +291,7 @@
                       <InputText v-model="form.com.manufacturer" placeholder="Nhập nhà sản xuất" style="width: 100%;" />
                     </div>
                     <div>
-                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Product Specifications</label>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Product Specifications <span style="color: #ef4444;">*</span></label>
                       <InputText v-model="form.com.specifications" placeholder="Nhập thông số" style="width: 100%;" />
                     </div>
                   </div>
@@ -714,7 +714,7 @@ const validateForm = (): boolean => {
   }
 
   if (activeTab.value === 1) {
-    if (!form.value.com.name) {
+    if (!form.value.com.name || !form.value.com.specifications) {
       toast.add({
         severity: 'warn',
         summary: 'Cảnh báo',
