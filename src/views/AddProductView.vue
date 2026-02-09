@@ -66,7 +66,7 @@
                       <InputText v-model="form.eng.vender" placeholder="Nhập nhà cung cấp" style="width: 100%;" />
                     </div>
                     <div>
-                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Description <span style="color: #ef4444;">*</span></label>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Description</label>
                       <InputText v-model="form.eng.description" placeholder="Nhập mô tả" style="width: 100%;" />
                     </div>
                   </div>
