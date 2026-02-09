@@ -112,6 +112,7 @@
                   />
                   <div>
                     <p class="font-semibold text-gray-900">{{ getProductName(data) }}</p>
+                    <p class="text-sm text-gray-500">{{ getDistinguishName(data) }}</p>
                     <p class="text-sm text-gray-500">{{ getProductCategory(data) }}</p>
                   </div>
                 </div>
@@ -368,6 +369,7 @@ import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import type { Item } from '@/types/item.types'
 import Dropdown from 'primevue/dropdown'
+import { get } from 'http'
 
 const router = useRouter()
 const confirm = useConfirm()
@@ -503,6 +505,7 @@ const getImageUrl = (filename: string) => {
 
 // Utility Functions
 const getProductName = (item: Item) => item.eng?.partname || item.com?.name || 'Unknown'
+const getDistinguishName = (item: Item) => item?.eng?.partname || item?.com?.specifications || 'Unknown'
 const getProductCategory = (item: Item) => item.eng ? 'Hàng kỹ thuật' : item.com ? 'Hàng tiêu dùng' : 'Chưa phân loại'
 const getProductImage = (item: Item) => 
   item.picture?.length ? getImageUrl(item.picture[0]) : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop'
