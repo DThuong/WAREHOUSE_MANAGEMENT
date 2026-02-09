@@ -164,7 +164,7 @@
                       Id: {{ detail.item.itemIndentifyId }}
                     </div>
                     <div style="font-size: 0.75rem; color: #666;">
-                      Distinguish: {{ detail.item?.eng?.partname || detail.item?.com?.specifications || '-' }}
+                      {{ detail.item?.eng?.partname || detail.item?.com?.specifications || '-' }}
                     </div>
                   </td>
                   

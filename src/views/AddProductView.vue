@@ -23,13 +23,13 @@
                   </div>
                   <div>
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Unit <span style="color: #ef4444;">*</span></label>
-                    <InputText v-model="form.unit" placeholder="VD: cái, hộp, kg" style="width: 100%;" />
+                    <InputText v-model="form.unit" placeholder="VD: cái, hộp, bịch (đừng viết hoa ký tự nào nhé, hic!!!)" style="width: 100%;" />
                   </div>
                 </div>
 
                 <div class="grid grid-cols-3 gap-4">
                   <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Price <span style="color: #ef4444;">*</span></label>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Price</label>
                     <InputText type="number" v-model="form.price" placeholder="0" style="width: 100%;" />
                   </div>
                   <div>
@@ -62,7 +62,7 @@
 
                   <div class="grid grid-cols-2 gap-4" style="margin-top: 1rem;">
                     <div>
-                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Vendor</label>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Vender</label>
                       <InputText v-model="form.eng.vender" placeholder="Nhập nhà cung cấp" style="width: 100%;" />
                     </div>
                     <div>
@@ -248,13 +248,13 @@
                   </div>
                   <div>
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Unit <span style="color: #ef4444;">*</span></label>
-                    <InputText v-model="form.unit" placeholder="VD: cái, hộp, kg" style="width: 100%;" />
+                    <InputText v-model="form.unit" placeholder="VD: cái, hộp, bịch (đừng viết hoa ký tự nào nhé, hic!!!)" style="width: 100%;" />
                   </div>
                 </div>
 
                 <div class="grid grid-cols-3 gap-4">
                   <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Price <span style="color: #ef4444;">*</span></label>
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Price</label>
                     <InputText v-model="form.price" type="number" placeholder="0" style="width: 100%;" />
                   </div>
                   <div>
@@ -691,7 +691,7 @@ const handleDeleteImage = async (imageName: string) => {
 }
 
 const validateForm = (): boolean => {
-  if (!form.value.type || !form.value.unit || !form.value.price) {
+  if (!form.value.type || !form.value.unit) {
     toast.add({
       severity: 'warn',
       summary: 'Cảnh báo',

@@ -192,7 +192,7 @@
                     {{ item.eng?.partname || item.com?.name }}
                   </div>
                   <div style="font-size: 0.75rem; color: #666;">
-                    Distinguish: {{ item?.eng?.partname || item?.com?.specifications || '-' }}
+                    {{ item?.eng?.partname || item?.com?.specifications || '-' }}
                   </div>
                 </td>
                 

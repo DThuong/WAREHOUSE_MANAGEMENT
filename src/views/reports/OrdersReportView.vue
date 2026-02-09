@@ -213,7 +213,7 @@
                             Id: {{ detail.item?.itemIndentifyId || '-' }}
                         </div>
                         <div class="muted-text">
-                            Distinguish: {{ detail.item?.eng?.partname || detail.item?.com?.specifications || '-' }}
+                            {{ detail.item?.eng?.partname || detail.item?.com?.specifications || '-' }}
                         </div>
                         </td>
 
