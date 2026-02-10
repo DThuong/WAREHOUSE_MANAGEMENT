@@ -88,7 +88,7 @@
           <DataTable 
             :value="filteredItems" 
             :paginator="true" 
-            :rows="5"
+            :rows="10"
             :loading="itemStore.loading"
             responsiveLayout="scroll"
           >
@@ -99,7 +99,12 @@
               </div>
             </template>
 
-            <Column field="id" header="ID" sortable class="w-32"></Column>
+            <Column field="id" header="ID" sortable class="w-32">
+              <template #body="{ data }">
+                <div :data-product-id="data.id">STT: {{ data.id }}</div>
+                <div :data-item-id="data.itemIndentifyId" class="text-xs!">{{ data.itemIndentifyId }}</div>
+              </template>
+            </Column>
             
             <Column header="Sản phẩm">
               <template #body="{ data }">
@@ -369,7 +374,6 @@ import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import type { Item } from '@/types/item.types'
 import Dropdown from 'primevue/dropdown'
-import { get } from 'http'
 
 const router = useRouter()
 const confirm = useConfirm()
@@ -384,8 +388,8 @@ const selectedStockStatus = ref<string | null>(null)
 
 const typeOptions = [
   { label: 'Tất cả loại', value: null },
-  { label: 'Engineer', value: 'eng' },
-  { label: 'Consumer', value: 'com' }
+  { label: 'Engineer', value: 'ENG' },
+  { label: 'Consumer', value: 'COM' }
 ]
 
 const stockStatusOptions = [
@@ -407,9 +411,9 @@ const filteredItems = computed(() => {
   let items = itemStore.items
 
   // Filter by type
-  if (selectedType.value === 'eng') {
+  if (selectedType.value === 'ENG') {
     items = items.filter(item => item.eng !== null)
-  } else if (selectedType.value === 'com') {
+  } else if (selectedType.value === 'COM') {
     items = items.filter(item => item.com !== null)
   }
 
@@ -442,7 +446,9 @@ const filteredItems = computed(() => {
 })
 
 const totalFilteredItems = computed(() => filteredItems.value.length)
-const lowStockCount = computed(() => filteredItems.value.filter(i => i.stockQty < 10).length)
+const lowStockCount = computed(() => 
+  filteredItems.value.filter(i => i.stockQty > 0 && i.stockQty <= i.saveQuantity).length
+)
 
 // Edit Dialog
 const showEditDialog = ref(false)
@@ -505,7 +511,7 @@ const getImageUrl = (filename: string) => {
 
 // Utility Functions
 const getProductName = (item: Item) => item.eng?.partname || item.com?.name || 'Unknown'
-const getDistinguishName = (item: Item) => item?.eng?.partname || item?.com?.specifications || 'Unknown'
+const getDistinguishName = (item: Item) => item?.eng?.description || item?.com?.specifications || 'Unknown'
 const getProductCategory = (item: Item) => item.eng ? 'Hàng kỹ thuật' : item.com ? 'Hàng tiêu dùng' : 'Chưa phân loại'
 const getProductImage = (item: Item) => 
   item.picture?.length ? getImageUrl(item.picture[0]) : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop'
