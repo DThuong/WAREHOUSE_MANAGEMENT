@@ -246,6 +246,7 @@ import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
 import logoImg from '../assets/images/newLogo.jpg'
 import type { Notification } from '@/types/notification.types'
+import notificationSound from '@/assets/notiSound/notification-sound.mp3'
 
 const route = useRoute()
 const router = useRouter()
@@ -408,10 +409,19 @@ const formatTime = (dateString: string): string => {
 }
 
 const playNotificationSound = () => {
-  // Optional: Play notification sound
-  const audio = new Audio('/notification-sound.mp3')
+  const audio = new Audio(notificationSound)
   audio.volume = 0.3
-  audio.play().catch(err => console.log('Cannot play sound:', err))
+  audio.play()
+    .then(() => {
+      console.log('Sound played successfully!')
+    })
+    .catch(err => {
+      console.error('Cannot play sound:', err)
+      console.error('Error details:', {
+        name: err.name,
+        message: err.message
+      })
+    })
 }
 
 const handleNotificationClick = async (notification: Notification) => {

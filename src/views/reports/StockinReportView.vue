@@ -31,9 +31,11 @@
       <!-- Filters - KHÔNG nằm trong reportContent -->
       <Card style="margin-bottom: 1.5rem;">
         <template #content>
-          <div style="display: flex; gap: 1rem; align-items: end;">
-            <div style="flex: 1;">
-              <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Từ ngày</label>
+          <div class="filter-grid">
+
+            <!-- From Date -->
+            <div class="field">
+              <label>Từ ngày</label>
               <Calendar 
                 v-model="fromDate" 
                 dateFormat="dd/mm/yy"
@@ -41,11 +43,14 @@
                 showTime
                 hourFormat="24"
                 :stepMinute="15"
-                style="width: 100%;"
+                class="w-full"
+                :inputStyle="{ width: '100%' }"
               />
             </div>
-            <div style="flex: 1;">
-              <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Đến ngày</label>
+
+            <!-- To Date -->
+            <div class="field">
+              <label>Đến ngày</label>
               <Calendar 
                 v-model="toDate" 
                 dateFormat="dd/mm/yy"
@@ -53,24 +58,31 @@
                 showTime
                 hourFormat="24"
                 :stepMinute="15"
-                style="width: 100%;"
+                class="w-full"
+                :inputStyle="{ width: '100%' }"
               />
             </div>
-            <Button 
-              label="Lọc" 
-              icon="pi pi-filter"
-              @click="applyFilter"
-              :loading="loading"
-            />
-            <Button 
-              label="Reset" 
-              icon="pi pi-refresh"
-              severity="secondary"
-              @click="resetFilter"
-            />
+
+            <!-- Buttons -->
+            <div class="actions">
+              <Button 
+                label="Lọc" 
+                icon="pi pi-filter"
+                @click="applyFilter"
+                :loading="loading"
+              />
+              <Button 
+                label="Reset" 
+                icon="pi pi-refresh"
+                severity="secondary"
+                @click="resetFilter"
+              />
+            </div>
+
           </div>
         </template>
       </Card>
+
 
       <!-- Report Content - CHỈ phần này được xuất PDF -->
       <div ref="reportContent" class="report-content" style="background: white; padding: 2rem;">
@@ -89,7 +101,7 @@
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
           <div style="text-align: center; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px;">
             <div style="font-size: 2rem; font-weight: 700; color: #6366f1;">
-              {{ filteredStockins.length }}
+              {{ filteredStockins.length ? filteredStockins.length : 0 }}
             </div>
             <div style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">
               Tổng số lần nhập
@@ -476,4 +488,44 @@ onMounted(() => {
     font-size: 10pt !important;
   }
 }
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.field {
+  width: 100%;
+  min-width: 0; /* Quan trọng cho grid items */
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+/* FIX: Kéo dài Calendar input full width */
+:deep(.p-calendar) {
+  display: flex;  
+  width: 100%;
+}
+
+:deep(.p-calendar .p-inputtext) {
+  flex: 1 !important;
+  width: 100% !important;
+}
+
+:deep(.p-calendar .p-button) {
+  flex-shrink: 0; /* Icon button không bị co lại */
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
 </style>

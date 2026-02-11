@@ -42,6 +42,7 @@
                 hourFormat="24"
                 :stepMinute="15"
                 style="width: 100%;"
+                :inputStyle="{ width: '100%' }"
               />
             </div>
             <div style="flex: 1; min-width: 200px;">
@@ -54,6 +55,7 @@
                 hourFormat="24"
                 :stepMinute="15"
                 style="width: 100%;"
+                :inputStyle="{ width: '100%' }"
               />
             </div>
             <div style="flex: 1; min-width: 200px;">

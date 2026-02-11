@@ -22,6 +22,14 @@ export interface Order {
   orderDetails: OrderDetail[]
 }
 
+export interface OrderPendingRealtime {
+  accountId: number
+  orderDate: string
+  status: OrderStatus
+  nameWorker: string
+  image: string[]
+}
+
 export interface CreateOrderRequest {
   nameWorker: string
   itemIds: {

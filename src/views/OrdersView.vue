@@ -47,6 +47,30 @@
                   />
                 </div>
               </div>
+
+              <!-- Status Filter -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block mb-2 text-sm font-semibold text-gray-700">Trạng thái</label>
+                  <Dropdown 
+                    v-model="selectedStatus" 
+                    :options="statusFilterOptions" 
+                    optionLabel="label" 
+                    optionValue="value"
+                    placeholder="Tất cả trạng thái"
+                    class="w-full"
+                  />
+                </div>
+                
+                <div>
+                  <label class="block mb-2 text-sm font-semibold text-gray-700">Tìm kiếm</label>
+                  <InputText 
+                    v-model="searchQuery" 
+                    placeholder="Tìm kiếm theo ID, người đặt..." 
+                    class="w-full"
+                  />
+                </div>
+              </div>
               
               <!-- Search & Actions -->
               <div class="flex justify-between items-center">
@@ -689,7 +713,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, onUnmounted } from 'vue'
 import { useOrderStore } from '@/stores/orderStore'
 import { useItemStore } from '@/stores/itemStore'
 import { orderAPI } from '@/services/orderAPI'
@@ -708,9 +732,10 @@ import Dropdown from 'primevue/dropdown'
 import InputNumber from 'primevue/inputnumber'
 import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
-import type { Order } from '@/types/order.types'
+import type { Order, OrderPendingRealtime } from '@/types/order.types'
 import Calendar from 'primevue/calendar'
 import { useRoute, useRouter } from 'vue-router'
+import { signalRService } from '@/services/orderNotiService'
 
 const confirm = useConfirm()
 const toast = useToast()
@@ -721,11 +746,19 @@ const router = useRouter()
 
 // Search & Filter
 const searchQuery = ref('')
-const selectedStatus = ref<{label: string, value: string} | null>(null)
+const selectedStatus = ref<string | null>(null)
 
 const fromDate = ref<Date>(new Date(new Date().getFullYear(), 0, 1, 0, 0, 0))
 const toDate = ref<Date>(new Date(new Date().setHours(23, 59, 59)))
 const selectedDepartment = ref<string | null>(null)
+
+const statusFilterOptions = [
+  { label: 'Tất cả trạng thái', value: null },
+  { label: 'Chờ duyệt', value: 'Pending' },
+  { label: 'Đã duyệt', value: 'Approved' },
+  { label: 'Hoàn thành', value: 'Completed' },
+  { label: 'Từ chối', value: 'Rejected' }
+]
 
 // Filter theo phòng ban
 const departmentOptions = computed(() => {
@@ -780,10 +813,7 @@ const filteredOrders = computed(() => {
   
   let filtered = orderStore.orders
 
-  if (selectedStatus.value) {
-    filtered = filtered.filter(order => order.status === selectedStatus.value?.value)
-  }
-
+  // CHỈ FILTER SEARCH Ở CLIENT
   if (searchQuery.value) {
     const term = searchQuery.value.toLowerCase()
     filtered = filtered.filter(order => 
@@ -876,7 +906,7 @@ const fetchAllOrders = async () => {
     const orders = await orderAPI.filterOrders({
       fromDate: from,
       toDate: to,
-      status: selectedStatus.value?.value || undefined,
+      status: selectedStatus.value || undefined,
       department: selectedDepartment.value || undefined
     })
     
@@ -1345,23 +1375,6 @@ const viewImageFullscreen = (imageUrl: string) => {
   window.open(getImageUrl(imageUrl), '_blank')
 }
 
-onMounted(async () => {
-  await Promise.all([
-    fetchAllOrders(),
-    fetchAllItems()
-  ])
-  
-  // Kiểm tra và auto-open order nếu có orderId trong query
-  checkAndOpenOrder()
-})
-
-// Watch route query changes để handle khi navigate từ notification
-watch(() => route.query.orderId, (newOrderId) => {
-  if (newOrderId) {
-    checkAndOpenOrder()
-  }
-}, { immediate: true })
-
 // Function để tự động mở order detail từ query parameter
 const checkAndOpenOrder = async () => {
   const orderIdFromQuery = route.query.orderId
@@ -1425,7 +1438,7 @@ const checkAndOpenOrder = async () => {
   // Clear query parameter sau khi xử lý xong
   router.replace({ query: {} })
 }
-// Optional: Scroll đến order trong DataTable
+// Scroll đến order trong DataTable
 const scrollToOrder = (orderId: number) => {
   setTimeout(() => {
     const orderRow = document.querySelector(`[data-order-id="${orderId}"]`)
@@ -1447,6 +1460,39 @@ const scrollToOrder = (orderId: number) => {
     }
   }, 800)
 }
+
+const handleNewOrderCreated = async (orderData: OrderPendingRealtime) => {
+  // Reload danh sách orders để hiển thị order mới
+  await fetchAllOrders()
+}
+
+onMounted(async () => {
+  // Kết nối SignalR
+  if (!signalRService.isConnected()) {
+    await signalRService.start()
+  }
+
+  signalRService.on('NewOrderCreated', handleNewOrderCreated)
+  // Load orders and items
+  await Promise.all([
+    fetchAllOrders(),
+    fetchAllItems()
+  ])
+  
+  // Kiểm tra và auto-open order nếu có orderId trong query
+  checkAndOpenOrder()
+})
+
+// Watch route query changes để handle khi navigate từ notification
+watch(() => route.query.orderId, (newOrderId) => {
+  if (newOrderId) {
+    checkAndOpenOrder()
+  }
+}, { immediate: true })
+
+onUnmounted(() => {
+  signalRService.off('NewOrderCreated')
+})
 </script>
 
 <style scoped>
