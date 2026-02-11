@@ -258,7 +258,9 @@ export const useDashboardStore = defineStore('dashboard', () => {
     totalItems: itemStore.totalItems,
     totalUsers: userStore.totalUsers,
     totalStockins: stockinStore.stockins.length,
-    lowStockCount: lowStockItems.value.length
+    lowStockCount: itemStore.items.filter(
+      item => item.stockQty > 0 && item.stockQty <= item.saveQuantity
+    ).length
   }))
 
   // ============ CHART DATA - Orders by Status ============
