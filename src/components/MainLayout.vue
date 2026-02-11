@@ -172,6 +172,15 @@
         style="font-size: 0.75rem; color: var(--primary-color);"
         icon="pi pi-check"
       />
+      <Button
+        v-if="allNotificationsRead"
+        label="Xóa tất cả"
+        text
+        size="small"
+        @click="deleteAllNoti"
+        style="font-size: 0.75rem; color: var(--primary-color);"
+        icon="pi pi-trash"
+      ></Button>
     </div>
 
     <div v-if="notificationStore.loading" style="text-align: center; padding: 2rem;">
@@ -287,6 +296,15 @@ const connectionStatusSeverity = computed(() => {
     default: return 'secondary'
   }
 })
+
+// kiểm tra điều kiện nếu đã đọc hết thông báo thì cho hiện nút xóa tất cả
+const allNotificationsRead = computed(() => {
+  return notificationStore.notifications.every((notification: Notification) => notification.isRead)
+})
+
+const deleteAllNoti = async () => {
+  await notificationStore.deleteAll()
+}
 
 // Lifecycle hooks
 onMounted(async () => {

@@ -241,6 +241,7 @@
                         title="Cập nhật trạng thái"
                     />
                   <Button 
+                    v-if="data.status === 'Rejected'"
                     icon="pi pi-trash" 
                     text 
                     rounded 
@@ -801,7 +802,8 @@ const updateStatusOptions = computed(() => {
     ]
   } else if (selectedOrder.value.status === 'Approved') {
     return [
-      { label: 'Hoàn thành (Đã giao hàng)', value: 'Completed' }
+      { label: 'Hoàn thành (Đã giao hàng)', value: 'Completed' },
+      { label: 'Từ chối đơn hàng', value: 'Rejected' }
     ]
   }
   
