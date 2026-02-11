@@ -14,7 +14,8 @@
         v-for="(stat, key, index) in dashboardStore.dashboardStats" 
         :key="key"
         class="stat-card-compact"
-        :class="getStatCardClass(index)"
+        :class="getStatCardClass(index), { 'cursor-pointer': statRoutes[key as string] }"
+        @click="navigateToStat(key as string)"
       >
         <div class="stat-icon" :class="getIconBgClass(index)">
           <i :class="getIconClass(index)"></i>
@@ -25,12 +26,13 @@
             {{ key === 'totalPurchase' ? formatCurrency(stat.value) : stat.value }}
           </div>
         </div>
+        <!-- <i v-if="statRoutes[key as string]" class="pi pi-chevron-right nav-arrow"></i> -->
       </div>
     </div>
 
     <!-- Order Status Summary Row -->
     <div class="order-status-grid">
-      <div class="status-card status-pending">
+      <div class="status-card status-pending clickable-status-card" @click="navigateToOrdersByStatus('Pending')">
         <div class="status-icon">
           <i class="pi pi-clock"></i>
         </div>
@@ -38,9 +40,10 @@
           <div class="status-value">{{ dashboardStore.orderStatusSummary.pending }}</div>
           <div class="status-label">Đơn chờ duyệt</div>
         </div>
+        <i class="pi pi-chevron-right nav-arrow"></i>
       </div>
 
-      <div class="status-card status-approved">
+      <div class="status-card status-approved clickable-status-card" @click="navigateToOrdersByStatus('Approved')">
         <div class="status-icon">
           <i class="pi pi-check-circle"></i>
         </div>
@@ -48,9 +51,10 @@
           <div class="status-value">{{ dashboardStore.orderStatusSummary.approved }}</div>
           <div class="status-label">Đơn đã duyệt</div>
         </div>
+        <i class="pi pi-chevron-right nav-arrow"></i>
       </div>
 
-      <div class="status-card status-completed">
+      <div class="status-card status-completed clickable-status-card" @click="navigateToOrdersByStatus('Completed')">
         <div class="status-icon">
           <i class="pi pi-check"></i>
         </div>
@@ -58,9 +62,10 @@
           <div class="status-value">{{ dashboardStore.orderStatusSummary.completed }}</div>
           <div class="status-label">Đơn hoàn thành</div>
         </div>
+        <i class="pi pi-chevron-right nav-arrow"></i>
       </div>
 
-      <div class="status-card status-rejected">
+      <div class="status-card status-rejected clickable-status-card" @click="navigateToOrdersByStatus('Rejected')">
         <div class="status-icon">
           <i class="pi pi-times-circle"></i>
         </div>
@@ -68,6 +73,7 @@
           <div class="status-value">{{ dashboardStore.orderStatusSummary.rejected }}</div>
           <div class="status-label">Đơn bị từ chối</div>
         </div>
+        <i class="pi pi-chevron-right nav-arrow"></i>
       </div>
     </div>
 
@@ -305,7 +311,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useItemStore } from '@/stores/itemStore'
 import { useOrderStore } from '@/stores/orderStore'
@@ -318,6 +324,7 @@ import { userAPI } from '@/services/userAPI'
 import MainLayout from '@/components/MainLayout.vue'
 import DoughnutChart from '@/components/DoughnutChart.vue'
 import { useToast } from 'primevue/usetoast'
+import { useRouter, useRoute} from 'vue-router'
 
 const dashboardStore = useDashboardStore()
 const itemStore = useItemStore()
@@ -325,10 +332,33 @@ const orderStore = useOrderStore()
 const stockinStore = useStockinStore()
 const userStore = useUserStore()
 const toast = useToast()
+const router = useRouter()
+const route = useRoute()
 
 const loading = ref(false)
 
 const totalOrders = computed(() => orderStore.totalOrders)
+
+const statRoutes: Record<string, string> = {
+  totalOrders: '/orders',
+  totalStockins: '/stockin',
+  totalStock: '/inventory',
+  totalPurchase: '' // Không có route
+}
+
+const navigateToStat = (key: string) => {
+  const route = statRoutes[key]
+  if (route) {
+    router.push(route)
+  }
+}
+
+const navigateToOrdersByStatus = (status: string | null) => {
+  router.push({
+    path: '/orders',
+    query: status ? { status } : {}
+  })
+}
 
 const fetchAllData = async () => {
   loading.value = true
@@ -358,16 +388,6 @@ const fetchAllData = async () => {
     loading.value = false
   }
 }
-
-onMounted(async () => {
-  await fetchAllData()
-  dashboardStore.refreshDashboard()
-
-  setTimeout(() => {
-    ordersByStatusChartRef.value?.resetAnimation()
-    stockValueChartRef.value?.resetAnimation()
-  }, 200)
-})
 
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('vi-VN', {
@@ -418,6 +438,31 @@ const getOrderStatusIcon = (status: string): string => {
   }
   return icons[status] || 'pi pi-file'
 }
+
+watch(() => route.query, (newQuery) => {
+  if (newQuery.status) {
+    // Set filter từ query parameter
+    selectedStatus.value = newQuery.status as string
+    // Auto apply filter
+    applyFilter()
+  }
+}, { immediate: true })
+
+onMounted(async () => {
+  await fetchAllData()
+  dashboardStore.refreshDashboard()
+
+  setTimeout(() => {
+    ordersByStatusChartRef.value?.resetAnimation()
+    stockValueChartRef.value?.resetAnimation()
+  }, 200)
+
+  if (route.query.status) {
+    selectedStatus.value = route.query.status as string
+    applyFilter()
+  }
+})
+
 </script>
 
 <style scoped>
@@ -1068,5 +1113,66 @@ const getOrderStatusIcon = (status: string): string => {
   .lists-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* Thêm vào <style scoped> */
+.stat-card-compact.cursor-pointer {
+  cursor: pointer;
+}
+
+.stat-card-compact.cursor-pointer:hover {
+  transform: translateY(-6px); /* Tăng hiệu ứng hover */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card-compact.cursor-pointer:active {
+  transform: translateY(-2px);
+}
+
+/* DashboardView.vue - Style */
+.clickable-status-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.clickable-status-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.clickable-status-card:active {
+  transform: translateY(-2px) scale(1.01);
+}
+
+/* Nav arrow indicator */
+.nav-arrow {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(0, 0, 0, 0.3);
+  font-size: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.clickable-status-card:hover .nav-arrow {
+  color: rgba(0, 0, 0, 0.6);
+  transform: translateY(-50%) translateX(4px);
+}
+
+/* Subtle shine effect on hover */
+.clickable-status-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.2) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.clickable-status-card:hover::before {
+  opacity: 1;
 }
 </style>

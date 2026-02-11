@@ -78,6 +78,14 @@
                   <span class="text-lg font-semibold text-gray-900">
                     Tổng: {{ totalFilteredOrders }} đơn hàng
                   </span>
+
+                  <Chip 
+                    v-if="route.query.status"
+                    :label="`${getStatusLabel(route.query.status as string)}`" 
+                    severity="info"
+                    removable
+                    @remove="clearStatusFilter"
+                  />
                 </div>
                 
                 <div class="flex gap-3">
@@ -761,6 +769,24 @@ const statusFilterOptions = [
   { label: 'Từ chối', value: 'Rejected' }
 ]
 
+// Helper để get status label
+const getStatusLabel = (status: string): string => {
+  const labels: Record<string, string> = {
+    'Pending': 'Chờ duyệt',
+    'Approved': 'Đã duyệt',
+    'Completed': 'Hoàn thành',
+    'Rejected': 'Từ chối'
+  }
+  return labels[status] || status
+}
+
+// Clear specific filter
+const clearStatusFilter = () => {
+  selectedStatus.value = null
+  router.replace({ query: {} })
+  fetchAllOrders()
+}
+
 // Filter theo phòng ban
 const departmentOptions = computed(() => {
   const departments = new Set<string>()
@@ -926,6 +952,14 @@ const fetchAllOrders = async () => {
 }
 
 const applyFilter = () => {
+  // Sync filter state to URL query
+  const query: Record<string, string> = {}
+  if (selectedStatus.value) {
+    query.status = selectedStatus.value
+  }
+  // Update URL without triggering navigation
+  router.replace({ query })
+  // Fetch với filter
   fetchAllOrders()
 }
 
@@ -935,6 +969,10 @@ const resetFilter = () => {
   selectedStatus.value = null
   selectedDepartment.value = null
   searchQuery.value = ''
+  
+  // Clear URL query
+  router.replace({ query: {} })
+  
   fetchAllOrders()
 }
 
@@ -1473,22 +1511,26 @@ onMounted(async () => {
   if (!signalRService.isConnected()) {
     await signalRService.start()
   }
-
   signalRService.on('NewOrderCreated', handleNewOrderCreated)
-  // Load orders and items
-  await Promise.all([
-    fetchAllOrders(),
-    fetchAllItems()
-  ])
-  
+  // Load items
+  await fetchAllItems()
+  // Check nếu có status trong query thì auto-filter
+  if (route.query.status) {
+    selectedStatus.value = route.query.status as string
+  }
+  // Load orders (sẽ tự động filter nếu có selectedStatus)
+  await fetchAllOrders()
   // Kiểm tra và auto-open order nếu có orderId trong query
   checkAndOpenOrder()
 })
 
-// Watch route query changes để handle khi navigate từ notification
-watch(() => route.query.orderId, (newOrderId) => {
-  if (newOrderId) {
-    checkAndOpenOrder()
+// Watch status from URL
+watch(() => route.query.status, async (newStatus) => {
+  if (newStatus) {
+    // Set dropdown value
+    selectedStatus.value = newStatus as string
+    // Auto fetch với filter
+    await fetchAllOrders()
   }
 }, { immediate: true })
 
