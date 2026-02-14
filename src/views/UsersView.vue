@@ -449,8 +449,8 @@ const departmentOptions = [
   { label: 'KHO', value: 'KHO' },
   { label: 'REPAIR', value: 'REPAIR' },
   { label: 'ENGINEER', value: 'ENGINEER' },
-  { label: 'SẢN XUẤT CA CƯỜNG', value: 'SẢN XUẤT CA CƯỜNG' },
-  { label: 'SẢN XUẤT CA LUÂN', value: 'SẢN XUẤT CA LUÂN' }
+  { label: 'SẢN XUẤT CA A', value: 'SẢN XUẤT CA A' },
+  { label: 'SẢN XUẤT CA B', value: 'SẢN XUẤT CA B' }
 ]
 
 // Filters
@@ -462,7 +462,6 @@ const filters = ref({
 // ==================== METHODS ====================
 
 const openAddDialog = () => {
-  console.log('🔵 Opening Add Dialog')
   isEditing.value = false
   editingUserId.value = null
   resetForm()
@@ -470,13 +469,11 @@ const openAddDialog = () => {
 }
 
 const viewUser = (user: User) => {
-  console.log('👁️ Viewing user:', user)
   selectedUser.value = user
   showViewDialog.value = true
 }
 
 const editUser = (user: User) => {
-  console.log('✏️ Editing user:', user)
   isEditing.value = true
   editingUserId.value = user.id
   formData.value = {
@@ -497,8 +494,6 @@ const editFromView = () => {
 }
 
 const saveUser = async () => {
-  console.log('💾 Saving user...', formData.value)
-  
   // Validation
   if (!formData.value.username || !formData.value.phoneNumber || 
       !formData.value.role || !formData.value.department) {
@@ -525,19 +520,14 @@ const saveUser = async () => {
     let result
     
     if (isEditing.value && editingUserId.value) {
-      console.log('🔄 Updating user ID:', editingUserId.value)
       result = await userStore.updateUser(editingUserId.value, {
         phoneNumber: formData.value.phoneNumber,
         role: formData.value.role,
         department: formData.value.department
       })
     } else {
-      console.log('➕ Adding new user')
       result = await userStore.addUser(formData.value)
     }
-
-    console.log('✅ Save result:', result)
-
     if (result.success) {
       closeDialog()
     }
@@ -553,7 +543,6 @@ const saveUser = async () => {
 }
 
 const confirmDelete = (user: User) => {
-  console.log('🗑️ Confirm delete user:', user)
   confirm.require({
     message: `Bạn có chắc chắn muốn xóa tài khoản "${user.username}"?`,
     header: 'Xác nhận xóa',
@@ -562,7 +551,6 @@ const confirmDelete = (user: User) => {
     rejectLabel: 'Hủy',
     acceptClass: 'p-button-danger',
     accept: async () => {
-      console.log('✅ Delete confirmed')
       await userStore.deleteUser(user.id)
     },
     reject: () => {
@@ -616,13 +604,11 @@ const savePassword = async () => {
 }
 
 const closeDialog = () => {
-  console.log('❌ Closing dialog')
   showDialog.value = false
   resetForm()
 }
 
 const closePasswordDialog = () => {
-  console.log('❌ Closing password dialog')
   showPasswordDialog.value = false
   newPassword.value = ''
   confirmPassword.value = ''

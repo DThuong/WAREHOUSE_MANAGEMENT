@@ -47,6 +47,12 @@ export interface UpdateItemRequest {
   com?: ComItem
 }
 
+export interface UsedInRangeItem {
+  itemId: number
+  totalOrdered: number
+  item: Item
+}
+
 // Enum for item category
 export enum ItemCategory {
   ENGINEER = 'ENGINEER',

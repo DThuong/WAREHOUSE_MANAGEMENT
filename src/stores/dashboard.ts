@@ -206,34 +206,101 @@ export const useDashboardStore = defineStore('dashboard', () => {
   })
 
   // ============ LOW STOCK ITEMS ============
-  
-  const lowStockItems = computed<LowStockItem[]>(() => {
-    return itemStore.items
-      .filter(item => item.stockQty < item.saveQuantity)
-      .map(item => {
-        const stockPercentage = (item.stockQty / item.saveQuantity) * 100
-        
-        let status: 'critical' | 'low' | 'warning'
-        if (stockPercentage <= 25) status = 'critical'
-        else if (stockPercentage <= 50) status = 'low'
-        else status = 'warning'
+  // Thêm computed để lấy danh sách items theo từng status
+const criticalStockItems = computed<LowStockItem[]>(() => {
+  return itemStore.items
+    .filter(item => getStockStatus(item) === 'critical')
+    .map(item => ({
+      id: item.id!,
+      name: getItemName(item),
+      code: getItemCode(item),
+      stockQty: item.stockQty,
+      safetyStock: item.saveQuantity,
+      image: getItemImageUrl(item),
+      status: 'critical' as const
+    }))
+    .sort((a, b) => {
+      const aPercentage = (a.stockQty / a.safetyStock) * 100
+      const bPercentage = (b.stockQty / b.safetyStock) * 100
+      return aPercentage - bPercentage // Sắp xếp từ nguy cấp nhất
+    })
+})
 
-        return {
-          id: item.id!,
-          name: getItemName(item),
-          code: getItemCode(item),
-          stockQty: item.stockQty,
-          safetyStock: item.saveQuantity,
-          image: getItemImageUrl(item),
-          status
-        }
-      })
-      .sort((a, b) => {
-        const statusOrder = { critical: 0, low: 1, warning: 2 }
-        return statusOrder[a.status] - statusOrder[b.status]
-      })
-      .slice(0, 10)
-  })
+const lowStockItemsByStatus = computed<LowStockItem[]>(() => {
+  return itemStore.items
+    .filter(item => getStockStatus(item) === 'low')
+    .map(item => ({
+      id: item.id!,
+      name: getItemName(item),
+      code: getItemCode(item),
+      stockQty: item.stockQty,
+      safetyStock: item.saveQuantity,
+      image: getItemImageUrl(item),
+      status: 'low' as const
+    }))
+})
+
+const warningStockItems = computed<LowStockItem[]>(() => {
+  return itemStore.items
+    .filter(item => getStockStatus(item) === 'warning')
+    .map(item => ({
+      id: item.id!,
+      name: getItemName(item),
+      code: getItemCode(item),
+      stockQty: item.stockQty,
+      safetyStock: item.saveQuantity,
+      image: getItemImageUrl(item),
+      status: 'warning' as const
+    }))
+})
+
+const notConfiguredItems = computed<LowStockItem[]>(() => {
+  return itemStore.items
+    .filter(item => getStockStatus(item) === 'not-configured')
+    .map(item => ({
+      id: item.id!,
+      name: getItemName(item),
+      code: getItemCode(item),
+      stockQty: item.stockQty,
+      safetyStock: item.saveQuantity,
+      image: getItemImageUrl(item),
+      status: 'warning' as const // Hoặc tạo type mới
+    }))
+})
+  
+  // Thêm helper function để tính stock status
+  const getStockStatus = (item: Item): 'critical' | 'low' | 'warning' | 'normal' | 'out-of-stock' | 'not-configured' => {
+    const stockQty = item.stockQty || 0
+    const saveQty = item.saveQuantity || 0
+    // Case 1: Hết hàng hoàn toàn
+    if (stockQty === 0) {
+      return 'out-of-stock'
+    }
+    // Case 2: Chưa cấu hình tồn an toàn (CHECK TRƯỚC khi so sánh)
+    if (saveQty === 0) {
+      return 'not-configured'
+    }
+    // Case 3: So sánh bình thường khi đã có cả stockQty và saveQty
+    if (stockQty >= saveQty) {
+      return 'normal'
+    }
+    // Case 4: Tính % khi stockQty < saveQty
+    const stockPercentage = (stockQty / saveQty) * 100
+  
+    if (stockPercentage <= 25) return 'critical'
+    if (stockPercentage <= 50) return 'low'
+    return 'warning'
+  }
+
+// Thêm computed để đếm theo từng loại
+const lowStockCountByStatus = computed(() => ({
+  normal: itemStore.items.filter(item => getStockStatus(item) === 'normal').length,
+  critical: itemStore.items.filter(item => getStockStatus(item) === 'critical' && item.stockQty > 0).length,
+  low: itemStore.items.filter(item => getStockStatus(item) === 'low').length,
+  warning: itemStore.items.filter(item => getStockStatus(item) === 'warning').length,
+  notConfigured: itemStore.items.filter(item => getStockStatus(item) === 'not-configured').length,
+  total: itemStore.items.filter(item => item.stockQty < item.saveQuantity && item.stockQty > 0).length
+}))
 
   // ============ RECENT ORDER STATUS ============
   
@@ -259,7 +326,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     totalUsers: userStore.totalUsers,
     totalStockins: stockinStore.stockins.length,
     lowStockCount: itemStore.items.filter(
-      item => item.stockQty > 0 && item.stockQty <= item.saveQuantity
+      item => item.stockQty > 0 && item.stockQty < item.saveQuantity
     ).length
   }))
 
@@ -324,8 +391,15 @@ export const useDashboardStore = defineStore('dashboard', () => {
     // Lists
     topOrderedItems,
     leastOrderedItems,
-    lowStockItems,
+    getStockStatus,
+    lowStockCountByStatus,
     recentOrderStatus,
+
+    // lowStockItems
+    lowStockItemsByStatus,
+    warningStockItems,
+    criticalStockItems,
+    notConfiguredItems,
     
     // Charts
     ordersByStatusChartData,

@@ -64,11 +64,60 @@
                 <span class="text-lg font-semibold text-gray-900">
                   Tổng: {{ totalFilteredItems }} sản phẩm
                 </span>
+                
+                <!-- Clickable Status Chips - DÙNG allItemsStockCount -->
                 <Chip 
-                  v-if="lowStockCount > 0"
-                  :label="`${lowStockCount} sản phẩm sắp hết`" 
-                  severity="danger"
+                  v-if="allItemsStockCount.normal > 0"
+                  :label="`${allItemsStockCount.normal} còn hàng`"
+                  icon="pi pi-check-circle"
+                  class="clickable-chip chip-normal"
+                  :class="{ 'chip-active': selectedStockStatus === 'in-stock' }"
+                  @click="handleChipClick('in-stock')"
+                />
+                
+                <Chip 
+                  v-if="allItemsStockCount.warning > 0"
+                  :label="`${allItemsStockCount.warning} cảnh báo`"
+                  icon="pi pi-info-circle"
+                  class="clickable-chip chip-warning"
+                  :class="{ 'chip-active': selectedStockStatus === 'warning' }"
+                  @click="handleChipClick('warning')"
+                />
+                
+                <Chip 
+                  v-if="allItemsStockCount.low > 0"
+                  :label="`${allItemsStockCount.low} thấp`" 
+                  icon="pi pi-exclamation-circle"
+                  class="clickable-chip chip-low pulse-warning"
+                  :class="{ 'chip-active': selectedStockStatus === 'low' }"
+                  @click="handleChipClick('low')"
+                />
+                
+                <Chip 
+                  v-if="allItemsStockCount.critical > 0"
+                  :label="`${allItemsStockCount.critical} nguy cấp`" 
                   icon="pi pi-exclamation-triangle"
+                  class="clickable-chip chip-critical pulse-danger"
+                  :class="{ 'chip-active': selectedStockStatus === 'critical' }"
+                  @click="handleChipClick('critical')"
+                />
+                
+                <Chip 
+                  v-if="allItemsStockCount.outOfStock > 0"
+                  :label="`${allItemsStockCount.outOfStock} hết hàng`" 
+                  icon="pi pi-times-circle"
+                  class="clickable-chip chip-out-of-stock pulse-danger"
+                  :class="{ 'chip-active': selectedStockStatus === 'out-of-stock' }"
+                  @click="handleChipClick('out-of-stock')"
+                />
+
+                <Chip 
+                  v-if="allItemsStockCount.notConfigured > 0"
+                  :label="`${allItemsStockCount.notConfigured} chưa có tồn an toàn`" 
+                  icon="pi pi-cog"
+                  class="clickable-chip chip-not-configured"
+                  severity="secondary"
+                  @click="handleChipClick('not-configured')"
                 />
               </div>
               
@@ -374,17 +423,23 @@ import Toast from 'primevue/toast'
 import ConfirmDialog from 'primevue/confirmdialog'
 import type { Item } from '@/types/item.types'
 import Dropdown from 'primevue/dropdown'
+import { useDashboardStore } from '@/stores/dashboard'
 
 const router = useRouter()
 const confirm = useConfirm()
 const toast = useToast()
 const itemStore = useItemStore()
+const dashboardStore = useDashboardStore()
 
 // Search & Filter
 const searchQuery = ref('')
 
 const selectedType = ref<string | null>(null)
 const selectedStockStatus = ref<string | null>(null)
+  // xử lý click từng Chip
+const handleChipClick = (status: string) => {
+  selectedStockStatus.value = status
+}
 
 const typeOptions = [
   { label: 'Tất cả loại', value: null },
@@ -395,8 +450,11 @@ const typeOptions = [
 const stockStatusOptions = [
   { label: 'Tất cả', value: null },
   { label: 'Còn hàng', value: 'in-stock' },
-  { label: 'Sắp hết', value: 'low-stock' },
-  { label: 'Hết hàng', value: 'out-of-stock' }
+  { label: 'Cảnh báo (>50% & <99%)', value: 'warning' },
+  { label: 'Thấp (≤50%)', value: 'low' }, 
+  { label: 'Nguy cấp (≤25%)', value: 'critical' },
+  { label: 'Hết hàng', value: 'out-of-stock' },
+  { label: 'Chưa có tồn an toàn', value: 'not-configured' }
 ]
 
 const resetFilter = () => {
@@ -406,27 +464,39 @@ const resetFilter = () => {
 }
 
 const filteredItems = computed(() => {
+  let items = baseItems.value
+
+  // Chỉ filter theo Stock Status
+  if (selectedStockStatus.value === 'in-stock') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'normal')
+  } else if (selectedStockStatus.value === 'warning') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'warning')
+  } else if (selectedStockStatus.value === 'low') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'low')
+  } else if (selectedStockStatus.value === 'critical') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'critical')
+  } else if (selectedStockStatus.value === 'out-of-stock') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'out-of-stock')
+  } else if (selectedStockStatus.value === 'not-configured') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'not-configured')
+  }
+
+  return items
+})
+
+const baseItems = computed(() => {
   if (!itemStore.items?.length) return []
   
   let items = itemStore.items
 
-  // Filter by type
+  // Chỉ filter theo Type
   if (selectedType.value === 'ENG') {
     items = items.filter(item => item.eng !== null)
   } else if (selectedType.value === 'COM') {
     items = items.filter(item => item.com !== null)
   }
 
-  // Filter by stock status
-  if (selectedStockStatus.value === 'in-stock') {
-    items = items.filter(item => item.stockQty > item.saveQuantity)
-  } else if (selectedStockStatus.value === 'low-stock') {
-    items = items.filter(item => item.stockQty > 0 && item.stockQty <= item.saveQuantity)
-  } else if (selectedStockStatus.value === 'out-of-stock') {
-    items = items.filter(item => item.stockQty === 0)
-  }
-
-  // Filter by search query
+  // Chỉ filter theo Search Query
   if (searchQuery.value) {
     const term = searchQuery.value.toLowerCase()
     items = items.filter(item => {
@@ -445,10 +515,52 @@ const filteredItems = computed(() => {
   return items
 })
 
+const allItemsStockCount = computed(() => {
+  if (!baseItems.value?.length) return {
+    critical: 0,
+    low: 0,
+    warning: 0,
+    outOfStock: 0,
+    normal: 0,
+    notConfigured: 0,
+    total: 0
+  }
+
+  const critical = baseItems.value.filter(item => 
+    dashboardStore.getStockStatus(item) === 'critical'
+  ).length
+  
+  const low = baseItems.value.filter(item => 
+    dashboardStore.getStockStatus(item) === 'low'
+  ).length
+  
+  const warning = baseItems.value.filter(item => 
+    dashboardStore.getStockStatus(item) === 'warning'
+  ).length
+
+  const outOfStock = baseItems.value.filter(item => 
+    dashboardStore.getStockStatus(item) === 'out-of-stock'
+  ).length
+
+  const normal = baseItems.value.filter(item => 
+    dashboardStore.getStockStatus(item) === 'normal'
+  ).length
+
+  const notConfigured = baseItems.value.filter(item => 
+    dashboardStore.getStockStatus(item) === 'not-configured'
+  ).length
+  
+  return {
+    critical,
+    low,
+    warning,
+    outOfStock,
+    normal,
+    notConfigured,
+    total: critical + low + warning + outOfStock + normal + notConfigured
+  }
+})
 const totalFilteredItems = computed(() => filteredItems.value.length)
-const lowStockCount = computed(() => 
-  filteredItems.value.filter(i => i.stockQty > 0 && i.stockQty <= i.saveQuantity).length
-)
 
 // Edit Dialog
 const showEditDialog = ref(false)
@@ -882,5 +994,115 @@ const viewImageFullscreen = (imageUrl: string) => {
   transition: background-color 0.2s, color 0.2s !important;
   animation: none !important;
   transform: none !important;
+}
+/* Clickable Chips */
+.clickable-chip {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clickable-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.clickable-chip:active {
+  transform: translateY(0);
+}
+
+/* Pulse Animation for Critical & Out of Stock */
+.pulse-warning {
+  animation: pulse-warning 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.pulse-danger {
+  animation: pulse-danger 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  50% {
+    opacity: 0.9;
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+  }
+}
+
+@keyframes pulse-danger {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  50% {
+    opacity: 0.9;
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+  }
+}
+
+/* Custom Colors */
+.chip-critical {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.chip-out-of-stock {
+  background: linear-gradient(135deg, #290b0b 0%, #130101 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.chip-low {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  color: white !important;
+}
+
+.chip-warning {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  color: white !important;
+}
+
+.chip-normal {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: white !important;
+}
+
+/* Icon với màu nổi bật */
+.chip-critical :deep(.p-chip-icon) {
+  color: #fde047 !important;
+  filter: drop-shadow(0 0 2px rgba(253, 224, 71, 0.5));
+}
+
+.chip-out-of-stock :deep(.p-chip-icon) {
+  color: #fbbf24 !important;
+  filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.5));
+}
+
+.chip-low :deep(.p-chip-icon) {
+  color: #fef3c7 !important;
+  font-weight: bold;
+}
+
+.chip-warning :deep(.p-chip-icon) {
+  color: #dbeafe !important;
+}
+
+.chip-normal :deep(.p-chip-icon) {
+  color: #dcfce7 !important;
+}
+
+.chip-not-configured {
+  background: linear-gradient(135deg, #47526b 0%, #3c4e68 100%) !important;
+  color: white !important;
+}
+
+.chip-not-configured :deep(.p-chip-icon) {
+  color: #f3f4f6 !important;
+}
+
+.chip-not-configured:hover {
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%) !important;
 }
 </style>

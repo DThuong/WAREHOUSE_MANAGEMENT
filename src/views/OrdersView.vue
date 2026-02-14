@@ -89,14 +89,6 @@
                 </div>
                 
                 <div class="flex gap-3">
-                  <span class="p-input-icon-left w-80">
-                    <InputText 
-                      v-model="searchQuery" 
-                      placeholder="Tìm kiếm theo ID, người đặt..." 
-                      class="w-full"
-                    />
-                  </span>
-                  
                   <Button 
                     label="Lọc" 
                     icon="pi pi-filter"
@@ -310,7 +302,7 @@
                   </div>
                   <div>
                     <p class="font-semibold">{{ getItemName(data.item) }}</p>
-                    <p class="text-sm text-gray-500">{{ data.item?.type || '-' }}</p>
+                    <p class="text-sm text-gray-500">{{ data.item?.itemIndentifyId || '-' }}</p>
                   </div>
                 </div>
               </template>
@@ -364,6 +356,22 @@
             placeholder="Chọn trạng thái"
             class="w-full"
         />
+        </div>
+        <!-- Note field - Chỉ hiển thị khi chọn Rejected -->
+        <div v-if="updateForm.status === 'Rejected'">
+          <label class="block mb-2 font-semibold">
+            Lý do từ chối <span class="text-red-500">*</span>
+          </label>
+          <Textarea 
+            v-model="updateForm.note" 
+            rows="4"
+            placeholder="Nhập lý do từ chối..."
+            class="w-full"
+            :class="{ 'p-invalid': updateForm.status === 'Rejected' && !updateForm.note.trim() }"
+          />
+          <small v-if="updateForm.status === 'Rejected' && !updateForm.note.trim()" class="p-error">
+            Vui lòng nhập lý do từ chối
+          </small>
         </div>
 
         <!-- Cảnh báo khi chọn Completed -->
@@ -611,7 +619,7 @@
                       <div class="flex-1 min-w-0">
                         <div class="font-medium text-sm truncate">{{ getSelectedItemLabel(slotProps.value) }}</div>
                         <div class="text-xs text-gray-500 truncate">
-                          {{ getSelectedItemType(slotProps.value) }} - 
+                          {{ getSelectedItemId(slotProps.value) }} - 
                           {{ getSelectedItemPrice(slotProps.value).toLocaleString('vi-VN') }} VND/{{ getSelectedItemUnit(slotProps.value) }}
                         </div>
                       </div>
@@ -745,6 +753,7 @@ import type { Order, OrderPendingRealtime } from '@/types/order.types'
 import Calendar from 'primevue/calendar'
 import { useRoute, useRouter } from 'vue-router'
 import { signalRService } from '@/services/orderNotiService'
+import Textarea from 'primevue/textarea'
 
 const confirm = useConfirm()
 const toast = useToast()
@@ -787,20 +796,6 @@ const clearStatusFilter = () => {
   fetchAllOrders()
 }
 
-// Filter theo phòng ban
-const departmentOptions = computed(() => {
-  const departments = new Set<string>()
-  orderStore.orders.forEach(order => {
-    if (order.account?.department) {
-      departments.add(order.account.department)
-    }
-  })
-  return [
-    { label: 'Tất cả phòng ban', value: null },
-    ...Array.from(departments).map(dept => ({ label: dept, value: dept }))
-  ]
-})
-
 const formatDateTimeForAPI = (date: Date): string => {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -810,13 +805,6 @@ const formatDateTimeForAPI = (date: Date): string => {
   
   return `${year}-${month}-${day} ${hours}:${minutes}`
 }
-
-const statusOptions = [
-  { label: 'Chờ xử lý', value: 'Pending' },
-  { label: 'Đã duyệt', value: 'Approved' },
-  { label: 'Từ chối', value: 'Rejected' },
-  { label: 'Hoàn thành', value: 'Completed' },
-]
 
 const updateStatusOptions = computed(() => {
   if (!selectedOrder.value) return []
@@ -866,7 +854,8 @@ const selectedOrder = ref<Order | null>(null)
 
 // Update Form
 const updateForm = ref({
-  status: ''
+  status: '',
+  note: ''
 })
 
 // Create Order Form
@@ -880,7 +869,6 @@ const createOrderForm = ref({
   items: [] as CreateOrderItem[]
 })
 
-// Available items for selection
 const availableItems = computed(() => {
   if (!itemStore.items?.length) return []
   
@@ -891,6 +879,7 @@ const availableItems = computed(() => {
     stock: item.stockQty,
     unit: item.unit,
     price: item.price || 0,
+    itemIndentifyId: item.itemIndentifyId,
     image: item.picture?.length ? getItemImageUrl(item.picture[0]) : null
   }))
 })
@@ -1043,9 +1032,9 @@ const getSelectedItemImage = (itemId: number) => {
   return item?.image || ''
 }
 
-const getSelectedItemType = (itemId: number) => {
+const getSelectedItemId = (itemId: number) => {
   const item = availableItems.value.find(i => i.value === itemId)
-  return item?.type || ''
+  return item?.itemIndentifyId || ''
 }
 
 const getSelectedItemUnit = (itemId: number) => {
@@ -1071,13 +1060,17 @@ const viewOrderDetails = (order: Order) => {
 
 const openUpdateStatusDialog = (order: Order) => {
   selectedOrder.value = order
-  updateForm.value.status = order.status
+  updateForm.value = {
+    status: order.status,
+    note: ''
+  }
   showUpdateStatusDialog.value = true
 }
 
 const saveUpdateStatus = async () => {
   if (!selectedOrder.value?.id) return
   
+  // Validate status
   if (!updateForm.value.status) {
     toast.add({
       severity: 'warn',
@@ -1088,12 +1081,26 @@ const saveUpdateStatus = async () => {
     return
   }
   
+  // VALIDATE NOTE khi Rejected
+  if (updateForm.value.status === 'Rejected') {
+    if (!updateForm.value.note || !updateForm.value.note.trim()) {
+      toast.add({
+        severity: 'warn',
+        summary: 'Thiếu thông tin',
+        detail: 'Vui lòng nhập lý do từ chối đơn hàng',
+        life: 3000
+      })
+      return
+    }
+  }
+  
+  // Validate image cho Completed
   if (updateForm.value.status === 'Completed') {
     if (!selectedOrder.value.image || selectedOrder.value.image.length === 0) {
       toast.add({
         severity: 'warn',
         summary: 'Thiếu hình ảnh minh chứng',
-        detail: 'Vui lòng tải lên ít nhất 1 hình ảnh minh chứng đã nhận hàng trước khi hoàn thành đơn hàng',
+        detail: 'Vui lòng tải lên ít nhất 1 hình ảnh minh chứng đã nhận hàng',
         life: 4000
       })
       return
@@ -1103,7 +1110,12 @@ const saveUpdateStatus = async () => {
   orderStore.setLoading(true)
   
   try {
-    await orderAPI.updateStatus(selectedOrder.value.id, updateForm.value.status)
+    // GỬI NOTE khi có
+    await orderAPI.updateStatus(
+      selectedOrder.value.id, 
+      updateForm.value.status,
+      updateForm.value.note || undefined
+    )
     
     const statusMessages: Record<string, string> = {
       'Approved': 'Đã duyệt đơn hàng thành công',

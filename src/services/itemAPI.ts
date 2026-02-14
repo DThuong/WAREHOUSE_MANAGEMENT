@@ -3,6 +3,7 @@ import type {
   Item,
   CreateItemRequest, 
   UpdateItemRequest,
+  UsedInRangeItem
 } from '@/types/item.types'
 
 export const itemAPI = {
@@ -101,7 +102,7 @@ export const itemAPI = {
       const res = await api.get<Item>(`/api/Item/image/${fileName}`)
       return res
     } catch (error: any) {
-      console.error('Error deleting image:', error)
+      console.error('Error get image:', error)
       throw error
     }
   },
@@ -113,6 +114,21 @@ export const itemAPI = {
       return res
     } catch (error: any) {
       console.error('Error deleting image:', error)
+      throw error
+    }
+  },
+
+  checkUsedInrange: async (fromDate: string, toDate: string): Promise<UsedInRangeItem[]> => {
+    try {
+      const res = await api.get<UsedInRangeItem[]>(`/api/Item/used-in-range`, {
+        params: {
+          fromDate,
+          toDate
+        }
+      })
+      return res
+    } catch (error: any) {
+      console.error('Error loading used in range:', error)
       throw error
     }
   }

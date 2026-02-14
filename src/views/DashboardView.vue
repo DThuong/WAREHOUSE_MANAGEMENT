@@ -22,17 +22,24 @@
         </div>
         <div class="stat-content">
           <div class="stat-label-compact">{{ stat.label }}</div>
-          <div class="stat-value-compact">
+          <div class="stat-value-compact">  <article></article>
             {{ key === 'totalPurchase' ? formatCurrency(stat.value) : stat.value }}
           </div>
         </div>
-        <!-- <i v-if="statRoutes[key as string]" class="pi pi-chevron-right nav-arrow"></i> -->
       </div>
     </div>
 
     <!-- Order Status Summary Row -->
     <div class="order-status-grid">
-      <div class="status-card status-pending clickable-status-card" @click="navigateToOrdersByStatus('Pending')">
+      <div 
+        class="status-card status-pending clickable-status-card" 
+        :class="{ 
+          'pulse-animation': hasPendingOrders,
+          'has-update': hasPendingOrders,
+          'has-new-update': hasNewPending 
+        }"
+        @click="navigateToOrdersByStatus('Pending')"
+      >
         <div class="status-icon">
           <i class="pi pi-clock"></i>
         </div>
@@ -41,9 +48,22 @@
           <div class="status-label">Đơn chờ duyệt</div>
         </div>
         <i class="pi pi-chevron-right nav-arrow"></i>
+        
+        <!-- Badge thông báo - hiển thị số lượng -->
+        <div v-if="hasPendingOrders" class="update-badge">
+          <span class="badge-count">{{ dashboardStore.orderStatusSummary.pending }} đơn cần xử lý</span>
+        </div>
       </div>
 
-      <div class="status-card status-approved clickable-status-card" @click="navigateToOrdersByStatus('Approved')">
+      <div 
+        class="status-card status-approved clickable-status-card" 
+        :class="{ 
+          'pulse-animation': hasApprovedOrders,
+          'has-update': hasApprovedOrders,
+          'has-new-update': hasNewApproved 
+        }"
+        @click="navigateToOrdersByStatus('Approved')"
+      >
         <div class="status-icon">
           <i class="pi pi-check-circle"></i>
         </div>
@@ -52,8 +72,14 @@
           <div class="status-label">Đơn đã duyệt</div>
         </div>
         <i class="pi pi-chevron-right nav-arrow"></i>
+        
+        <!-- Badge thông báo - hiển thị số lượng -->
+        <div v-if="hasApprovedOrders" class="update-badge approved-badge">
+          <span class="badge-count">{{ dashboardStore.orderStatusSummary.approved }} đơn cần xử lý</span>
+        </div>
       </div>
 
+      <!-- Completed và Rejected cards giữ nguyên -->
       <div class="status-card status-completed clickable-status-card" @click="navigateToOrdersByStatus('Completed')">
         <div class="status-icon">
           <i class="pi pi-check"></i>
@@ -139,17 +165,17 @@
           <h3 class="chart-title">Tổng quan hệ thống</h3>
         </div>
         <div class="overview-grid">
-          <div class="overview-item overview-blue">
+          <RouterLink to="/inventory" class="overview-item overview-purple">
             <div class="overview-icon">
               <i class="pi pi-box"></i>
             </div>
             <div class="overview-content">
               <div class="overview-value">{{ dashboardStore.overviewStats.totalItems }}</div>
-              <div class="overview-label">Vật tư</div>
+              <div class="overview-label">Tồn kho</div>
             </div>
-          </div>
+          </RouterLink>
 
-          <div class="overview-item overview-pink">
+          <RouterLink to="/users" class="overview-item overview-green">
             <div class="overview-icon">
               <i class="pi pi-users"></i>
             </div>
@@ -157,9 +183,9 @@
               <div class="overview-value">{{ dashboardStore.overviewStats.totalUsers }}</div>
               <div class="overview-label">Người dùng</div>
             </div>
-          </div>
+          </RouterLink>
 
-          <div class="overview-item overview-green">
+          <RouterLink to="/stockin" class="overview-item overview-yellow">
             <div class="overview-icon">
               <i class="pi pi-sign-in"></i>
             </div>
@@ -167,19 +193,9 @@
               <div class="overview-value">{{ dashboardStore.overviewStats.totalStockins }}</div>
               <div class="overview-label">Phiếu nhập</div>
             </div>
-          </div>
+          </RouterLink>
 
-          <div class="overview-item overview-yellow">
-            <div class="overview-icon">
-              <i class="pi pi-exclamation-triangle"></i>
-            </div>
-            <div class="overview-content">
-              <div class="overview-value">{{ dashboardStore.overviewStats.lowStockCount }}</div>
-              <div class="overview-label">Tồn kho thấp</div>
-            </div>
-          </div>
-
-          <div class="overview-item overview-purple">
+          <RouterLink to="/orders" class="overview-item overview-pink">
             <div class="overview-icon">
               <i class="pi pi-database" style="font-size: 1.5rem;"></i>
             </div>
@@ -187,15 +203,32 @@
               <div class="overview-value">{{ totalOrders }}</div>
               <div class="overview-label">Đơn hàng</div>
             </div>
-          </div>
+          </RouterLink>
 
-          <div class="overview-item overview-gray">
+          <div 
+            class="overview-item overview-gray clickable-overview"
+            @click="scrollToSection('top-orders-section')"
+          >
             <div class="overview-icon">
               <i class="pi pi-cart-arrow-down" style="font-size: 1.5rem;"></i>
             </div>
             <div class="overview-content">
               <div class="overview-value">{{ dashboardStore.topOrderedItems.length }}</div>
               <div class="overview-label">Top order</div>
+            </div>
+          </div>
+
+          <div 
+            class="overview-item overview-critical clickable-overview"
+            :class="{ 'has-critical-stock': dashboardStore.lowStockCountByStatus.critical > 0 }"
+            @click="scrollToSection('critical-stock-section')"
+          >
+            <div class="overview-icon">
+              <i class="pi pi-exclamation-triangle" style="font-size: 1.5rem;"></i>
+            </div>
+            <div class="overview-content">
+              <div class="overview-value">{{ dashboardStore.lowStockCountByStatus.critical }}</div>
+              <div class="overview-label">Nguy cấp</div>
             </div>
           </div>
         </div>
@@ -205,7 +238,7 @@
     <!-- Products & Orders Row -->
     <div class="lists-row">
       <!-- Top Ordered Items -->
-      <div class="list-container">
+      <div id="top-orders-section" class="list-container">
         <div class="list-header">
           <h3 class="list-title">
             <i class="pi pi-chart-line"></i>
@@ -238,16 +271,16 @@
       </div>
 
       <!-- Low Stock Items -->
-      <div class="list-container">
+      <div id="critical-stock-section" class="list-container">
         <div class="list-header">
           <h3 class="list-title">
             <i class="pi pi-exclamation-triangle"></i>
-            Vật tư tồn kho thấp
+            Vật tư tồn kho nguy cấp ({{ dashboardStore.lowStockCountByStatus.critical }})
           </h3>
         </div>
         <div class="list-content">
           <div 
-            v-for="item in dashboardStore.lowStockItems.slice(0, 5)" 
+            v-for="item in dashboardStore.criticalStockItems.slice(0, 50)" 
             :key="item.id"
             class="list-item"
           >
@@ -263,9 +296,9 @@
               <div class="stock-label">{{ getStockStatusLabel(item.status) }}</div>
             </div>
           </div>
-          <div v-if="dashboardStore.lowStockItems.length === 0" class="empty-state">
+          <div v-if="dashboardStore.criticalStockItems.length === 0" class="empty-state">
             <i class="pi pi-check-circle"></i>
-            <p>Tồn kho ổn định</p>
+            <p>Không có vật tư nguy cấp</p>
           </div>
         </div>
       </div>
@@ -280,7 +313,7 @@
         </div>
         <div class="list-content">
           <div 
-            v-for="order in dashboardStore.recentOrderStatus.slice(0, 5)" 
+            v-for="order in dashboardStore.recentOrderStatus.slice(0, 10)" 
             :key="order.id"
             class="list-item"
           >
@@ -311,7 +344,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, watch } from 'vue'
+import { onMounted, ref, computed, onUnmounted } from 'vue'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useItemStore } from '@/stores/itemStore'
 import { useOrderStore } from '@/stores/orderStore'
@@ -324,7 +357,9 @@ import { userAPI } from '@/services/userAPI'
 import MainLayout from '@/components/MainLayout.vue'
 import DoughnutChart from '@/components/DoughnutChart.vue'
 import { useToast } from 'primevue/usetoast'
-import { useRouter, useRoute} from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { signalRService } from '@/services/orderNotiService'
+import type { OrderPendingRealtime } from '@/types/order.types'
 
 const dashboardStore = useDashboardStore()
 const itemStore = useItemStore()
@@ -336,6 +371,8 @@ const router = useRouter()
 const route = useRoute()
 
 const loading = ref(false)
+const hasPendingOrders = computed(() => dashboardStore.orderStatusSummary.pending > 0)
+const hasApprovedOrders = computed(() => dashboardStore.orderStatusSummary.approved > 0)
 
 const totalOrders = computed(() => orderStore.totalOrders)
 
@@ -343,7 +380,23 @@ const statRoutes: Record<string, string> = {
   totalOrders: '/orders',
   totalStockins: '/stockin',
   totalStock: '/inventory',
-  totalPurchase: '' // Không có route
+  totalPurchase: ''
+}
+
+const scrollToSection = (sectionId: string) => {
+  const element = document.getElementById(sectionId)
+  if (element) {
+    element.scrollIntoView({ 
+      behavior: 'smooth', 
+      block: 'start' 
+    })
+    
+    // Highlight effect (optional)
+    element.classList.add('highlight-section')
+    setTimeout(() => {
+      element.classList.remove('highlight-section')
+    }, 2000)
+  }
 }
 
 const navigateToStat = (key: string) => {
@@ -439,30 +492,35 @@ const getOrderStatusIcon = (status: string): string => {
   return icons[status] || 'pi pi-file'
 }
 
-watch(() => route.query, (newQuery) => {
-  if (newQuery.status) {
-    // Set filter từ query parameter
-    selectedStatus.value = newQuery.status as string
-    // Auto apply filter
-    applyFilter()
-  }
-}, { immediate: true })
+const handleNewOrderCreated = async (orderData: OrderPendingRealtime) => {
+  // Reload data (animation sẽ tự động chạy vì computed)
+  await fetchAllData()
+}
+
+const handleOrderStatusUpdated = async (data: any) => {
+  // Reload data
+  await fetchAllData()
+}
 
 onMounted(async () => {
+  // Kết nối SignalR
+  if (!signalRService.isConnected()) {
+    await signalRService.start()
+  }
+  
+  // Register event handlers
+  signalRService.on('NewOrderCreated', handleNewOrderCreated)
+  signalRService.on('OrderStatusUpdated', handleOrderStatusUpdated)
+  
+  // Load data
   await fetchAllData()
   dashboardStore.refreshDashboard()
-
-  setTimeout(() => {
-    ordersByStatusChartRef.value?.resetAnimation()
-    stockValueChartRef.value?.resetAnimation()
-  }, 200)
-
-  if (route.query.status) {
-    selectedStatus.value = route.query.status as string
-    applyFilter()
-  }
 })
 
+onUnmounted(() => {
+  signalRService.off('NewOrderCreated')
+  signalRService.off('OrderStatusUpdated')
+})
 </script>
 
 <style scoped>
@@ -528,19 +586,19 @@ onMounted(async () => {
 }
 
 .card-blue { 
-  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  background: linear-gradient(135deg, #F0F7FF 0%, #E0EFFF 100%);
 }
 
 .card-pink { 
-  background: linear-gradient(135deg, #FCE4EC 0%, #F8BBD0 100%);
+  background: linear-gradient(135deg, #FFF0FF 0%, #FFE0FF 100%);
 }
 
 .card-yellow { 
-  background: linear-gradient(135deg, #FFF9C4 0%, #FFECB3 100%);
+  background: linear-gradient(135deg, #FFF8E8 0%, #FFE8C8 100%);
 }
 
 .card-purple { 
-  background: linear-gradient(135deg, #EDE7F6 0%, #D1C4E9 100%);
+  background: linear-gradient(135deg, #e0dbfa 0%, #e7e4f8 100%);
 }
 
 .stat-icon {
@@ -768,7 +826,7 @@ onMounted(async () => {
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 2rem;
 }
 
 .overview-item {
@@ -801,10 +859,42 @@ onMounted(async () => {
 }
 
 .overview-purple{
-  background: linear-gradient(135deg, #BDB2FF 0%, #BDB2FF 100%);
+  background: linear-gradient(135deg, #e0dbfa 0%, #e7e4f8 100%);
 }
 .overview-gray{
   background: linear-gradient(135deg, #E0E0E0 0%, #E0E0E0 100%);
+}
+
+/* Critical stock - màu đỏ nhạt với animation */
+.overview-critical {
+  background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+}
+
+.overview-critical .overview-icon {
+  background: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.overview-critical .overview-icon i {
+  color: #ef4444;
+  font-size: 1.5rem;
+}
+
+/* Animation pulse khi có stock nguy cấp */
+.overview-critical.has-critical-stock {
+  animation: criticalPulse 3s ease-in-out infinite;
+  border: 2px solid #ef4444;
+}
+
+@keyframes criticalPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+  }
 }
 
 .overview-icon {
@@ -869,10 +959,22 @@ onMounted(async () => {
 }
 
 .list-header {
-  padding: 1.25rem 1.5rem;
-  background: #abafe9;
-  border-bottom: 2px solid var(--pastel-purple);
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #FFF1E6 0%, #FFE5D9 100%);
 }
+
+.list-title {
+  color: #0c1ba3 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  font-weight: 700;
+}
+
+.list-title i {
+  color: #1e29ca !important;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+  font-size: 1.3rem;
+}
+
 
 .list-content {
   max-height: 500px;
@@ -1174,5 +1276,136 @@ onMounted(async () => {
 
 .clickable-status-card:hover::before {
   opacity: 1;
+}
+
+/* Badge thông báo - FIX */
+.update-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  min-width: auto;
+  height: auto;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
+  animation: badgeBounce 1.5s ease-in-out infinite;
+  z-index: 10;
+  white-space: nowrap;
+}
+
+.update-badge.approved-badge {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+}
+
+.badge-count {
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Animation cho Pending/Approved cards */
+.pulse-animation {
+  position: relative;
+  overflow: visible;
+}
+
+/* Animation nhẹ - luôn chạy khi có đơn */
+.pulse-animation.has-update {
+  animation: cardPulseSoft 3s ease-in-out infinite;
+}
+
+@keyframes cardPulseSoft {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    transform: scale(1.01);
+    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.2);
+  }
+}
+
+/* Animation mạnh - chỉ chạy khi có đơn MỚI */
+.pulse-animation.has-new-update {
+  animation: cardPulseStrong 0.8s ease-in-out infinite !important;
+}
+
+@keyframes cardPulseStrong {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 12px 32px rgba(245, 158, 11, 0.5);
+  }
+}
+
+.status-approved.has-update {
+  animation: cardPulseSoftBlue 3s ease-in-out infinite;
+}
+
+@keyframes cardPulseSoftBlue {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    transform: scale(1.01);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.2);
+  }
+}
+
+.status-approved.has-new-update {
+  animation: cardPulseStrongBlue 0.8s ease-in-out infinite !important;
+}
+
+@keyframes cardPulseStrongBlue {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.5);
+  }
+}
+
+/* Clickable overview items */
+.clickable-overview {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.clickable-overview:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Highlight animation khi scroll đến */
+.highlight-section {
+  animation: highlightPulse 2s ease-in-out;
+}
+
+@keyframes highlightPulse {
+  0% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 8px 24px rgba(139, 122, 184, 0.4);
+    transform: scale(1.01);
+  }
+  100% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transform: scale(1);
+  }
 }
 </style>

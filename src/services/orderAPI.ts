@@ -73,23 +73,27 @@ export const orderAPI = {
   },
 
   // Update order status - PUT /api/Order/status/{id}
-  // API nhận string status trực tiếp trong body
-  updateStatus: async (id: number, status: string): Promise<Order> => {
-    try {
-      return await api.put<Order>(
-        `/api/Order/status/${id}`, 
-        `"${status}"`,  // Send as JSON string
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      )
-    } catch (error: any) {
-      console.error('Error updating order status:', error)
-      throw error
+  updateStatus: async (id: number, status: string, note?: string): Promise<Order> => {
+  try {
+    const payload = {
+      newStatus: status,
+      note: note || null 
     }
-  },
+    
+    return await api.put<Order>(
+      `/api/Order/status/${id}`, 
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+  } catch (error: any) {
+    console.error('Error updating order status:', error)
+    throw error
+  }
+},
 
   // ===================== IMAGE APIs =====================
 

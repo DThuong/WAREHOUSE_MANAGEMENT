@@ -4,7 +4,11 @@
     <aside class="sidebar" :class="{ 'sidebar-collapsed': !sidebarOpen, 'mobile-open': mobileSidebarOpen }">
       <div class="sidebar-content" style="padding: 1.5rem;">
         <!-- Logo -->
-        <div class="flex items-center gap-2 mb-4" style="margin-bottom: 2rem;">
+        <router-link 
+          to="/" 
+          class="logo-container flex items-center gap-2 mb-4" 
+          style="margin-bottom: 2rem; text-decoration: none;"
+        >
           <div style="width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
             <img :src="logoImg" alt="Dongyang Logo" style="width: 100%; height: 100%; object-fit: cover;" />
           </div>
@@ -12,7 +16,7 @@
             <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--gray-900);">Dongyang</h2>
             <p style="font-size: 0.75rem; color: var(--gray-500);">Quản lý kho</p>
           </div>
-        </div>
+        </router-link>
 
         <!-- Navigation -->
         <nav>

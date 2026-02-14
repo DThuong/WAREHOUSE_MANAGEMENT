@@ -13,12 +13,6 @@
         </div>
         
         <div style="display: flex; gap: 0.5rem;">
-          <!-- <Button 
-            label="Tải PDF" 
-            icon="pi pi-download" 
-            @click="downloadPDF"
-            :loading="downloading"
-          /> -->
           <Button 
             label="In báo cáo" 
             icon="pi pi-print" 
@@ -58,8 +52,26 @@
               <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Tìm kiếm</label>
               <InputText 
                 v-model="searchQuery" 
-                placeholder="Tên sản phẩm..."
+                placeholder="Tên sản phẩm, ID..."
                 style="width: 100%;"
+              />
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Từ ngày</label>
+              <InputText 
+                v-model="dateRange.fromDate" 
+                type="date"
+                style="width: 100%;"
+                @change="loadUsedInRangeData"
+              />
+            </div>
+            <div style="flex: 1; min-width: 150px;">
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Đến ngày</label>
+              <InputText 
+                v-model="dateRange.toDate" 
+                type="date"
+                style="width: 100%;"
+                @change="loadUsedInRangeData"
               />
             </div>
             <Button 
@@ -83,38 +95,131 @@
         </div>
 
         <!-- Summary -->
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
-          <div style="text-align: center; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+          <!-- Tổng sản phẩm -->
+          <div 
+            @click="handleSummaryClick(null)"
+            :class="{ 'summary-card-active': selectedStockStatus === null }"
+            class="summary-card"
+            style="text-align: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+          >
             <div style="font-size: 2rem; font-weight: 700; color: #6366f1;">
               {{ totalItems }}
             </div>
             <div style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">
               Tổng sản phẩm
             </div>
+            <!-- <div v-if="selectedStockStatus === null" style="font-size: 0.75rem; color: #6366f1; margin-top: 0.25rem; font-weight: 600;">
+              Đang hiển thị: {{ filteredItems.length }}
+            </div> -->
           </div>
-          <div style="text-align: center; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px;">
+          
+          <!-- Còn hàng -->
+          <div 
+            @click="handleSummaryClick('normal')"
+            :class="{ 'summary-card-active': selectedStockStatus === 'normal' }"
+            class="summary-card"
+            style="text-align: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+          >
             <div style="font-size: 2rem; font-weight: 700; color: #10b981;">
-              {{ inStockCount }}
+              {{ normalCount }}
             </div>
             <div style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">
               Còn hàng
             </div>
+            <!-- <div v-if="selectedStockStatus === 'normal'" style="font-size: 0.75rem; color: #10b981; margin-top: 0.25rem; font-weight: 600;">
+              Đang hiển thị: {{ filteredItems.length }}
+            </div> -->
           </div>
-          <div style="text-align: center; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px;">
-            <div style="font-size: 2rem; font-weight: 700; color: #f59e0b;">
-              {{ lowStockCount }}
+          
+          <!-- Cảnh báo -->
+          <div 
+            @click="handleSummaryClick('warning')"
+            :class="{ 'summary-card-active': selectedStockStatus === 'warning' }"
+            class="summary-card"
+            style="text-align: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+          >
+            <div style="font-size: 2rem; font-weight: 700; color: #3b82f6;">
+              {{ warningCount }}
             </div>
             <div style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">
-              Sắp hết
+              Cảnh báo
             </div>
+            <!-- <div v-if="selectedStockStatus === 'warning'" style="font-size: 0.75rem; color: #3b82f6; margin-top: 0.25rem; font-weight: 600;">
+              Đang hiển thị: {{ filteredItems.length }}
+            </div> -->
           </div>
-          <div style="text-align: center; padding: 1rem; border: 1px solid #e5e7eb; border-radius: 8px;">
+          
+          <!-- Thấp -->
+          <div 
+            @click="handleSummaryClick('low')"
+            :class="{ 'summary-card-active': selectedStockStatus === 'low' }"
+            class="summary-card"
+            style="text-align: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+          >
+            <div style="font-size: 2rem; font-weight: 700; color: #f59e0b;">
+              {{ lowCount }}
+            </div>
+            <div style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">
+              Thấp
+            </div>
+            <!-- <div v-if="selectedStockStatus === 'low'" style="font-size: 0.75rem; color: #f59e0b; margin-top: 0.25rem; font-weight: 600;">
+              Đang hiển thị: {{ filteredItems.length }}
+            </div> -->
+          </div>
+          
+          <!-- Nguy cấp -->
+          <div 
+            @click="handleSummaryClick('critical')"
+            :class="{ 'summary-card-active': selectedStockStatus === 'critical' }"
+            class="summary-card"
+            style="text-align: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+          >
             <div style="font-size: 2rem; font-weight: 700; color: #ef4444;">
+              {{ criticalCount }}
+            </div>
+            <div style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">
+              Nguy cấp
+            </div>
+            <!-- <div v-if="selectedStockStatus === 'critical'" style="font-size: 0.75rem; color: #ef4444; margin-top: 0.25rem; font-weight: 600;">
+              Đang hiển thị: {{ filteredItems.length }}
+            </div> -->
+          </div>
+          
+          <!-- Hết hàng -->
+          <div 
+            @click="handleSummaryClick('out-of-stock')"
+            :class="{ 'summary-card-active': selectedStockStatus === 'out-of-stock' }"
+            class="summary-card"
+            style="text-align: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+          >
+            <div style="font-size: 2rem; font-weight: 700; color: #991b1b;">
               {{ outOfStockCount }}
             </div>
             <div style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">
               Hết hàng
             </div>
+            <!-- <div v-if="selectedStockStatus === 'out-of-stock'" style="font-size: 0.75rem; color: #991b1b; margin-top: 0.25rem; font-weight: 600;">
+              Đang hiển thị: {{ filteredItems.length }}
+            </div> -->
+          </div>
+          
+          <!-- Chưa cấu hình -->
+          <div 
+            @click="handleSummaryClick('not-configured')"
+            :class="{ 'summary-card-active': selectedStockStatus === 'not-configured' }"
+            class="summary-card"
+            style="text-align: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
+          >
+            <div style="font-size: 2rem; font-weight: 700; color: #6b7280;">
+              {{ notConfiguredCount }}
+            </div>
+            <div style="font-size: 0.875rem; color: #666; margin-top: 0.5rem;">
+              Chưa có tồn an toàn
+            </div>
+            <!-- <div v-if="selectedStockStatus === 'not-configured'" style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; font-weight: 600;">
+              Đang hiển thị: {{ filteredItems.length }}
+            </div> -->
           </div>
         </div>
 
@@ -139,10 +244,11 @@
                 <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Trạng thái</th>
                 <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Đơn giá</th>
                 <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Giá trị tồn</th>
+                <th style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb;">Số lần order</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in filteredItems" :key="item.id" style="border-bottom: 1px solid #e5e7eb;">
+              <tr v-for="item in itemsWithOrderCount" :key="item.id" style="border-bottom: 1px solid #e5e7eb;">
                 <!-- Mã SP -->
                 <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">
                   <strong>#{{ item.id }}</strong>
@@ -192,7 +298,7 @@
                     {{ item.eng?.partname || item.com?.name }}
                   </div>
                   <div style="font-size: 0.75rem; color: #666;">
-                    {{ item?.eng?.partname || item?.com?.specifications || '-' }}
+                    {{ item?.eng?.description || item?.com?.specifications || '-' }}
                   </div>
                 </td>
                 
@@ -249,6 +355,22 @@
                     {{ formatCurrency(item.stockQty * parseFloat(item.price || '0')) }}
                   </strong>
                 </td>
+
+                <!-- Số lần order -->
+                <td style="padding: 0.75rem; border: 1px solid #e5e7eb; text-align: center;">
+                  <span 
+                    :style="{
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '12px',
+                      fontSize: '0.875rem',
+                      fontWeight: '700',
+                      background: item.totalOrdered > 0 ? '#dbeafe' : '#f3f4f6',
+                      color: item.totalOrdered > 0 ? '#1e40af' : '#6b7280'
+                    }"
+                  >
+                    {{ item.totalOrdered || 0 }}
+                  </span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -285,19 +407,23 @@ import { useRouter } from 'vue-router'
 import MainLayout from '@/components/MainLayout.vue'
 import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
-import Chart from 'primevue/chart'
 import ProgressSpinner from 'primevue/progressspinner'
 import { useItemStore } from '@/stores/itemStore'
+import { useDashboardStore } from '@/stores/dashboard'
 import { itemAPI } from '@/services/itemAPI'
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
+import type { UsedInRangeItem } from '@/types/item.types'
 
 const router = useRouter()
 const itemStore = useItemStore()
+const dashboardStore = useDashboardStore()
 
 const loading = ref(false)
-const downloading = ref(false)
-const reportContent = ref<HTMLElement | null>(null)
+// filter 1 sản phẩm trong tất cả các đơn hàng có trạng thái Completed
+const usedInRangeData = ref<UsedInRangeItem[]>([])
+const dateRange = ref({
+  fromDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
+  toDate: new Date().toISOString().split('T')[0]
+})
 
 // Filters
 const selectedType = ref<string | null>(null)
@@ -306,15 +432,18 @@ const searchQuery = ref('')
 
 const typeOptions = [
   { label: 'Tất cả loại', value: null },
-  { label: 'Engineer', value: 'eng' },
-  { label: 'Consumer', value: 'com' }
+  { label: 'Engineer', value: 'ENG' },
+  { label: 'Consumer', value: 'COM' }
 ]
 
 const stockStatusOptions = [
   { label: 'Tất cả', value: null },
-  { label: 'Còn hàng', value: 'in-stock' },
-  { label: 'Sắp hết', value: 'low-stock' },
-  { label: 'Hết hàng', value: 'out-of-stock' }
+  { label: 'Còn hàng', value: 'normal' },
+  { label: 'Cảnh báo (>50% & <100%)', value: 'warning' },
+  { label: 'Thấp (≤50%)', value: 'low' },
+  { label: 'Nguy cấp (≤25%)', value: 'critical' },
+  { label: 'Hết hàng', value: 'out-of-stock' },
+  { label: 'Chưa có tồn an toàn', value: 'not-configured' }
 ]
 
 // Load data
@@ -329,6 +458,18 @@ const loadData = async () => {
     loading.value = false
   }
 }
+// load used in range data
+const loadUsedInRangeData = async () => {
+  try {
+    const data = await itemAPI.checkUsedInrange(
+      dateRange.value.fromDate,
+      dateRange.value.toDate
+    )
+    usedInRangeData.value = data
+  } catch (error) {
+    console.error('Error loading used in range:', error)
+  }
+}
 
 // Reset filter
 const resetFilter = () => {
@@ -337,51 +478,101 @@ const resetFilter = () => {
   searchQuery.value = ''
 }
 
-// Computed values
+// Helper để lấy totalOrdered từ usedInRangeData
+const getItemOrderCount = (itemId: number): number => {
+  const found = usedInRangeData.value.find(x => x.itemId === itemId)
+  return found?.totalOrdered || 0
+}
+
+// Merge filteredItems với order count
+const itemsWithOrderCount = computed(() => {
+  return filteredItems.value.map(item => ({
+    ...item,
+    totalOrdered: getItemOrderCount(item.id || 0)
+  }))
+})
+
+// ===== FILTERED ITEMS (Filter từ baseItems theo Stock Status) =====
 const filteredItems = computed(() => {
+  let items = baseItems.value
+
+  // Chỉ filter theo Stock Status
+  if (selectedStockStatus.value === 'normal') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'normal')
+  } else if (selectedStockStatus.value === 'warning') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'warning')
+  } else if (selectedStockStatus.value === 'low') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'low')
+  } else if (selectedStockStatus.value === 'critical') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'critical')
+  } else if (selectedStockStatus.value === 'out-of-stock') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'out-of-stock')
+  } else if (selectedStockStatus.value === 'not-configured') {
+    items = items.filter(item => dashboardStore.getStockStatus(item) === 'not-configured')
+  }
+
+  return items
+})
+
+// ===== BASE ITEMS (Bị ảnh hưởng bởi Type filter, KHÔNG bị ảnh hưởng bởi Stock Status filter) =====
+const baseItems = computed(() => {
+  if (!itemStore.items?.length) return []
+  
   let items = itemStore.items
 
-  // Filter by type
-  if (selectedType.value === 'eng') {
+  // Chỉ filter theo Type
+  if (selectedType.value === 'ENG') {
     items = items.filter(item => item.eng !== null)
-  } else if (selectedType.value === 'com') {
+  } else if (selectedType.value === 'COM') {
     items = items.filter(item => item.com !== null)
   }
 
-  // Filter by stock status
-  if (selectedStockStatus.value === 'in-stock') {
-    items = items.filter(item => item.stockQty > item.saveQuantity)
-  } else if (selectedStockStatus.value === 'low-stock') {
-    items = items.filter(item => item.stockQty > 0 && item.stockQty <= item.saveQuantity)
-  } else if (selectedStockStatus.value === 'out-of-stock') {
-    items = items.filter(item => item.stockQty === 0)
-  }
-
-  // Filter by search query
+  // Chỉ filter theo Search Query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     items = items.filter(item => {
       const name = item.eng?.partname || item.com?.name || ''
-      const location = item.eng?.location || item.com?.location || ''
-      return name.toLowerCase().includes(query) || location.toLowerCase().includes(query)
+      const description = item.eng?.description || item.com?.specifications || ''
+      const id = item.id?.toString() || ''
+      const itemId = item.itemIndentifyId || ''
+      
+      return (
+        name.toLowerCase().includes(query) || 
+        description.toLowerCase().includes(query) ||
+        id.includes(query) ||
+        itemId.toLowerCase().includes(query)
+      )
     })
   }
 
   return items
 })
 
-const totalItems = computed(() => filteredItems.value.length)
+// ===== SUMMARY COUNTS (Tính từ baseItems - bị ảnh hưởng bởi Type & Search, KHÔNG bị ảnh hưởng bởi Stock Status) =====
+const totalItems = computed(() => baseItems.value.length)
 
-const inStockCount = computed(() => 
-  filteredItems.value.filter(item => item.stockQty > item.saveQuantity).length
+const normalCount = computed(() => 
+  baseItems.value.filter(item => dashboardStore.getStockStatus(item) === 'normal').length
 )
 
-const lowStockCount = computed(() => 
-  filteredItems.value.filter(item => item.stockQty > 0 && item.stockQty <= item.saveQuantity).length
+const warningCount = computed(() => 
+  baseItems.value.filter(item => dashboardStore.getStockStatus(item) === 'warning').length
+)
+
+const lowCount = computed(() => 
+  baseItems.value.filter(item => dashboardStore.getStockStatus(item) === 'low').length
+)
+
+const criticalCount = computed(() => 
+  baseItems.value.filter(item => dashboardStore.getStockStatus(item) === 'critical').length
 )
 
 const outOfStockCount = computed(() => 
-  filteredItems.value.filter(item => item.stockQty === 0).length
+  baseItems.value.filter(item => dashboardStore.getStockStatus(item) === 'out-of-stock').length
+)
+
+const notConfiguredCount = computed(() => 
+  baseItems.value.filter(item => dashboardStore.getStockStatus(item) === 'not-configured').length
 )
 
 const totalInventoryValue = computed(() => {
@@ -389,61 +580,6 @@ const totalInventoryValue = computed(() => {
     const price = parseFloat(item.price || '0')
     return total + (item.stockQty * price)
   }, 0)
-})
-
-// Chart data
-const doughnutChartData = computed(() => ({
-  labels: ['Còn hàng', 'Sắp hết', 'Hết hàng'],
-  datasets: [{
-    data: [inStockCount.value, lowStockCount.value, outOfStockCount.value],
-    backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
-  }]
-}))
-
-const doughnutChartOptions = ref({
-  responsive: true,
-  maintainAspectRatio: true,
-  plugins: {
-    legend: {
-      position: 'bottom' as const,
-      labels: {
-        padding: 20,
-        usePointStyle: true
-      }
-    }
-  }
-})
-
-const barChartData = computed(() => {
-  const engCount = filteredItems.value.filter(item => item.eng !== null).length
-  const comCount = filteredItems.value.filter(item => item.com !== null).length
-
-  return {
-    labels: ['Engineer', 'Consumer'],
-    datasets: [{
-      label: 'Số lượng sản phẩm',
-      data: [engCount, comCount],
-      backgroundColor: ['#3b82f6', '#10b981']
-    }]
-  }
-})
-
-const barChartOptions = ref({
-  responsive: true,
-  maintainAspectRatio: true,
-  plugins: {
-    legend: {
-      display: false
-    }
-  },
-  scales: {
-    y: {
-      beginAtZero: true,
-      ticks: {
-        stepSize: 1
-      }
-    }
-  }
 })
 
 // Helper functions
@@ -460,76 +596,70 @@ const formatCurrency = (value: number) => {
   }).format(value)
 }
 
+// Sử dụng logic từ dashboardStore
 const getStockStatusLabel = (item: any) => {
-  if (item.stockQty === 0) return 'Hết hàng'
-  if (item.stockQty <= item.saveQuantity) return 'Sắp hết'
-  return 'Còn hàng'
+  const status = dashboardStore.getStockStatus(item)
+  
+  switch (status) {
+    case 'normal':
+      return 'Còn hàng'
+    case 'warning':
+      return 'Cảnh báo'
+    case 'low':
+      return 'Thấp'
+    case 'critical':
+      return 'Nguy cấp'
+    case 'out-of-stock':
+      return 'Hết hàng'
+    case 'not-configured':
+      return 'Chưa có tồn an toàn'
+    default:
+      return 'Không xác định'
+  }
 }
 
 const getStockStatusColor = (item: any) => {
-  if (item.stockQty === 0) {
-    return { bg: '#fee2e2', text: '#991b1b' }
-  }
-  if (item.stockQty <= item.saveQuantity) {
-    return { bg: '#fef3c7', text: '#92400e' }
-  }
-  return { bg: '#d1fae5', text: '#065f46' }
-}
-
-// Download PDF using html2canvas + jsPDF
-// const downloadPDF = async () => {
-//   if (!reportContent.value) return
+  const status = dashboardStore.getStockStatus(item)
   
-//   downloading.value = true
-//   try {
-//     // Capture the content as canvas
-//     const canvas = await html2canvas(reportContent.value, {
-//       scale: 2, // Higher quality
-//       useCORS: true, // Enable cross-origin images
-//       logging: false,
-//       backgroundColor: '#ffffff'
-//     })
-    
-//     const imgData = canvas.toDataURL('image/png')
-    
-//     // Calculate PDF dimensions
-//     const imgWidth = 210 // A4 width in mm
-//     const pageHeight = 297 // A4 height in mm
-//     const imgHeight = (canvas.height * imgWidth) / canvas.width
-//     let heightLeft = imgHeight
-    
-//     // Create PDF
-//     const pdf = new jsPDF('p', 'mm', 'a4')
-//     let position = 0
-    
-//     // Add first page
-//     pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-//     heightLeft -= pageHeight
-    
-//     // Add additional pages if needed
-//     while (heightLeft > 0) {
-//       position = heightLeft - imgHeight
-//       pdf.addPage()
-//       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-//       heightLeft -= pageHeight
-//     }
-    
-//     // Save PDF
-//     pdf.save(`bao-cao-ton-kho-${new Date().getTime()}.pdf`)
-//   } catch (error) {
-//     console.error('Error generating PDF:', error)
-//   } finally {
-//     downloading.value = false
-//   }
-// }
+  switch (status) {
+    case 'normal':
+      return { bg: '#d1fae5', text: '#065f46' }
+    case 'warning':
+      return { bg: '#dbeafe', text: '#1e40af' }
+    case 'low':
+      return { bg: '#fef3c7', text: '#92400e' }
+    case 'critical':
+      return { bg: '#fee2e2', text: '#991b1b' }
+    case 'out-of-stock':
+      return { bg: '#1c1917', text: '#ffffff' }
+    case 'not-configured':
+      return { bg: '#f3f4f6', text: '#4b5563' }
+    default:
+      return { bg: '#f3f4f6', text: '#6b7280' }
+  }
+}
 
 // Print report
 const printReport = () => {
   window.print()
 }
 
-onMounted(() => {
-  loadData()
+// Handle summary card click
+const handleSummaryClick = (status: string | null) => {
+  if (selectedStockStatus.value === status) {
+    // Nếu đang active thì bỏ filter (toggle off)
+    selectedStockStatus.value = null
+  } else {
+    // Nếu chưa active thì apply filter
+    selectedStockStatus.value = status
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([
+    loadData(),
+    loadUsedInRangeData()
+  ])
 })
 </script>
 
@@ -549,6 +679,45 @@ onMounted(() => {
 
 .report-table td {
   font-size: 0.875rem;
+}
+
+/* Summary Card Styles */
+.summary-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: #6366f1 !important;
+}
+
+.summary-card:active {
+  transform: translateY(-2px);
+}
+
+.summary-card-active {
+  border-color: #6366f1 !important;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.1) 100%);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.summary-card-active::before {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: #6366f1;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 @media print {
