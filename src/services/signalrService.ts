@@ -17,7 +17,7 @@ class SignalRService {
 
     try {
       this.connection = new signalR.HubConnectionBuilder()
-        .withUrl('http://172.16.162.103:7000/notificationHub', {
+        .withUrl('http://172.16.162.123:7000/notificationHub', {
           accessTokenFactory: () => token,
           skipNegotiation: false,
           transport: signalR.HttpTransportType.WebSockets

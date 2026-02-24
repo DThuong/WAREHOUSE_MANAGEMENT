@@ -19,11 +19,10 @@ import Dropdown from 'primevue/dropdown'
 import InputText from 'primevue/inputtext'
 import OverlayPanel from 'primevue/overlaypanel'
 import ToastService from 'primevue/toastservice'
-import { ConfirmationService, Ripple } from 'primevue'
+import { ConfirmationService } from 'primevue'
 
 // Import PrimeIcons
 import 'primeicons/primeicons.css'
-
 // Custom styles
 import './style.css'
 
