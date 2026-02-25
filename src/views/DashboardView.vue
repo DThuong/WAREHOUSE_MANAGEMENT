@@ -139,7 +139,7 @@
       <!-- Stock Value Chart -->
       <div class="chart-container">
         <div class="chart-header">
-          <h3 class="chart-title">Thống kê kho theo phân loại</h3>
+          <h3 class="chart-title">Thống kê kho theo giá trị</h3>
         </div>
         <div class="chart-wrapper">
           <DoughnutChart 
@@ -323,12 +323,12 @@
             <div class="order-info">
               <div class="order-number">Order ID: {{ order.id }}</div>
               <div class="order-meta">
-                {{ order.workerName }} - {{ order.totalItems }} items - {{ order.totalQty }} qty
+                {{ order.workerName }} - Order: {{ order.totalItems }} Sản phẩm - {{ order.totalQty }} Món
               </div>
             </div>
             <div class="order-status">
               <span class="status-badge" :class="'status-' + order.status.toLowerCase()">
-                {{ order.status }}
+                {{ getOrderStatusLabel(order.status) }}
               </span>
               <div class="order-date">{{ formatDate(order.orderDate) }}</div>
             </div>
@@ -490,6 +490,16 @@ const getOrderStatusIcon = (status: string): string => {
     Rejected: 'pi pi-times-circle'
   }
   return icons[status] || 'pi pi-file'
+}
+
+const getOrderStatusLabel = (status: string): string => {
+  const labels: Record<string, string> = {
+    Pending: 'Chờ duyệt',
+    Approved: 'Đã duyệt',
+    Completed: 'Hoàn thành',
+    Rejected: 'Từ chối'
+  }
+  return labels[status] || status
 }
 
 const handleNewOrderCreated = async (orderData: OrderPendingRealtime) => {
@@ -1049,7 +1059,7 @@ onUnmounted(() => {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--pastel-purple), var(--pastel-pink));
+  background: #1a1ee6;
   border-radius: 4px;
   transition: width 0.3s;
 }

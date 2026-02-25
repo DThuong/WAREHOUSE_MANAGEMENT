@@ -145,10 +145,14 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const topOrderedItems = computed<TopItem[]>(() => {
     const itemOrderMap = new Map<number, number>()
     
-    orderStore.orders.forEach(order => {
+    orderStore.orders
+    .filter(order => order.status === 'Completed')
+    .forEach(order => {
       order.orderDetails.forEach(detail => {
-        const currentQty = itemOrderMap.get(detail.itemId) || 0
-        itemOrderMap.set(detail.itemId, currentQty + detail.orderQty)
+        const id = detail.item?.id ?? detail.itemId
+        if (!id) return
+        const currentQty = itemOrderMap.get(id) || 0
+        itemOrderMap.set(id, currentQty + detail.orderQty)
       })
     })
 
