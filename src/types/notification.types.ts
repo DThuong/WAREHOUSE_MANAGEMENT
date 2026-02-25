@@ -7,5 +7,6 @@ export interface Notification{
     accountId: number
     isRead: boolean
     createdAt: string
+    orderId: number
     account: User
 }

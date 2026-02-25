@@ -333,7 +333,14 @@
       </div>
 
       <template #footer>
-        <Button label="Đóng" icon="pi pi-times" @click="showDetailsDialog = false" />
+        <Button label="Đóng" icon="pi pi-times" text @click="showDetailsDialog = false" />
+        <Button 
+          v-if="selectedOrder?.status === 'Pending' || selectedOrder?.status === 'Approved'"
+          label="Cập nhật trạng thái" 
+          icon="pi pi-pencil"
+          severity="warning"
+          @click="() => { showImageDialog = false; openUpdateStatusDialog(selectedOrder!) }"
+        />
       </template>
     </Dialog>
 
@@ -455,35 +462,13 @@
           
           <div 
             @click="!orderStore.uploadingImages && imageFileInput?.click()"
-            class="min-h-25 border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-gray-50 flex flex-col justify-center items-center"
-            :class="orderStore.uploadingImages ? 'opacity-50 cursor-not-allowed' : 'border-gray-400'"
+            @dragover.prevent
+            @drop.prevent="handleDrop"
+            class="border-2 border-dashed rounded-xl p-4! transition-all"
+            :class="orderStore.uploadingImages ? 'opacity-50 cursor-not-allowed border-gray-300' : 'border-gray-400 hover:bg-gray-50 cursor-pointer'"
           >
-            <i class="pi pi-cloud-upload text-5xl text-gray-400 mb-2"></i>
-            <p class="text-gray-600 text-sm mb-1">Click để chọn hình ảnh</p>
-            <p class="text-xs text-gray-500">PNG, JPG, WEBP (Max. 5MB)</p>
-          </div>
-          
-          <input 
-            ref="imageFileInput" 
-            type="file" 
-            accept="image/png,image/jpeg,image/jpg,image/webp"
-            multiple
-            :disabled="orderStore.uploadingImages"
-            class="hidden" 
-            @change="handleImageUpload"
-          />
-
-          <!-- Pending Images -->
-          <div v-if="pendingImages.length > 0" class="mt-4!">
-            <div class="flex justify-between items-center mb-2!">
-              <span class="font-medium text-sm">Đã chọn {{ pendingImages.length }} file</span>
-              <div class="flex gap-2">
-                <Button label="Xóa tất cả" icon="pi pi-trash" text size="small" severity="danger" @click="clearPendingImages" />
-                <Button label="Tải lên" icon="pi pi-upload" size="small" severity="success" :loading="orderStore.uploadingImages" @click="uploadPendingImages" />
-              </div>
-            </div>
-            
-            <div class="grid grid-cols-6 gap-3">
+            <!-- Pending Images Grid bên trong vùng upload -->
+            <div v-if="pendingImages.length > 0" class="grid grid-cols-5 gap-3 mb-4">
               <div 
                 v-for="(preview, index) in pendingImagePreviews" 
                 :key="`pending-${index}`"
@@ -497,9 +482,45 @@
                   severity="danger"
                   size="small"
                   class="absolute! top-1 right-1 bg-white/95!"
-                  @click="removePendingImage(index)"
+                  @click.stop="removePendingImage(index)"
                 />
               </div>
+
+              <!-- Ô thêm ảnh -->
+              <div
+                class="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50"
+                @click.stop="!orderStore.uploadingImages && imageFileInput?.click()"
+              >
+                <i class="pi pi-plus text-2xl text-gray-400"></i>
+                <span class="text-xs text-gray-400 mt-1">Thêm ảnh</span>
+              </div>
+            </div>
+
+            <!-- Empty state -->
+            <div class="flex flex-col items-center justify-center py-6" :class="{ '': pendingImages.length > 0 }">
+              <i class="pi pi-cloud-upload text-4xl text-gray-400 mb-2"></i>
+              <p class="text-gray-600 text-sm font-medium mb-1">Kéo thả hình ảnh vào đây hoặc click để chọn</p>
+              <p class="text-xs text-gray-400">PNG, JPG, WEBP (Max. 5MB mỗi file)</p>
+              <p class="text-xs text-gray-400">Upload từng ảnh một, có thể chọn nhiều ảnh cùng lúc</p>
+            </div>
+          </div>
+
+          <input 
+            ref="imageFileInput" 
+            type="file" 
+            accept="image/png,image/jpeg,image/jpg,image/webp"
+            multiple
+            :disabled="orderStore.uploadingImages"
+            class="hidden" 
+            @change="handleImageUpload"
+          />
+
+          <!-- Action buttons -->
+          <div v-if="pendingImages.length > 0" class="flex justify-between items-center mt-3">
+            <span class="text-sm text-gray-600 font-medium">Đã chọn {{ pendingImages.length }} file</span>
+            <div class="flex gap-2 mt-2!">
+              <Button label="Xóa tất cả" icon="pi pi-trash" text size="small" severity="danger" @click="clearPendingImages" />
+              <Button label="Tải lên" icon="pi pi-upload" size="small" severity="success" :loading="orderStore.uploadingImages" @click="uploadPendingImages" />
             </div>
           </div>
         </div>
@@ -540,6 +561,13 @@
 
       <template #footer>
         <Button label="Đóng" icon="pi pi-times" @click="closeImageDialog" />
+        <Button 
+          v-if="selectedOrder?.status === 'Pending' || selectedOrder?.status === 'Approved'"
+          label="Cập nhật trạng thái" 
+          icon="pi pi-pencil"
+          severity="warning"
+          @click="() => { showDetailsDialog = false; openUpdateStatusDialog(selectedOrder!) }"
+        />
       </template>
     </Dialog>
 
@@ -940,6 +968,37 @@ const fetchAllOrders = async () => {
   }
 }
 
+const handleDrop = (event: DragEvent) => {
+  if (orderStore.uploadingImages) return
+  const files = event.dataTransfer?.files
+  if (!files?.length) return
+  
+  const maxSize = 5 * 1024 * 1024
+  const validFiles: File[] = []
+
+  Array.from(files).forEach(file => {
+    if (!['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(file.type)) {
+      toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: `File ${file.name} không đúng định dạng`, life: 3000 })
+      return
+    }
+    if (file.size > maxSize) {
+      toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: `File ${file.name} quá lớn`, life: 3000 })
+      return
+    }
+    validFiles.push(file)
+  })
+
+  if (!validFiles.length) return
+  pendingImages.value.push(...validFiles)
+  validFiles.forEach(file => {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (e.target?.result) pendingImagePreviews.value.push(e.target.result as string)
+    }
+    reader.readAsDataURL(file)
+  })
+}
+
 const applyFilter = () => {
   // Sync filter state to URL query
   const query: Record<string, string> = {}
@@ -1131,6 +1190,7 @@ const saveUpdateStatus = async () => {
     })
     
     showUpdateStatusDialog.value = false
+    showImageDialog.value = false
     await fetchAllOrders()
   } catch (error: any) {
     toast.add({
@@ -1352,6 +1412,7 @@ const uploadPendingImages = async () => {
         const orderData = await orderAPI.getById(selectedOrder.value.id)
         currentImages.value = orderData.image || []
         orderStore.setCurrentOrder(orderData)
+        selectedOrder.value = orderData
       }
       
       await fetchAllOrders()
@@ -1406,6 +1467,7 @@ const confirmDeleteImage = (imageName: string) => {
           const orderData = await orderAPI.getById(selectedOrder.value.id)
           currentImages.value = orderData.image || []
           orderStore.setCurrentOrder(orderData)
+          selectedOrder.value = orderData
         }
         
         await fetchAllOrders()
@@ -1439,6 +1501,8 @@ const checkAndOpenOrder = async () => {
     console.warn('Invalid orderId:', orderIdFromQuery)
     return
   }
+
+  router.replace({ query: {} })
   
   // Hiển thị toast đang tìm
   toast.add({
@@ -1455,7 +1519,6 @@ const checkAndOpenOrder = async () => {
   let order = orderStore.orders.find(o => o.id === orderId)
   
   if (!order) {
-    console.log('📡 Order not in store, fetching from API...')
     // Nếu không tìm thấy, thử load lại từ API
     try {
       order = await orderAPI.getById(orderId)
@@ -1519,30 +1582,36 @@ const handleNewOrderCreated = async (orderData: OrderPendingRealtime) => {
 }
 
 onMounted(async () => {
-  // Kết nối SignalR
   if (!signalRService.isConnected()) {
     await signalRService.start()
   }
   signalRService.on('NewOrderCreated', handleNewOrderCreated)
-  // Load items
   await fetchAllItems()
-  // Check nếu có status trong query thì auto-filter
   if (route.query.status) {
     selectedStatus.value = route.query.status as string
   }
-  // Load orders (sẽ tự động filter nếu có selectedStatus)
   await fetchAllOrders()
-  // Kiểm tra và auto-open order nếu có orderId trong query
-  checkAndOpenOrder()
+  if (!route.query.orderId) {
+    checkAndOpenOrder()
+  }
 })
 
 // Watch status from URL
 watch(() => route.query.status, async (newStatus) => {
   if (newStatus) {
-    // Set dropdown value
     selectedStatus.value = newStatus as string
-    // Auto fetch với filter
     await fetchAllOrders()
+  }
+}, { immediate: true })
+
+// Watch orderId để bắt khi đang ở trang orders
+watch(() => route.query.orderId, async (newOrderId) => {
+  if (newOrderId) {
+    // Đảm bảo orders đã được load trước
+    if (!orderStore.orders.length) {
+      await fetchAllOrders()
+    }
+    await checkAndOpenOrder()
   }
 }, { immediate: true })
 

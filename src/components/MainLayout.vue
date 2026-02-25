@@ -447,14 +447,11 @@ const playNotificationSound = () => {
 }
 
 const handleNotificationClick = async (notification: Notification) => {
-  // Đánh dấu đã đọc
   await notificationStore.markAsRead(notification.id)
   
-  // Extract orderId from notification message
-  const orderId = extractOrderIdFromMessage(notification.message)
-  
-  // Navigate based on notification type
   if (notification.type?.toLowerCase().includes('order')) {
+    const orderId = notification.orderId // ✅ Dùng trực tiếp
+    
     if (orderId) {
       router.push({ 
         path: '/orders',
@@ -465,29 +462,7 @@ const handleNotificationClick = async (notification: Notification) => {
     }
   }
   
-  // Đóng panel
   notificationPanel.value?.hide()
-}
-
-// THÊM helper function để extract orderId từ message
-const extractOrderIdFromMessage = (message: string): number | null => {
-  // Pattern 1: "Order 2007 vừa được tạo..." hoặc "Order #2007"
-  const orderPattern = /Order\s*#?\s*(\d+)/i
-  const match = message.match(orderPattern)
-  
-  if (match && match[1]) {
-    return parseInt(match[1])
-  }
-  
-  // Pattern 2: "Đơn hàng 2007..." hoặc "Đơn hàng #2007"
-  const donhangPattern = /Đơn hàng\s*#?\s*(\d+)/i
-  const match2 = message.match(donhangPattern)
-  
-  if (match2 && match2[1]) {
-    return parseInt(match2[1])
-  }
-  
-  return null
 }
 
 const markAllAsRead = async () => {
