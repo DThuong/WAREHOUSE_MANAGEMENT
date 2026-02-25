@@ -45,6 +45,7 @@
                 :stepMinute="15"
                 class="w-full"
                 :inputStyle="{ width: '100%' }"
+                @date-select="loadData"
               />
             </div>
 
@@ -60,17 +61,18 @@
                 :stepMinute="15"
                 class="w-full"
                 :inputStyle="{ width: '100%' }"
+                @date-select="loadData"
               />
             </div>
 
             <!-- Buttons -->
             <div class="actions">
-              <Button 
+              <!-- <Button 
                 label="Lọc" 
                 icon="pi pi-filter"
                 @click="applyFilter"
                 :loading="loading"
-              />
+              /> -->
               <Button 
                 label="Reset" 
                 icon="pi pi-refresh"

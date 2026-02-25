@@ -29,8 +29,8 @@
                   showIcon
                   showTime
                   hourFormat="24"
-                  :stepMinute="15"
                   class="w-full calendar-full-width"
+                  @date-select="fetchAllStockins"
                 />
               </div>
               
@@ -42,8 +42,8 @@
                   showIcon
                   showTime
                   hourFormat="24"
-                  :stepMinute="15"
                   class="w-full calendar-full-width"
+                  @date-select="fetchAllStockins"
                 />
               </div>
             </div>
@@ -64,12 +64,12 @@
                   />
                 </span>
                 
-                <Button 
+                <!-- <Button 
                   label="Lọc" 
                   icon="pi pi-filter"
                   @click="applyDateFilter"
                   :loading="stockinStore.loading"
-                />
+                /> -->
                 
                 <Button 
                   label="Reset" 

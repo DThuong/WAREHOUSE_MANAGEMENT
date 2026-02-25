@@ -40,9 +40,9 @@
                 showIcon
                 showTime
                 hourFormat="24"
-                :stepMinute="15"
                 style="width: 100%;"
                 :inputStyle="{ width: '100%' }"
+                @date-select="loadData"
               />
             </div>
             <div style="flex: 1; min-width: 200px;">
@@ -53,9 +53,9 @@
                 showIcon
                 showTime
                 hourFormat="24"
-                :stepMinute="15"
                 style="width: 100%;"
                 :inputStyle="{ width: '100%' }"
+                @date-select="loadData"
               />
             </div>
             <div style="flex: 1; min-width: 200px;">
@@ -67,14 +67,15 @@
                 optionValue="value"
                 placeholder="Tất cả trạng thái"
                 style="width: 100%;"
+                @change="loadData"
               />
             </div>
-            <Button 
+            <!-- <Button 
               label="Lọc" 
               icon="pi pi-filter"
               @click="applyFilter"
               :loading="loading"
-            />
+            /> -->
             <Button 
               label="Reset" 
               icon="pi pi-refresh"

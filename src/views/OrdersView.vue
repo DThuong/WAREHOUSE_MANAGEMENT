@@ -31,6 +31,7 @@
                     hourFormat="24"
                     :stepMinute="15"
                     class="w-full calendar-full-width"
+                    @date-select="fetchAllOrders"
                   />
                 </div>
                 
@@ -44,6 +45,7 @@
                     hourFormat="24"
                     :stepMinute="15"
                     class="w-full calendar-full-width"
+                    @date-select="fetchAllOrders"
                   />
                 </div>
               </div>
@@ -59,6 +61,7 @@
                     optionValue="value"
                     placeholder="Tất cả trạng thái"
                     class="w-full"
+                    @change="fetchAllOrders"
                   />
                 </div>
                 
@@ -89,13 +92,6 @@
                 </div>
                 
                 <div class="flex gap-3">
-                  <Button 
-                    label="Lọc" 
-                    icon="pi pi-filter"
-                    @click="applyFilter"
-                    :loading="orderStore.loading"
-                  />
-                  
                   <Button 
                     label="Reset" 
                     icon="pi pi-refresh"
@@ -206,7 +202,7 @@
             <Column field="status" header="Trạng thái" sortable>
               <template #body="{ data }">
                 <Chip 
-                  :label="data.status" 
+                  :label="getStatusLabel(data.status)" 
                   :class="getStatusClass(data.status)"
                 />
               </template>
@@ -677,13 +673,23 @@
 
               <!-- Quantity -->
               <div class="w-md">
-                <label class="block mb-2 text-sm font-medium text-gray-700">Số lượng</label>
-                <InputNumber 
+                <div class="flex items-center justify-between">
+                  <label class="block mb-2 text-sm font-medium text-gray-700">Số lượng</label>
+                  <small v-if="item.itemId" class="text-gray-500 mt-1 block">
+                    Tồn kho: {{ getStockQty(item.itemId) }} {{ getSelectedItemUnit(item.itemId) }}
+                  </small>
+                  <small v-if="item.itemId && item.quantity > getStockQty(item.itemId)" class="text-red-500 mt-1 block">
+                    Vượt quá số lượng tồn kho!
+                  </small>
+                </div>
+                <InputNumber
                   v-model="item.quantity" 
                   :min="1"
+                  :max="getStockQty(item.itemId)"
                   showButtons
                   class="w-full"
                 />
+
               </div>
 
               <!-- Subtotal -->
@@ -824,6 +830,11 @@ const clearStatusFilter = () => {
   fetchAllOrders()
 }
 
+const getStockQty = (itemId: number): number => {
+  const item = availableItems.value.find(i => i.value === itemId)
+  return item?.stock || 0
+}
+
 const formatDateTimeForAPI = (date: Date): string => {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -916,7 +927,11 @@ const availableItems = computed(() => {
 const isFormValid = computed(() => {
   return createOrderForm.value.nameWorker.trim() !== '' &&
          createOrderForm.value.items.length > 0 && 
-         createOrderForm.value.items.every(item => item.itemId && item.quantity > 0)
+         createOrderForm.value.items.every(item => 
+           item.itemId && 
+           item.quantity > 0 &&
+           item.quantity <= getStockQty(item.itemId) 
+         )
 })
 
 // Total quantity
@@ -1175,6 +1190,12 @@ const saveUpdateStatus = async () => {
       updateForm.value.status,
       updateForm.value.note || undefined
     )
+
+    selectedOrder.value = {
+      ...selectedOrder.value,
+      status: updateForm.value.status,
+      note: updateForm.value.note || selectedOrder.value.note
+    }
     
     const statusMessages: Record<string, string> = {
       'Approved': 'Đã duyệt đơn hàng thành công',
@@ -1190,7 +1211,10 @@ const saveUpdateStatus = async () => {
     })
     
     showUpdateStatusDialog.value = false
-    showImageDialog.value = false
+    if (updateForm.value.status === 'Completed') {
+      showImageDialog.value = false
+      showDetailsDialog.value = true
+    }
     await fetchAllOrders()
   } catch (error: any) {
     toast.add({

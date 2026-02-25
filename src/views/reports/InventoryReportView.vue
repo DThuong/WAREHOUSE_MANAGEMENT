@@ -56,22 +56,35 @@
                 style="width: 100%;"
               />
             </div>
+            <!-- Từ ngày -->
             <div style="flex: 1; min-width: 150px;">
               <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Từ ngày</label>
-              <InputText 
+              <Calendar 
                 v-model="dateRange.fromDate" 
-                type="date"
+                dateFormat="dd/mm/yy"
+                showIcon
+                showTime
+                hourFormat="24"
                 style="width: 100%;"
-                @change="loadUsedInRangeData"
+                :inputStyle="{ width: '100%' }"
+                @date-select="loadUsedInRangeData"
+                @blur="loadUsedInRangeData"
               />
             </div>
+
+            <!-- Đến ngày -->
             <div style="flex: 1; min-width: 150px;">
               <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Đến ngày</label>
-              <InputText 
+              <Calendar 
                 v-model="dateRange.toDate" 
-                type="date"
+                dateFormat="dd/mm/yy"
+                showIcon
+                showTime
+                hourFormat="24"
                 style="width: 100%;"
-                @change="loadUsedInRangeData"
+                :inputStyle="{ width: '100%' }"
+                @date-select="loadUsedInRangeData"
+                @blur="loadUsedInRangeData"
               />
             </div>
             <Button 
@@ -412,6 +425,7 @@ import { useItemStore } from '@/stores/itemStore'
 import { useDashboardStore } from '@/stores/dashboard'
 import { itemAPI } from '@/services/itemAPI'
 import type { UsedInRangeItem } from '@/types/item.types'
+import Calendar from 'primevue/calendar'
 
 const router = useRouter()
 const itemStore = useItemStore()
@@ -421,9 +435,30 @@ const loading = ref(false)
 // filter 1 sản phẩm trong tất cả các đơn hàng có trạng thái Completed
 const usedInRangeData = ref<UsedInRangeItem[]>([])
 const dateRange = ref({
-  fromDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
-  toDate: new Date().toISOString().split('T')[0]
+  fromDate: new Date(new Date().setDate(new Date().getDate() - 30)),
+  toDate: new Date(new Date().setHours(23, 59, 59))
 })
+const formatDateTimeForAPI = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}`
+}
+
+const loadUsedInRangeData = async () => {
+  try {
+    const data = await itemAPI.checkUsedInrange(
+      formatDateTimeForAPI(dateRange.value.fromDate),
+      formatDateTimeForAPI(dateRange.value.toDate)
+    )
+    usedInRangeData.value = data
+  } catch (error) {
+    console.error('Error loading used in range:', error)
+  }
+}
+
 
 // Filters
 const selectedType = ref<string | null>(null)
@@ -458,24 +493,16 @@ const loadData = async () => {
     loading.value = false
   }
 }
-// load used in range data
-const loadUsedInRangeData = async () => {
-  try {
-    const data = await itemAPI.checkUsedInrange(
-      dateRange.value.fromDate,
-      dateRange.value.toDate
-    )
-    usedInRangeData.value = data
-  } catch (error) {
-    console.error('Error loading used in range:', error)
-  }
-}
 
 // Reset filter
 const resetFilter = () => {
   selectedType.value = null
   selectedStockStatus.value = null
   searchQuery.value = ''
+  dateRange.value = {
+    fromDate: new Date(new Date().setDate(new Date().getDate() - 30)),
+    toDate: new Date(new Date().setHours(23, 59, 59))
+  }
 }
 
 // Helper để lấy totalOrdered từ usedInRangeData
