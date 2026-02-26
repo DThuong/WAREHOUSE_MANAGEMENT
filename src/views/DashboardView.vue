@@ -139,7 +139,7 @@
       <!-- Stock Value Chart -->
       <div class="chart-container">
         <div class="chart-header">
-          <h3 class="chart-title">Thống kê kho theo giá trị</h3>
+          <h3 class="chart-title">Thống kê kho theo phân loại hàng hóa</h3>
         </div>
         <div class="chart-wrapper">
           <DoughnutChart 

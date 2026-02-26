@@ -102,13 +102,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }, 0)
   })
 
-  // Tổng số lượng tồn kho (tổng stockQty của tất cả items)
-  // const totalStockQuantity = computed(() => {
-  //   return itemStore.items.reduce((total, item) => {
-  //     return total + item.stockQty
-  //   }, 0)
-  // })
-
   const orderStatusSummary = computed<OrderStatusSummary>(() => ({
     pending: orderStore.pendingOrders.length,
     approved: orderStore.approvedOrders.length,

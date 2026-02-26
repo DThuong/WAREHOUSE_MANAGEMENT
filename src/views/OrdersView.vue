@@ -277,7 +277,7 @@
           </div>
           <div>
             <p class="text-sm text-gray-600">Trạng thái</p>
-            <Chip :label="selectedOrder.status" :class="getStatusClass(selectedOrder.status)" />
+            <Chip :label="getStatusLabel(selectedOrder.status)" :class="getStatusClass(selectedOrder.status)" />
           </div>
         </div>
 
@@ -411,7 +411,7 @@
         </p>
         <p class="text-sm text-gray-600 mb-1">
             Trạng thái hiện tại: 
-            <Chip :label="selectedOrder.status" :class="getStatusClass(selectedOrder.status)" class="ml-1" />
+            <Chip :label="getStatusLabel(selectedOrder.status)" :class="getStatusClass(selectedOrder.status)" class="ml-1" />
         </p>
         <!-- Hiển thị số lượng ảnh -->
         <p class="text-sm text-gray-600">
