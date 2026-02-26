@@ -67,6 +67,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Orders',
     component: () => import('@/views/OrdersView.vue' as string),
     meta: { title: 'Đơn hàng', requiresAuth: true, role: 'Admin' }
+  },
+  {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('@/views/SettingsView.vue' as string),
+    meta: { title: 'Cấu hình', requiresAuth: true, role: 'Admin' }
   }
 ]
 

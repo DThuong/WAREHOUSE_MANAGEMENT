@@ -1,7 +1,7 @@
 <template>
   <MainLayout>
     <div class="animate-fade-in">
-      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">Báo cáo</h2>
+      <!-- <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">Báo cáo</h2> -->
       
       <div class="grid grid-cols-3 gap-4 mb-6">
         <!-- Báo cáo nhập kho -->

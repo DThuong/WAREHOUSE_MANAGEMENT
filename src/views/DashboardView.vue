@@ -953,6 +953,13 @@ onUnmounted(() => {
   letter-spacing: 0.5px;
 }
 
+.stats-grid > *,
+.order-status-grid > *,
+.charts-row > *,
+.lists-row > * {
+  min-width: 0;
+}
+
 /* Lists Row */
 .lists-row {
   display: grid;
@@ -1223,7 +1230,29 @@ onUnmounted(() => {
   .order-status-grid,
   .charts-row,
   .lists-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+  }
+
+  .stat-card-compact { padding: 1.25rem !important; }
+  .status-card       { padding: 1rem !important; }
+  .stat-value-compact { font-size: 1.5rem !important; }
+  .status-value      { font-size: 1.75rem !important; }
+
+  .chart-container,
+  .overview-container,
+  .list-container {
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+   /* Overview grid: mobile 1 cột */
+  .overview-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .overview-item {
+    padding: 1rem !important;
   }
 }
 
@@ -1416,6 +1445,32 @@ onUnmounted(() => {
   100% {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     transform: scale(1);
+  }
+}
+
+/* Thêm vào cuối <style scoped> */
+@media (max-width: 480px) {
+  .stats-grid,
+  .order-status-grid,
+  .charts-row,
+  .lists-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .stat-card-compact {
+    padding: 1.25rem;
+  }
+
+  .status-card {
+    padding: 1rem;
+  }
+
+  .status-value {
+    font-size: 1.75rem;
+  }
+
+  .stat-value-compact {
+    font-size: 1.5rem;
   }
 }
 </style>

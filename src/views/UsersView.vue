@@ -721,7 +721,7 @@ onMounted(async () => {
 
 .phone-number {
   font-size: 0.875rem;
-  color: #475569;
+  color: #fff;
 }
 
 .department-text {

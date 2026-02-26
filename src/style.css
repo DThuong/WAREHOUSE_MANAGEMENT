@@ -32,7 +32,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--gray-50);
   color: var(--gray-900);
   line-height: 1.6;
@@ -72,6 +72,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   min-height: 100vh;
   background: var(--gray-50);
+  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .sidebar {
@@ -413,4 +414,18 @@ h1, h2, h3, h4, h5, h6 {
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+/* ConfirmDialog mobile fix */
+@media (max-width: 767px) {
+  .p-confirmdialog {
+    width: calc(100vw - 2rem) !important;
+    max-width: calc(100vw - 2rem) !important;
+    margin: 0 1rem !important;
+  }
+  .p-dialog{
+    width: calc(100vw - 2rem) !important;
+    max-width: calc(100vw - 2rem) !important;
+    margin: 0 1rem !important;
+  }
 }

@@ -1,10 +1,21 @@
 <template>
+  <!-- Image Preview -->
+  <ImagePreviewDialog
+    :visible="imagePreview.visible.value"
+    :current-src="imagePreview.currentSrc.value"
+    :images="imagePreview.images.value"
+    :current-index="imagePreview.currentIndex.value"
+    @close="imagePreview.close()"
+    @prev="imagePreview.prev()"
+    @next="imagePreview.next()"
+    @goto="(i) => { imagePreview.currentIndex.value = i; imagePreview.currentSrc.value = imagePreview.images.value[i] }"
+  />
   <MainLayout>
     <div class="animate-fade-in">
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
         <div>
-          <h2 class="text-2xl font-bold mb-4 text-gray-900">Quản lý đơn hàng</h2>
+          <h2 class="text-2xl font-bold mb-4 text-gray-900">Đơn hàng</h2>
           <p class="text-gray-600">Theo dõi và xử lý đơn đặt hàng</p>
         </div>
         <Button 
@@ -105,151 +116,191 @@
         </Card>
 
       <Card>
-        <!-- Statistics -->
-        <div class="grid grid-cols-4 gap-4 mb-6">
-          <div class="stat-card pending">
-            <div class="stat-icon">
-              <i class="pi pi-clock"></i>
-            </div>
-            <div>
-              <p class="stat-label">Chờ xử lý</p>
-              <p class="stat-value">{{ orderStore.pendingOrders.length }}</p>
-            </div>
-          </div>
-
-          <div class="stat-card approved">
-            <div class="stat-icon">
-              <i class="pi pi-check-circle"></i>
-            </div>
-            <div>
-              <p class="stat-label">Đã duyệt</p>
-              <p class="stat-value">{{ orderStore.approvedOrders.length }}</p>
-            </div>
-          </div>
-
-          <div class="stat-card completed">
-            <div class="stat-icon">
-              <i class="pi pi-verified"></i>
-            </div>
-            <div>
-              <p class="stat-label">Hoàn thành</p>
-              <p class="stat-value">{{ orderStore.completedOrders.length }}</p>
-            </div>
-          </div>
-
-          <div class="stat-card rejected">
-            <div class="stat-icon">
-              <i class="pi pi-times-circle"></i>
-            </div>
-            <div>
-              <p class="stat-label">Từ chối</p>
-              <p class="stat-value">{{ orderStore.rejectedOrders.length }}</p>
-            </div>
+      <!-- Statistics -->
+      <div class="stats-grid mb-6">
+        <div class="stat-card pending">
+          <div class="stat-icon"><i class="pi pi-clock"></i></div>
+          <div>
+            <p class="stat-label">Chờ xử lý</p>
+            <p class="stat-value">{{ orderStore.pendingOrders.length }}</p>
           </div>
         </div>
+        <div class="stat-card approved">
+          <div class="stat-icon"><i class="pi pi-check-circle"></i></div>
+          <div>
+            <p class="stat-label">Đã duyệt</p>
+            <p class="stat-value">{{ orderStore.approvedOrders.length }}</p>
+          </div>
+        </div>
+        <div class="stat-card completed">
+          <div class="stat-icon"><i class="pi pi-verified"></i></div>
+          <div>
+            <p class="stat-label">Hoàn thành</p>
+            <p class="stat-value">{{ orderStore.completedOrders.length }}</p>
+          </div>
+        </div>
+        <div class="stat-card rejected">
+          <div class="stat-icon"><i class="pi pi-times-circle"></i></div>
+          <div>
+            <p class="stat-label">Từ chối</p>
+            <p class="stat-value">{{ orderStore.rejectedOrders.length }}</p>
+          </div>
+        </div>
+      </div>
 
-        <!-- Orders Table -->
-        <template #content>
-          <DataTable 
-            :value="filteredOrders" 
-            :paginator="true" 
-            :rows="10"
-            :loading="orderStore.loading"
-            responsiveLayout="scroll"
-            :rowClass="getRowClass"
-          >
-            <template #empty>
-              <div class="text-center py-8">
-                <i class="pi pi-shopping-cart text-5xl text-gray-400"></i>
-                <p class="mt-4 text-gray-500">Chưa có đơn hàng nào</p>
-              </div>
-            </template>
+  <template #content>
+    <!-- DESKTOP: DataTable -->
+    <DataTable
+      v-if="!isTableMobile"
+      :value="filteredOrders"
+      :paginator="true"
+      :rows="10"
+      :loading="orderStore.loading"
+      responsiveLayout="scroll"
+      :rowClass="getRowClass"
+    >
+      <template #empty>
+        <div class="text-center py-8">
+          <i class="pi pi-shopping-cart text-5xl text-gray-400"></i>
+          <p class="mt-4 text-gray-500">Chưa có đơn hàng nào</p>
+        </div>
+      </template>
 
-            <Column field="id" header="ID" sortable class="w-20">
-              <template #body="{ data }">
-                <span :data-order-id="data.id">{{ data.id }}</span>
-              </template>
-            </Column>
-            
-            <Column field="orderDate" header="Ngày đặt" sortable>
-              <template #body="{ data }">
-                {{ formatDate(data.orderDate) }}
-              </template>
-            </Column>
-
-            <Column field="nameWorker" header="Tài khoản" sortable>
-              <template #body="{ data }">
-                <span class="font-medium">{{ data.account?.username || '-' }}</span>
-              </template>
-            </Column>
-
-            <Column field="account.department" header="Phòng ban" sortable></Column>
-            
-            <Column header="Sản phẩm">
-              <template #body="{ data }">
-                <div class="flex flex-col gap-1">
-                  <Chip 
-                    :label="`${data.orderDetails.length} sản phẩm`" 
-                    class="p-chip-info"
-                  />
-                  <span class="text-xs text-gray-500">
-                    Tổng: {{ getTotalQuantity(data) }} món
-                  </span>
-                </div>
-              </template>
-            </Column>
-
-            <Column field="status" header="Trạng thái" sortable>
-              <template #body="{ data }">
-                <Chip 
-                  :label="getStatusLabel(data.status)" 
-                  :class="getStatusClass(data.status)"
-                />
-              </template>
-            </Column>
-            
-            <Column header="Hành động" class="w-52">
-              <template #body="{ data }">
-                <div class="flex gap-2">
-                  <Button 
-                    icon="pi pi-eye" 
-                    text 
-                    rounded 
-                    severity="info"
-                    @click="viewOrderDetails(data)"
-                    title="Xem chi tiết"
-                  />
-                  <Button 
-                    icon="pi pi-images" 
-                    text 
-                    rounded 
-                    severity="secondary"
-                    @click="viewOrderImages(data)"
-                    title="Quản lý ảnh"
-                  />
-                  <Button 
-                        v-if="data.status === 'Pending' || data.status === 'Approved'"
-                        icon="pi pi-pencil" 
-                        text 
-                        rounded 
-                        severity="warning"
-                        @click="openUpdateStatusDialog(data)"
-                        title="Cập nhật trạng thái"
-                    />
-                  <Button 
-                    v-if="data.status === 'Rejected'"
-                    icon="pi pi-trash" 
-                    text 
-                    rounded 
-                    severity="danger"
-                    @click="confirmDelete(data)"
-                    title="Xóa"
-                  />
-                </div>
-              </template>
-            </Column>
-          </DataTable>
+      <Column field="id" header="ID" sortable class="w-20">
+        <template #body="{ data }">
+          <span :data-order-id="data.id">{{ data.id }}</span>
         </template>
+      </Column>
+      <Column field="orderDate" header="Ngày đặt" sortable>
+        <template #body="{ data }">{{ formatDate(data.orderDate) }}</template>
+      </Column>
+      <Column field="nameWorker" header="Tài khoản" sortable>
+        <template #body="{ data }">
+          <span class="font-medium">{{ data.account?.username || '-' }}</span>
+        </template>
+      </Column>
+      <Column field="account.department" header="Phòng ban" sortable></Column>
+      <Column header="Sản phẩm">
+        <template #body="{ data }">
+          <div class="flex flex-col gap-1">
+            <Chip :label="`${data.orderDetails.length} sản phẩm`" class="p-chip-info" />
+            <span class="text-xs text-gray-500">Tổng: {{ getTotalQuantity(data) }} món</span>
+          </div>
+        </template>
+      </Column>
+      <Column field="status" header="Trạng thái" sortable>
+        <template #body="{ data }">
+          <Chip :label="getStatusLabel(data.status)" :class="getStatusClass(data.status)" />
+        </template>
+      </Column>
+      <Column header="Hành động" class="w-52">
+        <template #body="{ data }">
+          <div class="flex gap-2">
+            <Button icon="pi pi-eye" text rounded severity="info" @click="viewOrderDetails(data)" title="Xem chi tiết" />
+            <Button icon="pi pi-images" text rounded severity="secondary" @click="viewOrderImages(data)" title="Quản lý ảnh" />
+            <Button
+              v-if="data.status === 'Pending' || data.status === 'Approved'"
+              icon="pi pi-pencil" text rounded severity="warning"
+              @click="openUpdateStatusDialog(data)" title="Cập nhật trạng thái"
+            />
+            <Button
+              v-if="data.status === 'Rejected'"
+              icon="pi pi-trash" text rounded severity="danger"
+              @click="confirmDelete(data)" title="Xóa"
+            />
+          </div>
+        </template>
+      </Column>
+    </DataTable>
+
+    <!-- MOBILE: Card List -->
+    <div v-else>
+      <div v-if="orderStore.loading" class="text-center py-8">
+        <i class="pi pi-spin pi-spinner text-3xl text-gray-400"></i>
+      </div>
+      <div v-else-if="filteredOrders.length === 0" class="text-center py-8">
+        <i class="pi pi-shopping-cart text-5xl text-gray-400"></i>
+        <p class="mt-4 text-gray-500">Chưa có đơn hàng nào</p>
+      </div>
+      <div v-else class="order-card-list">
+        <div
+          v-for="order in filteredOrders"
+          :key="order.id"
+          class="order-card"
+          :data-order-id="order.id"
+          @click="viewOrderDetails(order)"
+        >
+          <!-- Card Header -->
+          <div class="order-card-header">
+            <div class="flex items-center gap-2">
+              <span class="order-card-id">#{{ order.id }}</span>
+              <Chip :label="getStatusLabel(order.status)" :class="getStatusClass(order.status)" />
+            </div>
+            <span class="order-card-date">{{ formatDate(order.orderDate) }}</span>
+          </div>
+
+          <!-- Card Body -->
+          <div class="order-card-body">
+            <div class="order-card-row">
+              <i class="pi pi-user text-gray-400"></i>
+              <span class="order-card-label">Tài khoản</span>
+              <span class="order-card-value">{{ order.account?.username || '-' }}</span>
+            </div>
+            <div class="order-card-row">
+              <i class="pi pi-building text-gray-400"></i>
+              <span class="order-card-label">Phòng ban</span>
+              <span class="order-card-value">{{ order.account?.department || '-' }}</span>
+            </div>
+            <div class="order-card-row">
+              <i class="pi pi-box text-gray-400"></i>
+              <span class="order-card-label">Sản phẩm</span>
+              <span class="order-card-value">
+                {{ order.orderDetails.length }} loại · {{ getTotalQuantity(order) }} món
+              </span>
+            </div>
+          </div>
+
+          <!-- Card Footer: Actions -->
+          <div class="order-card-footer" @click.stop>
+            <Button
+              icon="pi pi-eye"
+              label="Chi tiết"
+              text
+              size="small"
+              severity="info"
+              @click="viewOrderDetails(order)"
+            />
+            <Button
+              icon="pi pi-images"
+              label="Ảnh"
+              text
+              size="small"
+              severity="secondary"
+              @click="viewOrderImages(order)"
+            />
+            <Button
+              v-if="order.status === 'Pending' || order.status === 'Approved'"
+              icon="pi pi-pencil"
+              label="Cập nhật"
+              text
+              size="small"
+              severity="warning"
+              @click="openUpdateStatusDialog(order)"
+            />
+            <Button
+              v-if="order.status === 'Rejected'"
+              icon="pi pi-trash"
+              label="Xóa"
+              text
+              size="small"
+              severity="danger"
+              @click="confirmDelete(order)"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
       </Card>
     </div>
 
@@ -258,6 +309,7 @@
       v-model:visible="showDetailsDialog" 
       :header="`Chi tiết đơn hàng #${selectedOrder?.id || ''}`"
       :style="{ width: '900px' }"
+      :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
     >
       <div v-if="selectedOrder" class="order-details">
@@ -284,14 +336,16 @@
         <!-- Order Items -->
         <div>
           <h4 class="font-semibold mb-3">Danh sách sản phẩm</h4>
-          <DataTable :value="selectedOrder.orderDetails" responsiveLayout="scroll">
+
+          <!-- DESKTOP: Table -->
+          <DataTable v-if="!isTableMobile" :value="selectedOrder.orderDetails" responsiveLayout="scroll">
             <Column header="Sản phẩm">
               <template #body="{ data }">
                 <div class="flex items-center gap-3">
-                  <img 
+                  <img
                     v-if="data.item?.picture?.length"
-                    :src="getItemImageUrl(data.item.picture[0])" 
-                    class="w-12 h-12 rounded object-cover" 
+                    :src="getItemImageUrl(data.item.picture[0])"
+                    class="w-12 h-12 rounded object-cover"
                   />
                   <div v-else class="w-12 h-12 rounded bg-gray-200 flex items-center justify-center">
                     <i class="pi pi-image text-gray-400"></i>
@@ -325,6 +379,55 @@
               </template>
             </Column>
           </DataTable>
+
+          <!-- MOBILE: Card list -->
+          <div v-else class="dialog-item-card-list">
+            <div
+              v-for="(data, index) in selectedOrder.orderDetails"
+              :key="index"
+              class="dialog-item-card"
+            >
+              <!-- Product Info Row -->
+              <div class="dialog-item-card-top">
+                <img
+                  v-if="data.item?.picture?.length"
+                  :src="getItemImageUrl(data.item.picture[0])"
+                  class="dialog-item-img"
+                />
+                <div v-else class="dialog-item-img-placeholder">
+                  <i class="pi pi-image text-gray-400"></i>
+                </div>
+                <div class="dialog-item-info">
+                  <p class="dialog-item-name">{{ getItemName(data.item) }}</p>
+                  <p class="dialog-item-id">{{ data.item?.itemIndentifyId || '-' }}</p>
+                </div>
+              </div>
+
+              <!-- Price Info Row -->
+              <div class="dialog-item-card-bottom">
+                <div class="dialog-item-price-row">
+                  <span class="dialog-item-price-label">Số lượng</span>
+                  <span class="dialog-item-price-value">
+                    {{ data.orderQty }} {{ data.item?.unit || '' }}
+                  </span>
+                </div>
+                <div class="dialog-item-price-row">
+                  <span class="dialog-item-price-label">Đơn giá</span>
+                  <span class="dialog-item-price-value">
+                    {{ data.item?.price ? Number(data.item.price).toLocaleString('vi-VN') + ' VND' : 'Chưa có giá' }}
+                  </span>
+                </div>
+                <div class="dialog-item-price-row total">
+                  <span class="dialog-item-price-label">Thành tiền</span>
+                  <span class="dialog-item-total">
+                    {{ data.item?.price
+                      ? (Number(data.item.price) * data.orderQty).toLocaleString('vi-VN') + ' VND'
+                      : '---' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -344,6 +447,7 @@
     v-model:visible="showUpdateStatusDialog" 
     header="Cập nhật trạng thái đơn hàng"
     :style="{ width: '500px' }"
+    :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
     :modal="true"
     >
     <div class="flex flex-col gap-4 mt-4">
@@ -444,6 +548,7 @@
       v-model:visible="showImageDialog" 
       :header="`Quản lý hình ảnh - Đơn hàng #${selectedOrder?.id || ''}`"
       :style="{ width: '800px' }"
+      :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
     >
       <div class="mt-4">
@@ -455,8 +560,30 @@
               <i class="pi pi-spin pi-spinner"></i> Đang tải lên...
             </span>
           </label>
-          
-          <div 
+
+          <!-- Mobile: 2 nút chọn ảnh / chụp ảnh -->
+          <div v-if="isTableMobile" class="flex gap-2 mb-3">
+            <Button
+              label="Chọn ảnh"
+              icon="pi pi-images"
+              severity="secondary"
+              class="flex-1"
+              :disabled="orderStore.uploadingImages"
+              @click="imageFileInput?.click()"
+            />
+            <Button
+              label="Chụp ảnh"
+              icon="pi pi-camera"
+              severity="secondary"
+              class="flex-1"
+              :disabled="orderStore.uploadingImages"
+              @click="cameraFileInput?.click()"
+            />
+          </div>
+
+          <!-- Desktop: Drop zone (giữ nguyên) -->
+          <div
+            v-if="!isTableMobile"
             @click="!orderStore.uploadingImages && imageFileInput?.click()"
             @dragover.prevent
             @drop.prevent="handleDrop"
@@ -465,15 +592,15 @@
           >
             <!-- Pending Images Grid bên trong vùng upload -->
             <div v-if="pendingImages.length > 0" class="grid grid-cols-5 gap-3 mb-4">
-              <div 
-                v-for="(preview, index) in pendingImagePreviews" 
+              <div
+                v-for="(preview, index) in pendingImagePreviews"
                 :key="`pending-${index}`"
                 class="relative aspect-square rounded-lg overflow-hidden border-2 border-orange-400"
               >
                 <img :src="preview" class="absolute inset-0 w-full h-full object-cover" />
-                <Button 
-                  icon="pi pi-times" 
-                  rounded 
+                <Button
+                  icon="pi pi-times"
+                  rounded
                   text
                   severity="danger"
                   size="small"
@@ -481,7 +608,6 @@
                   @click.stop="removePendingImage(index)"
                 />
               </div>
-
               <!-- Ô thêm ảnh -->
               <div
                 class="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50"
@@ -491,24 +617,73 @@
                 <span class="text-xs text-gray-400 mt-1">Thêm ảnh</span>
               </div>
             </div>
-
             <!-- Empty state -->
-            <div class="flex flex-col items-center justify-center py-6" :class="{ '': pendingImages.length > 0 }">
+            <div class="flex flex-col items-center justify-center py-6">
               <i class="pi pi-cloud-upload text-4xl text-gray-400 mb-2"></i>
               <p class="text-gray-600 text-sm font-medium mb-1">Kéo thả hình ảnh vào đây hoặc click để chọn</p>
               <p class="text-xs text-gray-400">PNG, JPG, WEBP (Max. 5MB mỗi file)</p>
-              <p class="text-xs text-gray-400">Upload từng ảnh một, có thể chọn nhiều ảnh cùng lúc</p>
             </div>
           </div>
 
-          <input 
-            ref="imageFileInput" 
-            type="file" 
+          <!-- Mobile: Preview ảnh đã chọn -->
+          <div v-if="isTableMobile && pendingImages.length > 0" class="mt-3">
+            <div class="grid grid-cols-3 gap-2">
+              <div
+                v-for="(preview, index) in pendingImagePreviews"
+                :key="`pending-mobile-${index}`"
+                class="relative aspect-square rounded-lg overflow-hidden border-2 border-orange-400 mt-3!"
+              >
+                <img :src="preview" class="absolute inset-0 w-full h-full object-cover" />
+                <Button
+                  icon="pi pi-times"
+                  rounded
+                  text
+                  severity="danger"
+                  size="small"
+                  class="absolute! top-1 right-1 bg-white/95!"
+                  @click.stop="removePendingImage(index)"
+                />
+                <!-- Hiển thị timestamp nếu có -->
+                <div
+                  v-if="pendingImageTimestamps[index]"
+                  class="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-center"
+                  style="font-size: 9px; padding: 2px 4px;"
+                >
+                  {{ pendingImageTimestamps[index] }}
+                </div>
+              </div>
+
+              <!-- Ô thêm ảnh mobile -->
+              <div
+                class="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer"
+                @click="imageFileInput?.click()"
+              >
+                <i class="pi pi-plus text-xl text-gray-400"></i>
+                <span class="text-xs text-gray-400 mt-1">Thêm</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Input chọn ảnh từ thư viện -->
+          <input
+            ref="imageFileInput"
+            type="file"
             accept="image/png,image/jpeg,image/jpg,image/webp"
             multiple
             :disabled="orderStore.uploadingImages"
-            class="hidden" 
+            class="hidden"
             @change="handleImageUpload"
+          />
+
+          <!-- Input chụp ảnh từ camera (mobile only) -->
+          <input
+            ref="cameraFileInput"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            :disabled="orderStore.uploadingImages"
+            class="hidden"
+            @change="handleCameraCapture"
           />
 
           <!-- Action buttons -->
@@ -523,11 +698,11 @@
 
         <!-- Current Images -->
         <div>
-          <label class="font-semibold mb-3 block">Hình ảnh hiện tại ({{ currentImages.length }})</label>
+          <label class="font-semibold mb-3! block">Hình ảnh hiện tại ({{ currentImages.length }})</label>
 
           <div v-if="currentImages.length === 0" class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed">
             <i class="pi pi-image text-5xl text-gray-400"></i>
-            <p class="mt-4 text-gray-500">Chưa có hình ảnh</p>
+            <p class="text-gray-500">Chưa có hình ảnh</p>
           </div>
 
           <div v-else class="grid grid-cols-4 gap-4">
@@ -542,6 +717,7 @@
                 @click="viewImageFullscreen(img)"
               />
               <Button 
+                v-if="selectedOrder?.status !== 'Completed'"
                 icon="pi pi-trash" 
                 rounded 
                 severity="danger"
@@ -571,6 +747,7 @@
     <Dialog 
       v-model:visible="showCreateOrderDialog" 
       header="Tạo đơn hàng mới"
+      :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :style="{ width: '1200px' }"
       :modal="true"
     >
@@ -788,7 +965,10 @@ import Calendar from 'primevue/calendar'
 import { useRoute, useRouter } from 'vue-router'
 import { signalRService } from '@/services/orderNotiService'
 import Textarea from 'primevue/textarea'
+import ImagePreviewDialog from '@/views/ImagePreviewDialog.vue'
+import { useImagePreview } from '@/composables/useImagePreview'
 
+const imagePreview = useImagePreview()
 const confirm = useConfirm()
 const toast = useToast()
 const orderStore = useOrderStore()
@@ -803,6 +983,12 @@ const selectedStatus = ref<string | null>(null)
 const fromDate = ref<Date>(new Date(new Date().getFullYear(), 0, 1, 0, 0, 0))
 const toDate = ref<Date>(new Date(new Date().setHours(23, 59, 59)))
 const selectedDepartment = ref<string | null>(null)
+const isTableMobile = ref(window.innerWidth < 768)
+const cameraFileInput = ref<HTMLInputElement | null>(null)
+const pendingImageTimestamps = ref<string[]>([])
+const handleTableResize = () => {
+  isTableMobile.value = window.innerWidth < 768
+}
 
 const statusFilterOptions = [
   { label: 'Tất cả trạng thái', value: null },
@@ -843,6 +1029,67 @@ const formatDateTimeForAPI = (date: Date): string => {
   const minutes = String(date.getMinutes()).padStart(2, '0')
   
   return `${year}-${month}-${day} ${hours}:${minutes}`
+}
+
+// ========================
+// vẽ WATERMARK TIMESTAMP lên ảnh
+// ========================
+const addTimestampToImage = (file: File, timestamp: string): Promise<File> => {
+  return new Promise((resolve) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      
+      const ctx = canvas.getContext('2d')!
+      
+      // Vẽ ảnh gốc
+      ctx.drawImage(img, 0, 0)
+      
+      // Config text
+      const fontSize = Math.max(img.width, img.height) * 0.035
+      ctx.font = `bold ${fontSize}px monospace`
+      
+      const padding = fontSize * 0.6
+      const text = timestamp
+      const textWidth = ctx.measureText(text).width
+      const boxW = textWidth + padding * 2
+      const boxH = fontSize + padding * 2
+      
+      // Vị trí: góc dưới bên phải
+      const x = img.width - boxW - fontSize * 0.5
+      const y = img.height - boxH - fontSize * 0.5
+      
+      // Nền mờ
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'
+      ctx.beginPath()
+      ctx.roundRect(x, y, boxW, boxH, fontSize * 0.3)
+      ctx.fill()
+      
+      // Text màu vàng kiểu camera
+      ctx.fillStyle = '#FFD700'
+      ctx.shadowColor = 'rgba(0,0,0,0.8)'
+      ctx.shadowBlur = 3
+      ctx.fillText(text, x + padding, y + padding + fontSize * 0.85)
+      
+      // Xuất file
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(url)
+        if (blob) {
+          const ext = file.name.split('.').pop() || 'jpg'
+          const newFile = new File([blob], file.name, { type: file.type })
+          resolve(newFile)
+        } else {
+          resolve(file)
+        }
+      }, file.type, 0.92)
+    }
+    
+    img.src = url
+  })
 }
 
 const updateStatusOptions = computed(() => {
@@ -983,11 +1230,11 @@ const fetchAllOrders = async () => {
   }
 }
 
-const handleDrop = (event: DragEvent) => {
+const handleDrop = async (event: DragEvent) => {
   if (orderStore.uploadingImages) return
   const files = event.dataTransfer?.files
   if (!files?.length) return
-  
+
   const maxSize = 5 * 1024 * 1024
   const validFiles: File[] = []
 
@@ -1004,26 +1251,23 @@ const handleDrop = (event: DragEvent) => {
   })
 
   if (!validFiles.length) return
-  pendingImages.value.push(...validFiles)
-  validFiles.forEach(file => {
+
+  for (const file of validFiles) {
+    const now = new Date()
+    const timestamp = now.toLocaleString('vi-VN', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    })
+    const watermarked = await addTimestampToImage(file, timestamp)
+    pendingImages.value.push(watermarked)
+    pendingImageTimestamps.value.push(timestamp)
+
     const reader = new FileReader()
     reader.onload = (e) => {
       if (e.target?.result) pendingImagePreviews.value.push(e.target.result as string)
     }
-    reader.readAsDataURL(file)
-  })
-}
-
-const applyFilter = () => {
-  // Sync filter state to URL query
-  const query: Record<string, string> = {}
-  if (selectedStatus.value) {
-    query.status = selectedStatus.value
+    reader.readAsDataURL(watermarked)
   }
-  // Update URL without triggering navigation
-  router.replace({ query })
-  // Fetch với filter
-  fetchAllOrders()
 }
 
 const resetFilter = () => {
@@ -1365,7 +1609,7 @@ const closeImageDialog = () => {
   orderStore.setCurrentOrder(null)
 }
 
-const handleImageUpload = (event: Event) => {
+const handleImageUpload = async (event: Event) => {
   const files = (event.target as HTMLInputElement).files
   if (!files?.length) return
 
@@ -1386,29 +1630,81 @@ const handleImageUpload = (event: Event) => {
 
   if (!validFiles.length) return
 
-  pendingImages.value.push(...validFiles)
-  
-  validFiles.forEach(file => {
+  // *** Đè timestamp lên từng ảnh upload có sẵn ***
+  for (const file of validFiles) {
+    const now = new Date()
+    const timestamp = now.toLocaleString('vi-VN', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    })
+    const watermarked = await addTimestampToImage(file, timestamp)
+    pendingImages.value.push(watermarked)
+    pendingImageTimestamps.value.push(timestamp)
+
     const reader = new FileReader()
     reader.onload = (e) => {
-      if (e.target?.result) {
-        pendingImagePreviews.value.push(e.target.result as string)
-      }
+      if (e.target?.result) pendingImagePreviews.value.push(e.target.result as string)
     }
-    reader.readAsDataURL(file)
-  })
+    reader.readAsDataURL(watermarked)
+  }
 
   if (imageFileInput.value) imageFileInput.value.value = ''
+}
+
+const handleCameraCapture = async (event: Event) => {
+  const files = (event.target as HTMLInputElement).files
+  if (!files?.length) return
+
+  const file = files[0]
+  const maxSize = 5 * 1024 * 1024
+
+  if (!['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(file.type)) {
+    toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Định dạng không hỗ trợ', life: 3000 })
+    return
+  }
+  if (file.size > maxSize) {
+    toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'File quá lớn (max 5MB)', life: 3000 })
+    return
+  }
+
+  const now = new Date()
+  const timestamp = now.toLocaleString('vi-VN', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  })
+
+  // Rename
+  const ext = file.name.split('.').pop() || 'jpg'
+  const newName = `photo_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.${ext}`
+  const renamedFile = new File([file], newName, { type: file.type })
+
+  // *** Chèn timestamp vào ảnh ***
+  const watermarkedFile = await addTimestampToImage(renamedFile, timestamp)
+
+  pendingImages.value.push(watermarkedFile)
+  pendingImageTimestamps.value.push(timestamp)
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    if (e.target?.result) {
+      pendingImagePreviews.value.push(e.target.result as string)
+    }
+  }
+  reader.readAsDataURL(watermarkedFile)
+
+  if (cameraFileInput.value) cameraFileInput.value.value = ''
 }
 
 const removePendingImage = (index: number) => {
   pendingImages.value.splice(index, 1)
   pendingImagePreviews.value.splice(index, 1)
+  pendingImageTimestamps.value.splice(index, 1) 
 }
 
 const clearPendingImages = () => {
   pendingImages.value = []
   pendingImagePreviews.value = []
+  pendingImageTimestamps.value = []
 }
 
 const uploadPendingImages = async () => {
@@ -1510,7 +1806,9 @@ const confirmDeleteImage = (imageName: string) => {
 }
 
 const viewImageFullscreen = (imageUrl: string) => {
-  window.open(getImageUrl(imageUrl), '_blank')
+  // Truyền toàn bộ danh sách để navigate giữa các ảnh
+  const fullUrls = currentImages.value.map(img => getImageUrl(img))
+  imagePreview.open(getImageUrl(imageUrl), fullUrls)
 }
 
 // Function để tự động mở order detail từ query parameter
@@ -1606,6 +1904,7 @@ const handleNewOrderCreated = async (orderData: OrderPendingRealtime) => {
 }
 
 onMounted(async () => {
+  window.addEventListener('resize', handleTableResize)
   if (!signalRService.isConnected()) {
     await signalRService.start()
   }
@@ -1640,6 +1939,7 @@ watch(() => route.query.orderId, async (newOrderId) => {
 }, { immediate: true })
 
 onUnmounted(() => {
+  window.removeEventListener('resize', handleTableResize)
   signalRService.off('NewOrderCreated')
 })
 </script>
@@ -1834,5 +2134,270 @@ onUnmounted(() => {
 :deep(.p-datatable .p-datatable-tbody > tr:hover) {
   background: #f8fafc;
   cursor: pointer;
+}
+
+/* =============================================
+   STATS GRID - responsive
+   ============================================= */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+/* =============================================
+   MOBILE ORDER CARDS
+   ============================================= */
+.order-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.order-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.order-card:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  border-color: #d1d5db;
+}
+
+.order-card:active {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.order-card-id {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.order-card-date {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.order-card-body {
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.order-card-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.order-card-label {
+  color: #6b7280;
+  min-width: 80px;
+}
+
+.order-card-value {
+  font-weight: 500;
+  color: #111827;
+  flex: 1;
+}
+
+.order-card-footer {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid #f3f4f6;
+  background: #fafafa;
+  flex-wrap: wrap;
+}
+
+/* =============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================= */
+@media (max-width: 1023px) {
+  /* Tablet: stat grid 2 cột */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  /* Mobile: stat grid 2 cột nhỏ hơn */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.625rem;
+  }
+
+  .stat-card {
+    padding: 0.875rem;
+    gap: 0.625rem;
+  }
+
+  .stat-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  /* Header page: stack dọc */
+  .flex.justify-between.items-center.mb-4 {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  /* Filter grid: 1 cột */
+  :deep(.p-card-content) .grid.grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  :deep(.p-dialog) {
+    width: calc(100vw - 2rem) !important;
+    max-width: calc(100vw - 2rem) !important;
+    margin: 0 1rem !important;
+    left: 0 !important;
+  }
+
+  :deep(.p-dialog .p-dialog-content) {
+    padding: 1rem !important;
+  }
+
+  :deep(.p-dialog .p-dialog-header) {
+    padding: 1rem !important;
+  }
+
+  :deep(.p-dialog .p-dialog-footer) {
+    padding: 0.75rem 1rem !important;
+  }
+}
+/* =============================================
+   DIALOG PRODUCT CARDS (mobile)
+   ============================================= */
+.dialog-item-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dialog-item-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+}
+
+.dialog-item-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  background: #f8fafc;
+}
+
+.dialog-item-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid #e5e7eb;
+}
+
+.dialog-item-img-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dialog-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dialog-item-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #111827;
+  line-height: 1.3;
+  margin-bottom: 0.2rem;
+}
+
+.dialog-item-id {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.dialog-item-card-bottom {
+  padding: 0.625rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.dialog-item-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8125rem;
+}
+
+.dialog-item-price-row.total {
+  padding-top: 0.375rem;
+  margin-top: 0.125rem;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.dialog-item-price-label {
+  color: #6b7280;
+}
+
+.dialog-item-price-value {
+  font-weight: 500;
+  color: #374151;
+}
+
+.dialog-item-total {
+  font-weight: 700;
+  color: #2563eb;
+  font-size: 0.9rem;
+}
+
+:deep(.p-confirmdialog) {
+  width: calc(100vw - 2rem) !important;
+  max-width: calc(100vw - 2rem) !important;
+  margin: 0 1rem !important;
+  left: 0 !important;
 }
 </style>

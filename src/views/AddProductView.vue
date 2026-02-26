@@ -52,7 +52,7 @@
                   <div class="grid grid-cols-2 gap-4">
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Part Name <span style="color: #ef4444;">*</span></label>
-                      <InputText v-model="form.eng.partname" placeholder="Nhập tên part" style="width: 100%;" />
+                      <InputText v-model="form.eng.partname" placeholder="Nhập tên sản phẩm" style="width: 100%;" />
                     </div>
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Location</label>
@@ -288,7 +288,7 @@
                   <div class="grid grid-cols-2 gap-4" style="margin-top: 1rem;">
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Manufacturer</label>
-                      <InputText v-model="form.com.manufacturer" placeholder="Nhập nhà sản xuất" style="width: 100%;" />
+                      <InputText v-model="form.com.manufacturer" placeholder="Nhập nhà cung cấp" style="width: 100%;" />
                     </div>
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Product Specifications <span style="color: #ef4444;">*</span></label>
