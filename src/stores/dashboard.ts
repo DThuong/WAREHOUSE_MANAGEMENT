@@ -17,8 +17,6 @@ interface DashboardStats {
 
 interface StatItem {
   value: number
-  change: number
-  label: string
 }
 
 interface TopItem {
@@ -113,23 +111,15 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const dashboardStats = computed<DashboardStats>(() => ({
     totalPurchase: {
       value: totalPurchaseValue.value,
-      change: 5,
-      label: 'Tổng giá trị kho'
     },
     totalOrders: {
       value: orderStore.totalOrders,
-      change: 12,
-      label: 'Tổng đơn hàng'
     },
     totalStockins: {
       value: stockinStore.stockins.length,
-      change: 8,
-      label: 'Tổng nhập kho'
     },
     totalStock: {
       value: itemStore.totalItems,
-      change: 3,
-      label: 'Tổng tồn kho'
     }
   }))
 

@@ -1,0 +1,353 @@
+{
+  "common": {
+    "upload": {
+      "addImage": "Add image",
+      "addMore": "Add more",
+      "dragDropOrClick": "Drag and drop images here or click to select",
+      "maxFileSize": "PNG, JPG, WEBP (Max. 5MB per file)",
+      "selectedFiles": "file(s) selected: ",
+      "uploading": "Uploading...",
+      "uploadBtn": "Upload",
+      "currentImages": "Current images",
+      "noImages": "No images yet"
+    },
+    "form": {
+      "selectProduct": "Select product",
+      "searchProduct": "Search product...",
+      "stockLabel": "Stock",
+      "stockRemaining": "In stock: {n}",
+      "exceedStock": "Exceeds available stock!",
+      "quantity": "Quantity",
+      "subtotal": "Subtotal",
+      "totalItems": "Total items",
+      "itemUnit": "items",
+      "totalQuantityOrdered": "Total quantity ordered",
+      "productUnit": "products",
+      "totalOrderValue": "Total order value",
+      "noProducts": "No products added",
+      "addFirstProduct": "Add first product",
+      "addProduct": "Add product",
+      "ordererName": "Requester name",
+      "ordererPlaceholder": "Enter requester name...",
+      "productList": "Order product list"
+    },
+    "createOrderAction": {
+      "updateStatus": "Update status",
+      "createOrder": "Create order",
+      "createOrderTitle": "Create new order",
+      "close": "Close",
+      "deleteAll": "Delete all",
+      "delete": "Delete"
+    },
+    "uploading": "Uploading...",
+    "selectImage": "Select Image",
+    "takePhoto": "Take Photo",
+    "noPrice": "No price",
+    "categoryItemCount": "types",
+    "quantityItemCount": "items",
+    "loadingData": "Loading data...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "close": "Close",
+    "update": "Update",
+    "confirm": "Confirm",
+    "action": "Action",
+    "status": "Status",
+    "image": "Image",
+    "product": "Product",
+    "quantity": "Quantity",
+    "price": "Unit Price",
+    "total": "Total",
+    "note": "Note",
+    "date": "Date",
+    "all": "All",
+    "filter": {
+      "fromDate": "From date",
+      "toDate": "To date",
+      "reset": "Clear filter",
+      "status": "Status"
+    },
+    "confirmDelete": "Confirm Delete",
+    "confirmDeleteMsg": "Are you sure you want to delete",
+    "print": "Print Report"
+  },
+  "language": {
+    "title": "Language",
+    "description": "Select display language for the system",
+    "vi": "Vietnamese",
+    "en": "English",
+    "ko": "Korean"
+  },
+  "dashboard": {
+    "totalPurchaseValue": "Total Inventory Value",
+    "orderToProcess": "Pending Orders",
+    "noLowStock": "No low-stock items",
+    "noOrders": "No orders yet",
+    "orderCount": "Number of Orders",
+    "systemOverview": "System Overview",
+    "title": "Dashboard",
+    "totalOrders": "Total Orders",
+    "totalImports": "Total Imports",
+    "totalStock": "Total Stock",
+    "pendingOrders": "Pending Orders",
+    "approvedOrders": "Approved Orders",
+    "completedOrders": "Completed Orders",
+    "rejectedOrders": "Rejected Orders",
+    "orderStatusChart": "Order Statistics by Status",
+    "orderCategoryChart": "Order Statistics by Product Category",
+    "stock": "Stock",
+    "users": "Users",
+    "importReceipts": "Import Receipts",
+    "orders": "Orders",
+    "topOrders": "Most Ordered",
+    "critical": "Critical",
+    "pending": "Pending",
+    "approved": "Approved",
+    "completed": "Completed",
+    "rejected": "Rejected",
+    "topOrderedMaterials": "Top Most Ordered Materials",
+    "criticalStock": "Critical Stock Materials (low stock at critical alert level)",
+    "recentOrders": "Recent Orders"
+  },
+  "orderManagement": {
+    "img": "Image",
+    "currentStatus": "Current Status",
+    "rejectReason": "Reject Reason",
+    "rejectReasonPlaceholder": "Enter reason for rejecting order...",
+    "chooseStatus": "Choose status",
+    "updateStatusOrder": "Update Order Status",
+    "viewDetail": "View Detail",
+    "manageImages": "Manage Images",
+    "updateStatus": "Update Status",
+    "orders": "Orders",
+    "title": "Order Management",
+    "subtitle": "Track and process orders",
+    "allStatus": "All Status",
+    "pending": "Pending",
+    "approved": "Approved",
+    "completed": "Completed",
+    "rejected": "Rejected",
+    "searchPlaceholder": "Search by id, requester,...",
+    "totalOrders": "Total Orders",
+    "orderDate": "Order Date",
+    "account": "Account",
+    "department": "Department",
+    "orderDetail": {
+      "title": "Order Detail",
+      "orderedBy": "Ordered By",
+      "department": "Department",
+      "orderDate": "Order Date",
+      "status": "Status",
+      "productList": "Product List"
+    },
+    "imageManagement": {
+      "title": "Image Management - Order",
+      "upload": "Upload New Image",
+      "dragDrop": "Drag and drop images here or click to select",
+      "currentImages": "Current Images",
+      "noImages": "No images yet"
+    },
+    "createOrder": {
+      "title": "Create New Order",
+      "ordererName": "Requester Name",
+      "ordererPlaceholder": "Enter requester name...",
+      "productList": "Order Product List",
+      "totalItems": "Total Items",
+      "totalQuantity": "Total Quantity Ordered",
+      "totalValue": "Total Order Value",
+      "submit": "Create Order",
+      "items": "items"
+    }
+  },
+  "inventoryManagement": {
+    "title": "Warehouse",
+    "subtitle": "Manage product inventory",
+    "productType": "Product Type",
+    "allTypes": "All Types",
+    "technical": "Technical Goods",
+    "consumer": "Consumer Goods",
+    "stockStatus": "Stock Status",
+    "all": "All",
+    "inStock": "In Stock",
+    "warning": "Warning",
+    "low": "Low",
+    "critical": "Critical",
+    "outOfStock": "Out of Stock",
+    "noSafetyStock": "No Safety Stock Set",
+    "searchPlaceholder": "Product name, id,...",
+    "clearFilter": "Clear Filter",
+    "total": "Total",
+    "type": "Type",
+    "price": "Price",
+    "currentStock": "Stock",
+    "safetyStock": "Safety Stock",
+    "imageManagement": {
+      "title": "Image Management",
+      "upload": "Upload New Image",
+      "clickToSelect": "Click to select image",
+      "currentImages": "Current Images"
+    },
+    "editProduct": {
+      "title": "Edit Product",
+      "type": "Type",
+      "unit": "Unit",
+      "price": "Price",
+      "safetyStock": "Safety Stock",
+      "currentStock": "Current Stock"
+    },
+    "addProduct": {
+      "title": "Add New Product",
+      "namePlaceholder": "Enter product name",
+      "locationPlaceholder": "Enter location",
+      "supplierPlaceholder": "Enter supplier",
+      "descriptionPlaceholder": "Enter description",
+      "specsPlaceholder": "Enter specifications",
+      "images": "Product Images",
+      "addImage": "Add Image",
+      "dragDrop": "Drag and drop images here or click to select",
+      "maxSize": "Max per file",
+      "uploadNote": "Upload one at a time, can select multiple images at once",
+      "submit": "Save Product",
+      "units": {
+        "piece": "Piece",
+        "box": "Box",
+        "bag": "Bag"
+      }
+    }
+  },
+  "importManagement": {
+    "title": "Import",
+    "subtitle": "Manage import receipts",
+    "totalReceipts": "Total Receipts",
+    "searchPlaceholder": "Search by note, creator,...",
+    "clearFilter": "Clear Filter",
+    "importDate": "Import Date",
+    "note": "Note",
+    "createdBy": "Created By",
+    "createReceipt": {
+      "title": "Create New Import Receipt",
+      "notePlaceholder": "Enter note for import receipt...",
+      "productList": "Import Product List",
+      "addProduct": "Add Product",
+      "noProducts": "No products yet",
+      "addFirst": "Add the first product",
+      "currentStock": "Stock",
+      "totalItems": "Total Items",
+      "totalQuantity": "Total Import Quantity",
+      "items": "items",
+      "submit": "Create Import Receipt"
+    },
+    "imageManagement": {
+      "title": "Image Management - Import Receipt",
+      "upload": "Upload New Image",
+      "clickToSelect": "Click to select image",
+      "uploadNote": "Upload one at a time, can select multiple images at once",
+      "currentImages": "Current Images",
+      "noImages": "No images yet"
+    },
+    "detail": {
+      "title": "Import Receipt Detail",
+      "importDate": "Import Date",
+      "createdBy": "Created By",
+      "note": "Note",
+      "productList": "Product List",
+      "importedQuantity": "Imported Quantity"
+    }
+  },
+  "userManagement": {
+    "title": "Users",
+    "subtitle": "Account Management",
+    "totalAccounts": "Total Accounts",
+    "addAccount": "Add Account",
+    "searchPlaceholder": "Search...",
+    "info": "Information",
+    "role": "Role",
+    "department": "Department",
+    "createdDate": "Created Date",
+    "accountDetail": {
+      "title": "Account Detail Information"
+    },
+    "editAccount": {
+      "title": "Edit Account",
+      "username": "Username",
+      "usernamePlaceholder": "Enter username",
+      "password": "Password",
+      "passwordPlaceholder": "Enter password",
+      "phone": "Phone Number",
+      "phonePlaceholder": "Enter phone number",
+      "role": "Role",
+      "rolePlaceholder": "Select role",
+      "department": "Department",
+      "departmentPlaceholder": "Select department"
+    },
+    "departments": {
+      "warehouse": "Warehouse",
+      "repair": "Repair",
+      "engineer": "Engineer",
+      "productionA": "Production Shift A",
+      "productionB": "Production Shift B"
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "submit": "Change Password"
+    },
+    "confirmDeleteMsg": "Are you sure you want to delete account"
+  },
+  "reports": {
+    "title": "Reports",
+    "import": {
+      "title": "Import Report",
+      "description": "View import details over time"
+    },
+    "order": {
+      "title": "Order Report",
+      "description": "Order statistics and status"
+    },
+    "inventory": {
+      "title": "Inventory Report",
+      "description": "Track inventory over time"
+    },
+    "viewReport": "View Report",
+    "orderSummary": {
+      "title": "Material Order Overview (status: completed)",
+      "showAll": "Show All",
+      "totalCompleted": "Total Completed Orders",
+      "viewDetail": "View Detailed Report"
+    },
+    "importReport": {
+      "title": "Import Report",
+      "dateRange": "From {from} to {to}",
+      "printDate": "Print Date",
+      "totalImports": "Total Import Count",
+      "totalProducts": "Total Products in Warehouse",
+      "totalQuantity": "Total Import Quantity",
+      "receiptCode": "Receipt Code",
+      "importer": "Importer",
+      "totalValue": "Total Import Value"
+    },
+    "orderReport": {
+      "title": "Order Report",
+      "dateRange": "From {from} to {to}",
+      "totalOrders": "Total Orders",
+      "pending": "Pending",
+      "approved": "Approved",
+      "completed": "Completed",
+      "rejected": "Rejected",
+      "orderCode": "Order Code",
+      "orderDate": "Order Date",
+      "orderedBy": "Ordered By",
+      "department": "Department",
+      "totalValue": "Total Order Value"
+    },
+    "inventoryReport": {
+      "title": "Inventory Report"
+    }
+  }
+}

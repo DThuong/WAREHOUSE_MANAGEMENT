@@ -20,6 +20,7 @@ import InputText from 'primevue/inputtext'
 import OverlayPanel from 'primevue/overlaypanel'
 import ToastService from 'primevue/toastservice'
 import { ConfirmationService } from 'primevue'
+import i18n from './i18n'
 
 // Import PrimeIcons
 import 'primeicons/primeicons.css'
@@ -28,6 +29,7 @@ import './style.css'
 
 const pinia = createPinia()
 const app = createApp(App)
+app.use(i18n)
 app.use(pinia)
 app.use(router)
 app.use(ToastService)

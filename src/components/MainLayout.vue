@@ -246,31 +246,167 @@
     <OverlayPanel
       v-if="!isMobile"
       ref="notificationPanel"
+      appendTo="body"
       style="width: 400px; max-width: 400px"
     >
-      <NotificationContent
-        :notification-store="notificationStore"
-        :all-notifications-read="allNotificationsRead"
-        @mark-all-read="markAllAsRead"
-        @delete-all="deleteAllNoti"
-        @notification-click="handleNotificationClick"
-        :get-notification-icon="getNotificationIcon"
-        :get-notification-color="getNotificationColor"
-        :get-notification-title="getNotificationTitle"
-        :format-time="formatTime"
-      />
+      <!-- Header -->
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0 0 0.75rem 0;
+          border-bottom: 1px solid var(--gray-200);
+          margin-bottom: 0.5rem;
+        "
+      >
+        <h3 style="font-weight: 600; margin: 0; font-size: 1.125rem">
+          Thông báo
+        </h3>
+        <div style="display: flex; align-items: center; gap: 0.5rem">
+          <Button
+            v-if="notificationStore.unreadCount > 0"
+            label="Đánh dấu đã đọc"
+            text
+            size="small"
+            @click="markAllAsRead"
+            style="font-size: 0.75rem"
+          />
+          <Button
+            v-if="
+              allNotificationsRead && notificationStore.notifications.length > 0
+            "
+            label="Xóa tất cả"
+            text
+            size="small"
+            icon="pi pi-trash"
+            @click="deleteAllNoti"
+            style="font-size: 0.75rem"
+          />
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div
+        v-if="notificationStore.loading"
+        style="text-align: center; padding: 3rem"
+      >
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      </div>
+
+      <!-- Empty -->
+      <div
+        v-else-if="notificationStore.recentNotifications.length === 0"
+        style="text-align: center; padding: 3rem 2rem; color: var(--gray-500)"
+      >
+        <i
+          class="pi pi-bell"
+          style="
+            font-size: 3rem;
+            opacity: 0.3;
+            display: block;
+            margin-bottom: 1rem;
+          "
+        ></i>
+        <p style="margin: 0">Không có thông báo mới</p>
+      </div>
+
+      <!-- List -->
+      <div v-else style="max-height: 400px; overflow-y: auto; margin: 0 -0.75rem">
+        <div
+          v-for="notification in notificationStore.recentNotifications"
+          :key="notification.id"
+          class="notification-item"
+          style="
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--gray-100);
+            cursor: pointer;
+            transition: background 0.15s;
+          "
+          :style="{
+            background: notification.isRead ? 'transparent' : 'var(--blue-50)',
+          }"
+          @click="handleNotificationClick(notification)"
+        >
+          <div style="display: flex; gap: 0.75rem; align-items: flex-start">
+            <Avatar
+              :icon="getNotificationIcon(notification.type)"
+              shape="circle"
+              size="normal"
+              :style="{
+                backgroundColor: getNotificationColor(notification.type),
+                color: 'white',
+                flexShrink: 0,
+              }"
+            />
+            <div style="flex: 1; min-width: 0">
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: flex-start;
+                  margin-bottom: 0.25rem;
+                "
+              >
+                <p
+                  style="
+                    font-weight: 600;
+                    font-size: 0.875rem;
+                    margin: 0;
+                    color: var(--gray-900);
+                  "
+                >
+                  {{ getNotificationTitle(notification.type) }}
+                </p>
+                <Badge
+                  v-if="!notification.isRead"
+                  value=" "
+                  severity="info"
+                  style="
+                    width: 8px;
+                    height: 8px;
+                    min-width: 8px;
+                    padding: 0;
+                    margin-left: 0.5rem;
+                    flex-shrink: 0;
+                  "
+                />
+              </div>
+              <p
+                style="
+                  font-size: 0.875rem;
+                  color: var(--gray-700);
+                  margin: 0.25rem 0;
+                  word-break: break-word;
+                "
+              >
+                {{ notification.message }}
+              </p>
+              <p
+                style="
+                  font-size: 0.75rem;
+                  color: var(--gray-400);
+                  margin: 0.25rem 0 0 0;
+                "
+              >
+                {{ formatTime(notification.createdAt) }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </OverlayPanel>
 
     <!-- ── MOBILE: Fixed dropdown từ navbar xuống ── -->
     <Teleport to="body">
       <div
         v-if="isMobile && mobileNotiVisible"
-        style="position: fixed; inset: 0; z-index: 9999;"
+        style="position: fixed; inset: 0; z-index: 9999"
         @click.self="mobileNotiVisible = false"
       >
         <!-- Backdrop mờ -->
         <div
-          style="position: absolute; inset: 0; background: rgba(0,0,0,0.3);"
+          style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.3)"
           @click="mobileNotiVisible = false"
         />
 
@@ -304,33 +440,46 @@
               z-index: 1;
             "
           >
-            <h3 style="font-weight: 600; margin: 0; font-size: 1.125rem">Thông báo</h3>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <h3 style="font-weight: 600; margin: 0; font-size: 1.125rem">
+              Thông báo
+            </h3>
+            <div style="display: flex; align-items: center; gap: 0.5rem">
               <Button
                 v-if="notificationStore.unreadCount > 0"
                 label="Đánh dấu đã đọc"
-                text size="small" icon="pi pi-check"
+                text
+                size="small"
                 @click="markAllAsRead"
-                style="font-size: 0.75rem;"
+                style="font-size: 0.75rem"
               />
               <Button
-                v-if="allNotificationsRead && notificationStore.notifications.length > 0"
+                v-if="
+                  allNotificationsRead &&
+                  notificationStore.notifications.length > 0
+                "
                 label="Xóa tất cả"
-                text size="small" icon="pi pi-trash"
+                text
+                size="small"
+                icon="pi pi-trash"
                 @click="deleteAllNoti"
-                style="font-size: 0.75rem;"
+                style="font-size: 0.75rem"
               />
               <Button
                 icon="pi pi-times"
-                text rounded size="small"
+                text
+                rounded
+                size="small"
                 @click="mobileNotiVisible = false"
               />
             </div>
           </div>
 
           <!-- Loading -->
-          <div v-if="notificationStore.loading" style="text-align: center; padding: 3rem;">
-            <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+          <div
+            v-if="notificationStore.loading"
+            style="text-align: center; padding: 3rem"
+          >
+            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
           </div>
 
           <!-- Empty -->
@@ -342,12 +491,20 @@
               color: var(--gray-500);
             "
           >
-            <i class="pi pi-bell" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 1rem;"></i>
+            <i
+              class="pi pi-bell"
+              style="
+                font-size: 3rem;
+                opacity: 0.3;
+                display: block;
+                margin-bottom: 1rem;
+              "
+            ></i>
             <p style="margin: 0">Không có thông báo mới</p>
           </div>
 
           <!-- List -->
-          <div v-else>
+          <div v-else style="max-height: calc(100vh - 200px); overflow-y: auto;">
             <div
               v-for="notification in notificationStore.recentNotifications"
               :key="notification.id"
@@ -357,10 +514,14 @@
                 cursor: pointer;
                 transition: background 0.15s;
               "
-              :style="{ background: notification.isRead ? 'transparent' : 'var(--blue-50)' }"
+              :style="{
+                background: notification.isRead
+                  ? 'transparent'
+                  : 'var(--blue-50)',
+              }"
               @click="handleNotificationClick(notification)"
             >
-              <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+              <div style="display: flex; gap: 0.75rem; align-items: flex-start">
                 <Avatar
                   :icon="getNotificationIcon(notification.type)"
                   shape="circle"
@@ -371,22 +532,56 @@
                     flexShrink: 0,
                   }"
                 />
-                <div style="flex: 1; min-width: 0;">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
-                    <p style="font-weight: 600; font-size: 0.875rem; margin: 0; color: var(--gray-900);">
+                <div style="flex: 1; min-width: 0">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: flex-start;
+                      margin-bottom: 0.25rem;
+                    "
+                  >
+                    <p
+                      style="
+                        font-weight: 600;
+                        font-size: 0.875rem;
+                        margin: 0;
+                        color: var(--gray-900);
+                      "
+                    >
                       {{ getNotificationTitle(notification.type) }}
                     </p>
                     <Badge
                       v-if="!notification.isRead"
                       value=" "
                       severity="info"
-                      style="width: 8px; height: 8px; min-width: 8px; padding: 0; margin-left: 0.5rem; flex-shrink: 0;"
+                      style="
+                        width: 8px;
+                        height: 8px;
+                        min-width: 8px;
+                        padding: 0;
+                        margin-left: 0.5rem;
+                        flex-shrink: 0;
+                      "
                     />
                   </div>
-                  <p style="font-size: 0.875rem; color: var(--gray-700); margin: 0.25rem 0; word-break: break-word;">
+                  <p
+                    style="
+                      font-size: 0.875rem;
+                      color: var(--gray-700);
+                      margin: 0.25rem 0;
+                      word-break: break-word;
+                    "
+                  >
                     {{ notification.message }}
                   </p>
-                  <p style="font-size: 0.75rem; color: var(--gray-400); margin: 0.25rem 0 0 0;">
+                  <p
+                    style="
+                      font-size: 0.75rem;
+                      color: var(--gray-400);
+                      margin: 0.25rem 0 0 0;
+                    "
+                  >
                     {{ formatTime(notification.createdAt) }}
                   </p>
                 </div>
@@ -469,22 +664,32 @@ const handleResize = () => {
 const connectionStatusText = computed(() => {
   const state = signalRService.getConnectionState();
   switch (state) {
-    case 0: return "Đã kết nối";
-    case 1: return "Đang kết nối...";
-    case 2: return "Đang kết nối lại...";
-    case 4: return "Mất kết nối";
-    default: return "Không xác định";
+    case 0:
+      return "Đã kết nối";
+    case 1:
+      return "Đang kết nối...";
+    case 2:
+      return "Đang kết nối lại...";
+    case 4:
+      return "Mất kết nối";
+    default:
+      return "Không xác định";
   }
 });
 
 const connectionStatusSeverity = computed(() => {
   const state = signalRService.getConnectionState();
   switch (state) {
-    case 0: return "success";
-    case 1: return "warning";
-    case 2: return "warning";
-    case 4: return "danger";
-    default: return "secondary";
+    case 0:
+      return "success";
+    case 1:
+      return "warning";
+    case 2:
+      return "warning";
+    case 4:
+      return "danger";
+    default:
+      return "secondary";
   }
 });
 
@@ -527,47 +732,71 @@ const handleSignalRNotification = (event: any) => {
 const getNotificationIcon = (type: string): string => {
   switch (type?.toLowerCase()) {
     case "order":
-    case "neworder": return "pi pi-shopping-cart";
+    case "neworder":
+      return "pi pi-shopping-cart";
     case "orderapproved":
     case "orderrejected":
-    case "orderstatus": return "pi pi-check-circle";
-    case "stockin": return "pi pi-box";
-    case "user": return "pi pi-user";
-    default: return "pi pi-bell";
+    case "orderstatus":
+      return "pi pi-check-circle";
+    case "stockin":
+      return "pi pi-box";
+    case "user":
+      return "pi pi-user";
+    default:
+      return "pi pi-bell";
   }
 };
 
 const getNotificationColor = (type: string): string => {
   switch (type?.toLowerCase()) {
     case "order":
-    case "neworder": return "#3b82f6";
-    case "orderapproved": return "#10b981";
-    case "orderrejected": return "#ef4444";
-    case "stockin": return "#8b5cf6";
-    case "user": return "#f59e0b";
-    default: return "#6366f1";
+    case "neworder":
+      return "#3b82f6";
+    case "orderapproved":
+      return "#10b981";
+    case "orderrejected":
+      return "#ef4444";
+    case "stockin":
+      return "#8b5cf6";
+    case "user":
+      return "#f59e0b";
+    default:
+      return "#6366f1";
   }
 };
 
 const getNotificationTitle = (type: string): string => {
   switch (type?.toLowerCase()) {
     case "order":
-    case "neworder": return "Đơn hàng mới";
-    case "orderapproved": return "Đơn hàng đã duyệt";
-    case "orderrejected": return "Đơn hàng bị từ chối";
-    case "orderstatus": return "Cập nhật đơn hàng";
-    case "stockin": return "Nhập kho";
-    case "user": return "Người dùng";
-    default: return "Thông báo";
+    case "neworder":
+      return "Đơn hàng mới";
+    case "orderapproved":
+      return "Đơn hàng đã duyệt";
+    case "orderrejected":
+      return "Đơn hàng bị từ chối";
+    case "orderstatus":
+      return "Cập nhật đơn hàng";
+    case "stockin":
+      return "Nhập kho";
+    case "user":
+      return "Người dùng";
+    default:
+      return "Thông báo";
   }
 };
 
-const getToastSeverity = (type: string): "success" | "info" | "warn" | "error" => {
+const getToastSeverity = (
+  type: string,
+): "success" | "info" | "warn" | "error" => {
   switch (type?.toLowerCase()) {
-    case "orderapproved": return "success";
-    case "orderrejected": return "error";
-    case "neworder": return "info";
-    default: return "info";
+    case "orderapproved":
+      return "success";
+    case "orderrejected":
+      return "error";
+    case "neworder":
+      return "info";
+    default:
+      return "info";
   }
 };
 
@@ -621,7 +850,12 @@ const handleLogout = async () => {
     router.push("/signin");
   } catch (error) {
     console.error("Logout error:", error);
-    toast.add({ severity: "error", summary: "Lỗi", detail: "Không thể đăng xuất", life: 3000 });
+    toast.add({
+      severity: "error",
+      summary: "Lỗi",
+      detail: "Không thể đăng xuất",
+      life: 3000,
+    });
   }
 };
 
@@ -635,7 +869,11 @@ const mainLinks = [
   { path: "/", label: "Bảng điều khiển", icon: "pi pi-home" },
   { path: "/orders", label: "Quản lý đơn hàng", icon: "pi pi-flag" },
   { path: "/inventory", label: "Quản lý tồn kho", icon: "pi pi-box" },
-  { path: "/stockin", label: "Quản lý nhập kho", icon: "pi pi-cart-arrow-down" },
+  {
+    path: "/stockin",
+    label: "Quản lý nhập kho",
+    icon: "pi pi-cart-arrow-down",
+  },
   { path: "/add-product", label: "Thêm tồn kho", icon: "pi pi-plus-circle" },
   { path: "/users", label: "Người dùng", icon: "pi pi-user" },
   { path: "/reports", label: "Báo cáo", icon: "pi pi-chart-bar" },
@@ -674,10 +912,6 @@ const toggleNotifications = (event: Event) => {
   min-width: 0;
 }
 
-.notification-item:hover {
-  background: var(--gray-50) !important;
-}
-
 .nav-link {
   display: flex;
   align-items: center;
@@ -712,9 +946,13 @@ const toggleNotifications = (event: Event) => {
   backdrop-filter: blur(2px);
 }
 
+.notification-item:hover {
+  background: rgba(159, 197, 241, 0.5) !important;
+}
+
 /* === MOBILE === */
 @media (max-width: 767px) {
-   :global(html, body) {
+  :global(html, body) {
     overflow-x: hidden;
     width: 100%;
     position: relative;

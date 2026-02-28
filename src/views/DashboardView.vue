@@ -4,7 +4,7 @@
     <div v-if="loading" class="loading-overlay">
       <div class="loading-spinner">
         <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: #8B7AB8;"></i>
-        <p>Đang tải dữ liệu...</p>
+        <p>{{ t('common.loadingData') }}</p>
       </div>
     </div>
 
@@ -21,7 +21,7 @@
           <i :class="getIconClass(index)"></i>
         </div>
         <div class="stat-content">
-          <div class="stat-label-compact">{{ stat.label }}</div>
+          <div class="stat-label-compact">{{ statLabels[key as string] }}</div>
           <div class="stat-value-compact">  <article></article>
             {{ key === 'totalPurchase' ? formatCurrency(stat.value) : stat.value }}
           </div>
@@ -45,13 +45,13 @@
         </div>
         <div class="status-content">
           <div class="status-value">{{ dashboardStore.orderStatusSummary.pending }}</div>
-          <div class="status-label">Đơn chờ duyệt</div>
+          <div class="status-label">{{ t('dashboard.pendingOrders') }}</div>
         </div>
         <i class="pi pi-chevron-right nav-arrow"></i>
         
         <!-- Badge thông báo - hiển thị số lượng -->
         <div v-if="hasPendingOrders" class="update-badge">
-          <span class="badge-count">{{ dashboardStore.orderStatusSummary.pending }} đơn cần xử lý</span>
+          <span class="badge-count">{{ dashboardStore.orderStatusSummary.pending }} {{ t('dashboard.orderToProcess') }}</span>
         </div>
       </div>
 
@@ -69,13 +69,13 @@
         </div>
         <div class="status-content">
           <div class="status-value">{{ dashboardStore.orderStatusSummary.approved }}</div>
-          <div class="status-label">Đơn đã duyệt</div>
+          <div class="status-label">{{ t('dashboard.approvedOrders') }}</div>
         </div>
         <i class="pi pi-chevron-right nav-arrow"></i>
         
         <!-- Badge thông báo - hiển thị số lượng -->
         <div v-if="hasApprovedOrders" class="update-badge approved-badge">
-          <span class="badge-count">{{ dashboardStore.orderStatusSummary.approved }} đơn cần xử lý</span>
+          <span class="badge-count">{{ dashboardStore.orderStatusSummary.approved }} {{ t('dashboard.orderToProcess') }}</span>
         </div>
       </div>
 
@@ -86,7 +86,7 @@
         </div>
         <div class="status-content">
           <div class="status-value">{{ dashboardStore.orderStatusSummary.completed }}</div>
-          <div class="status-label">Đơn hoàn thành</div>
+          <div class="status-label">{{ t('dashboard.completedOrders') }}</div>
         </div>
         <i class="pi pi-chevron-right nav-arrow"></i>
       </div>
@@ -97,7 +97,7 @@
         </div>
         <div class="status-content">
           <div class="status-value">{{ dashboardStore.orderStatusSummary.rejected }}</div>
-          <div class="status-label">Đơn bị từ chối</div>
+          <div class="status-label">{{ t('dashboard.rejectedOrders') }}</div>
         </div>
         <i class="pi pi-chevron-right nav-arrow"></i>
       </div>
@@ -108,7 +108,7 @@
       <!-- Orders Status Chart -->
       <div class="chart-container">
         <div class="chart-header">
-          <h3 class="chart-title">Thống kê đơn hàng theo trạng thái</h3>
+          <h3 class="chart-title">{{ t('dashboard.orderStatusChart') }}</h3>
         </div>
         <div class="chart-wrapper">
           <DoughnutChart 
@@ -119,19 +119,19 @@
         <div class="chart-legend">
           <div class="legend-item">
             <span class="legend-color" style="background: #FFD6A5;"></span>
-            <span>Pending</span>
+            <span>{{ t('dashboard.pending') }}</span>
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #A0C4FF;"></span>
-            <span>Approved</span>
+            <span>{{ t('dashboard.approved') }}</span>
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #CAFFBF;"></span>
-            <span>Completed</span>
+            <span>{{ t('dashboard.completed') }}</span>
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #FFADAD;"></span>
-            <span>Rejected</span>
+            <span>{{ t('dashboard.rejected') }}</span>
           </div>
         </div>
       </div>
@@ -139,7 +139,7 @@
       <!-- Stock Value Chart -->
       <div class="chart-container">
         <div class="chart-header">
-          <h3 class="chart-title">Thống kê kho theo phân loại hàng hóa</h3>
+          <h3 class="chart-title">{{ t('dashboard.orderCategoryChart') }}</h3>
         </div>
         <div class="chart-wrapper">
           <DoughnutChart 
@@ -150,11 +150,11 @@
         <div class="chart-legend">
           <div class="legend-item">
             <span class="legend-color" style="background: #BDB2FF;"></span>
-            <span>Engineer</span>
+            <span>{{ t('inventoryManagement.technical') }}</span>
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #FFC6FF;"></span>
-            <span>Consumer</span>
+            <span>{{ t('inventoryManagement.consumer') }}</span>
           </div>
         </div>
       </div>
@@ -162,7 +162,7 @@
       <!-- Overview Stats -->
       <div class="overview-container">
         <div class="chart-header">
-          <h3 class="chart-title">Tổng quan hệ thống</h3>
+          <h3 class="chart-title">{{ t('dashboard.systemOverview') }}</h3>
         </div>
         <div class="overview-grid">
           <RouterLink to="/inventory" class="overview-item overview-purple">
@@ -171,7 +171,7 @@
             </div>
             <div class="overview-content">
               <div class="overview-value">{{ dashboardStore.overviewStats.totalItems }}</div>
-              <div class="overview-label">Tồn kho</div>
+              <div class="overview-label">{{ t('dashboard.stock') }}</div>
             </div>
           </RouterLink>
 
@@ -181,7 +181,7 @@
             </div>
             <div class="overview-content">
               <div class="overview-value">{{ dashboardStore.overviewStats.totalUsers }}</div>
-              <div class="overview-label">Người dùng</div>
+              <div class="overview-label">{{ t('dashboard.users') }}</div>
             </div>
           </RouterLink>
 
@@ -191,7 +191,7 @@
             </div>
             <div class="overview-content">
               <div class="overview-value">{{ dashboardStore.overviewStats.totalStockins }}</div>
-              <div class="overview-label">Phiếu nhập</div>
+              <div class="overview-label">{{ t('dashboard.importReceipts') }}</div>
             </div>
           </RouterLink>
 
@@ -201,7 +201,7 @@
             </div>
             <div class="overview-content">
               <div class="overview-value">{{ totalOrders }}</div>
-              <div class="overview-label">Đơn hàng</div>
+              <div class="overview-label">{{ t('dashboard.orders') }}</div>
             </div>
           </RouterLink>
 
@@ -214,7 +214,7 @@
             </div>
             <div class="overview-content">
               <div class="overview-value">{{ dashboardStore.topOrderedItems.length }}</div>
-              <div class="overview-label">Top order</div>
+              <div class="overview-label">{{ t('dashboard.topOrders') }}</div>
             </div>
           </div>
 
@@ -228,7 +228,7 @@
             </div>
             <div class="overview-content">
               <div class="overview-value">{{ dashboardStore.lowStockCountByStatus.critical }}</div>
-              <div class="overview-label">Nguy cấp</div>
+              <div class="overview-label">{{ t('dashboard.critical') }}</div>
             </div>
           </div>
         </div>
@@ -242,7 +242,7 @@
         <div class="list-header">
           <h3 class="list-title">
             <i class="pi pi-chart-line"></i>
-            Top vật tư được order nhiều nhất
+            {{ t('dashboard.topOrderedMaterials') }}
           </h3>
         </div>
         <div class="list-content">
@@ -257,7 +257,7 @@
               <div class="item-code">{{ item.code }}</div>
             </div>
             <div class="item-stats">
-              <div class="item-qty">{{ item.totalOrdered }} lần order</div>
+              <div class="item-qty">{{ item.totalOrdered }} {{ t('dashboard.orderCount') }}</div>
               <div class="progress-bar">
                 <div class="progress-fill" :style="{ width: item.percentage + '%' }"></div>
               </div>
@@ -265,7 +265,7 @@
           </div>
           <div v-if="dashboardStore.topOrderedItems.length === 0" class="empty-state">
             <i class="pi pi-cart-arrow-down"></i>
-            <p>Chưa có đơn hàng nào</p>
+            <p>{{ t('dashboard.noOrders') }}</p>
           </div>
         </div>
       </div>
@@ -275,7 +275,7 @@
         <div class="list-header">
           <h3 class="list-title">
             <i class="pi pi-exclamation-triangle"></i>
-            Vật tư tồn kho nguy cấp ({{ dashboardStore.lowStockCountByStatus.critical }})
+            {{ t('dashboard.criticalStock') }} ({{ dashboardStore.lowStockCountByStatus.critical }})
           </h3>
         </div>
         <div class="list-content">
@@ -298,7 +298,7 @@
           </div>
           <div v-if="dashboardStore.criticalStockItems.length === 0" class="empty-state">
             <i class="pi pi-check-circle"></i>
-            <p>Không có vật tư nguy cấp</p>
+            <p>{{ t('dashboard.noLowStock') }}</p>
           </div>
         </div>
       </div>
@@ -308,7 +308,7 @@
         <div class="list-header">
           <h3 class="list-title">
             <i class="pi pi-list"></i>
-            Đơn hàng gần đây
+            {{ t('dashboard.recentOrders') }}
           </h3>
         </div>
         <div class="list-content">
@@ -323,7 +323,7 @@
             <div class="order-info">
               <div class="order-number">Order ID: {{ order.id }}</div>
               <div class="order-meta">
-                {{ order.workerName }} - Order: {{ order.totalItems }} Sản phẩm - {{ order.totalQty }} Món
+                {{ order.workerName }} - Order: {{ order.totalItems }} {{ t('common.product') }} - {{ t('common.quantity') }}: {{ order.totalQty }}
               </div>
             </div>
             <div class="order-status">
@@ -335,7 +335,7 @@
           </div>
           <div v-if="dashboardStore.recentOrderStatus.length === 0" class="empty-state">
             <i class="pi pi-cart-arrow-down"></i>
-            <p>Chưa có đơn hàng nào</p>
+            <p>{{ t('dashboard.noOrders') }}</p>
           </div>
         </div>
       </div>
@@ -360,6 +360,9 @@ import { useToast } from 'primevue/usetoast'
 import { useRouter, useRoute } from 'vue-router'
 import { signalRService } from '@/services/orderNotiService'
 import type { OrderPendingRealtime } from '@/types/order.types'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const dashboardStore = useDashboardStore()
 const itemStore = useItemStore()
@@ -382,6 +385,13 @@ const statRoutes: Record<string, string> = {
   totalStock: '/inventory',
   totalPurchase: ''
 }
+
+const statLabels: Record<string, string> = computed(() => ({
+  totalPurchase: t('dashboard.totalPurchaseValue'),
+  totalOrders:   t('dashboard.totalOrders'),
+  totalStockins: t('dashboard.totalImports'),
+  totalStock:    t('dashboard.totalStock'),
+}))
 
 const scrollToSection = (sectionId: string) => {
   const element = document.getElementById(sectionId)
@@ -475,9 +485,9 @@ const getIconClass = (index: number): string => {
 
 const getStockStatusLabel = (status: string): string => {
   const labels: Record<string, string> = {
-    critical: 'Rất thấp',
-    low: 'Thấp',
-    warning: 'Cảnh báo'
+    critical: t('dashboard.critical'),
+    low: t('dashboard.low'),
+    warning: t('dashboard.warning')
   }
   return labels[status] || status
 }
@@ -494,10 +504,10 @@ const getOrderStatusIcon = (status: string): string => {
 
 const getOrderStatusLabel = (status: string): string => {
   const labels: Record<string, string> = {
-    Pending: 'Chờ duyệt',
-    Approved: 'Đã duyệt',
-    Completed: 'Hoàn thành',
-    Rejected: 'Từ chối'
+    Pending: t('dashboard.pending'),
+    Approved: t('dashboard.approved'),
+    Completed: t('dashboard.completed'),
+    Rejected: t('dashboard.rejected')
   }
   return labels[status] || status
 }

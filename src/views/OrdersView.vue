@@ -20,11 +20,11 @@
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
         <div>
-          <h2 class="text-2xl font-bold mb-4 text-gray-900">Đơn hàng</h2>
-          <p class="text-gray-600">Theo dõi và xử lý đơn đặt hàng</p>
+          <h2 class="text-2xl font-bold mb-4 text-gray-900">{{ t("orderManagement.orders") }}</h2>
+          <p class="text-gray-600">{{ t("orderManagement.subtitle") }}</p>
         </div>
         <Button
-          label="Tạo đơn hàng mới"
+          :label="t('orderManagement.createOrder.title')"
           icon="pi pi-plus"
           class="btn-primary"
           @click="openCreateOrderDialog"
@@ -39,7 +39,7 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block mb-2 text-sm font-semibold text-gray-700"
-                  >Từ ngày</label
+                  >{{ t("common.filter.fromDate") }}</label
                 >
                 <Calendar
                   v-model="fromDate"
@@ -55,7 +55,7 @@
 
               <div>
                 <label class="block mb-2 text-sm font-semibold text-gray-700"
-                  >Đến ngày</label
+                  >{{ t("common.filter.toDate") }}</label
                 >
                 <Calendar
                   v-model="toDate"
@@ -74,7 +74,7 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block mb-2 text-sm font-semibold text-gray-700"
-                  >Trạng thái</label
+                  >{{ t("common.filter.status") }}</label
                 >
                 <Dropdown
                   v-model="selectedStatus"
@@ -89,11 +89,11 @@
 
               <div>
                 <label class="block mb-2 text-sm font-semibold text-gray-700"
-                  >Tìm kiếm</label
+                  >{{ t("common.search") }}</label
                 >
                 <InputText
                   v-model="searchQuery"
-                  placeholder="Tìm kiếm theo ID, người đặt..."
+                  :placeholder="t('orderManagement.searchPlaceholder')"
                   class="w-full"
                 />
               </div>
@@ -105,7 +105,7 @@
                 class="flex md:flex-row lg:flex-row flex-col items-center gap-4"
               >
                 <span class="text-lg font-semibold text-gray-900">
-                  Tổng: {{ totalItems }} đơn hàng
+                  {{ t("orderManagement.totalOrders") }}: {{ totalItems }} {{ t("orderManagement.orders") }}
                 </span>
 
                 <Chip
@@ -120,7 +120,7 @@
 
               <div class="flex gap-3">
                 <Button
-                  label="Reset"
+                  :label="t('common.filter.reset')"
                   icon="pi pi-refresh"
                   severity="secondary"
                   @click="resetFilter"
@@ -137,28 +137,28 @@
           <div class="stat-card pending">
             <div class="stat-icon"><i class="pi pi-clock"></i></div>
             <div>
-              <p class="stat-label">Chờ xử lý</p>
+              <p class="stat-label">{{ t("orderManagement.pending") }}</p>
               <p class="stat-value">{{ orderStore.pendingOrders.length }}</p>
             </div>
           </div>
           <div class="stat-card approved">
             <div class="stat-icon"><i class="pi pi-check-circle"></i></div>
             <div>
-              <p class="stat-label">Đã duyệt</p>
+              <p class="stat-label">{{ t("orderManagement.approved") }}</p>
               <p class="stat-value">{{ orderStore.approvedOrders.length }}</p>
             </div>
           </div>
           <div class="stat-card completed">
             <div class="stat-icon"><i class="pi pi-verified"></i></div>
             <div>
-              <p class="stat-label">Hoàn thành</p>
+              <p class="stat-label">{{ t("orderManagement.completed") }}</p>
               <p class="stat-value">{{ orderStore.completedOrders.length }}</p>
             </div>
           </div>
           <div class="stat-card rejected">
             <div class="stat-icon"><i class="pi pi-times-circle"></i></div>
             <div>
-              <p class="stat-label">Từ chối</p>
+              <p class="stat-label">{{ t("orderManagement.rejected") }}</p>
               <p class="stat-value">{{ orderStore.rejectedOrders.length }}</p>
             </div>
           </div>
@@ -178,7 +178,7 @@
             <template #empty>
               <div class="text-center py-8">
                 <i class="pi pi-shopping-cart text-5xl text-gray-400"></i>
-                <p class="mt-4 text-gray-500">Chưa có đơn hàng nào</p>
+                <p class="mt-4 text-gray-500">{{ t("dashboard.noOrders") }}</p>
               </div>
             </template>
 
@@ -187,12 +187,12 @@
                 <span :data-order-id="data.id">{{ data.id }}</span>
               </template>
             </Column>
-            <Column field="orderDate" header="Ngày đặt" sortable>
+            <Column field="orderDate" :header="t('orderManagement.orderDate')" sortable>
               <template #body="{ data }">{{
                 formatDate(data.orderDate)
               }}</template>
             </Column>
-            <Column field="nameWorker" header="Tài khoản" sortable>
+            <Column field="nameWorker" :header="t('orderManagement.account')" sortable>
               <template #body="{ data }">
                 <span class="font-medium">{{
                   data.account?.username || "-"
@@ -201,23 +201,20 @@
             </Column>
             <Column
               field="account.department"
-              header="Phòng ban"
+              :header="t('orderManagement.department')"
               sortable
             ></Column>
-            <Column header="Sản phẩm">
+            <Column :header="t('common.product')">
               <template #body="{ data }">
-                <div class="flex flex-col gap-1">
                   <Chip
-                    :label="`${data.orderDetails.length} sản phẩm`"
+                    :label="`${data.orderDetails.length} ${t('orderManagement.orders')}`"
                     class="p-chip-info"
+                    style="width: fit-content;"
                   />
-                  <span class="text-xs text-gray-500"
-                    >Tổng: {{ getTotalQuantity(data) }} món</span
-                  >
-                </div>
+                
               </template>
             </Column>
-            <Column field="status" header="Trạng thái" sortable>
+            <Column field="status" :header="t('common.filter.status')" sortable>
               <template #body="{ data }">
                 <Chip
                   :label="getStatusLabel(data.status)"
@@ -225,7 +222,7 @@
                 />
               </template>
             </Column>
-            <Column header="Hành động" class="w-52">
+            <Column :header="t('common.action')" class="w-52">
               <template #body="{ data }">
                 <div class="flex gap-2">
                   <Button
@@ -234,7 +231,7 @@
                     rounded
                     severity="info"
                     @click="viewOrderDetails(data)"
-                    title="Xem chi tiết"
+                    :title="t('orderManagement.viewDetail')"
                   />
                   <Button
                     icon="pi pi-images"
@@ -242,7 +239,7 @@
                     rounded
                     severity="secondary"
                     @click="viewOrderImages(data)"
-                    title="Quản lý ảnh"
+                    :title="t('orderManagement.manageImages')"
                   />
                   <Button
                     v-if="
@@ -253,7 +250,7 @@
                     rounded
                     severity="warning"
                     @click="openUpdateStatusDialog(data)"
-                    title="Cập nhật trạng thái"
+                    :title="t('orderManagement.updateStatus')"
                   />
                   <Button
                     v-if="data.status === 'Rejected'"
@@ -262,7 +259,7 @@
                     rounded
                     severity="danger"
                     @click="confirmDelete(data)"
-                    title="Xóa"
+                    :title="t('common.delete')"
                   />
                 </div>
               </template>
@@ -279,7 +276,7 @@
               class="text-center py-8"
             >
               <i class="pi pi-shopping-cart text-5xl text-gray-400"></i>
-              <p class="mt-4 text-gray-500">Chưa có đơn hàng nào</p>
+              <p class="mt-4 text-gray-500">{{ t('dashboard.noOrders') }}</p>
             </div>
             <div v-else class="order-card-list">
               <div
@@ -307,24 +304,24 @@
                 <div class="order-card-body">
                   <div class="order-card-row">
                     <i class="pi pi-user text-gray-400"></i>
-                    <span class="order-card-label">Tài khoản</span>
+                    <span class="order-card-label">{{ t('orderManagement.account') }}</span>
                     <span class="order-card-value">{{
                       order.account?.username || "-"
                     }}</span>
                   </div>
                   <div class="order-card-row">
                     <i class="pi pi-building text-gray-400"></i>
-                    <span class="order-card-label">Phòng ban</span>
+                    <span class="order-card-label">{{ t('orderManagement.department') }}</span>
                     <span class="order-card-value">{{
                       order.account?.department || "-"
                     }}</span>
                   </div>
                   <div class="order-card-row">
                     <i class="pi pi-box text-gray-400"></i>
-                    <span class="order-card-label">Sản phẩm</span>
+                    <span class="order-card-label">{{ t('common.product') }}</span>
                     <span class="order-card-value">
-                      {{ order.orderDetails.length }} loại ·
-                      {{ getTotalQuantity(order) }} món
+                      {{ order.orderDetails.length }} {{ t('common.categoryItemCount') }} -
+                      {{ getTotalQuantity(order) }} {{ t('common.quantityItemCount') }}
                     </span>
                   </div>
                 </div>
@@ -352,7 +349,7 @@
                       order.status === 'Pending' || order.status === 'Approved'
                     "
                     icon="pi pi-pencil"
-                    label="Cập nhật"
+                    :label="t('common.update')"
                     text
                     size="small"
                     severity="warning"
@@ -361,7 +358,7 @@
                   <Button
                     v-if="order.status === 'Rejected'"
                     icon="pi pi-trash"
-                    label="Xóa"
+                    :label="t('common.delete')"
                     text
                     size="small"
                     severity="danger"
@@ -391,7 +388,7 @@
     <!-- Order Details Dialog -->
     <Dialog
       v-model:visible="showDetailsDialog"
-      :header="`Chi tiết đơn hàng #${selectedOrder?.id || ''}`"
+      :header="`${t('orderManagement.orderDetail.title')} #${selectedOrder?.id || ''}`"
       :style="{ width: '900px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -400,23 +397,23 @@
         <!-- Order Info -->
         <div class="grid grid-cols-2 gap-4 mb-4 p-4! bg-gray-50 rounded-lg">
           <div>
-            <p class="text-sm text-gray-600">Người đặt</p>
+            <p class="text-sm text-gray-600">{{ t('orderManagement.orderDetail.orderedBy') }}</p>
             <p class="font-semibold">{{ selectedOrder.nameWorker || "-" }}</p>
           </div>
           <div>
-            <p class="text-sm text-gray-600">Phòng ban</p>
+            <p class="text-sm text-gray-600">{{ t('orderManagement.orderDetail.department') }}</p>
             <p class="font-semibold">
               {{ selectedOrder.account?.department || "-" }}
             </p>
           </div>
           <div>
-            <p class="text-sm text-gray-600">Ngày đặt</p>
+            <p class="text-sm text-gray-600">{{ t('orderManagement.orderDetail.orderDate') }}</p>
             <p class="font-semibold">
               {{ formatDate(selectedOrder.orderDate) }}
             </p>
           </div>
           <div>
-            <p class="text-sm text-gray-600">Trạng thái</p>
+            <p class="text-sm text-gray-600">{{ t('common.status') }}</p>
             <Chip
               :label="getStatusLabel(selectedOrder.status)"
               :class="getStatusClass(selectedOrder.status)"
@@ -426,7 +423,7 @@
 
         <!-- Order Items -->
         <div>
-          <h4 class="font-semibold mb-3">Danh sách sản phẩm</h4>
+          <h4 class="font-semibold mb-3">{{ t('orderManagement.orderDetail.productList') }}</h4>
 
           <!-- DESKTOP: Table -->
           <DataTable
@@ -434,7 +431,7 @@
             :value="selectedOrder.orderDetails"
             responsiveLayout="scroll"
           >
-            <Column header="Sản phẩm">
+            <Column :header="t('common.product')">
               <template #body="{ data }">
                 <div class="flex items-center gap-3">
                   <img
@@ -457,22 +454,22 @@
                 </div>
               </template>
             </Column>
-            <Column field="orderQty" header="Số lượng">
+            <Column field="orderQty" :header="t('common.quantity')">
               <template #body="{ data }">
                 <span class="font-medium"
                   >{{ data.orderQty }} {{ data.item?.unit || "" }}</span
                 >
               </template>
             </Column>
-            <Column header="Đơn giá">
+            <Column :header="t('common.price')">
               <template #body="{ data }">
                 <span v-if="data.item?.price">
                   {{ Number(data.item.price).toLocaleString("vi-VN") }} VND
                 </span>
-                <span v-else class="text-gray-400">Chưa có giá</span>
+                <span v-else class="text-gray-400">{{ t('common.noPrice') }}</span>
               </template>
             </Column>
-            <Column header="Thành tiền">
+            <Column :header="t('common.total')">
               <template #body="{ data }">
                 <span
                   v-if="data.item?.price"
@@ -518,24 +515,24 @@
               <!-- Price Info Row -->
               <div class="dialog-item-card-bottom">
                 <div class="dialog-item-price-row">
-                  <span class="dialog-item-price-label">Số lượng</span>
+                  <span class="dialog-item-price-label">{{ t('common.quantity') }}</span>
                   <span class="dialog-item-price-value">
                     {{ data.orderQty }} {{ data.item?.unit || "" }}
                   </span>
                 </div>
                 <div class="dialog-item-price-row">
-                  <span class="dialog-item-price-label">Đơn giá</span>
+                  <span class="dialog-item-price-label">{{ t('common.price') }}</span>
                   <span class="dialog-item-price-value">
                     {{
                       data.item?.price
                         ? Number(data.item.price).toLocaleString("vi-VN") +
                           " VND"
-                        : "Chưa có giá"
+                        : t('common.noPrice')
                     }}
                   </span>
                 </div>
                 <div class="dialog-item-price-row total">
-                  <span class="dialog-item-price-label">Thành tiền</span>
+                  <span class="dialog-item-price-label">{{ t('common.total') }}</span>
                   <span class="dialog-item-total">
                     {{
                       data.item?.price
@@ -554,7 +551,7 @@
 
       <template #footer>
         <Button
-          label="Đóng"
+          :label="t('common.close')"
           icon="pi pi-times"
           text
           @click="showDetailsDialog = false"
@@ -564,7 +561,7 @@
             selectedOrder?.status === 'Pending' ||
             selectedOrder?.status === 'Approved'
           "
-          label="Cập nhật trạng thái"
+          :label="t('orderManagement.updateStatus')"
           icon="pi pi-pencil"
           severity="warning"
           @click="
@@ -579,7 +576,7 @@
 
     <Dialog
       v-model:visible="showUpdateStatusDialog"
-      header="Cập nhật trạng thái đơn hàng"
+      :header="t('orderManagement.updateStatusOrder')"
       :style="{ width: '500px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -587,38 +584,32 @@
       <div class="flex flex-col gap-4 mt-4">
         <div>
           <label class="block mb-2 font-semibold">
-            Trạng thái <span class="text-red-500">*</span>
+            {{ t('common.status') }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
             v-model="updateForm.status"
             :options="updateStatusOptions"
             optionLabel="label"
             optionValue="value"
-            placeholder="Chọn trạng thái"
+            :placeholder="t('orderManagement.chooseStatus')"
             class="w-full"
           />
         </div>
         <!-- Note field - Chỉ hiển thị khi chọn Rejected -->
         <div v-if="updateForm.status === 'Rejected'">
           <label class="block mb-2 font-semibold">
-            Lý do từ chối <span class="text-red-500">*</span>
+            {{ t('orderManagement.rejectReason') }} <span class="text-red-500">*</span>
           </label>
           <Textarea
             v-model="updateForm.note"
             rows="4"
-            placeholder="Nhập lý do từ chối..."
+            :placeholder="t('orderManagement.rejectReasonPlaceholder')"
             class="w-full"
             :class="{
               'p-invalid':
                 updateForm.status === 'Rejected' && !updateForm.note.trim(),
             }"
           />
-          <small
-            v-if="updateForm.status === 'Rejected' && !updateForm.note.trim()"
-            class="p-error"
-          >
-            Vui lòng nhập lý do từ chối
-          </small>
         </div>
 
         <!-- Cảnh báo khi chọn Completed -->
@@ -634,14 +625,13 @@
             <i class="pi pi-exclamation-triangle text-orange-600 mt-1"></i>
             <div class="flex-1">
               <p class="font-semibold text-orange-800 text-sm mb-1">
-                Yêu cầu hình ảnh minh chứng
+                {{ t('orderManagement.proveImage') }}
               </p>
               <p class="text-orange-700 text-xs">
-                Vui lòng tải lên ít nhất 1 hình ảnh minh chứng đã nhận hàng
-                trước khi hoàn thành đơn hàng.
+                {{ t('orderManagement.proveImagePlaceholder') }}
               </p>
               <Button
-                label="Quản lý hình ảnh"
+                :label="t('orderManagement.manageImages')"
                 icon="pi pi-images"
                 size="small"
                 text
@@ -655,16 +645,16 @@
         <!-- Info về đơn hàng -->
         <div v-if="selectedOrder" class="p-3! bg-gray-50 rounded-lg">
           <p class="text-sm text-gray-600 mb-1">
-            Đơn hàng: <span class="font-semibold">#{{ selectedOrder.id }}</span>
+            {{ t('dashboard.orders') }}: <span class="font-semibold">#{{ selectedOrder.id }}</span>
           </p>
           <p class="text-sm text-gray-600 mb-1">
-            Người đặt:
+            {{ t('orderManagement.orderDetail.orderedBy') }}:
             <span class="font-semibold">{{
               selectedOrder.nameWorker || selectedOrder.account?.username
             }}</span>
           </p>
           <p class="text-sm text-gray-600 mb-1">
-            Trạng thái hiện tại:
+            {{ t('orderManagement.currentStatus') }}:
             <Chip
               :label="getStatusLabel(selectedOrder.status)"
               :class="getStatusClass(selectedOrder.status)"
@@ -673,9 +663,9 @@
           </p>
           <!-- Hiển thị số lượng ảnh -->
           <p class="text-sm text-gray-600">
-            Hình ảnh:
+            {{ t('common.image') }}:
             <span class="font-semibold"
-              >{{ selectedOrder.image?.length || 0 }} ảnh</span
+              >{{ selectedOrder.image?.length || 0 }} {{ t('orderManagement.img') }}</span
             >
           </p>
         </div>
@@ -683,14 +673,14 @@
 
       <template #footer>
         <Button
-          label="Hủy"
+          :label="t('common.cancel')"
           icon="pi pi-times"
           text
           @click="showUpdateStatusDialog = false"
           :disabled="orderStore.loading"
         />
         <Button
-          label="Cập nhật"
+          :label="t('common.update')"
           icon="pi pi-check"
           @click="saveUpdateStatus"
           :loading="orderStore.loading"
@@ -702,7 +692,7 @@
     <!-- Image Management Dialog -->
     <Dialog
       v-model:visible="showImageDialog"
-      :header="`Quản lý hình ảnh - Đơn hàng #${selectedOrder?.id || ''}`"
+      :header="`${t('orderManagement.imageManagement.title')} #${selectedOrder?.id || ''}`"
       :style="{ width: '800px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -711,19 +701,19 @@
         <!-- Upload Area -->
         <div class="mb-6">
           <label class="block mb-2 font-semibold">
-            Tải lên hình ảnh mới
+            {{ t('orderManagement.imageManagement.upload') }}
             <span
               v-if="orderStore.uploadingImages"
               class="text-primary text-sm ml-2"
             >
-              <i class="pi pi-spin pi-spinner"></i> Đang tải lên...
+              <i class="pi pi-spin pi-spinner"></i> {{ t('common.uploading') }}
             </span>
           </label>
 
           <!-- Mobile: 2 nút chọn ảnh / chụp ảnh -->
           <div v-if="isTableMobile" class="flex gap-2 mb-3">
             <Button
-              label="Chọn ảnh"
+              :label="t('common.selectImage')"
               icon="pi pi-images"
               severity="secondary"
               class="flex-1"
@@ -731,7 +721,7 @@
               @click="imageFileInput?.click()"
             />
             <Button
-              label="Chụp ảnh"
+              :label="t('common.takePhoto')"
               icon="pi pi-camera"
               severity="secondary"
               class="flex-1"
@@ -785,17 +775,17 @@
                 "
               >
                 <i class="pi pi-plus text-2xl text-gray-400"></i>
-                <span class="text-xs text-gray-400 mt-1">Thêm ảnh</span>
+                <span class="text-xs text-gray-400 mt-1">{{ t('common.upload.addImage') }}</span>
               </div>
             </div>
             <!-- Empty state -->
             <div class="flex flex-col items-center justify-center py-6">
               <i class="pi pi-cloud-upload text-4xl text-gray-400 mb-2"></i>
               <p class="text-gray-600 text-sm font-medium mb-1">
-                Kéo thả hình ảnh vào đây hoặc click để chọn
+                {{ t('common.upload.dragDropOrClick') }}
               </p>
               <p class="text-xs text-gray-400">
-                PNG, JPG, WEBP (Max. 5MB mỗi file)
+                {{ t('common.upload.maxFileSize') }}
               </p>
             </div>
           </div>
@@ -837,7 +827,7 @@
                 @click="imageFileInput?.click()"
               >
                 <i class="pi pi-plus text-xl text-gray-400"></i>
-                <span class="text-xs text-gray-400 mt-1">Thêm</span>
+                <span class="text-xs text-gray-400 mt-1">{{ t('common.upload.addMore') }}</span>
               </div>
             </div>
           </div>
@@ -870,11 +860,11 @@
             class="flex justify-between items-center mt-3"
           >
             <span class="text-sm text-gray-600 font-medium"
-              >Đã chọn {{ pendingImages.length }} file</span
+              >{{ t('common.upload.selectedFiles') }} {{ pendingImages.length }} file</span
             >
             <div class="flex gap-2 mt-2!">
               <Button
-                label="Xóa tất cả"
+                :label="t('common.createOrderAction.deleteAll')"
                 icon="pi pi-trash"
                 text
                 size="small"
@@ -882,7 +872,7 @@
                 @click="clearPendingImages"
               />
               <Button
-                label="Tải lên"
+                :label="t('common.upload.uploadBtn')"
                 icon="pi pi-upload"
                 size="small"
                 severity="success"
@@ -896,7 +886,7 @@
         <!-- Current Images -->
         <div>
           <label class="font-semibold mb-3! block"
-            >Hình ảnh hiện tại ({{ currentImages.length }})</label
+            >{{ t('common.upload.currentImages') }} ({{ currentImages.length }})</label
           >
 
           <div
@@ -904,7 +894,7 @@
             class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed"
           >
             <i class="pi pi-image text-5xl text-gray-400"></i>
-            <p class="text-gray-500">Chưa có hình ảnh</p>
+            <p class="text-gray-500">{{ t('common.upload.noImages') }}</p>
           </div>
 
           <div v-else class="grid grid-cols-4 gap-4">
@@ -940,7 +930,7 @@
             selectedOrder?.status === 'Pending' ||
             selectedOrder?.status === 'Approved'
           "
-          label="Cập nhật trạng thái"
+          :label="t('orderManagement.updateStatus')"
           icon="pi pi-pencil"
           severity="warning"
           @click="
@@ -956,7 +946,7 @@
     <!-- Create Order Dialog -->
     <Dialog
       v-model:visible="showCreateOrderDialog"
-      header="Tạo đơn hàng mới"
+      :header="t('common.createOrderAction.createOrderTitle')"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :style="{ width: '1200px' }"
       :modal="true"
@@ -965,12 +955,12 @@
         <!-- Name Worker -->
         <div>
           <label class="block mb-2 font-semibold">
-            Tên người đặt hàng <span class="text-red-500">*</span>
+            {{ t('common.form.ordererName') }} <span class="text-red-500">*</span>
           </label>
           <InputText
             v-model="createOrderForm.nameWorker"
             class="w-full"
-            placeholder="Nhập tên người đặt hàng..."
+            :placeholder="t('common.form.ordererPlaceholder')"
           />
         </div>
 
@@ -978,10 +968,10 @@
         <div>
           <div class="flex justify-between items-center mb-4">
             <label class="text-base font-semibold">
-              Danh sách sản phẩm đặt hàng <span class="text-red-500">*</span>
+              {{ t('common.form.productList') }} <span class="text-red-500">*</span>
             </label>
             <Button
-              label="Thêm sản phẩm"
+              :label="t('common.form.addProduct')"
               icon="pi pi-plus"
               size="small"
               @click="addItemRow"
@@ -993,9 +983,9 @@
             class="text-center py-8 rounded-lg border-2 border-dashed border-gray-300"
           >
             <i class="pi pi-shopping-cart text-5xl text-gray-400"></i>
-            <p class="mt-3! text-gray-500 font-medium">Chưa có sản phẩm nào</p>
+            <p class="mt-3! text-gray-500 font-medium">{{ t('common.form.noProducts') }}</p>
             <Button
-              label="Thêm sản phẩm đầu tiên"
+              :label="t('common.form.addFirstProduct')"
               icon="pi pi-plus"
               text
               class="mt-2!"
@@ -1012,17 +1002,17 @@
               <!-- Item Dropdown -->
               <div class="w-lg">
                 <label class="block mb-2 text-sm font-medium text-gray-700"
-                  >Sản phẩm</label
+                  >{{ t('common.form.productUnit') }}</label
                 >
                 <Dropdown
                   v-model="item.itemId"
                   :options="availableItems"
                   optionLabel="label"
                   optionValue="value"
-                  placeholder="Chọn sản phẩm"
+                  :placeholder="t('common.form.selectProduct')"
                   class="w-full"
                   :filter="true"
-                  filterPlaceholder="Tìm sản phẩm..."
+                  :filterPlaceholder="t('common.form.searchProduct')"
                 >
                   <template #value="slotProps">
                     <div
@@ -1067,7 +1057,7 @@
                           {{ slotProps.option.label }}
                         </div>
                         <div class="text-xs text-gray-500 truncate">
-                          {{ slotProps.option.type }} - Tồn:
+                          {{ slotProps.option.type }} - {{ t('common.form.stockLabel') }}:
                           {{ slotProps.option.stock }}
                           {{ slotProps.option.unit }} -
                           {{
@@ -1087,10 +1077,10 @@
               <div class="w-md">
                 <div class="flex items-center justify-between">
                   <label class="block mb-2 text-sm font-medium text-gray-700"
-                    >Số lượng</label
+                    >{{ t('common.form.quantity') }}</label
                   >
                   <small v-if="item.itemId" class="text-gray-500 mt-1 block">
-                    Tồn kho: {{ getStockQty(item.itemId) }}
+                    {{ t('common.form.stockRemaining', { n: getStockQty(item.itemId) }) }}
                     {{ getSelectedItemUnit(item.itemId) }}
                   </small>
                   <small
@@ -1099,7 +1089,7 @@
                     "
                     class="text-red-500 mt-1 block"
                   >
-                    Vượt quá số lượng tồn kho!
+                    {{ t('common.form.exceedStock') }}
                   </small>
                 </div>
                 <InputNumber
@@ -1115,7 +1105,7 @@
               <div class="w-48">
                 <label
                   class="block mb-2 text-sm font-medium text-gray-700 text-center"
-                  >Thành tiền</label
+                  >{{ t('common.form.subtotal') }}</label
                 >
                 <div class="h-10 flex items-center justify-center">
                   <Chip
@@ -1130,7 +1120,7 @@
               <!-- Remove Button -->
               <div class="w-8">
                 <label class="block mb-2 text-sm font-medium select-none"
-                  >Xóa</label
+                  >{{ t('common.delete') }}</label
                 >
                 <div class="h-10 flex items-center justify-center">
                   <Button
@@ -1153,22 +1143,22 @@
           class="mt-4 p-4! bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200"
         >
           <div class="flex items-center justify-between">
-            <span class="font-semibold text-gray-700">Tổng số mặt hàng:</span>
+            <span class="font-semibold text-gray-700">{{ t('common.form.totalItems') }}:</span>
             <span class="text-xl font-bold text-blue-600"
-              >{{ createOrderForm.items.length }} mặt hàng</span
+              >{{ createOrderForm.items.length }} {{ t('common.form.itemUnit') }}</span
             >
           </div>
           <div class="flex items-center justify-between mt-2!">
-            <span class="font-semibold text-gray-700">Tổng số lượng đặt:</span>
+            <span class="font-semibold text-gray-700">{{ t('common.form.totalQuantityOrdered') }}:</span>
             <span class="text-xl font-bold text-blue-600"
-              >{{ totalQuantity.toLocaleString("vi-VN") }} sản phẩm</span
+              >{{ totalQuantity.toLocaleString("vi-VN") }} {{ t('common.form.productUnit') }}</span
             >
           </div>
           <div
             class="flex items-center justify-between mt-2! pt-2! border-t border-blue-200"
           >
             <span class="font-semibold text-gray-800"
-              >Tổng giá trị đơn hàng:</span
+              >{{ t('common.form.totalOrderValue') }}:</span
             >
             <span class="text-2xl font-bold text-indigo-600"
               >{{ totalAmount.toLocaleString("vi-VN") }} VND</span
@@ -1179,14 +1169,14 @@
 
       <template #footer>
         <Button
-          label="Hủy"
+          :label="t('common.cancel')"
           icon="pi pi-times"
           text
           @click="closeCreateDialog"
           :disabled="orderStore.loading"
         />
         <Button
-          label="Tạo đơn hàng"
+          :label="t('common.createOrderAction.createOrder')"
           icon="pi pi-check"
           @click="submitCreate"
           :loading="orderStore.loading"
@@ -1229,7 +1219,9 @@ import ImagePreviewDialog from "@/views/ImagePreviewDialog.vue";
 import { useImagePreview } from "@/composables/useImagePreview";
 import { usePagination } from '@/composables/usePagination'
 import AppPagination from '@/components/AppPagination.vue'
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const imagePreview = useImagePreview();
 const confirm = useConfirm();
 const toast = useToast();
@@ -1263,10 +1255,10 @@ const statusFilterOptions = [
 // Helper để get status label
 const getStatusLabel = (status: string): string => {
   const labels: Record<string, string> = {
-    Pending: "Chờ duyệt",
-    Approved: "Đã duyệt",
-    Completed: "Hoàn thành",
-    Rejected: "Từ chối",
+    Pending: t("orderManagement.pending"),
+    Approved: t("orderManagement.approved"),
+    Completed: t("orderManagement.completed"),
+    Rejected: t("orderManagement.rejected"),
   };
   return labels[status] || status;
 };
@@ -2370,9 +2362,9 @@ onUnmounted(() => {
 }
 
 :deep(.p-chip-info) {
-  background: #dbeafe !important;
+  /* background: #dbeafe !important; */
   color: #2563eb !important;
-  border: 1px solid #bfdbfe !important;
+  /* border: 1px solid #bfdbfe !important; */
   font-weight: 600 !important;
 }
 
