@@ -37,9 +37,9 @@ npm run preview
 ```
 ## Các trang chính
 
-1. **Dashboard** (`/`) - Trang chủ với overview metrics
+1. **Dashboard** (`/`) - Trang chủ
 2. **Inventory** (`/inventory`) - Quản lý hàng tồn kho
 3. **Add Product** (`/add-product`) - Thêm sản phẩm mới
 4. **Reports** (`/reports`) - Báo cáo và thống kê
-5. **Suppliers** (`/suppliers`) - Quản lý nhà cung cấp
-6. **Customers** (`/customers`) - Quản lý khách hàng
+5. **Stockin** (`/stockin`) - Quản lý nhập kho
+6. **Users** (`/userss`) - Quản lý khách hàng
