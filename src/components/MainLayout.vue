@@ -714,6 +714,27 @@ const toggleNotifications = (event: Event) => {
 
 /* === MOBILE === */
 @media (max-width: 767px) {
+   :global(html, body) {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+
+  .app-container {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+
+  .main-content {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  .content-area {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
   .sidebar {
     position: fixed !important;
     top: 0;

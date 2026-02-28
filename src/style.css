@@ -418,6 +418,15 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ConfirmDialog mobile fix */
 @media (max-width: 767px) {
+  .app-container {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  .content-area {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
   .p-confirmdialog {
     width: calc(100vw - 2rem) !important;
     max-width: calc(100vw - 2rem) !important;
@@ -428,4 +437,11 @@ h1, h2, h3, h4, h5, h6 {
     max-width: calc(100vw - 2rem) !important;
     margin: 0 1rem !important;
   }
+}
+
+/* Fix iOS horizontal scroll & zoom */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
