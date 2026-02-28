@@ -1,8 +1,22 @@
 <template>
+  <!-- Image Preview -->
+  <ImagePreviewDialog
+    :visible="imagePreview.visible.value"
+    :current-src="imagePreview.currentSrc.value"
+    :images="imagePreview.images.value"
+    :current-index="imagePreview.currentIndex.value"
+    @close="imagePreview.close()"
+    @prev="imagePreview.prev()"
+    @next="imagePreview.next()"
+    @goto="(i) => {
+      imagePreview.currentIndex.value = i
+      imagePreview.currentSrc.value = imagePreview.images.value[i]
+    }"
+  />
   <MainLayout>
     <div class="animate-fade-in">
       <!-- Header -->
-      <div class="flex justify-between items-center mb-4">
+      <div class="flex md:flex-row lg:flex-row flex-col justify-between md:items-center lg:items-center mb-4">
         <div>
           <h2 class="text-2xl font-bold mb-4 text-gray-900">Kho hàng</h2>
           <p class="text-gray-600">Quản lý tồn kho sản phẩm</p>
@@ -60,7 +74,7 @@
             
             <!-- Summary & Actions Row -->
             <div class="flex justify-between items-center">
-              <div class="flex items-center gap-4">
+              <div class="flex md:flex-row lg:flex-row flex-col md:items-center lg:items-center gap-4">
                 <span class="text-lg font-semibold text-gray-900">
                   Tổng: {{ totalFilteredItems }} sản phẩm
                 </span>
@@ -134,9 +148,11 @@
 
       <Card>
         <template #content>
-          <DataTable 
-            :value="filteredItems" 
-            :paginator="true" 
+          <!-- DESKTOP: DataTable -->
+          <DataTable
+            v-if="!isTableMobile" 
+            :value="paginatedList" 
+            :paginator="false" 
             :rows="10"
             :loading="itemStore.loading"
             responsiveLayout="scroll"
@@ -227,6 +243,104 @@
               </template>
             </Column>
           </DataTable>
+
+          <!-- MOBILE: Card List -->
+        <div v-if="isTableMobile">
+          <div v-if="itemStore.loading" class="flex justify-center py-4">
+            <i class="pi pi-spin pi-spinner text-4xl text-gray-400"></i>
+          </div>
+
+          <div v-else-if="filteredItems.length === 0" class="text-center py-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+            <i class="pi pi-box text-5xl text-gray-400"></i>
+            <p class="mt-4 text-gray-500">Chưa có sản phẩm nào</p>
+          </div>
+
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div 
+              v-for="item in paginatedList" 
+              :key="item.id"
+              class="p-4! border-2 border-gray-200 rounded-lg"
+              @click="openEditDialog(item)"
+            >
+              <div class="flex items-center gap-3">
+                <img 
+                  :src="getProductImage(item)" 
+                  :alt="getProductName(item)" 
+                  class="w-12 h-12 rounded-lg object-cover cursor-pointer" 
+                  @click.stop="viewImages(item)"
+                />
+                <div>
+                  <p class="font-semibold text-gray-900">{{ getProductName(item) }}</p>
+                  <p class="text-sm text-gray-500">{{ getDistinguishName(item) }}</p>
+                  <p class="text-sm text-gray-500">{{ getProductCategory(item) }}</p>
+                </div>
+              </div>
+
+              <div class="mt-4">
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold">Giá:</span>
+                  <span class="font-medium">{{ Number(item.price).toLocaleString('vi-VN') }} VND</span>
+                </div>
+
+                <div class="flex items-center gap-2 mt-2">
+                  <span class="font-semibold">Tồn kho:</span>
+                  <Chip 
+                    :label="`${item.stockQty} ${item.unit}`" 
+                    :class="item.stockQty < 10 ? 'p-chip-danger' : 'p-chip-success'"
+                  />
+                </div>
+
+                <div class="flex items-center gap-2 mt-2">
+                  <span class="font-semibold">Tồn an toàn:</span>
+                  <span>{{ item.saveQuantity }} {{ item.unit }}</span>
+                </div>
+              </div>
+
+              <div class="flex gap-2 mt-4">
+                <Button 
+                  icon="pi pi-images" 
+                  text 
+                  rounded 
+                  severity="info"
+                  @click.stop="viewImages(item)"
+                  title="Quản lý ảnh"
+                />
+                <Button 
+                  icon="pi pi-pencil" 
+                  text 
+                  rounded 
+                  severity="secondary" 
+                  @click.stop="openEditDialog(item)"
+                  title="Sửa"
+                />
+                <Button 
+                  icon="pi pi-trash" 
+                  text 
+                  rounded 
+                  severity="danger"
+                  @click.stop="confirmDelete(item)"
+                  title="Xóa"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHARED PAGINATOR — dùng chung desktop & mobile -->
+        <AppPagination
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          :total-items="totalItems"
+          :page-info="pageInfo"
+          v-model:model-page-size="pageSize"
+          :show-page-size="true"
+          :max-visible="5"
+          @prev="prevPage"
+          @next="nextPage"
+          @first="firstPage"
+          @last="lastPage"
+          @goto="goToPage"
+        />
         </template>
       </Card>
     </div>
@@ -274,130 +388,184 @@
 
     <!-- Image Management Dialog -->
     <Dialog 
-      v-model:visible="showImageDialog" 
-      :header="`Quản lý hình ảnh - ${selectedItem ? getProductName(selectedItem) : ''}`"
-      :style="{ width: '800px' }"
-      :modal="true"
-      :dismissableMask="true"
-    >
-      <div class="mt-4">
-        <!-- Upload Area -->
-        <div class="mb-6">
-          <label class="block mb-2 font-semibold">
-            Tải lên hình ảnh mới
-            <span v-if="itemStore.uploadingImages" class="text-primary text-sm ml-2">
-              <i class="pi pi-spin pi-spinner"></i> Đang tải lên...
-            </span>
-          </label>
-          
-          <div 
-            @click="!itemStore.uploadingImages && imageFileInput?.click()"
-            class="min-h-25 border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all hover:bg-gray-50 flex flex-col justify-center items-center"
-            :class="itemStore.uploadingImages ? 'opacity-50 cursor-not-allowed' : 'border-gray-400'"
-          >
-            <i class="pi pi-cloud-upload text-5xl text-gray-400 mb-2"></i>
-            <p class="text-gray-600 text-sm mb-1">Click để chọn hình ảnh</p>
-            <p class="text-xs text-gray-500">PNG, JPG, WEBP (Max. 5MB)</p>
-          </div>
-          
-          <input 
-            ref="imageFileInput" 
-            type="file" 
-            accept="image/png,image/jpeg,image/jpg,image/webp"
-            multiple
-            :disabled="itemStore.uploadingImages"
-            class="hidden" 
-            @change="handleImageUpload"
-          />
+  v-model:visible="showImageDialog" 
+  :header="`Quản lý hình ảnh - ${selectedItem ? getProductName(selectedItem) : ''}`"
+  :style="{ width: '800px' }"
+  :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
+  :modal="true"
+  :dismissableMask="true"
+>
+  <div class="mt-4">
+    <!-- Upload Area -->
+    <div class="mb-6">
+      <label class="block mb-2 font-semibold">
+        Tải lên hình ảnh mới
+        <span v-if="itemStore.uploadingImages" class="text-primary text-sm ml-2">
+          <i class="pi pi-spin pi-spinner"></i> Đang tải lên...
+        </span>
+      </label>
 
-          <!-- Pending Images Preview -->
-          <div v-if="pendingImages.length > 0" class="mt-4">
-            <div class="flex justify-between items-center mb-2">
-              <span class="font-medium text-sm">Đã chọn {{ pendingImages.length }} file</span>
-              <div class="flex gap-2 mt-3!">
-                <Button label="Xóa tất cả" icon="pi pi-trash" text size="small" severity="danger" @click="clearPendingImages" />
-                <Button label="Tải lên" icon="pi pi-upload" size="small" severity="success" :loading="itemStore.uploadingImages" @click="uploadPendingImages" />
-              </div>
-            </div>
-            
-            <div class="grid grid-cols-6 gap-3">
-              <div 
-                v-for="(preview, index) in pendingImagePreviews" 
-                :key="`pending-${index}`"
-                class="relative aspect-square rounded-lg overflow-hidden border-2 border-orange-400"
-              >
-                <img :src="preview" class="absolute inset-0 w-full h-full object-cover" />
-                
-                <Button 
-                  icon="pi pi-times" 
-                  rounded 
-                  text
-                  severity="danger"
-                  size="small"
-                  class="absolute! top-1 right-1 bg-white/95! hover:bg-orange-200!"
-                  @click="removePendingImage(index)"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Current Images -->
-        <div>
-          <div class="flex justify-between items-center mb-4">
-            <label class="font-semibold">Hình ảnh hiện tại ({{ currentImages.length }})</label>
-          </div>
-
-          <div v-if="currentImages.length === 0" class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-            <i class="pi pi-image text-5xl text-gray-400"></i>
-            <p class="mt-4 text-gray-500">Chưa có hình ảnh nào</p>
-          </div>
-
-          <div v-else class="grid grid-cols-4 gap-4">
-            <div 
-              v-for="(img, index) in currentImages" 
-              :key="`current-${index}`"
-              class="image-container"
-            >
-              <img 
-                :src="getImageUrl(img)" 
-                class="image-preview"
-                @click="viewImageFullscreen(img)"
-              />
-              <Button 
-                icon="pi pi-trash" 
-                rounded 
-                severity="danger"
-                size="small"
-                :loading="itemStore.deletingImage"
-                class="delete-button"
-                @click.stop="confirmDeleteImage(img)"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <template #footer>
-        <Button label="Đóng" icon="pi pi-times" @click="closeImageDialog" />
-      </template>
-    </Dialog>
-
-    <!-- Fullscreen Image Dialog -->
-    <Dialog 
-      v-model:visible="showFullscreenImage" 
-      :style="{ width: '90vw', maxWidth: '1200px' }"
-      :modal="true"
-      header="Xem hình ảnh"
-    >
-      <div class="flex justify-center items-center p-4">
-        <img 
-          v-if="fullscreenImageUrl"
-          :src="fullscreenImageUrl" 
-          class="max-w-full max-h-[70vh] object-contain rounded-lg"
+      <!-- Mobile: 2 nút chọn ảnh / chụp ảnh -->
+      <div v-if="isTableMobile" class="flex gap-2 mb-3">
+        <Button
+          label="Chọn ảnh"
+          icon="pi pi-images"
+          severity="secondary"
+          class="flex-1"
+          :disabled="itemStore.uploadingImages"
+          @click="imageFileInput?.click()"
+        />
+        <Button
+          label="Chụp ảnh"
+          icon="pi pi-camera"
+          severity="secondary"
+          class="flex-1"
+          :disabled="itemStore.uploadingImages"
+          @click="cameraFileInput?.click()"
         />
       </div>
-    </Dialog>
+
+      <!-- Desktop: Drop zone -->
+      <div
+        v-if="!isTableMobile"
+        @click="!itemStore.uploadingImages && imageFileInput?.click()"
+        class="border-2 border-dashed rounded-xl p-4 transition-all"
+        :class="itemStore.uploadingImages
+          ? 'opacity-50 cursor-not-allowed border-gray-300'
+          : 'border-gray-400 hover:bg-gray-50 cursor-pointer'"
+      >
+        <div v-if="pendingImages.length > 0" class="grid grid-cols-5 gap-3 mb-4">
+          <div
+            v-for="(preview, index) in pendingImagePreviews"
+            :key="`pending-${index}`"
+            class="relative aspect-square rounded-lg overflow-hidden border-2 border-orange-400"
+          >
+            <img :src="preview" class="absolute inset-0 w-full h-full object-cover" />
+            <Button
+              icon="pi pi-times"
+              rounded text severity="danger" size="small"
+              class="absolute! top-1 right-1 bg-white/95!"
+              @click.stop="removePendingImage(index)"
+            />
+          </div>
+          <!-- Ô thêm ảnh -->
+          <div
+            class="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50"
+            @click.stop="!itemStore.uploadingImages && imageFileInput?.click()"
+          >
+            <i class="pi pi-plus text-2xl text-gray-400"></i>
+            <span class="text-xs text-gray-400 mt-1">Thêm ảnh</span>
+          </div>
+        </div>
+        <div class="flex flex-col items-center justify-center py-6">
+          <i class="pi pi-cloud-upload text-4xl text-gray-400 mb-2"></i>
+          <p class="text-gray-600 text-sm font-medium mb-1">Kéo thả hình ảnh vào đây hoặc click để chọn</p>
+          <p class="text-xs text-gray-400">PNG, JPG, WEBP (Max. 5MB mỗi file)</p>
+        </div>
+      </div>
+
+      <!-- Mobile: Preview ảnh đã chọn -->
+      <div v-if="isTableMobile && pendingImages.length > 0" class="mt-3">
+        <div class="grid grid-cols-3 gap-2">
+          <div
+            v-for="(preview, index) in pendingImagePreviews"
+            :key="`pending-mobile-${index}`"
+            class="relative aspect-square rounded-lg overflow-hidden border-2 border-orange-400 mt-3!"
+          >
+            <img :src="preview" class="absolute inset-0 w-full h-full object-cover" />
+            <Button
+              icon="pi pi-times"
+              rounded text severity="danger" size="small"
+              class="absolute! top-1 right-1 bg-white/95!"
+              @click.stop="removePendingImage(index)"
+            />
+            <div
+              v-if="pendingImageTimestamps[index]"
+              class="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-center"
+              style="font-size: 9px; padding: 2px 4px"
+            >
+              {{ pendingImageTimestamps[index] }}
+            </div>
+          </div>
+          <!-- Ô thêm ảnh mobile -->
+          <div
+            class="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer"
+            @click="imageFileInput?.click()"
+          >
+            <i class="pi pi-plus text-xl text-gray-400"></i>
+            <span class="text-xs text-gray-400 mt-1">Thêm</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input chọn ảnh từ thư viện -->
+      <input
+        ref="imageFileInput"
+        type="file"
+        accept="image/png,image/jpeg,image/jpg,image/webp"
+        multiple
+        :disabled="itemStore.uploadingImages"
+        class="hidden"
+        @change="handleImageUpload"
+      />
+
+      <!-- Input chụp ảnh từ camera (mobile only) -->
+      <input
+        ref="cameraFileInput"
+        type="file"
+        accept="image/*"
+        capture="environment"
+        :disabled="itemStore.uploadingImages"
+        class="hidden"
+        @change="handleCameraCapture"
+      />
+
+      <!-- Action buttons -->
+      <div v-if="pendingImages.length > 0" class="flex justify-between items-center mt-3">
+        <span class="text-sm text-gray-600 font-medium">Đã chọn {{ pendingImages.length }} file</span>
+        <div class="flex gap-2 mt-2!">
+          <Button label="Xóa tất cả" icon="pi pi-trash" text size="small" severity="danger" @click="clearPendingImages" />
+          <Button label="Tải lên" icon="pi pi-upload" size="small" severity="success" :loading="itemStore.uploadingImages" @click="uploadPendingImages" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Images -->
+    <div>
+      <label class="font-semibold mb-3! block">Hình ảnh hiện tại ({{ currentImages.length }})</label>
+
+      <div v-if="currentImages.length === 0" class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+        <i class="pi pi-image text-5xl text-gray-400"></i>
+        <p class="mt-4 text-gray-500">Chưa có hình ảnh nào</p>
+      </div>
+
+      <div v-else class="grid grid-cols-4 gap-4">
+        <div
+          v-for="(img, index) in currentImages"
+          :key="`current-${index}`"
+          class="image-container"
+        >
+          <img
+            :src="getImageUrl(img)"
+            class="image-preview"
+            @click="viewImageFullscreen(img)"
+          />
+          <Button
+            icon="pi pi-trash"
+            rounded severity="danger" size="small"
+            :loading="itemStore.deletingImage"
+            class="delete-button"
+            @click.stop="confirmDeleteImage(img)"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <template #footer>
+    <Button label="Đóng" icon="pi pi-times" @click="closeImageDialog" />
+  </template>
+</Dialog>
 
     <ConfirmDialog />
     <Toast />
@@ -405,7 +573,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useItemStore } from '@/stores/itemStore'
 import { itemAPI } from '@/services/itemAPI'
@@ -424,21 +592,83 @@ import ConfirmDialog from 'primevue/confirmdialog'
 import type { Item } from '@/types/item.types'
 import Dropdown from 'primevue/dropdown'
 import { useDashboardStore } from '@/stores/dashboard'
+import ImagePreviewDialog from '@/views/ImagePreviewDialog.vue'
+import {useImagePreview} from '@/composables/useImagePreview'
+import { usePagination } from '@/composables/usePagination'
+import AppPagination from '@/components/AppPagination.vue'
 
 const router = useRouter()
 const confirm = useConfirm()
 const toast = useToast()
 const itemStore = useItemStore()
 const dashboardStore = useDashboardStore()
+const imagePreview = useImagePreview()
+const cameraFileInput = ref<HTMLInputElement | null>(null)
+const pendingImageTimestamps = ref<string[]>([])
 
 // Search & Filter
 const searchQuery = ref('')
 
 const selectedType = ref<string | null>(null)
 const selectedStockStatus = ref<string | null>(null)
+const isTableMobile = ref(window.innerWidth < 768)
+// resize
+const handleResize = () => {
+  isTableMobile.value = window.innerWidth < 768
+}
   // xử lý click từng Chip
 const handleChipClick = (status: string) => {
   selectedStockStatus.value = status
+}
+
+const addTimestampToImage = (file: File, timestamp: string): Promise<File> => {
+  return new Promise((resolve) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(img, 0, 0)
+
+      const fontSize = Math.max(img.width, img.height) * 0.035
+      ctx.font = `bold ${fontSize}px monospace`
+
+      const padding = fontSize * 0.6
+      const text = timestamp
+      const textWidth = ctx.measureText(text).width
+      const boxW = textWidth + padding * 2
+      const boxH = fontSize + padding * 2
+
+      const x = img.width - boxW - fontSize * 0.5
+      const y = img.height - boxH - fontSize * 0.5
+
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'
+      ctx.beginPath()
+      ctx.roundRect(x, y, boxW, boxH, fontSize * 0.3)
+      ctx.fill()
+
+      ctx.fillStyle = '#FFD700'
+      ctx.shadowColor = 'rgba(0,0,0,0.8)'
+      ctx.shadowBlur = 3
+      ctx.fillText(text, x + padding, y + padding + fontSize * 0.85)
+
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(url)
+        if (blob) {
+          const newFile = new File([blob], file.name, { type: file.type })
+          resolve(newFile)
+        } else {
+          resolve(file)
+        }
+      }, file.type, 0.92)
+    }
+
+    img.src = url
+  })
 }
 
 const typeOptions = [
@@ -462,6 +692,13 @@ const resetFilter = () => {
   selectedStockStatus.value = null
   searchQuery.value = ''
 }
+
+// Utility Functions
+const getProductName = (item: Item) => item.eng?.partname || item.com?.name || 'Unknown'
+const getDistinguishName = (item: Item) => item?.eng?.description || item?.com?.specifications || 'Unknown'
+const getProductCategory = (item: Item) => item.eng ? 'Hàng kỹ thuật' : item.com ? 'Hàng tiêu dùng' : 'Chưa phân loại'
+const getProductImage = (item: Item) => 
+  item.picture?.length ? getImageUrl(item.picture[0]) : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop'
 
 const filteredItems = computed(() => {
   let items = baseItems.value
@@ -514,6 +751,12 @@ const baseItems = computed(() => {
 
   return items
 })
+
+const { currentPage, pageSize, totalPages, totalItems,
+        paginatedList, pageInfo,
+        goToPage, nextPage, prevPage, firstPage, lastPage
+} = usePagination(() => filteredItems.value, isTableMobile.value ? 5 : 10)
+
 
 const allItemsStockCount = computed(() => {
   if (!baseItems.value?.length) return {
@@ -581,19 +824,16 @@ const pendingImages = ref<File[]>([])
 const pendingImagePreviews = ref<string[]>([])
 const imageFileInput = ref<HTMLInputElement | null>(null)
 
-// Fullscreen
-const showFullscreenImage = ref(false)
-const fullscreenImageUrl = ref('')
-
 //  Load items on mount
 onMounted(async () => {
   await fetchAllItems()
+  window.addEventListener('resize', handleResize)
 })
 
 //  Clear shared state on unmount
 onUnmounted(() => {
   itemStore.setCurrentItem(null)
-  console.log('InventoryView unmounted - cleared currentItem')
+  window.removeEventListener('resize', handleResize)
 })
 
 //  Fetch all items
@@ -621,16 +861,8 @@ const getImageUrl = (filename: string) => {
   return `${import.meta.env.WAREHOUSE_URL}/api/Item/image/${filename}`
 }
 
-// Utility Functions
-const getProductName = (item: Item) => item.eng?.partname || item.com?.name || 'Unknown'
-const getDistinguishName = (item: Item) => item?.eng?.description || item?.com?.specifications || 'Unknown'
-const getProductCategory = (item: Item) => item.eng ? 'Hàng kỹ thuật' : item.com ? 'Hàng tiêu dùng' : 'Chưa phân loại'
-const getProductImage = (item: Item) => 
-  item.picture?.length ? getImageUrl(item.picture[0]) : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop'
-
 //  Edit Handlers
 const openEditDialog = (item: Item) => {
-  console.log('openEditDialog called with:', item)
   editingItem.value = item
   editForm.value = {
     type: item.type,
@@ -711,7 +943,6 @@ const confirmDelete = (item: Item) => {
 
 //  Image Handlers
 const viewImages = async (item: Item) => {
-  console.log('viewImages called with:', item)
   selectedItem.value = item
   
   if (item.id) {
@@ -737,7 +968,7 @@ const closeImageDialog = () => {
   itemStore.setCurrentItem(null)
 }
 
-const handleImageUpload = (event: Event) => {
+const handleImageUpload = async (event: Event) => {
   const files = (event.target as HTMLInputElement).files
   if (!files?.length) return
 
@@ -758,29 +989,75 @@ const handleImageUpload = (event: Event) => {
 
   if (!validFiles.length) return
 
-  pendingImages.value.push(...validFiles)
-  
-  validFiles.forEach(file => {
+  for (const file of validFiles) {
+    const now = new Date()
+    const timestamp = now.toLocaleString('vi-VN', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    })
+    const watermarked = await addTimestampToImage(file, timestamp)
+    pendingImages.value.push(watermarked)
+    pendingImageTimestamps.value.push(timestamp)
+
     const reader = new FileReader()
     reader.onload = (e) => {
-      if (e.target?.result) {
-        pendingImagePreviews.value.push(e.target.result as string)
-      }
+      if (e.target?.result) pendingImagePreviews.value.push(e.target.result as string)
     }
-    reader.readAsDataURL(file)
-  })
+    reader.readAsDataURL(watermarked)
+  }
 
   if (imageFileInput.value) imageFileInput.value.value = ''
+}
+
+const handleCameraCapture = async (event: Event) => {
+  const files = (event.target as HTMLInputElement).files
+  if (!files?.length) return
+
+  const file = files[0]
+  const maxSize = 5 * 1024 * 1024
+
+  if (!['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(file.type)) {
+    toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Định dạng không hỗ trợ', life: 3000 })
+    return
+  }
+  if (file.size > maxSize) {
+    toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'File quá lớn (max 5MB)', life: 3000 })
+    return
+  }
+
+  const now = new Date()
+  const timestamp = now.toLocaleString('vi-VN', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  })
+
+  const ext = file.name.split('.').pop() || 'jpg'
+  const newName = `photo_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.${ext}`
+  const renamedFile = new File([file], newName, { type: file.type })
+
+  const watermarked = await addTimestampToImage(renamedFile, timestamp)
+  pendingImages.value.push(watermarked)
+  pendingImageTimestamps.value.push(timestamp)
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    if (e.target?.result) pendingImagePreviews.value.push(e.target.result as string)
+  }
+  reader.readAsDataURL(watermarked)
+
+  if (cameraFileInput.value) cameraFileInput.value.value = ''
 }
 
 const removePendingImage = (index: number) => {
   pendingImages.value.splice(index, 1)
   pendingImagePreviews.value.splice(index, 1)
+  pendingImageTimestamps.value.splice(index, 1)
 }
 
 const clearPendingImages = () => {
   pendingImages.value = []
   pendingImagePreviews.value = []
+  pendingImageTimestamps.value = []
 }
 
 const uploadPendingImages = async () => {
@@ -882,9 +1159,13 @@ const confirmDeleteImage = (imageName: string) => {
 }
 
 const viewImageFullscreen = (imageUrl: string) => {
-  fullscreenImageUrl.value = getImageUrl(imageUrl)
-  showFullscreenImage.value = true
+  const fullUrls = currentImages.value.map(img => getImageUrl(img))
+  imagePreview.open(getImageUrl(imageUrl), fullUrls)
 }
+
+watch(isTableMobile, (mobile) => {
+  pageSize.value = mobile ? 5 : 10
+})
 </script>
 
 <style scoped>

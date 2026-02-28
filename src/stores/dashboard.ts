@@ -137,7 +137,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   
   const topOrderedItems = computed<TopItem[]>(() => {
     const itemOrderMap = new Map<number, number>()
-    
+    const TOP_LIMIT = 10
     orderStore.orders
     .filter(order => order.status === 'Completed')
     .forEach(order => {
@@ -159,7 +159,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
     const maxOrdered = itemsWithOrderCount[0]?.totalOrdered || 1
     
-    return itemsWithOrderCount.slice(0, 5).map(({ item, totalOrdered }) => ({
+    return itemsWithOrderCount.slice(0, TOP_LIMIT).map(({ item, totalOrdered }) => ({
       id: item.id!,
       name: getItemName(item),
       code: getItemCode(item),
@@ -174,7 +174,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   
   const leastOrderedItems = computed<TopItem[]>(() => {
     const itemOrderMap = new Map<number, number>()
-    
+    const TOP_LIMIT = 10
     orderStore.orders.forEach(order => {
       order.orderDetails.forEach(detail => {
         const currentQty = itemOrderMap.get(detail.itemId) || 0
@@ -191,7 +191,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
     const maxOrdered = Math.max(...itemsWithOrderCount.map(x => x.totalOrdered), 1)
     
-    return itemsWithOrderCount.slice(0, 5).map(({ item, totalOrdered }) => ({
+    return itemsWithOrderCount.slice(0, TOP_LIMIT).map(({ item, totalOrdered }) => ({
       id: item.id!,
       name: getItemName(item),
       code: getItemCode(item),

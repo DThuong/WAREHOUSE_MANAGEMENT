@@ -54,7 +54,7 @@
       </div>
 
       <!-- Sales Overview Chart -->
-      <Card style="margin-bottom: 1.5rem;">
+      <Card v-if="!isMobile" style="margin-bottom: 1.5rem;">
         <template #content>
           <div style="padding: 1.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -96,17 +96,41 @@
         </template>
       </Card>
     </div>
+      <Dialog
+    v-model:visible="showUnsupportedDialog"
+    :modal="true"
+    :draggable="false"
+    :style="{ width: '85vw', maxWidth: '320px' }"
+    :showHeader="false"
+    :closable="false"
+  >
+    <div style="text-align: center; padding: 1.5rem 1rem;">
+      <i class="pi pi-mobile" style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 1rem; display: block;"></i>
+      <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; color: #1e293b;">Không hỗ trợ</h3>
+      <p style="font-size: 0.875rem; color: #64748b; margin-bottom: 1.5rem; line-height: 1.5;">
+        Thiết bị này không hỗ trợ xem báo cáo. Vui lòng sử dụng máy tính để có trải nghiệm tốt hơn.
+      </p>
+      <Button
+        label="Đã hiểu"
+        style="width: 100%;"
+        @click="showUnsupportedDialog = false"
+      />
+    </div>
+  </Dialog>
   </MainLayout>
+
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import MainLayout from '@/components/MainLayout.vue'
 import Chart from 'primevue/chart'
 import ProgressSpinner from 'primevue/progressspinner'
 import { useOrderStore } from '@/stores/orderStore'
 import { orderAPI } from '@/services/orderAPI'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
 
 const router = useRouter()
 const orderStore = useOrderStore()
@@ -114,11 +138,22 @@ const orderStore = useOrderStore()
 const loading = ref(false)
 const showThisYearOnly = ref(true)
 
+const isMobile = ref(
+  window.innerWidth < 768 || 
+  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+)
+const handleResize = () => { isMobile.value = window.innerWidth < 768 }
+
+const showUnsupportedDialog = ref(false)
+
 // Navigate to report pages
 const navigateToReport = (type: string) => {
+  if (isMobile.value) {
+    showUnsupportedDialog.value = true
+    return
+  }
   router.push({ name: `${type.charAt(0).toUpperCase() + type.slice(1)}Report` })
 }
-
 // Load completed orders using filter API
 const loadCompletedOrders = async () => {
   loading.value = true
@@ -274,6 +309,9 @@ const toggleYearFilter = () => {
 }
 
 onMounted(() => {
+  window.addEventListener('resize', handleResize)
   loadCompletedOrders()
 })
+
+onUnmounted(() => { window.removeEventListener('resize', handleResize) })
 </script>

@@ -23,7 +23,12 @@
                   </div>
                   <div>
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Unit <span style="color: #ef4444;">*</span></label>
-                    <InputText v-model="form.unit" placeholder="VD: cái, hộp, bịch (đừng viết hoa ký tự nào nhé, hic!!!)" style="width: 100%;" />
+                    <Dropdown
+                      v-model="form.unit"
+                      :options="unitOptions"
+                      placeholder="Chọn đơn vị"
+                      style="width: 100%;"
+                    />
                   </div>
                 </div>
 
@@ -66,7 +71,7 @@
                       <InputText v-model="form.eng.vender" placeholder="Nhập nhà cung cấp" style="width: 100%;" />
                     </div>
                     <div>
-                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Description</label>
+                      <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Description <span style="color: #ef4444;">*</span></label>
                       <InputText v-model="form.eng.description" placeholder="Nhập mô tả" style="width: 100%;" />
                     </div>
                   </div>
@@ -248,7 +253,12 @@
                   </div>
                   <div>
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Unit <span style="color: #ef4444;">*</span></label>
-                    <InputText v-model="form.unit" placeholder="VD: cái, hộp, bịch (đừng viết hoa ký tự nào nhé, hic!!!)" style="width: 100%;" />
+                    <Dropdown
+                      v-model="form.unit"
+                      :options="unitOptions"
+                      placeholder="Chọn đơn vị"
+                      style="width: 100%;"
+                    />
                   </div>
                 </div>
 
@@ -472,12 +482,15 @@ import Button from 'primevue/button'
 import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
 import Toast from 'primevue/toast'
+import Dropdown from 'primevue/dropdown'
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const activeTab = ref(0)
 const router = useRouter()
 const toast = useToast()
 const itemStore = useItemStore()
+
+const unitOptions = ['cái', 'hộp', 'bịch']
 
 interface SelectedFile {
   id: string
@@ -702,7 +715,7 @@ const validateForm = (): boolean => {
   }
 
   if (activeTab.value === 0) {
-    if (!form.value.eng.partname) {
+    if (!form.value.eng.partname || !form.value.eng.description) {
       toast.add({
         severity: 'warn',
         summary: 'Cảnh báo',
