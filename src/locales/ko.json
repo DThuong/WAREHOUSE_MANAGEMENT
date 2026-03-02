@@ -215,142 +215,401 @@
     }
   },
   "inventoryManagement": {
+    "units": {
+      "cai": "개",
+      "hop": "박스",
+      "bich": "봉지"
+    },
     "title": "창고",
     "subtitle": "제품 재고 관리",
-    "productType": "제품 유형",
-    "allTypes": "전체 유형",
-    "technical": "기술 자재",
-    "consumer": "소모품",
-    "stockStatus": "재고 상태",
-    "all": "전체",
-    "inStock": "재고 있음",
-    "warning": "경고",
-    "low": "부족",
-    "critical": "위험",
-    "outOfStock": "품절",
-    "noSafetyStock": "안전재고 미설정",
-    "searchPlaceholder": "제품명, ID,...",
-    "clearFilter": "필터 초기화",
-    "total": "합계",
-    "type": "유형",
-    "price": "가격",
-    "currentStock": "현재 재고",
-    "safetyStock": "안전 재고",
-    "imageManagement": {
-      "title": "이미지 관리",
-      "upload": "새 이미지 업로드",
-      "clickToSelect": "클릭하여 이미지 선택",
-      "currentImages": "현재 이미지"
+    "addProduct": "새 제품 추가",
+    "filters": {
+      "productType": "제품 유형",
+      "stockStatus": "재고 상태",
+      "search": "검색",
+      "searchPlaceholder": "제품명, ID...",
+      "allTypes": "전체 유형",
+      "allStatuses": "전체",
+      "reset": "초기화"
     },
-    "editProduct": {
-      "title": "제품 편집",
+    "typeOptions": {
+      "engineer": "엔지니어",
+      "consumer": "소비자"
+    },
+    "stockStatusOptions": {
+      "inStock": "재고 있음",
+      "warning": "경고 (>50% & <99%)",
+      "low": "부족 (≤50%)",
+      "critical": "위험 (≤25%)",
+      "outOfStock": "품절",
+      "notConfigured": "안전 재고 미설정"
+    },
+    "summary": {
+      "total": "총계: {count}개 제품",
+      "inStock": "{count}개 재고 있음",
+      "warning": "{count}개 경고",
+      "low": "{count}개 부족",
+      "critical": "{count}개 위험",
+      "outOfStock": "{count}개 품절",
+      "notConfigured": "{count}개 안전 재고 미설정"
+    },
+    "table": {
+      "id": "ID",
+      "product": "제품",
       "type": "유형",
-      "unit": "단위",
       "price": "가격",
-      "safetyStock": "안전 재고",
-      "currentStock": "현재 재고 수량"
+      "stockQty": "재고 수량",
+      "safeQty": "안전 재고",
+      "actions": "작업",
+      "empty": "제품이 없습니다",
+      "serialPrefix": "번호: "
     },
-    "addProduct": {
-      "title": "새 제품 추가",
-      "namePlaceholder": "제품명 입력",
-      "locationPlaceholder": "위치 입력",
-      "supplierPlaceholder": "공급업체 입력",
-      "descriptionPlaceholder": "설명 입력",
-      "specsPlaceholder": "사양 입력",
-      "images": "제품 이미지",
-      "addImage": "이미지 추가",
-      "dragDrop": "이미지를 드래그하거나 클릭하여 선택",
-      "maxSize": "파일당 최대",
-      "uploadNote": "한 번에 하나씩 업로드, 여러 장 동시 선택 가능",
-      "submit": "제품 저장",
-      "units": {
-        "piece": "개",
-        "box": "박스",
-        "bag": "봉"
-      }
+    "category": {
+      "engineering": "기술 제품",
+      "consumer": "소비재",
+      "uncategorized": "미분류",
+      "unknown": "알 수 없음"
+    },
+    "currency": "VND",
+    "actions": {
+      "manageImages": "이미지 관리",
+      "edit": "수정",
+      "delete": "삭제"
+    },
+    "editDialog": {
+      "header": "제품 수정",
+      "type": "유형",
+      "typePlaceholder": "제품 유형 입력",
+      "unit": "단위",
+      "unitPlaceholder": "예: 개, 박스, kg",
+      "price": "가격",
+      "pricePlaceholder": "0.00",
+      "safeQty": "안전 재고",
+      "stockQty": "재고 수량",
+      "required": "*",
+      "cancel": "취소",
+      "save": "업데이트"
+    },
+    "imageDialog": {
+      "header": "이미지 관리 - {name}",
+      "uploadTitle": "새 이미지 업로드",
+      "uploading": "업로드 중...",
+      "selectImages": "이미지 선택",
+      "takePhoto": "사진 촬영",
+      "dropzone": "이미지를 여기에 드래그하거나 클릭하여 선택",
+      "dropzoneHint": "PNG, JPG, WEBP (파일당 최대 5MB)",
+      "addMore": "이미지 추가",
+      "selectedCount": "{count}개 파일 선택됨",
+      "clearAll": "전체 삭제",
+      "upload": "업로드",
+      "currentImages": "현재 이미지 ({count})",
+      "noImages": "이미지가 없습니다",
+      "close": "닫기"
+    },
+    "confirmDelete": {
+      "productMessage": "\"{name}\"을(를) 삭제하시겠습니까?",
+      "productHeader": "삭제 확인",
+      "imageMessage": "이 이미지를 삭제하시겠습니까?",
+      "imageHeader": "삭제 확인",
+      "accept": "삭제",
+      "reject": "취소"
+    },
+    "toast": {
+      "errorLoadTitle": "오류",
+      "errorLoadDetail": "제품 목록을 불러올 수 없습니다",
+      "updateSuccess": "제품이 성공적으로 업데이트되었습니다",
+      "updateSuccessTitle": "성공",
+      "updateError": "제품을 업데이트할 수 없습니다",
+      "deleteSuccess": "제품이 성공적으로 삭제되었습니다",
+      "deleteSuccessTitle": "성공",
+      "deleteError": "제품을 삭제할 수 없습니다",
+      "invalidFormat": "{name} 파일은 지원하지 않는 형식입니다",
+      "fileTooLarge": "{name} 파일이 너무 큽니다 (최대 5MB)",
+      "unsupportedFormat": "지원하지 않는 형식",
+      "fileTooLargeSimple": "파일이 너무 큽니다 (최대 5MB)",
+      "noFileSelected": "선택된 파일이 없습니다",
+      "uploadSuccessTitle": "성공",
+      "uploadSuccessDetail": "{success}/{total}개 이미지 업로드 완료",
+      "uploadFailDetail": "{count}개 이미지 업로드 실패",
+      "uploadError": "이미지를 업로드할 수 없습니다",
+      "deleteImageSuccess": "이미지가 삭제되었습니다",
+      "deleteImageSuccessTitle": "성공",
+      "deleteImageError": "이미지를 삭제할 수 없습니다",
+      "warningTitle": "경고",
+      "errorTitle": "오류"
     }
   },
-  "importManagement": {
+   "importManagement": {
     "title": "입고",
     "subtitle": "입고 전표 관리",
-    "totalReceipts": "전체 입고 전표",
-    "searchPlaceholder": "비고, 작성자로 검색...",
-    "clearFilter": "필터 초기화",
-    "importDate": "입고일",
-    "note": "비고",
-    "createdBy": "작성자",
-    "createReceipt": {
-      "title": "새 입고 전표 생성",
-      "notePlaceholder": "입고 전표 비고를 입력하세요...",
+    "createNew": "새 입고 전표 생성",
+    "filters": {
+      "fromDate": "시작일",
+      "toDate": "종료일",
+      "searchPlaceholder": "메모, 작성자로 검색...",
+      "reset": "초기화"
+    },
+    "summary": {
+      "total": "총계: {count}개 전표"
+    },
+    "empty": "입고 전표가 없습니다",
+    "card": {
+      "createdBy": "작성자",
+      "products": "제품",
+      "images": "이미지",
+      "note": "메모",
+      "productCount": "{count}개 제품",
+      "imageCount": "{count}장",
+      "detail": "상세",
+      "images_btn": "이미지",
+      "delete": "삭제"
+    },
+    "createDialog": {
+      "header": "새 입고 전표 생성",
+      "note": "메모",
+      "notePlaceholder": "입고 전표 메모를 입력하세요...",
       "productList": "입고 제품 목록",
       "addProduct": "제품 추가",
-      "noProducts": "제품 없음",
+      "emptyProducts": "제품이 없습니다",
       "addFirst": "첫 번째 제품 추가",
-      "currentStock": "현재 재고",
-      "totalItems": "총 품목 수",
-      "totalQuantity": "총 입고 수량",
-      "items": "품목",
+      "productBadge": "제품 {index}",
+      "productLabel": "제품",
+      "productPlaceholder": "제품 선택",
+      "productFilter": "제품 검색...",
+      "stockLabel": "재고",
+      "stockDisplay": "재고: {qty} {unit}",
+      "quantityLabel": "수량",
+      "summaryItems": "총 품목 수:",
+      "summaryItemsValue": "{count}개 품목",
+      "summaryQty": "총 입고 수량:",
+      "summaryQtyValue": "{count}개 제품",
+      "cancel": "취소",
+      "uploadImages": "이미지 업로드",
+      "changeImages": "이미지 변경 ({count})",
       "submit": "입고 전표 생성"
     },
-    "imageManagement": {
-      "title": "이미지 관리 - 입고 전표",
-      "upload": "새 이미지 업로드",
-      "clickToSelect": "클릭하여 이미지 선택",
-      "uploadNote": "한 번에 하나씩 업로드, 여러 장 동시 선택 가능",
-      "currentImages": "현재 이미지",
-      "noImages": "이미지 없음"
+    "createImageDialog": {
+      "header": "증빙 이미지 추가",
+      "hint": "모든 이미지에 타임스탬프가 자동으로 추가됩니다. 완료 후 이 창을 닫아 전표 작성으로 돌아가세요.",
+      "selectImages": "이미지 선택",
+      "takePhoto": "사진 촬영",
+      "dropzone": "드래그하거나 클릭하여 선택",
+      "dropzoneHint": "PNG, JPG, WEBP (최대 5MB) · 자동 타임스탬프",
+      "selectedCount": "{count}장 선택됨:",
+      "addMore": "추가",
+      "noImages": "선택된 이미지가 없습니다",
+      "closeWithCount": "완료 ({count}장)",
+      "close": "닫기"
     },
-    "detail": {
-      "title": "입고 전표 상세",
-      "importDate": "입고일",
+    "detailDialog": {
+      "header": "입고 전표 상세 #{id}",
+      "stockInDate": "입고일",
       "createdBy": "작성자",
-      "note": "비고",
-      "productList": "제품 목록",
-      "importedQuantity": "입고 수량"
+      "note": "메모",
+      "productList": "제품 목록 ({count})",
+      "noProducts": "제품이 없습니다",
+      "close": "닫기"
+    },
+    "imageDialog": {
+      "header": "이미지 관리 - 입고 전표 #{id}",
+      "uploadTitle": "새 이미지 업로드",
+      "uploading": "업로드 중...",
+      "selectImages": "이미지 선택",
+      "takePhoto": "사진 촬영",
+      "dropzone": "드래그하거나 클릭하여 선택",
+      "dropzoneHint": "PNG, JPG, WEBP (최대 5MB)",
+      "addMore": "추가",
+      "selectedCount": "{count}개 파일 선택됨",
+      "clearAll": "전체 삭제",
+      "upload": "업로드",
+      "currentImages": "현재 이미지 ({count})",
+      "noImages": "이미지가 없습니다",
+      "close": "닫기"
+    },
+    "confirmDelete": {
+      "message": "입고 전표 #{id}를 삭제하시겠습니까?",
+      "header": "삭제 확인",
+      "accept": "삭제",
+      "reject": "취소"
+    },
+    "toast": {
+      "errorTitle": "오류",
+      "successTitle": "성공",
+      "warningTitle": "경고",
+      "loadStockinError": "입고 전표 목록을 불러올 수 없습니다",
+      "loadItemError": "제품 목록을 불러올 수 없습니다",
+      "createSuccess": "입고 전표 #{id} 생성 완료!",
+      "createError": "입고 전표를 생성할 수 없습니다",
+      "deleteSuccess": "입고 전표가 삭제되었습니다",
+      "deleteError": "입고 전표를 삭제할 수 없습니다",
+      "invalidFormat": "{name} 파일은 지원하지 않는 형식입니다",
+      "fileTooLarge": "{name} 파일이 너무 큽니다 (최대 5MB)",
+      "unsupportedFormat": "지원하지 않는 형식",
+      "fileTooLargeSimple": "파일이 너무 큽니다 (최대 5MB)",
+      "noFileSelected": "선택된 파일이 없습니다",
+      "uploadSuccessDetail": "{success}/{total}장 업로드 완료",
+      "uploadFailDetail": "{count}장 업로드 실패",
+      "uploadError": "이미지를 업로드할 수 없습니다"
     }
   },
-  "userManagement": {
-    "title": "사용자",
-    "subtitle": "계정 관리",
-    "totalAccounts": "전체 계정",
-    "addAccount": "계정 추가",
-    "searchPlaceholder": "검색...",
-    "info": "정보",
-    "role": "역할",
-    "department": "부서",
-    "createdDate": "생성일",
-    "accountDetail": {
-      "title": "계정 상세 정보"
+   "addInventory": {
+    "title": "새 제품 추가",
+    "tabs": {
+      "engineer": "기술 제품",
+      "consumer": "소비재"
     },
-    "editAccount": {
-      "title": "계정 편집",
+    "fields": {
+      "type": "유형",
+      "unit": "단위",
+      "unitPlaceholder": "단위 선택",
+      "price": "가격",
+      "safeQuantity": "안전 재고",
+      "inventoryQuantity": "재고 수량",
+      "required": "*"
+    },
+    "engineer": {
+      "sectionTitle": "기술 제품 정보",
+      "partName": "부품명",
+      "partNamePlaceholder": "제품명 입력",
+      "location": "위치",
+      "locationPlaceholder": "위치 입력",
+      "vender": "공급업체",
+      "venderPlaceholder": "공급업체 입력",
+      "description": "설명",
+      "descriptionPlaceholder": "설명 입력"
+    },
+    "consumer": {
+      "sectionTitle": "소비재 정보",
+      "productName": "제품명",
+      "productNamePlaceholder": "제품명 입력",
+      "location": "위치",
+      "locationPlaceholder": "위치 입력",
+      "manufacturer": "제조사",
+      "manufacturerPlaceholder": "제조사 입력",
+      "specifications": "제품 사양",
+      "specificationsPlaceholder": "사양 입력"
+    },
+    "images": {
+      "label": "제품 이미지",
+      "uploading": "업로드 중 {current}/{total}...",
+      "saved": "저장됨",
+      "pending": "대기 중",
+      "addMore": "이미지 추가",
+      "dropzoneTitle": "이미지를 여기에 드래그하거나 클릭하여 선택",
+      "dropzoneHint1": "PNG, JPG, WEBP (파일당 최대 5MB)",
+      "dropzoneHint2": "한 번에 하나씩 업로드하거나 여러 파일 선택 가능",
+      "savedCount": "저장됨",
+      "pendingCount": "업로드 대기",
+      "clearPending": "대기 파일 삭제"
+    },
+    "actions": {
+      "cancel": "취소",
+      "uploadImages": "이미지 업로드",
+      "save": "제품 저장"
+    },
+    "toast": {
+      "warningTitle": "경고",
+      "successTitle": "성공",
+      "errorTitle": "오류",
+      "invalidFormat": "{name} 파일은 지원하지 않는 형식입니다",
+      "fileTooLarge": "{name} 파일이 너무 큽니다 (최대 5MB)",
+      "noFileSelected": "선택된 파일이 없습니다",
+      "uploadSuccess": "{success}/{total}개 이미지 업로드 완료",
+      "uploadFailed": "{count}개 이미지 업로드 실패",
+      "uploadError": "이미지를 업로드할 수 없습니다",
+      "deleteImageSuccess": "이미지가 삭제되었습니다",
+      "deleteImageError": "이미지를 삭제할 수 없습니다",
+      "requiredFields": "필수 항목을 모두 입력해 주세요",
+      "requiredEngineer": "기술 제품 정보를 모두 입력해 주세요",
+      "requiredConsumer": "소비재 정보를 모두 입력해 주세요",
+      "createSuccess": "제품이 생성되었습니다. 이미지를 계속 추가하거나 목록으로 돌아갈 수 있습니다.",
+      "createError": "제품을 생성할 수 없습니다"
+    }
+  },
+    "userManagement": {
+    "title": "계정 관리",
+    "addAccount": "계정 추가",
+    "summary": {
+      "total": "총: {count}개 계정"
+    },
+    "search": "검색...",
+    "empty": "계정이 없습니다",
+    "table": {
+      "id": "ID",
+      "info": "정보",
+      "role": "역할",
+      "department": "부서",
+      "status": "상태",
+      "createdAt": "생성일",
+      "actions": "작업"
+    },
+    "status": {
+      "active": "활성",
+      "inactive": "비활성"
+    },
+    "mobile": {
+      "role": "역할",
+      "department": "부서",
+      "createdAt": "생성일"
+    },
+    "tooltip": {
+      "view": "상세 보기",
+      "edit": "수정",
+      "changePassword": "비밀번호 변경",
+      "delete": "삭제"
+    },
+    "addDialog": {
+      "headerAdd": "새 계정 추가",
+      "headerEdit": "계정 수정",
       "username": "사용자명",
       "usernamePlaceholder": "사용자명 입력",
       "password": "비밀번호",
       "passwordPlaceholder": "비밀번호 입력",
-      "phone": "전화번호",
-      "phonePlaceholder": "전화번호 입력",
+      "phoneNumber": "전화번호",
+      "phoneNumberPlaceholder": "전화번호 입력",
       "role": "역할",
       "rolePlaceholder": "역할 선택",
       "department": "부서",
-      "departmentPlaceholder": "부서 선택"
+      "departmentPlaceholder": "부서 선택",
+      "cancel": "취소",
+      "add": "추가",
+      "update": "업데이트"
     },
-    "departments": {
-      "warehouse": "창고",
-      "repair": "수리",
-      "engineer": "엔지니어",
-      "productionA": "생산 A조",
-      "productionB": "생산 B조"
+    "viewDialog": {
+      "header": "계정 상세 정보",
+      "id": "ID",
+      "role": "역할",
+      "department": "부서",
+      "status": "상태",
+      "createdAt": "생성일",
+      "close": "닫기",
+      "edit": "수정"
     },
-    "changePassword": {
-      "title": "비밀번호 변경",
+    "passwordDialog": {
+      "header": "비밀번호 변경",
       "newPassword": "새 비밀번호",
       "newPasswordPlaceholder": "새 비밀번호 입력",
       "confirmPassword": "비밀번호 확인",
       "confirmPasswordPlaceholder": "새 비밀번호 재입력",
+      "mismatch": "비밀번호가 일치하지 않습니다",
+      "cancel": "취소",
       "submit": "비밀번호 변경"
     },
-    "confirmDeleteMsg": "정말로 이 계정을 삭제하시겠습니까"
+    "confirmDelete": {
+      "message": "\"{username}\" 계정을 삭제하시겠습니까?",
+      "header": "삭제 확인",
+      "accept": "삭제",
+      "reject": "취소"
+    },
+    "toast": {
+      "warningTitle": "경고",
+      "errorTitle": "오류",
+      "requiredFields": "모든 필수 항목을 입력해 주세요",
+      "requiredPassword": "비밀번호를 입력해 주세요",
+      "saveError": "계정을 저장할 수 없습니다",
+      "requiredPasswordFields": "모든 항목을 입력해 주세요",
+      "passwordMismatch": "비밀번호가 일치하지 않습니다"
+    }
   },
   "reports": {
     "title": "보고서",

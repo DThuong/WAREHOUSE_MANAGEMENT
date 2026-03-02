@@ -215,142 +215,401 @@
     }
   },
   "inventoryManagement": {
+    "units": {
+      "cai": "cái",
+      "hop": "hộp",
+      "bich": "bịch"
+    },
     "title": "Kho hàng",
     "subtitle": "Quản lý tồn kho sản phẩm",
-    "productType": "Loại sản phẩm",
-    "allTypes": "Tất cả loại",
-    "technical": "Hàng kỹ thuật",
-    "consumer": "Hàng tiêu dùng",
-    "stockStatus": "Trạng thái tồn kho",
-    "all": "Tất cả",
-    "inStock": "Còn hàng",
-    "warning": "Cảnh báo",
-    "low": "Thấp",
-    "critical": "Nguy cấp",
-    "outOfStock": "Hết hàng",
-    "noSafetyStock": "Chưa có tồn an toàn",
-    "searchPlaceholder": "Tên sản phẩm, id,...",
-    "clearFilter": "Xóa bộ lọc",
-    "total": "Tổng",
-    "type": "Loại",
-    "price": "Giá",
-    "currentStock": "Tồn kho",
-    "safetyStock": "Tồn an toàn",
-    "imageManagement": {
-      "title": "Quản lý hình ảnh",
-      "upload": "Tải lên hình ảnh mới",
-      "clickToSelect": "Click để chọn hình ảnh",
-      "currentImages": "Hình ảnh hiện tại"
+    "addProduct": "Thêm sản phẩm mới",
+    "filters": {
+      "productType": "Loại sản phẩm",
+      "stockStatus": "Trạng thái tồn kho",
+      "search": "Tìm kiếm",
+      "searchPlaceholder": "Tên sản phẩm, ID...",
+      "allTypes": "Tất cả loại",
+      "allStatuses": "Tất cả",
+      "reset": "Reset"
     },
-    "editProduct": {
-      "title": "Chỉnh sửa sản phẩm",
+    "typeOptions": {
+      "engineer": "Engineer",
+      "consumer": "Consumer"
+    },
+    "stockStatusOptions": {
+      "inStock": "Còn hàng",
+      "warning": "Cảnh báo (>50% & <99%)",
+      "low": "Thấp (≤50%)",
+      "critical": "Nguy cấp (≤25%)",
+      "outOfStock": "Hết hàng",
+      "notConfigured": "Chưa có tồn an toàn"
+    },
+    "summary": {
+      "total": "Tổng: {count} sản phẩm",
+      "inStock": "{count} còn hàng",
+      "warning": "{count} cảnh báo",
+      "low": "{count} thấp",
+      "critical": "{count} nguy cấp",
+      "outOfStock": "{count} hết hàng",
+      "notConfigured": "{count} chưa có tồn an toàn"
+    },
+    "table": {
+      "id": "ID",
+      "product": "Sản phẩm",
       "type": "Loại",
-      "unit": "Đơn vị",
       "price": "Giá",
-      "safetyStock": "Tồn an toàn",
-      "currentStock": "Số lượng tồn"
+      "stockQty": "Tồn kho",
+      "safeQty": "Tồn an toàn",
+      "actions": "Hành động",
+      "empty": "Chưa có sản phẩm nào",
+      "serialPrefix": "STT: "
     },
-    "addProduct": {
-      "title": "Thêm sản phẩm mới",
-      "namePlaceholder": "Nhập tên sản phẩm",
+    "category": {
+      "engineering": "Hàng kỹ thuật",
+      "consumer": "Hàng tiêu dùng",
+      "uncategorized": "Chưa phân loại",
+      "unknown": "Unknown"
+    },
+    "currency": "VND",
+    "actions": {
+      "manageImages": "Quản lý ảnh",
+      "edit": "Sửa",
+      "delete": "Xóa"
+    },
+    "editDialog": {
+      "header": "Chỉnh sửa sản phẩm",
+      "type": "Loại",
+      "typePlaceholder": "Nhập loại sản phẩm",
+      "unit": "Đơn vị",
+      "unitPlaceholder": "VD: cái, hộp, kg",
+      "price": "Giá",
+      "pricePlaceholder": "0.00",
+      "safeQty": "Tồn an toàn",
+      "stockQty": "Số lượng tồn",
+      "required": "*",
+      "cancel": "Hủy",
+      "save": "Cập nhật"
+    },
+    "imageDialog": {
+      "header": "Quản lý hình ảnh - {name}",
+      "uploadTitle": "Tải lên hình ảnh mới",
+      "uploading": "Đang tải lên...",
+      "selectImages": "Chọn ảnh",
+      "takePhoto": "Chụp ảnh",
+      "dropzone": "Kéo thả hình ảnh vào đây hoặc click để chọn",
+      "dropzoneHint": "PNG, JPG, WEBP (Max. 5MB mỗi file)",
+      "addMore": "Thêm ảnh",
+      "selectedCount": "Đã chọn {count} file",
+      "clearAll": "Xóa tất cả",
+      "upload": "Tải lên",
+      "currentImages": "Hình ảnh hiện tại ({count})",
+      "noImages": "Chưa có hình ảnh nào",
+      "close": "Đóng"
+    },
+    "confirmDelete": {
+      "productMessage": "Bạn có chắc muốn xóa \"{name}\"?",
+      "productHeader": "Xác nhận xóa",
+      "imageMessage": "Bạn có chắc muốn xóa hình ảnh này?",
+      "imageHeader": "Xác nhận xóa",
+      "accept": "Xóa",
+      "reject": "Hủy"
+    },
+    "toast": {
+      "errorLoadTitle": "Lỗi",
+      "errorLoadDetail": "Không thể tải danh sách sản phẩm",
+      "updateSuccess": "Cập nhật sản phẩm thành công",
+      "updateSuccessTitle": "Thành công",
+      "updateError": "Không thể cập nhật sản phẩm",
+      "deleteSuccess": "Xóa sản phẩm thành công",
+      "deleteSuccessTitle": "Thành công",
+      "deleteError": "Không thể xóa sản phẩm",
+      "invalidFormat": "File {name} không đúng định dạng",
+      "fileTooLarge": "File {name} quá lớn (tối đa 5MB)",
+      "unsupportedFormat": "Định dạng không hỗ trợ",
+      "fileTooLargeSimple": "File quá lớn (max 5MB)",
+      "noFileSelected": "Không có file nào được chọn",
+      "uploadSuccessTitle": "Thành công",
+      "uploadSuccessDetail": "Đã tải lên {success}/{total} ảnh",
+      "uploadFailDetail": "{count} ảnh tải lên thất bại",
+      "uploadError": "Không thể tải lên hình ảnh",
+      "deleteImageSuccess": "Đã xóa hình ảnh",
+      "deleteImageSuccessTitle": "Thành công",
+      "deleteImageError": "Không thể xóa hình ảnh",
+      "warningTitle": "Cảnh báo",
+      "errorTitle": "Lỗi"
+    }
+  },
+  "addInventory": {
+    "title": "Thêm sản phẩm mới",
+    "tabs": {
+      "engineer": "Hàng kỹ thuật",
+      "consumer": "Hàng tiêu dùng"
+    },
+    "fields": {
+      "type": "Type",
+      "unit": "Unit",
+      "unitPlaceholder": "Chọn đơn vị",
+      "price": "Price",
+      "safeQuantity": "Safe Quantity",
+      "inventoryQuantity": "Inventory Quantity",
+      "required": "*"
+    },
+    "engineer": {
+      "sectionTitle": "Thông tin hàng kỹ thuật",
+      "partName": "Part Name",
+      "partNamePlaceholder": "Nhập tên sản phẩm",
+      "location": "Location",
       "locationPlaceholder": "Nhập vị trí",
-      "supplierPlaceholder": "Nhập nhà cung cấp",
-      "descriptionPlaceholder": "Nhập mô tả",
-      "specsPlaceholder": "Nhập thông số",
-      "images": "Product images",
-      "addImage": "Thêm ảnh",
-      "dragDrop": "Kéo thả hình ảnh vào đây hoặc click để chọn",
-      "maxSize": "Max mỗi file",
-      "uploadNote": "Upload từng ảnh một, có thể chọn nhiều ảnh cùng một lúc",
-      "submit": "Lưu sản phẩm",
-      "units": {
-        "piece": "Cái",
-        "box": "Hộp",
-        "bag": "Bịch"
-      }
+      "vender": "Vender",
+      "venderPlaceholder": "Nhập nhà cung cấp",
+      "description": "Description",
+      "descriptionPlaceholder": "Nhập mô tả"
+    },
+    "consumer": {
+      "sectionTitle": "Thông tin hàng tiêu dùng",
+      "productName": "Product name",
+      "productNamePlaceholder": "Nhập tên sản phẩm",
+      "location": "Location",
+      "locationPlaceholder": "Nhập vị trí",
+      "manufacturer": "Manufacturer",
+      "manufacturerPlaceholder": "Nhập nhà cung cấp",
+      "specifications": "Product Specifications",
+      "specificationsPlaceholder": "Nhập thông số"
+    },
+    "images": {
+      "label": "Product Images",
+      "uploading": "Đang tải lên {current}/{total}...",
+      "saved": "Đã lưu",
+      "pending": "Chờ up",
+      "addMore": "Thêm ảnh",
+      "dropzoneTitle": "Kéo thả hình ảnh vào đây hoặc click để chọn",
+      "dropzoneHint1": "PNG, JPG, WEBP (Max. 5MB mỗi file)",
+      "dropzoneHint2": "Upload từng ảnh một, có thể chọn nhiều ảnh cùng lúc",
+      "savedCount": "đã lưu",
+      "pendingCount": "chờ upload",
+      "clearPending": "Xóa file chờ"
+    },
+    "actions": {
+      "cancel": "Hủy",
+      "uploadImages": "Tải lên hình ảnh",
+      "save": "Lưu sản phẩm"
+    },
+    "toast": {
+      "warningTitle": "Cảnh báo",
+      "successTitle": "Thành công",
+      "errorTitle": "Lỗi",
+      "invalidFormat": "File {name} không đúng định dạng",
+      "fileTooLarge": "File {name} quá lớn (tối đa 5MB)",
+      "noFileSelected": "Không có file nào được chọn",
+      "uploadSuccess": "Đã tải lên {success}/{total} ảnh",
+      "uploadFailed": "{count} ảnh tải lên thất bại",
+      "uploadError": "Không thể tải lên hình ảnh",
+      "deleteImageSuccess": "Đã xóa hình ảnh",
+      "deleteImageError": "Không thể xóa hình ảnh",
+      "requiredFields": "Vui lòng điền đầy đủ các trường bắt buộc",
+      "requiredEngineer": "Vui lòng điền đầy đủ thông tin Engineer",
+      "requiredConsumer": "Vui lòng điền đầy đủ thông tin hàng tiêu dùng",
+      "createSuccess": "Sản phẩm đã được tạo. Bạn có thể tiếp tục thêm hình ảnh hoặc quay lại danh sách.",
+      "createError": "Không thể tạo sản phẩm"
     }
   },
   "importManagement": {
     "title": "Nhập hàng",
     "subtitle": "Quản lý phiếu nhập kho",
-    "totalReceipts": "Tổng phiếu nhập",
-    "searchPlaceholder": "Tìm kiếm theo ghi chú, người tạo,...",
-    "clearFilter": "Xóa bộ lọc",
-    "importDate": "Ngày nhập",
-    "note": "Ghi chú",
-    "createdBy": "Người tạo",
-    "createReceipt": {
-      "title": "Tạo phiếu nhập mới",
+    "createNew": "Tạo phiếu nhập mới",
+    "filters": {
+      "fromDate": "Từ ngày",
+      "toDate": "Đến ngày",
+      "searchPlaceholder": "Tìm kiếm theo ghi chú, người tạo...",
+      "reset": "Reset"
+    },
+    "summary": {
+      "total": "Tổng: {count} phiếu nhập"
+    },
+    "empty": "Chưa có phiếu nhập nào",
+    "card": {
+      "createdBy": "Người tạo",
+      "products": "Sản phẩm",
+      "images": "Hình ảnh",
+      "note": "Ghi chú",
+      "productCount": "{count} SP",
+      "imageCount": "{count} ảnh",
+      "detail": "Chi tiết",
+      "images_btn": "Ảnh",
+      "delete": "Xóa"
+    },
+    "createDialog": {
+      "header": "Tạo phiếu nhập mới",
+      "note": "Ghi chú",
       "notePlaceholder": "Nhập ghi chú cho phiếu nhập...",
       "productList": "Danh sách sản phẩm nhập",
       "addProduct": "Thêm sản phẩm",
-      "noProducts": "Chưa có sản phẩm nào",
+      "emptyProducts": "Chưa có sản phẩm nào",
       "addFirst": "Thêm sản phẩm đầu tiên",
-      "currentStock": "Tồn",
-      "totalItems": "Tổng số mặt hàng",
-      "totalQuantity": "Tổng số lượng nhập",
-      "items": "mặt hàng",
+      "productBadge": "Sản phẩm {index}",
+      "productLabel": "Sản phẩm",
+      "productPlaceholder": "Chọn sản phẩm",
+      "productFilter": "Tìm sản phẩm...",
+      "stockLabel": "Tồn kho",
+      "stockDisplay": "Tồn: {qty} {unit}",
+      "quantityLabel": "Số lượng",
+      "summaryItems": "Tổng số mặt hàng:",
+      "summaryItemsValue": "{count} mặt hàng",
+      "summaryQty": "Tổng số lượng nhập:",
+      "summaryQtyValue": "{count} sản phẩm",
+      "cancel": "Hủy",
+      "uploadImages": "Upload hình ảnh",
+      "changeImages": "Đổi ảnh ({count})",
       "submit": "Tạo phiếu nhập"
     },
-    "imageManagement": {
-      "title": "Quản lý hình ảnh - Phiếu nhập",
-      "upload": "Tải lên hình ảnh mới",
-      "clickToSelect": "Click để chọn hình ảnh",
-      "uploadNote": "Upload từng ảnh một, có thể chọn nhiều ảnh cùng một lúc",
-      "currentImages": "Hình ảnh hiện tại",
-      "noImages": "Chưa có hình ảnh nào"
+    "createImageDialog": {
+      "header": "Thêm hình ảnh minh chứng",
+      "hint": "Tất cả hình ảnh sẽ được gắn timestamp tự động. Sau khi xong, đóng dialog để quay lại tạo phiếu nhập.",
+      "selectImages": "Chọn ảnh",
+      "takePhoto": "Chụp ảnh",
+      "dropzone": "Kéo thả hoặc click để chọn",
+      "dropzoneHint": "PNG, JPG, WEBP (Max. 5MB) · Timestamp tự động",
+      "selectedCount": "Đã chọn {count} hình:",
+      "addMore": "Thêm",
+      "noImages": "Chưa có hình nào được chọn",
+      "closeWithCount": "Xong ({count} ảnh)",
+      "close": "Đóng"
     },
-    "detail": {
-      "title": "Chi tiết phiếu nhập",
-      "importDate": "Ngày nhập",
+    "detailDialog": {
+      "header": "Chi tiết phiếu nhập #{id}",
+      "stockInDate": "Ngày nhập",
       "createdBy": "Người tạo",
       "note": "Ghi chú",
-      "productList": "Danh sách sản phẩm",
-      "importedQuantity": "Số lượng nhập"
+      "productList": "Danh sách sản phẩm ({count})",
+      "noProducts": "Không có sản phẩm nào",
+      "close": "Đóng"
+    },
+    "imageDialog": {
+      "header": "Quản lý hình ảnh - Phiếu nhập #{id}",
+      "uploadTitle": "Tải lên hình ảnh mới",
+      "uploading": "Đang tải lên...",
+      "selectImages": "Chọn ảnh",
+      "takePhoto": "Chụp ảnh",
+      "dropzone": "Kéo thả hoặc click để chọn",
+      "dropzoneHint": "PNG, JPG, WEBP (Max. 5MB)",
+      "addMore": "Thêm ảnh",
+      "selectedCount": "Đã chọn {count} file",
+      "clearAll": "Xóa tất cả",
+      "upload": "Tải lên",
+      "currentImages": "Hình ảnh hiện tại ({count})",
+      "noImages": "Chưa có hình ảnh nào",
+      "close": "Đóng"
+    },
+    "confirmDelete": {
+      "message": "Bạn có chắc muốn xóa phiếu nhập #{id}?",
+      "header": "Xác nhận xóa",
+      "accept": "Xóa",
+      "reject": "Hủy"
+    },
+    "toast": {
+      "errorTitle": "Lỗi",
+      "successTitle": "Thành công",
+      "warningTitle": "Cảnh báo",
+      "loadStockinError": "Không thể tải danh sách phiếu nhập",
+      "loadItemError": "Không thể tải danh sách sản phẩm",
+      "createSuccess": "Tạo phiếu nhập #{id} thành công!",
+      "createError": "Không thể tạo phiếu nhập",
+      "deleteSuccess": "Xóa phiếu nhập thành công",
+      "deleteError": "Không thể xóa phiếu nhập",
+      "invalidFormat": "File {name} không đúng định dạng",
+      "fileTooLarge": "File {name} quá lớn (tối đa 5MB)",
+      "unsupportedFormat": "Định dạng không hỗ trợ",
+      "fileTooLargeSimple": "File quá lớn (max 5MB)",
+      "noFileSelected": "Không có file nào được chọn",
+      "uploadSuccessDetail": "Đã tải lên {success}/{total} ảnh",
+      "uploadFailDetail": "{count} ảnh tải lên thất bại",
+      "uploadError": "Không thể tải lên hình ảnh"
     }
   },
   "userManagement": {
-    "title": "Người dùng",
-    "subtitle": "Quản lý tài khoản",
-    "totalAccounts": "Tổng tài khoản",
+    "title": "Quản lý tài khoản",
     "addAccount": "Thêm tài khoản",
-    "searchPlaceholder": "Tìm kiếm...",
-    "info": "Thông tin",
-    "role": "Vai trò",
-    "department": "Phòng ban",
-    "createdDate": "Ngày tạo",
-    "accountDetail": {
-      "title": "Thông tin chi tiết tài khoản"
+    "summary": {
+      "total": "Tổng: {count} tài khoản"
     },
-    "editAccount": {
-      "title": "Chỉnh sửa tài khoản",
+    "search": "Tìm kiếm...",
+    "empty": "Chưa có tài khoản nào",
+    "table": {
+      "id": "ID",
+      "info": "Thông tin",
+      "role": "Vai trò",
+      "department": "Phòng ban",
+      "status": "Trạng thái",
+      "createdAt": "Ngày tạo",
+      "actions": "Hành động"
+    },
+    "status": {
+      "active": "Hoạt động",
+      "inactive": "Không hoạt động"
+    },
+    "mobile": {
+      "role": "Vai trò",
+      "department": "Phòng ban",
+      "createdAt": "Ngày tạo"
+    },
+    "tooltip": {
+      "view": "Xem chi tiết",
+      "edit": "Chỉnh sửa",
+      "changePassword": "Đổi mật khẩu",
+      "delete": "Xóa"
+    },
+    "addDialog": {
+      "headerAdd": "Thêm tài khoản mới",
+      "headerEdit": "Chỉnh sửa tài khoản",
       "username": "Tên đăng nhập",
       "usernamePlaceholder": "Nhập tên đăng nhập",
       "password": "Mật khẩu",
       "passwordPlaceholder": "Nhập mật khẩu",
-      "phone": "Số điện thoại",
-      "phonePlaceholder": "Nhập số điện thoại",
+      "phoneNumber": "Số điện thoại",
+      "phoneNumberPlaceholder": "Nhập số điện thoại",
       "role": "Vai trò",
       "rolePlaceholder": "Chọn vai trò",
       "department": "Phòng ban",
-      "departmentPlaceholder": "Chọn phòng ban"
+      "departmentPlaceholder": "Chọn phòng ban",
+      "cancel": "Hủy",
+      "add": "Thêm",
+      "update": "Cập nhật"
     },
-    "departments": {
-      "warehouse": "Kho",
-      "repair": "Repair",
-      "engineer": "Engineer",
-      "productionA": "Sản xuất ca A",
-      "productionB": "Sản xuất ca B"
+    "viewDialog": {
+      "header": "Thông tin chi tiết tài khoản",
+      "id": "ID",
+      "role": "Vai trò",
+      "department": "Phòng ban",
+      "status": "Trạng thái",
+      "createdAt": "Ngày tạo",
+      "close": "Đóng",
+      "edit": "Chỉnh sửa"
     },
-    "changePassword": {
-      "title": "Đổi mật khẩu",
+    "passwordDialog": {
+      "header": "Đổi mật khẩu",
       "newPassword": "Mật khẩu mới",
       "newPasswordPlaceholder": "Nhập mật khẩu mới",
       "confirmPassword": "Xác nhận mật khẩu",
       "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới",
+      "mismatch": "Mật khẩu không khớp",
+      "cancel": "Hủy",
       "submit": "Đổi mật khẩu"
     },
-    "confirmDeleteMsg": "Bạn có chắc chắn muốn xóa tài khoản"
+    "confirmDelete": {
+      "message": "Bạn có chắc chắn muốn xóa tài khoản \"{username}\"?",
+      "header": "Xác nhận xóa",
+      "accept": "Xóa",
+      "reject": "Hủy"
+    },
+    "toast": {
+      "warningTitle": "Cảnh báo",
+      "errorTitle": "Lỗi",
+      "requiredFields": "Vui lòng điền đầy đủ thông tin",
+      "requiredPassword": "Vui lòng nhập mật khẩu",
+      "saveError": "Không thể lưu tài khoản",
+      "requiredPasswordFields": "Vui lòng nhập đầy đủ thông tin",
+      "passwordMismatch": "Mật khẩu không khớp"
+    }
   },
   "reports": {
     "title": "Báo cáo",

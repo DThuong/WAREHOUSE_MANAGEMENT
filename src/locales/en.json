@@ -213,142 +213,401 @@
     }
   },
   "inventoryManagement": {
+    "units": {
+      "cai": "Piece",
+      "hop": "Box",
+      "bich": "Bag"
+    },
     "title": "Warehouse",
     "subtitle": "Manage product inventory",
-    "productType": "Product Type",
-    "allTypes": "All Types",
-    "technical": "Technical Goods",
-    "consumer": "Consumer Goods",
-    "stockStatus": "Stock Status",
-    "all": "All",
-    "inStock": "In Stock",
-    "warning": "Warning",
-    "low": "Low",
-    "critical": "Critical",
-    "outOfStock": "Out of Stock",
-    "noSafetyStock": "No Safety Stock Set",
-    "searchPlaceholder": "Product name, id,...",
-    "clearFilter": "Clear Filter",
-    "total": "Total",
-    "type": "Type",
-    "price": "Price",
-    "currentStock": "Stock",
-    "safetyStock": "Safety Stock",
-    "imageManagement": {
-      "title": "Image Management",
-      "upload": "Upload New Image",
-      "clickToSelect": "Click to select image",
-      "currentImages": "Current Images"
+    "addProduct": "Add new product",
+    "filters": {
+      "productType": "Product type",
+      "stockStatus": "Stock status",
+      "search": "Search",
+      "searchPlaceholder": "Product name, ID...",
+      "allTypes": "All types",
+      "allStatuses": "All",
+      "reset": "Reset"
     },
-    "editProduct": {
-      "title": "Edit Product",
+    "typeOptions": {
+      "engineer": "Engineer",
+      "consumer": "Consumer"
+    },
+    "stockStatusOptions": {
+      "inStock": "In stock",
+      "warning": "Warning (>50% & <99%)",
+      "low": "Low (≤50%)",
+      "critical": "Critical (≤25%)",
+      "outOfStock": "Out of stock",
+      "notConfigured": "No safety stock set"
+    },
+    "summary": {
+      "total": "Total: {count} products",
+      "inStock": "{count} in stock",
+      "warning": "{count} warning",
+      "low": "{count} low",
+      "critical": "{count} critical",
+      "outOfStock": "{count} out of stock",
+      "notConfigured": "{count} no safety stock"
+    },
+    "table": {
+      "id": "ID",
+      "product": "Product",
       "type": "Type",
-      "unit": "Unit",
       "price": "Price",
-      "safetyStock": "Safety Stock",
-      "currentStock": "Current Stock"
+      "stockQty": "Stock qty",
+      "safeQty": "Safety stock",
+      "actions": "Actions",
+      "empty": "No products found",
+      "serialPrefix": "No: "
     },
-    "addProduct": {
-      "title": "Add New Product",
-      "namePlaceholder": "Enter product name",
-      "locationPlaceholder": "Enter location",
-      "supplierPlaceholder": "Enter supplier",
-      "descriptionPlaceholder": "Enter description",
-      "specsPlaceholder": "Enter specifications",
-      "images": "Product Images",
-      "addImage": "Add Image",
-      "dragDrop": "Drag and drop images here or click to select",
-      "maxSize": "Max per file",
-      "uploadNote": "Upload one at a time, can select multiple images at once",
-      "submit": "Save Product",
-      "units": {
-        "piece": "Piece",
-        "box": "Box",
-        "bag": "Bag"
-      }
+    "category": {
+      "engineering": "Engineering goods",
+      "consumer": "Consumer goods",
+      "uncategorized": "Uncategorized",
+      "unknown": "Unknown"
+    },
+    "currency": "VND",
+    "actions": {
+      "manageImages": "Manage images",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "editDialog": {
+      "header": "Edit product",
+      "type": "Type",
+      "typePlaceholder": "Enter product type",
+      "unit": "Unit",
+      "unitPlaceholder": "E.g: piece, box, kg",
+      "price": "Price",
+      "pricePlaceholder": "0.00",
+      "safeQty": "Safety stock",
+      "stockQty": "Stock quantity",
+      "required": "*",
+      "cancel": "Cancel",
+      "save": "Update"
+    },
+    "imageDialog": {
+      "header": "Manage images - {name}",
+      "uploadTitle": "Upload new images",
+      "uploading": "Uploading...",
+      "selectImages": "Select images",
+      "takePhoto": "Take photo",
+      "dropzone": "Drag & drop images here or click to select",
+      "dropzoneHint": "PNG, JPG, WEBP (Max. 5MB per file)",
+      "addMore": "Add more",
+      "selectedCount": "{count} file(s) selected",
+      "clearAll": "Clear all",
+      "upload": "Upload",
+      "currentImages": "Current images ({count})",
+      "noImages": "No images yet",
+      "close": "Close"
+    },
+    "confirmDelete": {
+      "productMessage": "Are you sure you want to delete \"{name}\"?",
+      "productHeader": "Confirm deletion",
+      "imageMessage": "Are you sure you want to delete this image?",
+      "imageHeader": "Confirm deletion",
+      "accept": "Delete",
+      "reject": "Cancel"
+    },
+    "toast": {
+      "errorLoadTitle": "Error",
+      "errorLoadDetail": "Unable to load product list",
+      "updateSuccess": "Product updated successfully",
+      "updateSuccessTitle": "Success",
+      "updateError": "Unable to update product",
+      "deleteSuccess": "Product deleted successfully",
+      "deleteSuccessTitle": "Success",
+      "deleteError": "Unable to delete product",
+      "invalidFormat": "File {name} has an unsupported format",
+      "fileTooLarge": "File {name} is too large (max 5MB)",
+      "unsupportedFormat": "Unsupported format",
+      "fileTooLargeSimple": "File is too large (max 5MB)",
+      "noFileSelected": "No file selected",
+      "uploadSuccessTitle": "Success",
+      "uploadSuccessDetail": "Uploaded {success}/{total} images",
+      "uploadFailDetail": "{count} image(s) failed to upload",
+      "uploadError": "Unable to upload images",
+      "deleteImageSuccess": "Image deleted",
+      "deleteImageSuccessTitle": "Success",
+      "deleteImageError": "Unable to delete image",
+      "warningTitle": "Warning",
+      "errorTitle": "Error"
     }
   },
   "importManagement": {
     "title": "Import",
-    "subtitle": "Manage import receipts",
-    "totalReceipts": "Total Receipts",
-    "searchPlaceholder": "Search by note, creator,...",
-    "clearFilter": "Clear Filter",
-    "importDate": "Import Date",
-    "note": "Note",
-    "createdBy": "Created By",
-    "createReceipt": {
-      "title": "Create New Import Receipt",
-      "notePlaceholder": "Enter note for import receipt...",
-      "productList": "Import Product List",
-      "addProduct": "Add Product",
-      "noProducts": "No products yet",
-      "addFirst": "Add the first product",
-      "currentStock": "Stock",
-      "totalItems": "Total Items",
-      "totalQuantity": "Total Import Quantity",
-      "items": "items",
-      "submit": "Create Import Receipt"
+    "subtitle": "Manage stock-in receipts",
+    "createNew": "Create new receipt",
+    "filters": {
+      "fromDate": "From date",
+      "toDate": "To date",
+      "searchPlaceholder": "Search by note, creator...",
+      "reset": "Reset"
     },
-    "imageManagement": {
-      "title": "Image Management - Import Receipt",
-      "upload": "Upload New Image",
-      "clickToSelect": "Click to select image",
-      "uploadNote": "Upload one at a time, can select multiple images at once",
-      "currentImages": "Current Images",
-      "noImages": "No images yet"
+    "summary": {
+      "total": "Total: {count} receipts"
     },
-    "detail": {
-      "title": "Import Receipt Detail",
-      "importDate": "Import Date",
-      "createdBy": "Created By",
+    "empty": "No receipts found",
+    "card": {
+      "createdBy": "Created by",
+      "products": "Products",
+      "images": "Images",
       "note": "Note",
-      "productList": "Product List",
-      "importedQuantity": "Imported Quantity"
+      "productCount": "{count} items",
+      "imageCount": "{count} photos",
+      "detail": "Detail",
+      "images_btn": "Images",
+      "delete": "Delete"
+    },
+    "createDialog": {
+      "header": "Create new receipt",
+      "note": "Note",
+      "notePlaceholder": "Enter note for this receipt...",
+      "productList": "Product import list",
+      "addProduct": "Add product",
+      "emptyProducts": "No products added",
+      "addFirst": "Add first product",
+      "productBadge": "Product {index}",
+      "productLabel": "Product",
+      "productPlaceholder": "Select product",
+      "productFilter": "Search product...",
+      "stockLabel": "Stock",
+      "stockDisplay": "Stock: {qty} {unit}",
+      "quantityLabel": "Quantity",
+      "summaryItems": "Total items:",
+      "summaryItemsValue": "{count} items",
+      "summaryQty": "Total import quantity:",
+      "summaryQtyValue": "{count} products",
+      "cancel": "Cancel",
+      "uploadImages": "Upload images",
+      "changeImages": "Change images ({count})",
+      "submit": "Create receipt"
+    },
+    "createImageDialog": {
+      "header": "Add evidence images",
+      "hint": "All images will be automatically timestamped. When done, close this dialog to return to the receipt form.",
+      "selectImages": "Select images",
+      "takePhoto": "Take photo",
+      "dropzone": "Drag & drop or click to select",
+      "dropzoneHint": "PNG, JPG, WEBP (Max. 5MB) · Auto timestamp",
+      "selectedCount": "{count} image(s) selected:",
+      "addMore": "Add more",
+      "noImages": "No images selected",
+      "closeWithCount": "Done ({count} images)",
+      "close": "Close"
+    },
+    "detailDialog": {
+      "header": "Receipt detail #{id}",
+      "stockInDate": "Import date",
+      "createdBy": "Created by",
+      "note": "Note",
+      "productList": "Product list ({count})",
+      "noProducts": "No products",
+      "close": "Close"
+    },
+    "imageDialog": {
+      "header": "Manage images - Receipt #{id}",
+      "uploadTitle": "Upload new images",
+      "uploading": "Uploading...",
+      "selectImages": "Select images",
+      "takePhoto": "Take photo",
+      "dropzone": "Drag & drop or click to select",
+      "dropzoneHint": "PNG, JPG, WEBP (Max. 5MB)",
+      "addMore": "Add more",
+      "selectedCount": "{count} file(s) selected",
+      "clearAll": "Clear all",
+      "upload": "Upload",
+      "currentImages": "Current images ({count})",
+      "noImages": "No images yet",
+      "close": "Close"
+    },
+    "confirmDelete": {
+      "message": "Are you sure you want to delete receipt #{id}?",
+      "header": "Confirm deletion",
+      "accept": "Delete",
+      "reject": "Cancel"
+    },
+    "toast": {
+      "errorTitle": "Error",
+      "successTitle": "Success",
+      "warningTitle": "Warning",
+      "loadStockinError": "Unable to load receipt list",
+      "loadItemError": "Unable to load product list",
+      "createSuccess": "Receipt #{id} created successfully!",
+      "createError": "Unable to create receipt",
+      "deleteSuccess": "Receipt deleted successfully",
+      "deleteError": "Unable to delete receipt",
+      "invalidFormat": "File {name} has an unsupported format",
+      "fileTooLarge": "File {name} is too large (max 5MB)",
+      "unsupportedFormat": "Unsupported format",
+      "fileTooLargeSimple": "File is too large (max 5MB)",
+      "noFileSelected": "No file selected",
+      "uploadSuccessDetail": "Uploaded {success}/{total} images",
+      "uploadFailDetail": "{count} image(s) failed to upload",
+      "uploadError": "Unable to upload images"
     }
   },
-  "userManagement": {
-    "title": "Users",
-    "subtitle": "Account Management",
-    "totalAccounts": "Total Accounts",
-    "addAccount": "Add Account",
-    "searchPlaceholder": "Search...",
-    "info": "Information",
-    "role": "Role",
-    "department": "Department",
-    "createdDate": "Created Date",
-    "accountDetail": {
-      "title": "Account Detail Information"
+    "addInventory": {
+    "title": "Add new product",
+    "tabs": {
+      "engineer": "Engineering goods",
+      "consumer": "Consumer goods"
     },
-    "editAccount": {
-      "title": "Edit Account",
+    "fields": {
+      "type": "Type",
+      "unit": "Unit",
+      "unitPlaceholder": "Select unit",
+      "price": "Price",
+      "safeQuantity": "Safe Quantity",
+      "inventoryQuantity": "Inventory Quantity",
+      "required": "*"
+    },
+    "engineer": {
+      "sectionTitle": "Engineering product info",
+      "partName": "Part Name",
+      "partNamePlaceholder": "Enter product name",
+      "location": "Location",
+      "locationPlaceholder": "Enter location",
+      "vender": "Vender",
+      "venderPlaceholder": "Enter vendor",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter description"
+    },
+    "consumer": {
+      "sectionTitle": "Consumer product info",
+      "productName": "Product name",
+      "productNamePlaceholder": "Enter product name",
+      "location": "Location",
+      "locationPlaceholder": "Enter location",
+      "manufacturer": "Manufacturer",
+      "manufacturerPlaceholder": "Enter manufacturer",
+      "specifications": "Product Specifications",
+      "specificationsPlaceholder": "Enter specifications"
+    },
+    "images": {
+      "label": "Product Images",
+      "uploading": "Uploading {current}/{total}...",
+      "saved": "Saved",
+      "pending": "Pending",
+      "addMore": "Add image",
+      "dropzoneTitle": "Drag & drop images here or click to select",
+      "dropzoneHint1": "PNG, JPG, WEBP (Max. 5MB per file)",
+      "dropzoneHint2": "Upload one at a time or select multiple files",
+      "savedCount": "saved",
+      "pendingCount": "pending upload",
+      "clearPending": "Clear pending"
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "uploadImages": "Upload images",
+      "save": "Save product"
+    },
+    "toast": {
+      "warningTitle": "Warning",
+      "successTitle": "Success",
+      "errorTitle": "Error",
+      "invalidFormat": "File {name} has an unsupported format",
+      "fileTooLarge": "File {name} is too large (max 5MB)",
+      "noFileSelected": "No file selected",
+      "uploadSuccess": "Uploaded {success}/{total} images",
+      "uploadFailed": "{count} image(s) failed to upload",
+      "uploadError": "Unable to upload images",
+      "deleteImageSuccess": "Image deleted",
+      "deleteImageError": "Unable to delete image",
+      "requiredFields": "Please fill in all required fields",
+      "requiredEngineer": "Please fill in all Engineer fields",
+      "requiredConsumer": "Please fill in all Consumer fields",
+      "createSuccess": "Product created. You can continue adding images or go back to the list.",
+      "createError": "Unable to create product"
+    }
+  },
+    "userManagement": {
+    "title": "Account Management",
+    "addAccount": "Add Account",
+    "summary": {
+      "total": "Total: {count} accounts"
+    },
+    "search": "Search...",
+    "empty": "No accounts found",
+    "table": {
+      "id": "ID",
+      "info": "Info",
+      "role": "Role",
+      "department": "Department",
+      "status": "Status",
+      "createdAt": "Created At",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "mobile": {
+      "role": "Role",
+      "department": "Department",
+      "createdAt": "Created At"
+    },
+    "tooltip": {
+      "view": "View detail",
+      "edit": "Edit",
+      "changePassword": "Change password",
+      "delete": "Delete"
+    },
+    "addDialog": {
+      "headerAdd": "Add new account",
+      "headerEdit": "Edit account",
       "username": "Username",
       "usernamePlaceholder": "Enter username",
       "password": "Password",
       "passwordPlaceholder": "Enter password",
-      "phone": "Phone Number",
-      "phonePlaceholder": "Enter phone number",
+      "phoneNumber": "Phone number",
+      "phoneNumberPlaceholder": "Enter phone number",
       "role": "Role",
       "rolePlaceholder": "Select role",
       "department": "Department",
-      "departmentPlaceholder": "Select department"
+      "departmentPlaceholder": "Select department",
+      "cancel": "Cancel",
+      "add": "Add",
+      "update": "Update"
     },
-    "departments": {
-      "warehouse": "Warehouse",
-      "repair": "Repair",
-      "engineer": "Engineer",
-      "productionA": "Production Shift A",
-      "productionB": "Production Shift B"
+    "viewDialog": {
+      "header": "Account details",
+      "id": "ID",
+      "role": "Role",
+      "department": "Department",
+      "status": "Status",
+      "createdAt": "Created At",
+      "close": "Close",
+      "edit": "Edit"
     },
-    "changePassword": {
-      "title": "Change Password",
-      "newPassword": "New Password",
+    "passwordDialog": {
+      "header": "Change password",
+      "newPassword": "New password",
       "newPasswordPlaceholder": "Enter new password",
-      "confirmPassword": "Confirm Password",
+      "confirmPassword": "Confirm password",
       "confirmPasswordPlaceholder": "Re-enter new password",
-      "submit": "Change Password"
+      "mismatch": "Passwords do not match",
+      "cancel": "Cancel",
+      "submit": "Change password"
     },
-    "confirmDeleteMsg": "Are you sure you want to delete account"
+    "confirmDelete": {
+      "message": "Are you sure you want to delete account \"{username}\"?",
+      "header": "Confirm delete",
+      "accept": "Delete",
+      "reject": "Cancel"
+    },
+    "toast": {
+      "warningTitle": "Warning",
+      "errorTitle": "Error",
+      "requiredFields": "Please fill in all required fields",
+      "requiredPassword": "Please enter a password",
+      "saveError": "Unable to save account",
+      "requiredPasswordFields": "Please fill in all fields",
+      "passwordMismatch": "Passwords do not match"
+    }
   },
   "reports": {
     "title": "Reports",

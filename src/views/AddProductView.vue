@@ -1,13 +1,13 @@
 <template>
   <MainLayout>
     <div class="animate-fade-in" style="max-width: 900px; margin: 0 auto;">
-      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Thêm sản phẩm mới</h2>
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">{{ t('addInventory.title') }}</h2>
 
       <Card>
         <template #content>
           <TabView v-model:activeIndex="activeTab">
             <!-- Engineer Tab -->
-            <TabPanel header="Hàng kỹ thuật">
+            <TabPanel :header="t('addInventory.tabs.engineer')">
               <form @submit.prevent="handleSubmit" class="grid gap-6">
                 <!-- Common Fields (giữ nguyên) -->
                 <div class="grid grid-cols-2 gap-4">
@@ -26,7 +26,9 @@
                     <Dropdown
                       v-model="form.unit"
                       :options="unitOptions"
-                      placeholder="Chọn đơn vị"
+                      option-label="label"
+                      option-value="value"
+                      :placeholder="t('addInventory.fields.unitPlaceholder')"
                       style="width: 100%;"
                     />
                   </div>
@@ -51,28 +53,28 @@
                 <div style="border-top: 2px solid var(--gray-200); padding-top: 1.5rem; margin-top: 1rem;">
                   <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; color: var(--primary-color);">
                     <i class="pi pi-cog" style="margin-right: 0.5rem;"></i>
-                    Thông tin hàng kỹ thuật
+                    {{ t('addInventory.engineer.sectionTitle') }}
                   </h3>
 
                   <div class="grid grid-cols-2 gap-4">
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Part Name <span style="color: #ef4444;">*</span></label>
-                      <InputText v-model="form.eng.partname" placeholder="Nhập tên sản phẩm" style="width: 100%;" />
+                      <InputText v-model="form.eng.partname" :placeholder="t('addInventory.engineer.partNamePlaceholder')" style="width: 100%;" />
                     </div>
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Location</label>
-                      <InputText v-model="form.eng.location" placeholder="Nhập vị trí" style="width: 100%;" />
+                      <InputText v-model="form.eng.location" :placeholder="t('addInventory.engineer.locationPlaceholder')" style="width: 100%;" />
                     </div>
                   </div>
 
                   <div class="grid grid-cols-2 gap-4" style="margin-top: 1rem;">
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Vender</label>
-                      <InputText v-model="form.eng.vender" placeholder="Nhập nhà cung cấp" style="width: 100%;" />
+                      <InputText v-model="form.eng.vender" :placeholder="t('addInventory.engineer.venderPlaceholder')" style="width: 100%;" />
                     </div>
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Description <span style="color: #ef4444;">*</span></label>
-                      <InputText v-model="form.eng.description" placeholder="Nhập mô tả" style="width: 100%;" />
+                      <InputText v-model="form.eng.description" :placeholder="t('addInventory.engineer.descriptionPlaceholder')" style="width: 100%;" />
                     </div>
                   </div>
                 </div>
@@ -82,7 +84,7 @@
                   <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
                     Product Images
                     <span v-if="itemStore.uploadingImages" style="color: var(--primary-color); font-size: 0.875rem; margin-left: 0.5rem;">
-                      <i class="pi pi-spin pi-spinner"></i> Đang tải lên {{ uploadProgress.current }}/{{ uploadProgress.total }}...
+                      <i class="pi pi-spin pi-spinner"></i> {{ t('addInventory.images.uploading', { current: uploadProgress.current, total: uploadProgress.total }) }}
                     </span>
                   </label>
                   
@@ -104,7 +106,7 @@
                         <!-- Success Badge -->
                         <div class="image-badge success">
                           <i class="pi pi-check"></i>
-                          Đã lưu
+                          {{ t('addInventory.images.saved') }}
                         </div>
                         
                         <!-- Delete Button -->
@@ -134,7 +136,7 @@
                         <!-- Pending Badge -->
                         <div class="image-badge pending">
                           <i class="pi pi-clock"></i>
-                          Chờ up
+                          {{ t('addInventory.images.pending') }}
                         </div>
                         
                         <!-- Remove Button -->
@@ -156,7 +158,7 @@
                         @click="triggerFileInput"
                       >
                         <i class="pi pi-plus"></i>
-                        <span>Thêm ảnh</span>
+                        <span>{{ t('addInventory.images.addMore') }}</span>
                       </div>
                     </div>
 
@@ -168,9 +170,9 @@
                       @click="triggerFileInput"
                     >
                       <i class="pi pi-cloud-upload"></i>
-                      <p class="title">Kéo thả hình ảnh vào đây hoặc click để chọn</p>
-                      <p class="subtitle">PNG, JPG, WEBP (Max. 5MB mỗi file)</p>
-                      <p class="subtitle">Upload từng ảnh một, có thể chọn nhiều ảnh cùng lúc</p>
+                      <p class="title">{{ t('addInventory.images.dropzoneTitle') }}</p>
+                      <p class="subtitle">{{ t('addInventory.images.dropzoneHint1') }}</p>
+                      <p class="subtitle">{{ t('addInventory.images.dropzoneHint2') }}</p>
                     </div>
 
                     <!-- Hidden File Input -->
@@ -190,17 +192,17 @@
                     <div class="image-stats">
                       <span class="stat-item">
                         <i class="pi pi-check-circle"></i>
-                        <strong>{{ (itemStore.currentItem?.picture || []).length }}</strong> đã lưu
+                        <strong>{{ (itemStore.currentItem?.picture || []).length }}</strong> {{ t('addInventory.images.savedCount') }}
                       </span>
                       <span class="stat-item">
                         <i class="pi pi-clock"></i>
-                        <strong>{{ selectedFiles.length }}</strong> chờ upload
+                        <strong>{{ selectedFiles.length }}</strong> {{ t('addInventory.images.pendingCount') }}
                       </span>
                     </div>
                     
                     <Button 
                       v-if="selectedFiles.length > 0"
-                      label="Xóa file chờ" 
+                      :label="t('addInventory.images.clearPending')" 
                       icon="pi pi-trash" 
                       text 
                       size="small"
@@ -213,21 +215,21 @@
                 <!-- Form Actions -->
                 <div class="flex gap-2" style="padding-top: 1rem; border-top: 1px solid var(--gray-200); justify-content: flex-end;">
                   <Button 
-                    label="Hủy" 
+                    :label="t('addInventory.actions.cancel')" 
                     severity="secondary" 
                     outlined 
                     @click="handleCancel" 
                   />
                   <Button 
                     v-if="selectedFiles.length > 0 && createdItemId"
-                    label="Tải lên hình ảnh" 
+                    :label="t('addInventory.actions.uploadImages')" 
                     icon="pi pi-upload"
                     severity="info"
                     :loading="itemStore.uploadingImages"
                     @click="handleUploadImages"
                   />
                   <Button 
-                    label="Lưu sản phẩm" 
+                    :label="t('addInventory.actions.save')" 
                     type="submit" 
                     icon="pi pi-check" 
                     :loading="itemStore.loading" 
@@ -237,7 +239,7 @@
             </TabPanel>
 
             <!-- Consumer Tab -->
-            <TabPanel header="Hàng tiêu dùng">
+            <TabPanel :header="t('addInventory.tabs.consumer')">
               <form @submit.prevent="handleSubmit" class="grid gap-6">
                 <!-- Common Fields -->
                 <div class="grid grid-cols-2 gap-4">
@@ -256,7 +258,9 @@
                     <Dropdown
                       v-model="form.unit"
                       :options="unitOptions"
-                      placeholder="Chọn đơn vị"
+                      option-label="label"
+                      option-value="value"
+                      :placeholder="t('addInventory.fields.unitPlaceholder')"
                       style="width: 100%;"
                     />
                   </div>
@@ -281,28 +285,28 @@
                 <div style="border-top: 2px solid var(--gray-200); padding-top: 1.5rem; margin-top: 1rem;">
                   <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; color: var(--primary-color);">
                     <i class="pi pi-shopping-cart" style="margin-right: 0.5rem;"></i>
-                    Thông tin hàng tiêu dùng
+                    {{ t('addInventory.consumer.sectionTitle') }}
                   </h3>
 
                   <div class="grid grid-cols-2 gap-4">
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Product name <span style="color: #ef4444;">*</span></label>
-                      <InputText v-model="form.com.name" placeholder="Nhập tên sản phẩm" style="width: 100%;" />
+                      <InputText v-model="form.com.name" :placeholder="t('addInventory.consumer.productNamePlaceholder')" style="width: 100%;" />
                     </div>
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Location</label>
-                      <InputText v-model="form.com.location" placeholder="Nhập vị trí" style="width: 100%;" />
+                      <InputText v-model="form.com.location" :placeholder="t('addInventory.consumer.locationPlaceholder')" style="width: 100%;" />
                     </div>
                   </div>
 
                   <div class="grid grid-cols-2 gap-4" style="margin-top: 1rem;">
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Manufacturer</label>
-                      <InputText v-model="form.com.manufacturer" placeholder="Nhập nhà cung cấp" style="width: 100%;" />
+                      <InputText v-model="form.com.manufacturer" :placeholder="t('addInventory.consumer.manufacturerPlaceholder')" style="width: 100%;" />
                     </div>
                     <div>
                       <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Product Specifications <span style="color: #ef4444;">*</span></label>
-                      <InputText v-model="form.com.specifications" placeholder="Nhập thông số" style="width: 100%;" />
+                      <InputText v-model="form.com.specifications" :placeholder="t('addInventory.consumer.specificationsPlaceholder')" style="width: 100%;" />
                     </div>
                   </div>
                 </div>
@@ -312,7 +316,7 @@
                   <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
                     Product Images
                     <span v-if="itemStore.uploadingImages" style="color: var(--primary-color); font-size: 0.875rem; margin-left: 0.5rem;">
-                      <i class="pi pi-spin pi-spinner"></i> Đang tải lên {{ uploadProgress.current }}/{{ uploadProgress.total }}...
+                      <i class="pi pi-spin pi-spinner"></i> {{ t('addInventory.images.uploading', { current: uploadProgress.current, total: uploadProgress.total }) }}
                     </span>
                   </label>
                   
@@ -331,7 +335,7 @@
                         
                         <div class="image-badge success">
                           <i class="pi pi-check"></i>
-                          Đã lưu
+                          {{ t('addInventory.images.saved') }}
                         </div>
                         
                         <Button 
@@ -359,7 +363,7 @@
                         
                         <div class="image-badge pending">
                           <i class="pi pi-clock"></i>
-                          Chờ up
+                          {{ t('addInventory.images.pending') }}
                         </div>
                         
                         <Button 
@@ -380,7 +384,7 @@
                         @click="triggerFileInput"
                       >
                         <i class="pi pi-plus"></i>
-                        <span>Thêm ảnh</span>
+                        <span>{{ t('addInventory.images.addMore') }}</span>
                       </div>
                     </div>
 
@@ -392,9 +396,9 @@
                       @click="triggerFileInput"
                     >
                       <i class="pi pi-cloud-upload"></i>
-                      <p class="title">Kéo thả hình ảnh vào đây hoặc click để chọn</p>
-                      <p class="subtitle">PNG, JPG, WEBP (Max. 5MB mỗi file)</p>
-                      <p class="subtitle">Upload từng ảnh một, có thể chọn nhiều ảnh cùng lúc</p>
+                      <p class="title">{{ t('addInventory.images.dropzoneTitle') }}</p>
+                      <p class="subtitle">{{ t('addInventory.images.dropzoneHint1') }}</p>
+                      <p class="subtitle">{{ t('addInventory.images.dropzoneHint2') }}</p>
                     </div>
 
                     <!-- Hidden File Input -->
@@ -414,17 +418,17 @@
                     <div class="image-stats">
                       <span class="stat-item">
                         <i class="pi pi-check-circle"></i>
-                        <strong>{{ (itemStore.currentItem?.picture || []).length }}</strong> đã lưu
+                        <strong>{{ (itemStore.currentItem?.picture || []).length }}</strong> {{ t('addInventory.images.savedCount') }}
                       </span>
                       <span class="stat-item">
                         <i class="pi pi-clock"></i>
-                        <strong>{{ selectedFiles.length }}</strong> chờ upload
+                        <strong>{{ selectedFiles.length }}</strong> {{ t('addInventory.images.pendingCount') }}
                       </span>
                     </div>
                     
                     <Button 
                       v-if="selectedFiles.length > 0"
-                      label="Xóa file chờ" 
+                      :label="t('addInventory.images.clearPending')" 
                       icon="pi pi-trash" 
                       text 
                       size="small"
@@ -437,21 +441,21 @@
                 <!-- Form Actions -->
                 <div class="flex gap-2" style="padding-top: 1rem; border-top: 1px solid var(--gray-200); justify-content: flex-end;">
                   <Button 
-                    label="Hủy" 
+                    :label="t('addInventory.actions.cancel')" 
                     severity="secondary" 
                     outlined 
                     @click="handleCancel" 
                   />
                   <Button 
                     v-if="selectedFiles.length > 0 && createdItemId"
-                    label="Tải lên hình ảnh" 
+                    :label="t('addInventory.actions.uploadImages')" 
                     icon="pi pi-upload"
                     severity="info"
                     :loading="itemStore.uploadingImages"
                     @click="handleUploadImages"
                   />
                   <Button 
-                    label="Lưu sản phẩm" 
+                    :label="t('addInventory.actions.save')" 
                     type="submit" 
                     icon="pi pi-check" 
                     :loading="itemStore.loading" 
@@ -483,14 +487,20 @@ import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
 import Toast from 'primevue/toast'
 import Dropdown from 'primevue/dropdown'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const fileInput = ref<HTMLInputElement | null>(null)
 const activeTab = ref(0)
 const router = useRouter()
 const toast = useToast()
 const itemStore = useItemStore()
 
-const unitOptions = ['cái', 'hộp', 'bịch']
+const unitOptions = computed(() => [
+  { label: t('inventoryManagement.units.cai'), value: 'cái' },
+  { label: t('inventoryManagement.units.hop'), value: 'hộp' },
+  { label: t('inventoryManagement.units.bich'), value: 'bịch' },
+])
 
 interface SelectedFile {
   id: string
@@ -570,8 +580,8 @@ const handleFileChange = (event: Event) => {
     if (!['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(file.type)) {
       toast.add({
         severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: `File ${file.name} không đúng định dạng`,
+        summary: t('addInventory.toast.warningTitle'),
+        detail: t('addInventory.toast.invalidFormat', { name: file.name }),
         life: 3000
       })
       return
@@ -580,8 +590,8 @@ const handleFileChange = (event: Event) => {
     if (file.size > maxSize) {
       toast.add({
         severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: `File ${file.name} quá lớn (tối đa 5MB)`,
+        summary: t('addInventory.toast.warningTitle'),
+        detail: t('addInventory.toast.fileTooLarge', { name: file.name }),
         life: 3000
       })
       return
@@ -617,8 +627,8 @@ const handleUploadImages = async () => {
   if (!createdItemId.value || selectedFiles.value.length === 0) {
     toast.add({
       severity: 'warn',
-      summary: 'Cảnh báo',
-      detail: 'Không có file nào được chọn',
+      summary: t('addInventory.toast.warningTitle'),
+      detail: t('addInventory.toast.noFileSelected'),
       life: 3000
     })
     return
@@ -636,8 +646,8 @@ const handleUploadImages = async () => {
     if (result.success > 0) {
       toast.add({
         severity: 'success',
-        summary: 'Thành công',
-        detail: `Đã tải lên ${result.success}/${selectedFiles.value.length} ảnh`,
+        summary: t('addInventory.toast.successTitle'),
+        detail: t('addInventory.toast.uploadSuccess', { success: result.success, total: selectedFiles.value.length }),
         life: 3000
       })
 
@@ -652,16 +662,16 @@ const handleUploadImages = async () => {
     if (result.failed > 0) {
       toast.add({
         severity: 'error',
-        summary: 'Lỗi',
-        detail: `${result.failed} ảnh tải lên thất bại`,
+        summary: t('addInventory.toast.errorTitle'),
+        detail: t('addInventory.toast.uploadFailed', { count: result.failed }),
         life: 5000
       })
     }
   } catch (error: any) {
     toast.add({
       severity: 'error',
-      summary: 'Lỗi',
-      detail: error.message || 'Không thể tải lên hình ảnh',
+      summary: t('addInventory.toast.errorTitle'),
+      detail: error.message || t('addInventory.toast.uploadError'),
       life: 3000
     })
   } finally {
@@ -682,8 +692,8 @@ const handleDeleteImage = async (imageName: string) => {
     
     toast.add({
       severity: 'success',
-      summary: 'Thành công',
-      detail: 'Đã xóa hình ảnh',
+      summary: t('addInventory.toast.successTitle'),
+      detail: t('addInventory.toast.deleteImageSuccess'),
       life: 3000
     })
 
@@ -694,8 +704,8 @@ const handleDeleteImage = async (imageName: string) => {
   } catch (error: any) {
     toast.add({
       severity: 'error',
-      summary: 'Lỗi',
-      detail: error.message || 'Không thể xóa hình ảnh',
+      summary: t('addInventory.toast.errorTitle'),
+      detail: error.message || t('addInventory.toast.deleteImageError'),
       life: 3000
     })
   } finally {
@@ -707,8 +717,8 @@ const validateForm = (): boolean => {
   if (!form.value.type || !form.value.unit) {
     toast.add({
       severity: 'warn',
-      summary: 'Cảnh báo',
-      detail: 'Vui lòng điền đầy đủ các trường bắt buộc',
+      summary: t('addInventory.toast.warningTitle'),
+      detail: t('addInventory.toast.requiredFields'),
       life: 3000
     })
     return false
@@ -718,8 +728,8 @@ const validateForm = (): boolean => {
     if (!form.value.eng.partname || !form.value.eng.description) {
       toast.add({
         severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: 'Vui lòng điền đầy đủ thông tin Engineer',
+        summary: t('addInventory.toast.warningTitle'),
+        detail: t('addInventory.toast.requiredEngineer'),
         life: 3000
       })
       return false
@@ -730,8 +740,8 @@ const validateForm = (): boolean => {
     if (!form.value.com.name || !form.value.com.specifications) {
       toast.add({
         severity: 'warn',
-        summary: 'Cảnh báo',
-        detail: 'Vui lòng điền đầy đủ thông tin hàng tiêu dùng',
+        summary: t('addInventory.toast.warningTitle'),
+        detail: t('addInventory.toast.requiredConsumer'),
         life: 3000
       })
       return false
@@ -772,8 +782,8 @@ const handleSubmit = async () => {
 
       toast.add({
         severity: 'success',
-        summary: 'Thành công',
-        detail: 'Sản phẩm đã được tạo. Bạn có thể tiếp tục thêm hình ảnh hoặc quay lại danh sách.',
+        summary: t('addInventory.toast.successTitle'),
+        detail: t('addInventory.toast.createSuccess'),
         life: 5000
       })
 
@@ -782,8 +792,8 @@ const handleSubmit = async () => {
   } catch (error: any) {
     toast.add({
       severity: 'error',
-      summary: 'Lỗi',
-      detail: error.message || 'Không thể tạo sản phẩm',
+      summary: t('addInventory.toast.errorTitle'),
+      detail: error.message || t('addInventory.toast.createError'),
       life: 3000
     })
   } finally {

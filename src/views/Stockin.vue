@@ -19,11 +19,13 @@
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
         <div>
-          <h2 class="text-2xl font-bold mb-4 text-gray-900">Nhập hàng</h2>
-          <p class="text-gray-600">Quản lý phiếu nhập kho</p>
+          <h2 class="text-2xl font-bold mb-4 text-gray-900">
+            {{ t("importManagement.title") }}
+          </h2>
+          <p class="text-gray-600">{{ t("importManagement.subtitle") }}</p>
         </div>
         <Button
-          label="Tạo phiếu nhập mới"
+          :label="t('importManagement.createNew')"
           icon="pi pi-plus"
           class="btn-primary"
           @click="openCreateDialog"
@@ -36,9 +38,9 @@
           <div class="flex flex-col gap-4">
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700"
-                  >Từ ngày</label
-                >
+                <label class="block mb-2 text-sm font-semibold text-gray-700">{{
+                  t("importManagement.filters.fromDate")
+                }}</label>
                 <Calendar
                   v-model="fromDate"
                   dateFormat="dd/mm/yy"
@@ -50,9 +52,9 @@
                 />
               </div>
               <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700"
-                  >Đến ngày</label
-                >
+                <label class="block mb-2 text-sm font-semibold text-gray-700">{{
+                  t("importManagement.filters.toDate")
+                }}</label>
                 <Calendar
                   v-model="toDate"
                   dateFormat="dd/mm/yy"
@@ -76,12 +78,14 @@
                 <span class="p-input-icon-left w-full md:w-80">
                   <InputText
                     v-model="searchQuery"
-                    placeholder="Tìm kiếm theo ghi chú, người tạo..."
+                    :placeholder="
+                      t('importManagement.filters.searchPlaceholder')
+                    "
                     class="w-full"
                   />
                 </span>
                 <Button
-                  label="Reset"
+                  :label="t('importManagement.filters.reset')"
                   icon="pi pi-refresh"
                   severity="secondary"
                   class="w-full md:w-auto"
@@ -104,7 +108,9 @@
               class="text-center py-8"
             >
               <i class="pi pi-inbox text-5xl text-gray-400"></i>
-              <p class="mt-4 text-gray-500">Chưa có phiếu nhập nào</p>
+              <p class="mt-4 text-gray-500">
+                {{ t("importManagement.empty") }}
+              </p>
             </div>
             <div v-else class="stockin-card-list">
               <div
@@ -122,28 +128,40 @@
                 <div class="stockin-card-body">
                   <div class="stockin-card-row">
                     <i class="pi pi-user text-gray-400"></i>
-                    <span class="stockin-card-label">Người tạo</span>
+                    <span class="stockin-card-label">{{
+                      t("importManagement.card.createdBy")
+                    }}</span>
                     <span class="stockin-card-value">{{
                       stockin.account?.username || "-"
                     }}</span>
                   </div>
                   <div class="stockin-card-row">
                     <i class="pi pi-box text-gray-400"></i>
-                    <span class="stockin-card-label">Sản phẩm</span>
-                    <span class="stockin-card-value"
-                      >{{ stockin.stockInDetails?.length || 0 }} SP</span
-                    >
+                    <span class="stockin-card-label">{{
+                      t("importManagement.card.products")
+                    }}</span>
+                    <span class="stockin-card-value">{{
+                      t("importManagement.card.productCount", {
+                        count: stockin.stockInDetails?.length || 0,
+                      })
+                    }}</span>
                   </div>
                   <div class="stockin-card-row">
                     <i class="pi pi-images text-gray-400"></i>
-                    <span class="stockin-card-label">Hình ảnh</span>
-                    <span class="stockin-card-value"
-                      >{{ stockin.image?.length || 0 }} ảnh</span
-                    >
+                    <span class="stockin-card-label">{{
+                      t("importManagement.card.images")
+                    }}</span>
+                    <span class="stockin-card-value">{{
+                      t("importManagement.card.imageCount", {
+                        count: stockin.image?.length || 0,
+                      })
+                    }}</span>
                   </div>
                   <div v-if="stockin.note" class="stockin-card-row">
                     <i class="pi pi-file-edit text-gray-400"></i>
-                    <span class="stockin-card-label">Ghi chú</span>
+                    <span class="stockin-card-label">{{
+                      t("importManagement.card.note")
+                    }}</span>
                     <span class="stockin-card-value truncate">{{
                       stockin.note
                     }}</span>
@@ -152,7 +170,7 @@
                 <div class="stockin-card-footer" @click.stop>
                   <Button
                     icon="pi pi-eye"
-                    label="Chi tiết"
+                    :label="t('importManagement.card.detail')"
                     text
                     size="small"
                     severity="info"
@@ -160,7 +178,7 @@
                   />
                   <Button
                     icon="pi pi-images"
-                    label="Ảnh"
+                    :label="t('importManagement.card.images_btn')"
                     text
                     size="small"
                     severity="secondary"
@@ -168,7 +186,7 @@
                   />
                   <Button
                     icon="pi pi-trash"
-                    label="Xóa"
+                    :label="t('importManagement.card.delete')"
                     text
                     size="small"
                     severity="danger"
@@ -198,7 +216,7 @@
     <!-- ==================== CREATE STOCKIN DIALOG ==================== -->
     <Dialog
       v-model:visible="showCreateDialog"
-      header="Tạo phiếu nhập mới"
+      :header="t('importManagement.createDialog.header')"
       :style="{ width: '900px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -206,12 +224,12 @@
       <div class="flex flex-col gap-4 mt-4">
         <!-- Ghi chú -->
         <div>
-          <label class="block mb-2 font-semibold">Ghi chú</label>
+          <label>{{ t("importManagement.createDialog.note") }}</label>
           <Textarea
             v-model="createForm.note"
             rows="3"
             class="w-full"
-            placeholder="Nhập ghi chú cho phiếu nhập..."
+            :placeholder="t('importManagement.createDialog.notePlaceholder')"
           />
         </div>
 
@@ -221,10 +239,11 @@
             class="flex md:flex-row lg:flex-row flex-col justify-between items-center mb-3 gap-2"
           >
             <label class="text-base font-semibold">
-              Danh sách sản phẩm nhập <span class="text-red-500">*</span>
+              {{ t("importManagement.createDialog.productList") }}
+              <span class="text-red-500">*</span>
             </label>
             <Button
-              label="Thêm sản phẩm"
+              :label="t('importManagement.createDialog.addProduct')"
               icon="pi pi-plus"
               size="small"
               @click="addItemRow"
@@ -236,9 +255,11 @@
             class="text-center py-8 rounded-lg border-2 border-dashed border-gray-300 mt-2!"
           >
             <i class="pi pi-box text-4xl text-gray-300 mb-2 block"></i>
-            <p class="text-gray-500 font-medium mb-2">Chưa có sản phẩm nào</p>
+            <p class="text-gray-500 font-medium mb-2">
+              {{ t("importManagement.createDialog.emptyProducts") }}
+            </p>
             <Button
-              label="Thêm sản phẩm đầu tiên"
+              :label="t('importManagement.createDialog.addFirst')"
               icon="pi pi-plus"
               text
               @click="addItemRow"
@@ -256,7 +277,11 @@
                 <span
                   class="text-xs font-bold text-gray-500 px-2 py-0.5 rounded-full"
                 >
-                  Sản phẩm {{ index + 1 }}
+                  {{
+                    t("importManagement.createDialog.productBadge", {
+                      index: index + 1,
+                    })
+                  }}
                 </span>
                 <Button
                   icon="pi pi-trash"
@@ -270,20 +295,24 @@
 
               <!-- Dropdown sản phẩm -->
               <div>
-                <label class="block mb-1.5 text-sm font-medium text-gray-700"
-                  >Sản phẩm</label
-                >
+                <label class="block mb-1.5 text-sm font-medium text-gray-700">{{
+                  t("importManagement.createDialog.productLabel")
+                }}</label>
                 <Dropdown
                   v-model="item.itemId"
                   :options="availableItems"
                   optionLabel="label"
                   optionValue="value"
-                  placeholder="Chọn sản phẩm"
+                  :placeholder="
+                    t('importManagement.createDialog.productPlaceholder')
+                  "
                   class="w-full"
                   :filter="true"
                   appendTo="body"
                   panelClass="stockin-item-dropdown-panel"
-                  filterPlaceholder="Tìm sản phẩm..."
+                  :filterPlaceholder="
+                    t('importManagement.createDialog.productFilter')
+                  "
                   @change="onItemSelect($event, index)"
                 >
                   <template #value="slotProps">
@@ -302,7 +331,8 @@
                           {{ getSelectedItemLabel(slotProps.value) }}
                         </div>
                         <div class="text-xs text-gray-500 truncate">
-                          {{ getSelectedItemType(slotProps.value) }} - Tồn:
+                          {{ getSelectedItemType(slotProps.value) }} -
+                          {{ t("importManagement.createDialog.stockLabel") }}:
                           {{ getSelectedItemStock(slotProps.value) }}
                           {{ getSelectedItemUnit(slotProps.value) }}
                         </div>
@@ -331,7 +361,8 @@
                           {{ slotProps.option.label }}
                         </div>
                         <div class="text-xs text-gray-500">
-                          {{ slotProps.option.type }} · Tồn:
+                          {{ slotProps.option.type }} ·
+                          {{ t("importManagement.createDialog.stockLabel") }}:
                           {{ slotProps.option.stock }}
                           {{ slotProps.option.unit }}
                         </div>
@@ -344,8 +375,11 @@
               <!-- Số lượng + Tồn kho -->
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="block mb-1.5 text-sm font-medium text-gray-700"
-                    >Số lượng</label
+                  <label
+                    class="block mb-1.5 text-sm font-medium text-gray-700"
+                    >{{
+                      t("importManagement.createDialog.quantityLabel")
+                    }}</label
                   >
                   <input
                     type="number"
@@ -355,8 +389,9 @@
                   />
                 </div>
                 <div>
-                  <label class="block mb-1.5 text-sm font-medium text-gray-700"
-                    >Tồn kho</label
+                  <label
+                    class="block mb-1.5 text-sm font-medium text-gray-700"
+                    >{{ t("importManagement.createDialog.stockLabel") }}</label
                   >
                   <div
                     class="h-9 flex items-center px-3! bg-blue-50 border border-blue-200 rounded-lg"
@@ -382,23 +417,31 @@
           class="p-4! bg-blue-50 rounded-lg border border-blue-200 flex flex-col gap-2"
         >
           <div class="flex items-center justify-between">
-            <span class="font-semibold text-gray-700">Tổng số mặt hàng:</span>
-            <span class="text-xl font-bold text-primary"
-              >{{ createForm.items.length }} mặt hàng</span
+            <span class="font-semibold text-gray-700"
+              >{{ t("importManagement.createDialog.summaryItems") }}:</span
             >
+            <span class="text-xl font-bold text-primary">{{
+              t("importManagement.createDialog.summaryItemsValue", {
+                count: createForm.items.length,
+              })
+            }}</span>
           </div>
           <div class="flex items-center justify-between mt-2">
-            <span class="font-semibold text-gray-700">Tổng số lượng nhập:</span>
-            <span class="text-xl font-bold text-primary"
-              >{{ totalQuantity }} sản phẩm</span
+            <span class="font-semibold text-gray-700"
+              >{{ t("importManagement.createDialog.summaryQty") }}:</span
             >
+            <span class="text-xl font-bold text-primary">{{
+              t("importManagement.createDialog.summaryQtyValue", {
+                count: totalQuantity,
+              })
+            }}</span>
           </div>
         </div>
       </div>
 
       <template #footer>
         <Button
-          label="Hủy"
+          :label="t('importManagement.createDialog.cancel')"
           icon="pi pi-times"
           text
           @click="closeCreateDialog"
@@ -407,7 +450,7 @@
         <!-- Bước 1: Chưa có ảnh → chỉ hiện nút Upload -->
         <Button
           v-if="createPendingImages.length === 0"
-          label="Upload hình ảnh"
+          :label="t('importManagement.createDialog.uploadImages')"
           icon="pi pi-images"
           severity="secondary"
           :disabled="!isFormValid"
@@ -417,12 +460,16 @@
         <!-- Bước 2: Đã có ảnh → hiện nút Tạo phiếu (và nút đổi ảnh) -->
         <template v-else>
           <Button
-            :label="`Đổi ảnh (${createPendingImages.length})`"
+            :label="
+              t('importManagement.createDialog.changeImages', {
+                count: createPendingImages.length,
+              })
+            "
             severity="secondary"
             @click="openCreateImageDialog"
           />
           <Button
-            label="Tạo phiếu nhập"
+            :label="t('importManagement.createDialog.submit')"
             severity="success"
             :loading="isSubmittingCreate"
             @click="confirmAndCreateStockin"
@@ -434,7 +481,7 @@
     <!-- CREATE IMAGE DIALOG -->
     <Dialog
       v-model:visible="showCreateImageDialog"
-      header="Thêm hình ảnh minh chứng"
+      :header="t('importManagement.createImageDialog.header')"
       :style="{ width: '800px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -444,22 +491,21 @@
           class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2"
         >
           <p class="text-sm text-blue-700 p-2!">
-            Tất cả hình ảnh sẽ được gắn <strong>timestamp</strong> tự động. Sau
-            khi xong, đóng dialog để quay lại tạo phiếu nhập.
+            {{ t("importManagement.createImageDialog.hint") }}
           </p>
         </div>
 
         <!-- Mobile: 2 nút -->
         <div v-if="isTableMobile" class="flex gap-2 mb-3">
           <Button
-            label="Chọn ảnh"
+            :label="t('importManagement.createImageDialog.selectImages')"
             icon="pi pi-images"
             severity="secondary"
             class="flex-1"
             @click="createImageFileInput?.click()"
           />
           <Button
-            label="Chụp ảnh"
+            :label="t('importManagement.createImageDialog.takePhoto')"
             icon="pi pi-camera"
             severity="secondary"
             class="flex-1"
@@ -478,10 +524,10 @@
           <div class="flex flex-col items-center justify-center py-4!">
             <i class="pi pi-cloud-upload text-4xl text-gray-400 mb-2"></i>
             <p class="text-gray-600 text-sm font-medium mb-1">
-              Kéo thả hoặc click để chọn
+              {{ t("importManagement.createImageDialog.dropzone") }}
             </p>
             <p class="text-xs text-gray-400">
-              PNG, JPG, WEBP (Max. 5MB) · Timestamp tự động
+              {{ t("importManagement.createImageDialog.dropzoneHint") }}
             </p>
           </div>
         </div>
@@ -489,9 +535,13 @@
         <!-- Preview grid -->
         <div v-if="createPendingPreviews.length > 0">
           <p class="text-sm font-medium text-gray-700 mb-2">
-            Đã chọn {{ createPendingPreviews.length }} hình:
+            {{
+              t("importManagement.createImageDialog.selectedCount", {
+                count: createPendingPreviews.length,
+              })
+            }}
           </p>
-          <div class="grid grid-cols-3 gap-2">
+          <div class="grid grid-cols-3 gap-2 mt-3!">
             <div
               v-for="(preview, index) in createPendingPreviews"
               :key="`cp-${index}`"
@@ -522,16 +572,20 @@
               @click="createImageFileInput?.click()"
             >
               <i class="pi pi-plus text-xl text-gray-400"></i>
-              <span class="text-xs text-gray-400 mt-1">Thêm</span>
+              <span class="text-xs text-gray-400 mt-1">{{
+                t("importManagement.createImageDialog.addMore")
+              }}</span>
             </div>
           </div>
         </div>
         <div
           v-else
-          class="text-center py-6 text-gray-400 border-2 border-dashed border-gray-400 rounded-xl mt-3! py-2!"
+          class="text-center text-gray-400 border-2 border-dashed border-gray-400 rounded-xl mt-3! py-2!"
         >
           <i class="pi pi-image text-4xl mb-2 block"></i>
-          <p class="text-sm">Chưa có hình nào được chọn</p>
+          <p class="text-sm">
+            {{ t("importManagement.createImageDialog.noImages") }}
+          </p>
         </div>
 
         <!-- Hidden inputs -->
@@ -557,8 +611,10 @@
         <Button
           :label="
             createPendingImages.length > 0
-              ? `Xong (${createPendingImages.length} ảnh)`
-              : 'Đóng'
+              ? t('importManagement.createImageDialog.closeWithCount', {
+                  count: createPendingImages.length,
+                })
+              : t('importManagement.createImageDialog.close')
           "
           :icon="createPendingImages.length > 0 ? 'pi pi-check' : 'pi pi-times'"
           :severity="createPendingImages.length > 0 ? 'success' : 'secondary'"
@@ -570,7 +626,9 @@
     <!-- ==================== DETAIL DIALOG ==================== -->
     <Dialog
       v-model:visible="showDetailDialog"
-      :header="`Chi tiết phiếu nhập #${selectedStockin?.id}`"
+      :header="
+        t('importManagement.detailDialog.header', { id: selectedStockin?.id })
+      "
       :style="{ width: '900px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -578,34 +636,42 @@
       <div v-if="selectedStockin" class="mt-4">
         <div class="grid grid-cols-2 gap-4 mb-4 p-4! bg-gray-50 rounded-lg">
           <div>
-            <label class="block text-sm text-gray-600 mb-1">Ngày nhập</label>
+            <label class="block text-sm text-gray-600 mb-1">{{
+              t("importManagement.detailDialog.stockInDate")
+            }}</label>
             <p class="font-semibold text-gray-900">
               {{ formatDateTime(selectedStockin.stockInDate) }}
             </p>
           </div>
           <div>
-            <label class="block text-sm text-gray-600 mb-1">Người tạo</label>
+            <label class="block text-sm text-gray-600 mb-1">{{
+              t("importManagement.detailDialog.createdBy")
+            }}</label>
             <p class="font-semibold text-gray-900">
               {{ selectedStockin.account?.username }}
             </p>
           </div>
           <div class="col-span-2">
-            <label class="block text-sm text-gray-600 mb-1">Ghi chú</label>
+            <label class="block text-sm text-gray-600 mb-1">{{
+              t("importManagement.detailDialog.note")
+            }}</label>
             <p class="text-gray-900">{{ selectedStockin.note || "-" }}</p>
           </div>
         </div>
 
         <div class="mb-4">
           <h3 class="text-lg font-semibold mb-3">
-            Danh sách sản phẩm ({{
-              selectedStockin.stockInDetails?.length || 0
-            }})
+            {{
+              t("importManagement.detailDialog.productList", {
+                count: selectedStockin.stockInDetails?.length || 0,
+              })
+            }}
           </h3>
           <div
             v-if="!selectedStockin.stockInDetails?.length"
             class="text-center py-4 text-gray-500"
           >
-            Không có sản phẩm nào
+            {{ t("importManagement.detailDialog.noProducts") }}
           </div>
           <div v-else class="flex flex-col gap-2">
             <div
@@ -644,7 +710,7 @@
 
       <template #footer>
         <Button
-          label="Đóng"
+          :label="t('importManagement.detailDialog.close')"
           icon="pi pi-times"
           @click="showDetailDialog = false"
         />
@@ -654,7 +720,9 @@
     <!-- ==================== IMAGE MANAGEMENT DIALOG ==================== -->
     <Dialog
       v-model:visible="showImageDialog"
-      :header="`Quản lý hình ảnh - Phiếu nhập #${selectedStockin?.id}`"
+      :header="
+        t('importManagement.imageDialog.header', { id: selectedStockin?.id })
+      "
       :style="{ width: '800px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -664,19 +732,20 @@
         <!-- Upload Area -->
         <div class="mb-6">
           <label class="block mb-2 font-semibold">
-            Tải lên hình ảnh mới
+            {{ t("importManagement.imageDialog.uploadTitle") }}
             <span
               v-if="stockinStore.uploadingImages"
               class="text-primary text-sm ml-2"
             >
-              <i class="pi pi-spin pi-spinner"></i> Đang tải lên...
+              <i class="pi pi-spin pi-spinner"></i>
+              {{ t("importManagement.imageDialog.uploading") }}
             </span>
           </label>
 
           <!-- Mobile: 2 nút -->
           <div v-if="isTableMobile" class="flex gap-2 mb-3">
             <Button
-              label="Chọn ảnh"
+              :label="t('importManagement.imageDialog.selectImages')"
               icon="pi pi-images"
               severity="secondary"
               class="flex-1"
@@ -684,7 +753,7 @@
               @click="imageFileInput?.click()"
             />
             <Button
-              label="Chụp ảnh"
+              :label="t('importManagement.imageDialog.takePhoto')"
               icon="pi pi-camera"
               severity="secondary"
               class="flex-1"
@@ -736,15 +805,19 @@
                 "
               >
                 <i class="pi pi-plus text-2xl text-gray-400"></i>
-                <span class="text-xs text-gray-400 mt-1">Thêm ảnh</span>
+                <span class="text-xs text-gray-400 mt-1">{{
+                  t("importManagement.imageDialog.addMore")
+                }}</span>
               </div>
             </div>
             <div class="flex flex-col items-center justify-center py-6">
               <i class="pi pi-cloud-upload text-4xl text-gray-400 mb-2"></i>
               <p class="text-gray-600 text-sm font-medium mb-1">
-                Kéo thả hoặc click để chọn
+                {{ t("importManagement.imageDialog.dropzone") }}
               </p>
-              <p class="text-xs text-gray-400">PNG, JPG, WEBP (Max. 5MB)</p>
+              <p class="text-xs text-gray-400">
+                {{ t("importManagement.imageDialog.dropzoneHint") }}
+              </p>
             </div>
           </div>
 
@@ -782,7 +855,9 @@
                 @click="imageFileInput?.click()"
               >
                 <i class="pi pi-plus text-xl text-gray-400"></i>
-                <span class="text-xs text-gray-400 mt-1">Thêm</span>
+                <span class="text-xs text-gray-400 mt-1">{{
+                  t("importManagement.imageDialog.addMore")
+                }}</span>
               </div>
             </div>
           </div>
@@ -810,14 +885,16 @@
           <!-- Action buttons -->
           <div
             v-if="pendingImages.length > 0"
-            class="flex justify-between items-center mt-3"
+            class="flex justify-between items-center mt-3!"
           >
-            <span class="text-sm text-gray-600 font-medium"
-              >Đã chọn {{ pendingImages.length }} file</span
-            >
+            <span class="text-sm text-gray-600 font-medium">{{
+              t("importManagement.imageDialog.selectedCount", {
+                count: pendingImages.length,
+              })
+            }}</span>
             <div class="flex gap-2 mt-2">
               <Button
-                label="Xóa tất cả"
+                :label="t('importManagement.imageDialog.clearAll')"
                 icon="pi pi-trash"
                 text
                 size="small"
@@ -825,7 +902,7 @@
                 @click="clearPendingImages"
               />
               <Button
-                label="Tải lên"
+                :label="t('importManagement.imageDialog.upload')"
                 icon="pi pi-upload"
                 size="small"
                 severity="success"
@@ -838,14 +915,18 @@
 
         <!-- Current Images -->
         <div>
-          <label class="font-semibold mb-4 block"
-            >Hình ảnh hiện tại ({{ currentImages.length }})</label
-          >
+          <label class="font-semibold mb-4 block">{{
+            t("importManagement.imageDialog.currentImages", {
+              count: currentImages.length,
+            })
+          }}</label>
           <div
             v-if="currentImages.length === 0"
             class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300"
           >
-            <p class="my-4 text-gray-500">Chưa có hình ảnh nào</p>
+            <p class="my-4 text-gray-500">
+              {{ t("importManagement.imageDialog.noImages") }}
+            </p>
           </div>
           <div v-else class="grid grid-cols-4 gap-4">
             <div
@@ -864,7 +945,11 @@
       </div>
 
       <template #footer>
-        <Button label="Đóng" icon="pi pi-times" @click="closeImageDialog" />
+        <Button
+          :label="t('importManagement.imageDialog.close')"
+          icon="pi pi-times"
+          @click="closeImageDialog"
+        />
       </template>
     </Dialog>
 
@@ -897,12 +982,14 @@ import ImagePreviewDialog from "@/views/ImagePreviewDialog.vue";
 import { useImagePreview } from "@/composables/useImagePreview";
 import { usePagination } from "@/composables/usePagination";
 import AppPagination from "@/components/AppPagination.vue";
+import { useI18n } from "vue-i18n";
 
 const confirm = useConfirm();
 const toast = useToast();
 const stockinStore = useStockinStore();
 const itemStore = useItemStore();
 const imagePreview = useImagePreview();
+const { t } = useI18n();
 
 // ── Resize ────────────────────────────────────────────────
 const isTableMobile = ref(window.innerWidth < 768);
@@ -949,8 +1036,8 @@ const handleCreateImageUpload = async (event: Event) => {
     ) {
       toast.add({
         severity: "warn",
-        summary: "Cảnh báo",
-        detail: `File ${file.name} không đúng định dạng`,
+        summary: t("importManagement.toast.warningTitle"),
+        detail: t("importManagement.toast.invalidFormat", { name: file.name }),
         life: 3000,
       });
       return;
@@ -958,8 +1045,8 @@ const handleCreateImageUpload = async (event: Event) => {
     if (file.size > maxSize) {
       toast.add({
         severity: "warn",
-        summary: "Cảnh báo",
-        detail: `File ${file.name} quá lớn (tối đa 5MB)`,
+        summary: t("importManagement.toast.warningTitle"),
+        detail: t("importManagement.toast.fileTooLarge", { name: file.name }),
         life: 3000,
       });
       return;
@@ -1049,8 +1136,8 @@ const handleCreateCameraCapture = async (event: Event) => {
   ) {
     toast.add({
       severity: "warn",
-      summary: "Cảnh báo",
-      detail: "Định dạng không hỗ trợ",
+      summary: t("importManagement.toast.warningTitle"),
+      detail: t("importManagement.toast.unsupportedFormat"),
       life: 3000,
     });
     return;
@@ -1058,8 +1145,8 @@ const handleCreateCameraCapture = async (event: Event) => {
   if (file.size > 5 * 1024 * 1024) {
     toast.add({
       severity: "warn",
-      summary: "Cảnh báo",
-      detail: "File quá lớn (max 5MB)",
+      summary: t("importManagement.toast.warningTitle"),
+      detail: t("importManagement.toast.fileTooLargeSimple"),
       life: 3000,
     });
     return;
@@ -1114,8 +1201,8 @@ const confirmAndCreateStockin = async () => {
     );
     toast.add({
       severity: "success",
-      summary: "Thành công",
-      detail: `Tạo phiếu nhập #${newStockin.id} thành công!`,
+      summary: t("importManagement.toast.successTitle"),
+      detail: t("importManagement.toast.createSuccess", { id: newStockin.id }),
       life: 3000,
     });
     // Reset
@@ -1127,8 +1214,8 @@ const confirmAndCreateStockin = async () => {
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Lỗi",
-      detail: error.message || "Không thể tạo phiếu nhập",
+      summary: t("importManagement.toast.errorTitle"),
+      detail: error.message || t("importManagement.toast.createError"),
       life: 3000,
     });
   } finally {
@@ -1232,8 +1319,8 @@ const fetchAllStockins = async () => {
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Lỗi",
-      detail: error.message || "Không thể tải danh sách phiếu nhập",
+      summary: t("importManagement.toast.errorTitle"),
+      detail: error.message || t("importManagement.toast.loadStockinError"),
       life: 3000,
     });
   } finally {
@@ -1248,8 +1335,8 @@ const fetchAllItems = async () => {
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Lỗi",
-      detail: error.message || "Không thể tải danh sách sản phẩm",
+      summary: t("importManagement.toast.errorTitle"),
+      detail: error.message || t("importManagement.toast.loadItemError"),
       life: 3000,
     });
   }
@@ -1382,27 +1469,6 @@ const onItemSelect = (event: any, index: number) => {
   console.log("Item selected:", event.value, "at index:", index);
 };
 
-/**
- * Luồng: Tạo phiếu nhập → tự động mở Image Dialog để upload ảnh
- */
-const submitCreate = async () => {
-  if (!isFormValid.value) {
-    toast.add({
-      severity: "warn",
-      summary: "Cảnh báo",
-      detail: "Vui lòng điền đủ thông tin",
-      life: 3000,
-    });
-    return;
-  }
-  // Nếu đã có ảnh rồi → tạo phiếu luôn
-  if (createPendingImages.value.length > 0) {
-    await confirmAndCreateStockin();
-    return;
-  }
-  // Chưa có ảnh → mở image dialog
-  showCreateImageDialog.value = true;
-};
 // ── Detail ────────────────────────────────────────────────
 const viewDetail = async (stockin: Stockin) => {
   selectedStockin.value = stockin;
@@ -1419,11 +1485,11 @@ const viewDetail = async (stockin: Stockin) => {
 // ── Delete ────────────────────────────────────────────────
 const confirmDelete = (stockin: Stockin) => {
   confirm.require({
-    message: `Bạn có chắc muốn xóa phiếu nhập #${stockin.id}?`,
-    header: "Xác nhận xóa",
+    message: t("importManagement.confirmDelete.message", { id: stockin.id }),
+    header: t("importManagement.confirmDelete.header"),
     icon: "pi pi-exclamation-triangle",
-    acceptLabel: "Xóa",
-    rejectLabel: "Hủy",
+    acceptLabel: t("importManagement.confirmDelete.accept"),
+    rejectLabel: t("importManagement.confirmDelete.reject"),
     acceptClass: "p-button-danger",
     accept: async () => {
       if (!stockin.id) return;
@@ -1432,16 +1498,16 @@ const confirmDelete = (stockin: Stockin) => {
         await stockinAPI.deleteStockin(stockin.id);
         toast.add({
           severity: "success",
-          summary: "Thành công",
-          detail: "Xóa phiếu nhập thành công",
+          summary: t("importManagement.toast.successTitle"),
+          detail: t("importManagement.toast.deleteSuccess"),
           life: 3000,
         });
         await fetchAllStockins();
       } catch (error: any) {
         toast.add({
           severity: "error",
-          summary: "Lỗi",
-          detail: error.message || "Không thể xóa phiếu nhập",
+          summary: t("importManagement.toast.errorTitle"),
+          detail: error.message || t("importManagement.toast.deleteError"),
           life: 3000,
         });
       } finally {
@@ -1517,8 +1583,8 @@ const handleImageUpload = (event: Event) => {
     ) {
       toast.add({
         severity: "warn",
-        summary: "Cảnh báo",
-        detail: `File ${file.name} không đúng định dạng`,
+        summary: t("importManagement.toast.warningTitle"),
+        detail: t("importManagement.toast.invalidFormat", { name: file.name }),
         life: 3000,
       });
       return;
@@ -1526,8 +1592,8 @@ const handleImageUpload = (event: Event) => {
     if (file.size > maxSize) {
       toast.add({
         severity: "warn",
-        summary: "Cảnh báo",
-        detail: `File ${file.name} quá lớn (tối đa 5MB)`,
+        summary: t("importManagement.toast.warningTitle"),
+        detail: t("importManagement.toast.fileTooLarge", { name: file.name }),
         life: 3000,
       });
       return;
@@ -1556,8 +1622,8 @@ const handleCameraCapture = async (event: Event) => {
   ) {
     toast.add({
       severity: "warn",
-      summary: "Cảnh báo",
-      detail: "Định dạng không hỗ trợ",
+      summary: t("importManagement.toast.warningTitle"),
+      detail: t("importManagement.toast.unsupportedFormat"),
       life: 3000,
     });
     return;
@@ -1565,8 +1631,8 @@ const handleCameraCapture = async (event: Event) => {
   if (file.size > 5 * 1024 * 1024) {
     toast.add({
       severity: "warn",
-      summary: "Cảnh báo",
-      detail: "File quá lớn (max 5MB)",
+      summary: t("importManagement.toast.warningTitle"),
+      detail: t("importManagement.toast.fileTooLargeSimple"),
       life: 3000,
     });
     return;
@@ -1613,8 +1679,8 @@ const uploadPendingImages = async () => {
   if (!selectedStockin.value?.id || !pendingImages.value.length) {
     toast.add({
       severity: "warn",
-      summary: "Cảnh báo",
-      detail: "Không có file nào được chọn",
+      summary: t("importManagement.toast.warningTitle"),
+      detail: t("importManagement.toast.noFileSelected"),
       life: 3000,
     });
     return;
@@ -1628,8 +1694,11 @@ const uploadPendingImages = async () => {
     if (result.success > 0) {
       toast.add({
         severity: "success",
-        summary: "Thành công",
-        detail: `Đã tải lên ${result.success}/${pendingImages.value.length} ảnh`,
+        summary: t("importManagement.toast.successTitle"),
+        detail: t("importManagement.toast.uploadSuccessDetail", {
+          success: result.success,
+          total: pendingImages.value.length,
+        }),
         life: 3000,
       });
       clearPendingImages();
@@ -1645,16 +1714,18 @@ const uploadPendingImages = async () => {
     if (result.failed > 0) {
       toast.add({
         severity: "error",
-        summary: "Lỗi",
-        detail: `${result.failed} ảnh tải lên thất bại`,
+        summary: t("importManagement.toast.errorTitle"),
+        detail: t("importManagement.toast.uploadFailDetail", {
+          count: result.failed,
+        }),
         life: 5000,
       });
     }
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Lỗi",
-      detail: error.message || "Không thể tải lên hình ảnh",
+      summary: t("importManagement.toast.errorTitle"),
+      detail: error.message || t("importManagement.toast.uploadError"),
       life: 3000,
     });
   } finally {
@@ -1668,7 +1739,7 @@ const viewImageFullscreen = (imageUrl: string) => {
 };
 
 watch(isTableMobile, (mobile) => {
-  pageSize.value = mobile ? 5 : 10
+  pageSize.value = mobile ? 5 : 10;
 });
 </script>
 

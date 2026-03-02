@@ -18,11 +18,11 @@
       <!-- Header -->
       <div class="flex md:flex-row lg:flex-row flex-col justify-between md:items-center lg:items-center mb-4">
         <div>
-          <h2 class="text-2xl font-bold mb-4 text-gray-900">Kho hàng</h2>
-          <p class="text-gray-600">Quản lý tồn kho sản phẩm</p>
+          <h2 class="text-2xl font-bold mb-4 text-gray-900">{{ t("inventoryManagement.title") }}</h2>
+          <p class="text-gray-600">{{ t("inventoryManagement.subtitle") }}</p>
         </div>
         <Button 
-          label="Thêm sản phẩm mới" 
+          :label="t('inventoryManagement.addProduct')" 
           icon="pi pi-plus" 
           class="btn-primary" 
           @click="router.push('/add-product')"
@@ -35,37 +35,37 @@
             <!-- Filters Row -->
             <div class="grid grid-cols-3 gap-3">
               <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700">Loại sản phẩm</label>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">{{ t("inventoryManagement.filters.productType") }}</label>
                 <Dropdown 
                   v-model="selectedType" 
                   :options="typeOptions" 
                   optionLabel="label" 
                   optionValue="value"
-                  placeholder="Tất cả loại"
+                  :placeholder="t('inventoryManagement.filters.allTypes')"
                   class="w-full"
                   showClear
                 />
               </div>
               
               <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700">Trạng thái tồn kho</label>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">{{ t("inventoryManagement.filters.stockStatus") }}</label>
                 <Dropdown 
                   v-model="selectedStockStatus" 
                   :options="stockStatusOptions" 
                   optionLabel="label" 
                   optionValue="value"
-                  placeholder="Tất cả"
+                  :placeholder="t('inventoryManagement.filters.allStatuses')"
                   class="w-full"
                   showClear
                 />
               </div>
               
               <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700">Tìm kiếm</label>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">{{ t("inventoryManagement.filters.search") }}</label>
                 <div class="p-input-icon-left w-full">
                   <InputText 
                     v-model="searchQuery" 
-                    placeholder="Tên sản phẩm, ID..." 
+                    :placeholder="t('inventoryManagement.filters.searchPlaceholder')" 
                     class="w-full"
                   />
                 </div>
@@ -73,25 +73,25 @@
             </div>
             
             <!-- Summary & Actions Row -->
-            <div class="flex justify-between items-center">
-              <div class="flex md:flex-row lg:flex-row flex-col md:items-center lg:items-center gap-4">
+            <div class="flex md:flex-row lg:flex-row flex-col justify-between md:items-center lg:items-center items-start gap-4">
+              <div class="flex md:flex-row lg:flex-row flex-col md:items-center lg:items-center gap-4 w-full!">
                 <span class="text-lg font-semibold text-gray-900">
-                  Tổng: {{ totalFilteredItems }} sản phẩm
+                  {{ t("inventoryManagement.summary.total", { count: totalFilteredItems }) }}
                 </span>
                 
                 <!-- Clickable Status Chips - DÙNG allItemsStockCount -->
                 <Chip 
                   v-if="allItemsStockCount.normal > 0"
-                  :label="`${allItemsStockCount.normal} còn hàng`"
+                  :label="`${allItemsStockCount.normal} ${t('inventoryManagement.stockStatusOptions.inStock')}`"
                   icon="pi pi-check-circle"
                   class="clickable-chip chip-normal"
                   :class="{ 'chip-active': selectedStockStatus === 'in-stock' }"
                   @click="handleChipClick('in-stock')"
                 />
                 
-                <Chip 
+                <Chip
                   v-if="allItemsStockCount.warning > 0"
-                  :label="`${allItemsStockCount.warning} cảnh báo`"
+                  :label="`${allItemsStockCount.warning} ${t('inventoryManagement.stockStatusOptions.warning')}`"
                   icon="pi pi-info-circle"
                   class="clickable-chip chip-warning"
                   :class="{ 'chip-active': selectedStockStatus === 'warning' }"
@@ -100,7 +100,7 @@
                 
                 <Chip 
                   v-if="allItemsStockCount.low > 0"
-                  :label="`${allItemsStockCount.low} thấp`" 
+                  :label="`${allItemsStockCount.low} ${t('inventoryManagement.stockStatusOptions.low')}`" 
                   icon="pi pi-exclamation-circle"
                   class="clickable-chip chip-low pulse-warning"
                   :class="{ 'chip-active': selectedStockStatus === 'low' }"
@@ -109,7 +109,7 @@
                 
                 <Chip 
                   v-if="allItemsStockCount.critical > 0"
-                  :label="`${allItemsStockCount.critical} nguy cấp`" 
+                  :label="`${allItemsStockCount.critical} ${t('inventoryManagement.stockStatusOptions.critical')}`" 
                   icon="pi pi-exclamation-triangle"
                   class="clickable-chip chip-critical pulse-danger"
                   :class="{ 'chip-active': selectedStockStatus === 'critical' }"
@@ -118,7 +118,7 @@
                 
                 <Chip 
                   v-if="allItemsStockCount.outOfStock > 0"
-                  :label="`${allItemsStockCount.outOfStock} hết hàng`" 
+                  :label="`${allItemsStockCount.outOfStock} ${t('inventoryManagement.stockStatusOptions.outOfStock')}`" 
                   icon="pi pi-times-circle"
                   class="clickable-chip chip-out-of-stock pulse-danger"
                   :class="{ 'chip-active': selectedStockStatus === 'out-of-stock' }"
@@ -127,7 +127,7 @@
 
                 <Chip 
                   v-if="allItemsStockCount.notConfigured > 0"
-                  :label="`${allItemsStockCount.notConfigured} chưa có tồn an toàn`" 
+                  :label="`${allItemsStockCount.notConfigured} ${t('inventoryManagement.stockStatusOptions.notConfigured')}`" 
                   icon="pi pi-cog"
                   class="clickable-chip chip-not-configured"
                   severity="secondary"
@@ -160,7 +160,7 @@
             <template #empty>
               <div class="text-center py-8">
                 <i class="pi pi-box text-5xl text-gray-400"></i>
-                <p class="mt-4 text-gray-500">Chưa có sản phẩm nào</p>
+                <p class="mt-4 text-gray-500">{{ t("inventoryManagement.table.empty") }}</p>
               </div>
             </template>
 
@@ -171,7 +171,7 @@
               </template>
             </Column>
             
-            <Column header="Sản phẩm">
+            <Column :header="t('common.product')" sortable>
               <template #body="{ data }">
                 <div class="flex items-center gap-3">
                   <img 
@@ -189,15 +189,15 @@
               </template>
             </Column>
             
-            <Column field="type" header="Loại" sortable></Column>
+            <Column field="type" :header="t('inventoryManagement.table.type')" sortable></Column>
             
-            <Column field="price" header="Giá" sortable>
+            <Column field="price" :header="t('common.price')" sortable>
               <template #body="{ data }">
                 <span class="font-medium">{{ Number(data.price).toLocaleString('vi-VN') }} VND</span>
               </template>
             </Column>
             
-            <Column field="stockQty" header="Tồn kho" sortable>
+            <Column field="stockQty" :header="t('inventoryManagement.table.stockQty')" sortable>
               <template #body="{ data }">
                 <Chip 
                   :label="`${data.stockQty} ${data.unit}`" 
@@ -206,13 +206,13 @@
               </template>
             </Column>
             
-            <Column field="saveQuantity" header="Tồn an toàn" sortable>
+            <Column field="saveQuantity" :header="t('inventoryManagement.table.safeQty')" sortable>
               <template #body="{ data }">
                 <span>{{ data.saveQuantity }} {{ data.unit }}</span>
               </template>
             </Column>
             
-            <Column header="Hành động" class="w-40">
+            <Column :header="t('common.action')" class="w-40">
               <template #body="{ data }">
                 <div class="flex gap-2">
                   <Button 
@@ -221,7 +221,7 @@
                     rounded 
                     severity="info"
                     @click="viewImages(data)"
-                    title="Quản lý ảnh"
+                    :title="t('inventoryManagement.actions.manageImages')"
                   />
                   <Button 
                     icon="pi pi-pencil" 
@@ -229,7 +229,7 @@
                     rounded 
                     severity="secondary" 
                     @click="openEditDialog(data)"
-                    title="Sửa"
+                    :title="t('inventoryManagement.actions.edit')"
                   />
                   <Button 
                     icon="pi pi-trash" 
@@ -237,7 +237,7 @@
                     rounded 
                     severity="danger"
                     @click="confirmDelete(data)"
-                    title="Xóa"
+                    :title="t('inventoryManagement.actions.delete')"
                   />
                 </div>
               </template>
@@ -252,7 +252,7 @@
 
           <div v-else-if="filteredItems.length === 0" class="text-center py-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
             <i class="pi pi-box text-5xl text-gray-400"></i>
-            <p class="mt-4 text-gray-500">Chưa có sản phẩm nào</p>
+            <p class="mt-4 text-gray-500">{{ t("inventoryManagement.table.empty") }}</p>
           </div>
 
           <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -278,12 +278,12 @@
 
               <div class="mt-4">
                 <div class="flex items-center gap-2">
-                  <span class="font-semibold">Giá:</span>
+                  <span class="font-semibold">{{ t('inventoryManagement.table.price') }}:</span>
                   <span class="font-medium">{{ Number(item.price).toLocaleString('vi-VN') }} VND</span>
                 </div>
 
                 <div class="flex items-center gap-2 mt-2">
-                  <span class="font-semibold">Tồn kho:</span>
+                  <span class="font-semibold">{{ t('inventoryManagement.table.stockQty') }}:</span>
                   <Chip 
                     :label="`${item.stockQty} ${item.unit}`" 
                     :class="item.stockQty < 10 ? 'p-chip-danger' : 'p-chip-success'"
@@ -291,7 +291,7 @@
                 </div>
 
                 <div class="flex items-center gap-2 mt-2">
-                  <span class="font-semibold">Tồn an toàn:</span>
+                  <span class="font-semibold">{{ t('inventoryManagement.table.safeQty') }}:</span>
                   <span>{{ item.saveQuantity }} {{ item.unit }}</span>
                 </div>
               </div>
@@ -303,7 +303,7 @@
                   rounded 
                   severity="info"
                   @click.stop="viewImages(item)"
-                  title="Quản lý ảnh"
+                  :title="t('inventoryManagement.actions.manageImages')"
                 />
                 <Button 
                   icon="pi pi-pencil" 
@@ -311,7 +311,7 @@
                   rounded 
                   severity="secondary" 
                   @click.stop="openEditDialog(item)"
-                  title="Sửa"
+                  :title="t('inventoryManagement.actions.edit')"
                 />
                 <Button 
                   icon="pi pi-trash" 
@@ -319,7 +319,7 @@
                   rounded 
                   severity="danger"
                   @click.stop="confirmDelete(item)"
-                  title="Xóa"
+                  :title="t('inventoryManagement.actions.delete')"
                 />
               </div>
             </div>
@@ -348,67 +348,79 @@
     <!-- Edit Dialog -->
     <Dialog 
       v-model:visible="showEditDialog" 
-      header="Chỉnh sửa sản phẩm"
+      :header="t('inventoryManagement.editDialog.header')"
       :style="{ width: '500px' }"
       :modal="true"
     >
       <div class="flex flex-col gap-4 mt-4">
         <div>
-          <label class="block mb-2 font-semibold">Loại <span class="text-red-500">*</span></label>
-          <InputText v-model="editForm.type" class="w-full" placeholder="Nhập loại sản phẩm" />
+          <label class="block mb-2 font-semibold">{{ t('inventoryManagement.editDialog.type') }} <span class="text-red-500">*</span></label>
+          <Dropdown 
+            v-model="editForm.type" 
+            :options="typeEditOptions" 
+            optionLabel="label" 
+            optionValue="value"
+            class="w-full" 
+          />
         </div>
 
         <div>
-          <label class="block mb-2 font-semibold">Đơn vị <span class="text-red-500">*</span></label>
-          <InputText v-model="editForm.unit" class="w-full" placeholder="VD: cái, hộp, kg" />
+          <label class="block mb-2 font-semibold">{{ t('inventoryManagement.editDialog.unit') }} <span class="text-red-500">*</span></label>
+          <Dropdown 
+            v-model="editForm.unit" 
+            :options="unitOptions" 
+            optionLabel="label" 
+            optionValue="value"
+            class="w-full" 
+          />
         </div>
 
         <div>
-          <label class="block mb-2 font-semibold">Giá <span class="text-red-500">*</span></label>
+          <label class="block mb-2 font-semibold">{{ t('inventoryManagement.editDialog.price') }} <span class="text-red-500">*</span></label>
           <InputText v-model="editForm.price" class="w-full" placeholder="0.00" />
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block mb-2 font-semibold">Tồn an toàn <span class="text-red-500">*</span></label>
+            <label class="block mb-2 font-semibold">{{ t('inventoryManagement.editDialog.safeQty') }} <span class="text-red-500">*</span></label>
             <InputText v-model.number="editForm.saveQuantity" type="number" class="w-full" placeholder="0" />
           </div>
           <div>
-            <label class="block mb-2 font-semibold">Số lượng tồn <span class="text-red-500">*</span></label>
+            <label class="block mb-2 font-semibold">{{ t('inventoryManagement.editDialog.stockQty') }} <span class="text-red-500">*</span></label>
             <InputText v-model.number="editForm.stockQty" type="number" class="w-full" placeholder="0" />
           </div>
         </div>
       </div>
 
       <template #footer>
-        <Button label="Hủy" icon="pi pi-times" text @click="showEditDialog = false" :disabled="itemStore.loading" />
-        <Button label="Cập nhật" icon="pi pi-check" @click="saveEdit" :loading="itemStore.loading" />
+        <Button :label="t('common.cancel')" icon="pi pi-times" text @click="showEditDialog = false" :disabled="itemStore.loading" />
+        <Button :label="t('common.update')" icon="pi pi-check" @click="saveEdit" :loading="itemStore.loading" />
       </template>
     </Dialog>
 
     <!-- Image Management Dialog -->
     <Dialog 
-  v-model:visible="showImageDialog" 
-  :header="`Quản lý hình ảnh - ${selectedItem ? getProductName(selectedItem) : ''}`"
-  :style="{ width: '800px' }"
-  :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
-  :modal="true"
-  :dismissableMask="true"
->
+      v-model:visible="showImageDialog" 
+      :header="t('inventoryManagement.imageDialog.header', { name: selectedItem ? getProductName(selectedItem) : '' })"
+      :style="{ width: '800px' }"
+      :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
+      :modal="true"
+      :dismissableMask="true"
+    >
   <div class="mt-4">
     <!-- Upload Area -->
     <div class="mb-6">
       <label class="block mb-2 font-semibold">
-        Tải lên hình ảnh mới
+        {{ t("inventoryManagement.imageDialog.uploadTitle") }} <!-- Tải lên hình ảnh mới -->
         <span v-if="itemStore.uploadingImages" class="text-primary text-sm ml-2">
-          <i class="pi pi-spin pi-spinner"></i> Đang tải lên...
+          <i class="pi pi-spin pi-spinner"></i> {{ t("inventoryManagement.imageDialog.uploading") }}
         </span>
       </label>
 
       <!-- Mobile: 2 nút chọn ảnh / chụp ảnh -->
       <div v-if="isTableMobile" class="flex gap-2 mb-3">
         <Button
-          label="Chọn ảnh"
+          :label="t('inventoryManagement.imageDialog.selectImages')"
           icon="pi pi-images"
           severity="secondary"
           class="flex-1"
@@ -416,7 +428,7 @@
           @click="imageFileInput?.click()"
         />
         <Button
-          label="Chụp ảnh"
+          :label="t('inventoryManagement.imageDialog.takePhoto')"
           icon="pi pi-camera"
           severity="secondary"
           class="flex-1"
@@ -454,13 +466,13 @@
             @click.stop="!itemStore.uploadingImages && imageFileInput?.click()"
           >
             <i class="pi pi-plus text-2xl text-gray-400"></i>
-            <span class="text-xs text-gray-400 mt-1">Thêm ảnh</span>
+            <span class="text-xs text-gray-400 mt-1">{{ t("inventoryManagement.imageDialog.addMore") }}</span>
           </div>
         </div>
         <div class="flex flex-col items-center justify-center py-6">
           <i class="pi pi-cloud-upload text-4xl text-gray-400 mb-2"></i>
-          <p class="text-gray-600 text-sm font-medium mb-1">Kéo thả hình ảnh vào đây hoặc click để chọn</p>
-          <p class="text-xs text-gray-400">PNG, JPG, WEBP (Max. 5MB mỗi file)</p>
+          <p class="text-gray-600 text-sm font-medium mb-1">{{ t("inventoryManagement.imageDialog.dropzone") }}</p>
+          <p class="text-xs text-gray-400">{{ t("inventoryManagement.imageDialog.dropzoneHint") }}</p>
         </div>
       </div>
 
@@ -493,7 +505,7 @@
             @click="imageFileInput?.click()"
           >
             <i class="pi pi-plus text-xl text-gray-400"></i>
-            <span class="text-xs text-gray-400 mt-1">Thêm</span>
+            <span class="text-xs text-gray-400 mt-1">{{ t("inventoryManagement.imageDialog.addMore") }}</span>
           </div>
         </div>
       </div>
@@ -522,21 +534,21 @@
 
       <!-- Action buttons -->
       <div v-if="pendingImages.length > 0" class="flex justify-between items-center mt-3">
-        <span class="text-sm text-gray-600 font-medium">Đã chọn {{ pendingImages.length }} file</span>
+        <span class="text-sm text-gray-600 font-medium">{{ t("inventoryManagement.imageDialog.selectedCount", { count: pendingImages.length }) }}</span>
         <div class="flex gap-2 mt-2!">
-          <Button label="Xóa tất cả" icon="pi pi-trash" text size="small" severity="danger" @click="clearPendingImages" />
-          <Button label="Tải lên" icon="pi pi-upload" size="small" severity="success" :loading="itemStore.uploadingImages" @click="uploadPendingImages" />
+          <Button :label="t('inventoryManagement.imageDialog.clearAll')" icon="pi pi-trash" text size="small" severity="danger" @click="clearPendingImages" />
+          <Button :label="t('inventoryManagement.imageDialog.upload')" icon="pi pi-upload" size="small" severity="success" :loading="itemStore.uploadingImages" @click="uploadPendingImages" />
         </div>
       </div>
     </div>
 
     <!-- Current Images -->
     <div>
-      <label class="font-semibold mb-3! block">Hình ảnh hiện tại ({{ currentImages.length }})</label>
+      <label class="font-semibold mb-3! block">{{ t("inventoryManagement.imageDialog.currentImages", { count: currentImages.length }) }}</label>
 
       <div v-if="currentImages.length === 0" class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
         <i class="pi pi-image text-5xl text-gray-400"></i>
-        <p class="mt-4 text-gray-500">Chưa có hình ảnh nào</p>
+        <p class="mt-4 text-gray-500">{{ t("inventoryManagement.imageDialog.noImages") }}</p>
       </div>
 
       <div v-else class="grid grid-cols-4 gap-4">
@@ -563,7 +575,7 @@
   </div>
 
   <template #footer>
-    <Button label="Đóng" icon="pi pi-times" @click="closeImageDialog" />
+    <Button :label="t('inventoryManagement.imageDialog.close')" icon="pi pi-times" @click="closeImageDialog" />
   </template>
 </Dialog>
 
@@ -596,6 +608,7 @@ import ImagePreviewDialog from '@/views/ImagePreviewDialog.vue'
 import {useImagePreview} from '@/composables/useImagePreview'
 import { usePagination } from '@/composables/usePagination'
 import AppPagination from '@/components/AppPagination.vue'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const confirm = useConfirm()
@@ -605,6 +618,7 @@ const dashboardStore = useDashboardStore()
 const imagePreview = useImagePreview()
 const cameraFileInput = ref<HTMLInputElement | null>(null)
 const pendingImageTimestamps = ref<string[]>([])
+const { t } = useI18n()
 
 // Search & Filter
 const searchQuery = ref('')
@@ -671,20 +685,31 @@ const addTimestampToImage = (file: File, timestamp: string): Promise<File> => {
   })
 }
 
+const typeEditOptions = [
+  { label: 'Engineer', value: 'ENG' },
+  { label: 'Consumer', value: 'COM' }
+]
+
+const unitOptions = [
+  { label: t('inventoryManagement.units.cai'), value: 'cái' },
+  { label: t('inventoryManagement.units.hop'), value: 'hộp' },
+  { label: t('inventoryManagement.units.bich'), value: 'bịch' }
+]
+
 const typeOptions = [
-  { label: 'Tất cả loại', value: null },
+  { label: t('inventoryManagement.filters.allTypes'), value: null },
   { label: 'Engineer', value: 'ENG' },
   { label: 'Consumer', value: 'COM' }
 ]
 
 const stockStatusOptions = [
-  { label: 'Tất cả', value: null },
-  { label: 'Còn hàng', value: 'in-stock' },
-  { label: 'Cảnh báo (>50% & <99%)', value: 'warning' },
-  { label: 'Thấp (≤50%)', value: 'low' }, 
-  { label: 'Nguy cấp (≤25%)', value: 'critical' },
-  { label: 'Hết hàng', value: 'out-of-stock' },
-  { label: 'Chưa có tồn an toàn', value: 'not-configured' }
+  { label: t('inventoryManagement.filters.allStatuses'), value: null },
+  { label: t('inventoryManagement.stockStatusOptions.inStock'), value: 'in-stock' },
+  { label: t('inventoryManagement.stockStatusOptions.warning'), value: 'warning' },
+  { label: t('inventoryManagement.stockStatusOptions.low'), value: 'low' }, 
+  { label: t('inventoryManagement.stockStatusOptions.critical'), value: 'critical' },
+  { label: t('inventoryManagement.stockStatusOptions.outOfStock'), value: 'out-of-stock' },
+  { label: t('inventoryManagement.stockStatusOptions.notConfigured'), value: 'not-configured' }
 ]
 
 const resetFilter = () => {
@@ -696,7 +721,12 @@ const resetFilter = () => {
 // Utility Functions
 const getProductName = (item: Item) => item.eng?.partname || item.com?.name || 'Unknown'
 const getDistinguishName = (item: Item) => item?.eng?.description || item?.com?.specifications || 'Unknown'
-const getProductCategory = (item: Item) => item.eng ? 'Hàng kỹ thuật' : item.com ? 'Hàng tiêu dùng' : 'Chưa phân loại'
+const getProductCategory = (item: Item) => 
+  item.eng 
+    ? t('inventoryManagement.category.engineering') 
+    : item.com 
+      ? t('inventoryManagement.category.consumer') 
+      : t('inventoryManagement.category.uncategorized')
 const getProductImage = (item: Item) => 
   item.picture?.length ? getImageUrl(item.picture[0]) : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop'
 
@@ -845,8 +875,8 @@ const fetchAllItems = async () => {
   } catch (error: any) {
     toast.add({
       severity: 'error',
-      summary: 'Lỗi',
-      detail: error.message || 'Không thể tải danh sách sản phẩm',
+      summary: t("inventoryManagement.toast.errorLoadTitle"),
+      detail: error.message || t("inventoryManagement.toast.errorLoadDetail"),
       life: 3000
     })
   } finally {
@@ -884,8 +914,8 @@ const saveEdit = async () => {
     
     toast.add({
       severity: 'success',
-      summary: 'Thành công',
-      detail: 'Cập nhật sản phẩm thành công',
+      summary: t("inventoryManagement.toast.updateSuccessTitle"),
+      detail: t("inventoryManagement.toast.updateSuccess"),
       life: 3000
     })
     
@@ -894,8 +924,8 @@ const saveEdit = async () => {
   } catch (error: any) {
     toast.add({
       severity: 'error',
-      summary: 'Lỗi',
-      detail: error.message || 'Không thể cập nhật sản phẩm',
+      summary: t("inventoryManagement.toast.errorLoadTitle"),
+      detail: error.message || t("inventoryManagement.toast.updateError"),
       life: 3000
     })
   } finally {
@@ -905,11 +935,11 @@ const saveEdit = async () => {
 
 const confirmDelete = (item: Item) => {
   confirm.require({
-    message: `Bạn có chắc muốn xóa "${getProductName(item)}"?`,
-    header: 'Xác nhận xóa',
+    message: t('inventoryManagement.confirmDelete.productMessage', { name: getProductName(item) }),
+    header: t('inventoryManagement.confirmDelete.productHeader'),
     icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Xóa',
-    rejectLabel: 'Hủy',
+    acceptLabel: t('inventoryManagement.confirmDelete.accept'),
+    rejectLabel: t('inventoryManagement.confirmDelete.reject'),
     acceptClass: 'p-button-danger',
     accept: async () => {
       if (item.id) {
@@ -920,8 +950,8 @@ const confirmDelete = (item: Item) => {
           
           toast.add({
             severity: 'success',
-            summary: 'Thành công',
-            detail: 'Xóa sản phẩm thành công',
+            summary: t('inventoryManagement.toast.deleteSuccessTitle'),
+            detail: t('inventoryManagement.toast.deleteSuccess'),
             life: 3000
           })
           
@@ -929,8 +959,8 @@ const confirmDelete = (item: Item) => {
         } catch (error: any) {
           toast.add({
             severity: 'error',
-            summary: 'Lỗi',
-            detail: error.message || 'Không thể xóa sản phẩm',
+            summary: t('inventoryManagement.toast.errorTitle'),
+            detail: error.message || t('inventoryManagement.toast.deleteError'),
             life: 3000
           })
         } finally {
@@ -977,11 +1007,11 @@ const handleImageUpload = async (event: Event) => {
 
   Array.from(files).forEach(file => {
     if (!['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(file.type)) {
-      toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: `File ${file.name} không đúng định dạng`, life: 3000 })
+      toast.add({ severity: 'warn', summary: t('inventoryManagement.toast.warningTitle'), detail: t('inventoryManagement.toast.invalidFormat', { name: file.name }), life: 3000 })
       return
     }
     if (file.size > maxSize) {
-      toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: `File ${file.name} quá lớn (tối đa 5MB)`, life: 3000 })
+      toast.add({ severity: 'warn', summary: t('inventoryManagement.toast.warningTitle'), detail: t('inventoryManagement.toast.fileTooLarge', { name: file.name }), life: 3000 })
       return
     }
     validFiles.push(file)
@@ -1017,11 +1047,11 @@ const handleCameraCapture = async (event: Event) => {
   const maxSize = 5 * 1024 * 1024
 
   if (!['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(file.type)) {
-    toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Định dạng không hỗ trợ', life: 3000 })
+    toast.add({ severity: 'warn', summary: t('inventoryManagement.toast.warningTitle'), detail: t('inventoryManagement.toast.unsupportedFormat'), life: 3000 })
     return
   }
   if (file.size > maxSize) {
-    toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'File quá lớn (max 5MB)', life: 3000 })
+    toast.add({ severity: 'warn', summary: t('inventoryManagement.toast.warningTitle'), detail: t('inventoryManagement.toast.fileTooLargeSimple'), life: 3000 })
     return
   }
 
@@ -1062,7 +1092,7 @@ const clearPendingImages = () => {
 
 const uploadPendingImages = async () => {
   if (!selectedItem.value?.id || !pendingImages.value.length) {
-    toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Không có file nào được chọn', life: 3000 })
+    toast.add({ severity: 'warn', summary: t('inventoryManagement.toast.warningTitle'), detail: t('inventoryManagement.toast.noFileSelected'), life: 3000 })
     return
   }
 
@@ -1074,8 +1104,8 @@ const uploadPendingImages = async () => {
     if (result.success > 0) {
       toast.add({
         severity: 'success',
-        summary: 'Thành công',
-        detail: `Đã tải lên ${result.success}/${pendingImages.value.length} ảnh`,
+        summary: t('inventoryManagement.toast.uploadSuccessTitle'), 
+        detail: t('inventoryManagement.toast.uploadSuccessDetail', { success: result.success, total: pendingImages.value.length }),
         life: 3000
       })
 
@@ -1094,16 +1124,16 @@ const uploadPendingImages = async () => {
     if (result.failed > 0) {
       toast.add({
         severity: 'error',
-        summary: 'Lỗi',
-        detail: `${result.failed} ảnh tải lên thất bại`,
+        summary: t('inventoryManagement.toast.errorTitle'), 
+        detail: t('inventoryManagement.toast.uploadFailDetail', { count: result.failed }),
         life: 5000
       })
     }
   } catch (error: any) {
     toast.add({
       severity: 'error',
-      summary: 'Lỗi',
-      detail: error.message || 'Không thể tải lên hình ảnh',
+      summary: t('inventoryManagement.toast.errorTitle'), 
+      detail: error.message || t('inventoryManagement.toast.uploadError'),
       life: 3000
     })
   } finally {
@@ -1113,11 +1143,11 @@ const uploadPendingImages = async () => {
 
 const confirmDeleteImage = (imageName: string) => {
   confirm.require({
-    message: 'Bạn có chắc muốn xóa hình ảnh này?',
-    header: 'Xác nhận xóa',
+    message: t('inventoryManagement.confirmDelete.imageMessage'),
+    header: t('inventoryManagement.confirmDelete.imageHeader'),
     icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Xóa',
-    rejectLabel: 'Hủy',
+    acceptLabel: t('common.delete'),
+    rejectLabel: t('common.cancel'),
     acceptClass: 'p-button-danger',
     accept: async () => {
       if (!selectedItem.value?.id) return
@@ -1131,8 +1161,8 @@ const confirmDeleteImage = (imageName: string) => {
         
         toast.add({
           severity: 'success',
-          summary: 'Thành công',
-          detail: 'Đã xóa hình ảnh',
+          summary: t('inventoryManagement.toast.deleteImageSuccessTitle'), 
+          detail: t('inventoryManagement.toast.deleteImageSuccess'),
           life: 3000
         })
         
@@ -1147,8 +1177,8 @@ const confirmDeleteImage = (imageName: string) => {
       } catch (error: any) {
         toast.add({
           severity: 'error',
-          summary: 'Lỗi',
-          detail: error.message || 'Không thể xóa hình ảnh',
+          summary: t('inventoryManagement.toast.errorTitle'), 
+          detail: error.message || t('inventoryManagement.toast.deleteImageError'),
           life: 3000
         })
       } finally {
