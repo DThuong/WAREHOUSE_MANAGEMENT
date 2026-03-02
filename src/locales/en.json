@@ -32,6 +32,9 @@
       "productList": "Order product list"
     },
     "createOrderAction": {
+      "approveOrder": "Approve order",
+      "rejectOrder": "Reject order",
+      "completeOrder": "Complete (Delivered)",
       "updateStatus": "Update status",
       "createOrder": "Create order",
       "createOrderTitle": "Create new order",
@@ -113,6 +116,53 @@
     "recentOrders": "Recent Orders"
   },
   "orderManagement": {
+    "common": {
+    "warning": "Warning",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm Delete",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "searching": "Searching",
+    "notFound": "Not Found",
+    "missingInfo": "Missing Information",
+    "missingImage": "Missing proof image",
+    "createOrderAction": {
+      "approveOrder": "Approve Order",
+      "rejectOrder": "Reject Order",
+      "completeOrder": "Completed (Delivered)"
+    },
+    "toast": {
+      "invalidFormat": "invalid format",
+      "fileTooLarge": "too large",
+      "fileTooLargeMax": "File too large (max 5MB)",
+      "unsupportedFormat": "Unsupported format",
+      "noFile": "No files selected",
+      "selectStatus": "Please select a status",
+      "enterRejectReason": "Please enter the reason for rejecting the order",
+      "uploadAtLeastOneImage": "Please upload at least 1 proof image of received goods",
+      "fillAllInfo": "Please fill in all required information",
+      "approveSuccess": "Order approved successfully",
+      "rejectSuccess": "Order rejected",
+      "completeSuccess": "Order completed",
+      "updateStatusSuccess": "Status updated successfully",
+      "cannotUpdateStatus": "Cannot update status",
+      "deleteOrderSuccess": "Order deleted successfully",
+      "cannotDeleteOrder": "Cannot delete order",
+      "createOrderSuccess": "Order created successfully",
+      "cannotCreateOrder": "Cannot create order",
+      "uploadSuccess": "Uploaded {success}/{total} images",
+      "uploadFailed": "{failed} image(s) failed",
+      "cannotUpload": "Cannot upload",
+      "deleteImageSuccess": "Image deleted",
+      "cannotDeleteImage": "Cannot delete",
+      "loadOrderError": "Cannot load order list",
+      "openingOrder": "Opening order #{id}...",
+      "orderNotFound": "Order #{id} not found"
+    },
+    "confirmDeleteOrder": "Are you sure you want to delete order #{id}?",
+    "confirmDeleteImage": "Are you sure you want to delete this image?"
+  },
     "img": "Image",
     "currentStatus": "Current Status",
     "rejectReason": "Reject Reason",

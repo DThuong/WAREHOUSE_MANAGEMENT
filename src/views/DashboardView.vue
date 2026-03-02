@@ -257,7 +257,7 @@
               <div class="item-code">{{ item.code }}</div>
             </div>
             <div class="item-stats">
-              <div class="item-qty">{{ item.totalOrdered }} {{ t('dashboard.orderCount') }}</div>
+              <div class="item-qty">{{ t('dashboard.orderCount') }}: {{ item.totalOrdered }} </div>
               <div class="progress-bar">
                 <div class="progress-fill" :style="{ width: item.percentage + '%' }"></div>
               </div>

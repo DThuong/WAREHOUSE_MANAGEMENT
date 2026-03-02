@@ -32,6 +32,9 @@
       "productList": "주문 제품 목록"
     },
     "createOrderAction": {
+      "approveOrder": "주문 승인",
+      "rejectOrder": "주문 거절",
+      "completeOrder": "완료 (배송 완료)",
       "updateStatus": "상태 업데이트",
       "createOrder": "주문 생성",
       "createOrderTitle": "새 주문 생성",
@@ -113,6 +116,53 @@
     "recentOrders": "최근 주문"
   },
   "orderManagement": {
+    "common": {
+    "warning": "경고",
+    "error": "오류",
+    "success": "성공",
+    "confirm": "삭제 확인",
+    "delete": "삭제",
+    "cancel": "취소",
+    "searching": "검색 중",
+    "notFound": "찾을 수 없음",
+    "missingInfo": "정보 누락",
+    "missingImage": "증빙 이미지 누락",
+    "createOrderAction": {
+      "approveOrder": "주문 승인",
+      "rejectOrder": "주문 거절",
+      "completeOrder": "완료 (배송 완료)"
+    },
+    "toast": {
+      "invalidFormat": "형식이 올바르지 않음",
+      "fileTooLarge": "파일이 너무 큼",
+      "fileTooLargeMax": "파일이 너무 큼 (최대 5MB)",
+      "unsupportedFormat": "지원하지 않는 형식",
+      "noFile": "파일이 없습니다",
+      "selectStatus": "상태를 선택해 주세요",
+      "enterRejectReason": "주문 거절 사유를 입력해 주세요",
+      "uploadAtLeastOneImage": "수령 증빙 이미지를 최소 1장 업로드해 주세요",
+      "fillAllInfo": "모든 정보를 입력해 주세요",
+      "approveSuccess": "주문이 성공적으로 승인되었습니다",
+      "rejectSuccess": "주문이 거절되었습니다",
+      "completeSuccess": "주문이 완료되었습니다",
+      "updateStatusSuccess": "상태가 성공적으로 업데이트되었습니다",
+      "cannotUpdateStatus": "상태를 업데이트할 수 없습니다",
+      "deleteOrderSuccess": "주문이 성공적으로 삭제되었습니다",
+      "cannotDeleteOrder": "주문을 삭제할 수 없습니다",
+      "createOrderSuccess": "주문이 성공적으로 생성되었습니다",
+      "cannotCreateOrder": "주문을 생성할 수 없습니다",
+      "uploadSuccess": "{success}/{total}장 이미지 업로드 완료",
+      "uploadFailed": "{failed}장 업로드 실패",
+      "cannotUpload": "업로드할 수 없습니다",
+      "deleteImageSuccess": "이미지가 삭제되었습니다",
+      "cannotDeleteImage": "삭제할 수 없습니다",
+      "loadOrderError": "주문 목록을 불러올 수 없습니다",
+      "openingOrder": "주문 #{id} 열는 중...",
+      "orderNotFound": "주문 #{id}을(를) 찾을 수 없습니다"
+    },
+    "confirmDeleteOrder": "주문 #{id}을(를) 삭제하시겠습니까?",
+    "confirmDeleteImage": "이 이미지를 삭제하시겠습니까?"
+  },
     "img": "이미지",
     "currentStatus": "현재 상태",
     "proveImage": "증빙 이미지 요구",

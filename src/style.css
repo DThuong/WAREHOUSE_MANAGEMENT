@@ -29,6 +29,7 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -418,6 +419,11 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ConfirmDialog mobile fix */
 @media (max-width: 767px) {
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
   .app-container {
     overflow-x: hidden;
     max-width: 100vw;
@@ -437,11 +443,39 @@ h1, h2, h3, h4, h5, h6 {
     max-width: calc(100vw - 2rem) !important;
     margin: 0 1rem !important;
   }
+  .p-toast {
+    width: calc(100vw - 1.5rem) !important;
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    top: 1rem !important;
+  }
+
+  .p-toast-message-content {
+    padding: 0.75rem !important;
+  }
+
+  .p-toast-detail {
+    font-size: 0.875rem !important;
+  }
 }
 
 /* Fix iOS horizontal scroll & zoom */
 html, body {
-  overflow-x: hidden;
   width: 100%;
   max-width: 100vw;
+}
+
+html {
+  overflow-y: scroll; /* Luôn show scrollbar, không bị layout shift */
+}
+
+html.p-overflow-hidden,
+html:has(body.p-overflow-hidden) {
+  overflow: hidden !important;
+}
+
+@layer override {
+  body.p-overflow-hidden {
+    padding-right: 0 !important;
+  }
 }

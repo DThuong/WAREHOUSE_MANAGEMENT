@@ -20,7 +20,9 @@
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
         <div>
-          <h2 class="text-2xl font-bold mb-4 text-gray-900">{{ t("orderManagement.orders") }}</h2>
+          <h2 class="text-2xl font-bold mb-4 text-gray-900">
+            {{ t("orderManagement.orders") }}
+          </h2>
           <p class="text-gray-600">{{ t("orderManagement.subtitle") }}</p>
         </div>
         <Button
@@ -38,9 +40,9 @@
             <!-- Date Range -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700"
-                  >{{ t("common.filter.fromDate") }}</label
-                >
+                <label class="block mb-2 text-sm font-semibold text-gray-700">{{
+                  t("common.filter.fromDate")
+                }}</label>
                 <Calendar
                   v-model="fromDate"
                   dateFormat="dd/mm/yy"
@@ -54,9 +56,9 @@
               </div>
 
               <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700"
-                  >{{ t("common.filter.toDate") }}</label
-                >
+                <label class="block mb-2 text-sm font-semibold text-gray-700">{{
+                  t("common.filter.toDate")
+                }}</label>
                 <Calendar
                   v-model="toDate"
                   dateFormat="dd/mm/yy"
@@ -73,24 +75,24 @@
             <!-- Status Filter -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700"
-                  >{{ t("common.filter.status") }}</label
-                >
+                <label class="block mb-2 text-sm font-semibold text-gray-700">{{
+                  t("common.filter.status")
+                }}</label>
                 <Dropdown
                   v-model="selectedStatus"
                   :options="statusFilterOptions"
                   optionLabel="label"
                   optionValue="value"
-                  placeholder="Tất cả trạng thái"
+                  :placeholder="t('orderManagement.allStatus')"
                   class="w-full"
                   @change="fetchAllOrders"
                 />
               </div>
 
               <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700"
-                  >{{ t("common.search") }}</label
-                >
+                <label class="block mb-2 text-sm font-semibold text-gray-700">{{
+                  t("common.search")
+                }}</label>
                 <InputText
                   v-model="searchQuery"
                   :placeholder="t('orderManagement.searchPlaceholder')"
@@ -105,7 +107,8 @@
                 class="flex md:flex-row lg:flex-row flex-col items-center gap-4"
               >
                 <span class="text-lg font-semibold text-gray-900">
-                  {{ t("orderManagement.totalOrders") }}: {{ totalItems }} {{ t("orderManagement.orders") }}
+                  {{ t("orderManagement.totalOrders") }}: {{ totalItems }}
+                  {{ t("orderManagement.orders") }}
                 </span>
 
                 <Chip
@@ -187,12 +190,20 @@
                 <span :data-order-id="data.id">{{ data.id }}</span>
               </template>
             </Column>
-            <Column field="orderDate" :header="t('orderManagement.orderDate')" sortable>
+            <Column
+              field="orderDate"
+              :header="t('orderManagement.orderDate')"
+              sortable
+            >
               <template #body="{ data }">{{
                 formatDate(data.orderDate)
               }}</template>
             </Column>
-            <Column field="nameWorker" :header="t('orderManagement.account')" sortable>
+            <Column
+              field="nameWorker"
+              :header="t('orderManagement.account')"
+              sortable
+            >
               <template #body="{ data }">
                 <span class="font-medium">{{
                   data.account?.username || "-"
@@ -206,12 +217,11 @@
             ></Column>
             <Column :header="t('common.product')">
               <template #body="{ data }">
-                  <Chip
-                    :label="`${data.orderDetails.length} ${t('orderManagement.orders')}`"
-                    class="p-chip-info"
-                    style="width: fit-content;"
-                  />
-                
+                <Chip
+                  :label="`${data.orderDetails.length} ${t('common.product')}`"
+                  class="p-chip-info"
+                  style="width: fit-content"
+                />
               </template>
             </Column>
             <Column field="status" :header="t('common.filter.status')" sortable>
@@ -276,7 +286,7 @@
               class="text-center py-8"
             >
               <i class="pi pi-shopping-cart text-5xl text-gray-400"></i>
-              <p class="mt-4 text-gray-500">{{ t('dashboard.noOrders') }}</p>
+              <p class="mt-4 text-gray-500">{{ t("dashboard.noOrders") }}</p>
             </div>
             <div v-else class="order-card-list">
               <div
@@ -304,24 +314,32 @@
                 <div class="order-card-body">
                   <div class="order-card-row">
                     <i class="pi pi-user text-gray-400"></i>
-                    <span class="order-card-label">{{ t('orderManagement.account') }}</span>
+                    <span class="order-card-label">{{
+                      t("orderManagement.account")
+                    }}</span>
                     <span class="order-card-value">{{
                       order.account?.username || "-"
                     }}</span>
                   </div>
                   <div class="order-card-row">
                     <i class="pi pi-building text-gray-400"></i>
-                    <span class="order-card-label">{{ t('orderManagement.department') }}</span>
+                    <span class="order-card-label">{{
+                      t("orderManagement.department")
+                    }}</span>
                     <span class="order-card-value">{{
                       order.account?.department || "-"
                     }}</span>
                   </div>
                   <div class="order-card-row">
                     <i class="pi pi-box text-gray-400"></i>
-                    <span class="order-card-label">{{ t('common.product') }}</span>
+                    <span class="order-card-label">{{
+                      t("common.product")
+                    }}</span>
                     <span class="order-card-value">
-                      {{ order.orderDetails.length }} {{ t('common.categoryItemCount') }} -
-                      {{ getTotalQuantity(order) }} {{ t('common.quantityItemCount') }}
+                      {{ order.orderDetails.length }}
+                      {{ t("common.categoryItemCount") }} -
+                      {{ getTotalQuantity(order) }}
+                      {{ t("common.quantityItemCount") }}
                     </span>
                   </div>
                 </div>
@@ -369,18 +387,18 @@
             </div>
           </div>
 
-           <AppPagination
-              :current-page="currentPage"
-              :total-pages="totalPages"
-              :total-items="totalItems"
-              :page-info="pageInfo"
-              v-model:model-page-size="pageSize"
-              @prev="prevPage"
-              @next="nextPage"
-              @first="firstPage"
-              @last="lastPage"
-              @goto="goToPage"
-            />
+          <AppPagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :total-items="totalItems"
+            :page-info="pageInfo"
+            v-model:model-page-size="pageSize"
+            @prev="prevPage"
+            @next="nextPage"
+            @first="firstPage"
+            @last="lastPage"
+            @goto="goToPage"
+          />
         </template>
       </Card>
     </div>
@@ -389,6 +407,7 @@
     <Dialog
       v-model:visible="showDetailsDialog"
       :header="`${t('orderManagement.orderDetail.title')} #${selectedOrder?.id || ''}`"
+      :blockScroll="true"
       :style="{ width: '900px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -397,23 +416,29 @@
         <!-- Order Info -->
         <div class="grid grid-cols-2 gap-4 mb-4 p-4! bg-gray-50 rounded-lg">
           <div>
-            <p class="text-sm text-gray-600">{{ t('orderManagement.orderDetail.orderedBy') }}</p>
+            <p class="text-sm text-gray-600">
+              {{ t("orderManagement.orderDetail.orderedBy") }}
+            </p>
             <p class="font-semibold">{{ selectedOrder.nameWorker || "-" }}</p>
           </div>
           <div>
-            <p class="text-sm text-gray-600">{{ t('orderManagement.orderDetail.department') }}</p>
+            <p class="text-sm text-gray-600">
+              {{ t("orderManagement.orderDetail.department") }}
+            </p>
             <p class="font-semibold">
               {{ selectedOrder.account?.department || "-" }}
             </p>
           </div>
           <div>
-            <p class="text-sm text-gray-600">{{ t('orderManagement.orderDetail.orderDate') }}</p>
+            <p class="text-sm text-gray-600">
+              {{ t("orderManagement.orderDetail.orderDate") }}
+            </p>
             <p class="font-semibold">
               {{ formatDate(selectedOrder.orderDate) }}
             </p>
           </div>
           <div>
-            <p class="text-sm text-gray-600">{{ t('common.status') }}</p>
+            <p class="text-sm text-gray-600">{{ t("common.status") }}</p>
             <Chip
               :label="getStatusLabel(selectedOrder.status)"
               :class="getStatusClass(selectedOrder.status)"
@@ -423,7 +448,9 @@
 
         <!-- Order Items -->
         <div>
-          <h4 class="font-semibold mb-3">{{ t('orderManagement.orderDetail.productList') }}</h4>
+          <h4 class="font-semibold mb-3">
+            {{ t("orderManagement.orderDetail.productList") }}
+          </h4>
 
           <!-- DESKTOP: Table -->
           <DataTable
@@ -466,7 +493,9 @@
                 <span v-if="data.item?.price">
                   {{ Number(data.item.price).toLocaleString("vi-VN") }} VND
                 </span>
-                <span v-else class="text-gray-400">{{ t('common.noPrice') }}</span>
+                <span v-else class="text-gray-400">{{
+                  t("common.noPrice")
+                }}</span>
               </template>
             </Column>
             <Column :header="t('common.total')">
@@ -515,24 +544,30 @@
               <!-- Price Info Row -->
               <div class="dialog-item-card-bottom">
                 <div class="dialog-item-price-row">
-                  <span class="dialog-item-price-label">{{ t('common.quantity') }}</span>
+                  <span class="dialog-item-price-label">{{
+                    t("common.quantity")
+                  }}</span>
                   <span class="dialog-item-price-value">
                     {{ data.orderQty }} {{ data.item?.unit || "" }}
                   </span>
                 </div>
                 <div class="dialog-item-price-row">
-                  <span class="dialog-item-price-label">{{ t('common.price') }}</span>
+                  <span class="dialog-item-price-label">{{
+                    t("common.price")
+                  }}</span>
                   <span class="dialog-item-price-value">
                     {{
                       data.item?.price
                         ? Number(data.item.price).toLocaleString("vi-VN") +
                           " VND"
-                        : t('common.noPrice')
+                        : t("common.noPrice")
                     }}
                   </span>
                 </div>
                 <div class="dialog-item-price-row total">
-                  <span class="dialog-item-price-label">{{ t('common.total') }}</span>
+                  <span class="dialog-item-price-label">{{
+                    t("common.total")
+                  }}</span>
                   <span class="dialog-item-total">
                     {{
                       data.item?.price
@@ -574,9 +609,11 @@
       </template>
     </Dialog>
 
+    <!-- Update Status Dialog -->
     <Dialog
       v-model:visible="showUpdateStatusDialog"
       :header="t('orderManagement.updateStatusOrder')"
+      :blockScroll="true"
       :style="{ width: '500px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -584,7 +621,7 @@
       <div class="flex flex-col gap-4 mt-4">
         <div>
           <label class="block mb-2 font-semibold">
-            {{ t('common.status') }} <span class="text-red-500">*</span>
+            {{ t("common.status") }} <span class="text-red-500">*</span>
           </label>
           <Dropdown
             v-model="updateForm.status"
@@ -598,7 +635,8 @@
         <!-- Note field - Chỉ hiển thị khi chọn Rejected -->
         <div v-if="updateForm.status === 'Rejected'">
           <label class="block mb-2 font-semibold">
-            {{ t('orderManagement.rejectReason') }} <span class="text-red-500">*</span>
+            {{ t("orderManagement.rejectReason") }}
+            <span class="text-red-500">*</span>
           </label>
           <Textarea
             v-model="updateForm.note"
@@ -625,10 +663,10 @@
             <i class="pi pi-exclamation-triangle text-orange-600 mt-1"></i>
             <div class="flex-1">
               <p class="font-semibold text-orange-800 text-sm mb-1">
-                {{ t('orderManagement.proveImage') }}
+                {{ t("orderManagement.proveImage") }}
               </p>
               <p class="text-orange-700 text-xs">
-                {{ t('orderManagement.proveImagePlaceholder') }}
+                {{ t("orderManagement.proveImagePlaceholder") }}
               </p>
               <Button
                 :label="t('orderManagement.manageImages')"
@@ -645,16 +683,17 @@
         <!-- Info về đơn hàng -->
         <div v-if="selectedOrder" class="p-3! bg-gray-50 rounded-lg">
           <p class="text-sm text-gray-600 mb-1">
-            {{ t('dashboard.orders') }}: <span class="font-semibold">#{{ selectedOrder.id }}</span>
+            {{ t("dashboard.orders") }}:
+            <span class="font-semibold">#{{ selectedOrder.id }}</span>
           </p>
           <p class="text-sm text-gray-600 mb-1">
-            {{ t('orderManagement.orderDetail.orderedBy') }}:
+            {{ t("orderManagement.orderDetail.orderedBy") }}:
             <span class="font-semibold">{{
               selectedOrder.nameWorker || selectedOrder.account?.username
             }}</span>
           </p>
           <p class="text-sm text-gray-600 mb-1">
-            {{ t('orderManagement.currentStatus') }}:
+            {{ t("orderManagement.currentStatus") }}:
             <Chip
               :label="getStatusLabel(selectedOrder.status)"
               :class="getStatusClass(selectedOrder.status)"
@@ -663,9 +702,10 @@
           </p>
           <!-- Hiển thị số lượng ảnh -->
           <p class="text-sm text-gray-600">
-            {{ t('common.image') }}:
+            {{ t("common.image") }}:
             <span class="font-semibold"
-              >{{ selectedOrder.image?.length || 0 }} {{ t('orderManagement.img') }}</span
+              >{{ selectedOrder.image?.length || 0 }}
+              {{ t("orderManagement.img") }}</span
             >
           </p>
         </div>
@@ -693,6 +733,7 @@
     <Dialog
       v-model:visible="showImageDialog"
       :header="`${t('orderManagement.imageManagement.title')} #${selectedOrder?.id || ''}`"
+      :blockScroll="true"
       :style="{ width: '800px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -701,12 +742,12 @@
         <!-- Upload Area -->
         <div class="mb-6">
           <label class="block mb-2 font-semibold">
-            {{ t('orderManagement.imageManagement.upload') }}
+            {{ t("orderManagement.imageManagement.upload") }}
             <span
               v-if="orderStore.uploadingImages"
               class="text-primary text-sm ml-2"
             >
-              <i class="pi pi-spin pi-spinner"></i> {{ t('common.uploading') }}
+              <i class="pi pi-spin pi-spinner"></i> {{ t("common.uploading") }}
             </span>
           </label>
 
@@ -775,17 +816,19 @@
                 "
               >
                 <i class="pi pi-plus text-2xl text-gray-400"></i>
-                <span class="text-xs text-gray-400 mt-1">{{ t('common.upload.addImage') }}</span>
+                <span class="text-xs text-gray-400 mt-1">{{
+                  t("common.upload.addImage")
+                }}</span>
               </div>
             </div>
             <!-- Empty state -->
             <div class="flex flex-col items-center justify-center py-6">
               <i class="pi pi-cloud-upload text-4xl text-gray-400 mb-2"></i>
               <p class="text-gray-600 text-sm font-medium mb-1">
-                {{ t('common.upload.dragDropOrClick') }}
+                {{ t("common.upload.dragDropOrClick") }}
               </p>
               <p class="text-xs text-gray-400">
-                {{ t('common.upload.maxFileSize') }}
+                {{ t("common.upload.maxFileSize") }}
               </p>
             </div>
           </div>
@@ -827,7 +870,9 @@
                 @click="imageFileInput?.click()"
               >
                 <i class="pi pi-plus text-xl text-gray-400"></i>
-                <span class="text-xs text-gray-400 mt-1">{{ t('common.upload.addMore') }}</span>
+                <span class="text-xs text-gray-400 mt-1">{{
+                  t("common.upload.addMore")
+                }}</span>
               </div>
             </div>
           </div>
@@ -860,7 +905,8 @@
             class="flex justify-between items-center mt-3"
           >
             <span class="text-sm text-gray-600 font-medium"
-              >{{ t('common.upload.selectedFiles') }} {{ pendingImages.length }} file</span
+              >{{ t("common.upload.selectedFiles") }}
+              {{ pendingImages.length }} file</span
             >
             <div class="flex gap-2 mt-2!">
               <Button
@@ -886,7 +932,9 @@
         <!-- Current Images -->
         <div>
           <label class="font-semibold mb-3! block"
-            >{{ t('common.upload.currentImages') }} ({{ currentImages.length }})</label
+            >{{ t("common.upload.currentImages") }} ({{
+              currentImages.length
+            }})</label
           >
 
           <div
@@ -894,7 +942,7 @@
             class="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed"
           >
             <i class="pi pi-image text-5xl text-gray-400"></i>
-            <p class="text-gray-500">{{ t('common.upload.noImages') }}</p>
+            <p class="text-gray-500">{{ t("common.upload.noImages") }}</p>
           </div>
 
           <div v-else class="grid grid-cols-4 gap-4">
@@ -948,6 +996,7 @@
       v-model:visible="showCreateOrderDialog"
       :header="t('common.createOrderAction.createOrderTitle')"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
+      :blockScroll="true"
       :style="{ width: '1200px' }"
       :modal="true"
     >
@@ -955,7 +1004,8 @@
         <!-- Name Worker -->
         <div>
           <label class="block mb-2 font-semibold">
-            {{ t('common.form.ordererName') }} <span class="text-red-500">*</span>
+            {{ t("common.form.ordererName") }}
+            <span class="text-red-500">*</span>
           </label>
           <InputText
             v-model="createOrderForm.nameWorker"
@@ -968,7 +1018,8 @@
         <div>
           <div class="flex justify-between items-center mb-4">
             <label class="text-base font-semibold">
-              {{ t('common.form.productList') }} <span class="text-red-500">*</span>
+              {{ t("common.form.productList") }}
+              <span class="text-red-500">*</span>
             </label>
             <Button
               :label="t('common.form.addProduct')"
@@ -983,7 +1034,9 @@
             class="text-center py-8 rounded-lg border-2 border-dashed border-gray-300"
           >
             <i class="pi pi-shopping-cart text-5xl text-gray-400"></i>
-            <p class="mt-3! text-gray-500 font-medium">{{ t('common.form.noProducts') }}</p>
+            <p class="mt-3! text-gray-500 font-medium">
+              {{ t("common.form.noProducts") }}
+            </p>
             <Button
               :label="t('common.form.addFirstProduct')"
               icon="pi pi-plus"
@@ -997,13 +1050,28 @@
             <div
               v-for="(item, index) in createOrderForm.items"
               :key="index"
-              class="flex items-end gap-3 p-4"
+              class="create-order-item-row p-4! border border-gray-200 rounded-lg"
             >
-              <!-- Item Dropdown -->
-              <div class="w-lg">
-                <label class="block mb-2 text-sm font-medium text-gray-700"
-                  >{{ t('common.form.productUnit') }}</label
-                >
+              <!-- Header row: số thứ tự + nút xóa -->
+              <div class="flex justify-between items-center mb-3!">
+                <span class="text-sm font-semibold text-gray-600">
+                  {{ t("common.form.productUnit") }} #{{ index + 1 }}
+                </span>
+                <Button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  text
+                  rounded
+                  size="small"
+                  @click="removeItemRow(index)"
+                />
+              </div>
+
+              <!-- Dropdown sản phẩm - full width -->
+              <div class="mb-3!">
+                <label class="block mb-2 text-sm font-medium text-gray-700">
+                  {{ t("common.form.productUnit") }}
+                </label>
                 <Dropdown
                   v-model="item.itemId"
                   :options="availableItems"
@@ -1013,6 +1081,8 @@
                   class="w-full"
                   :filter="true"
                   :filterPlaceholder="t('common.form.searchProduct')"
+                  appendTo="body"
+                  panelClass="order-item-dropdown-panel"
                 >
                   <template #value="slotProps">
                     <div
@@ -1057,7 +1127,8 @@
                           {{ slotProps.option.label }}
                         </div>
                         <div class="text-xs text-gray-500 truncate">
-                          {{ slotProps.option.type }} - {{ t('common.form.stockLabel') }}:
+                          {{ slotProps.option.type }} -
+                          {{ t("common.form.stockLabel") }}:
                           {{ slotProps.option.stock }}
                           {{ slotProps.option.unit }} -
                           {{
@@ -1073,66 +1144,47 @@
                 </Dropdown>
               </div>
 
-              <!-- Quantity -->
-              <div class="w-md">
-                <div class="flex items-center justify-between">
-                  <label class="block mb-2 text-sm font-medium text-gray-700"
-                    >{{ t('common.form.quantity') }}</label
-                  >
-                  <small v-if="item.itemId" class="text-gray-500 mt-1 block">
-                    {{ t('common.form.stockRemaining', { n: getStockQty(item.itemId) }) }}
-                    {{ getSelectedItemUnit(item.itemId) }}
-                  </small>
-                  <small
-                    v-if="
-                      item.itemId && item.quantity > getStockQty(item.itemId)
-                    "
-                    class="text-red-500 mt-1 block"
-                  >
-                    {{ t('common.form.exceedStock') }}
-                  </small>
-                </div>
-                <InputNumber
-                  v-model="item.quantity"
-                  :min="1"
-                  :max="getStockQty(item.itemId)"
-                  showButtons
-                  class="w-full"
-                />
-              </div>
+              <!-- Số lượng + Thành tiền: 2 cột cố định -->
+<div class="grid grid-cols-2 gap-3 items-end">
+  <div>
+    <div class="flex items-center justify-between mb-2">
+      <label class="text-sm font-medium text-gray-700">
+        {{ t('common.form.quantity') }}
+      </label>
+    </div>
+    <small v-if="item.itemId" class="text-gray-500 text-xs block mb-1">
+      {{ t('common.form.stockRemaining', { n: getStockQty(item.itemId) }) }}
+      {{ getSelectedItemUnit(item.itemId) }}
+    </small>
+    <small
+      v-if="item.itemId && item.quantity > getStockQty(item.itemId)"
+      class="text-red-500 text-xs block mb-1"
+    >
+      {{ t('common.form.exceedStock') }}
+    </small>
+    <InputNumber
+      v-model="item.quantity"
+      :min="1"
+      :max="getStockQty(item.itemId)"
+      showButtons
+      class="w-full"
+    />
+  </div>
 
-              <!-- Subtotal -->
-              <div class="w-48">
-                <label
-                  class="block mb-2 text-sm font-medium text-gray-700 text-center"
-                  >{{ t('common.form.subtotal') }}</label
-                >
-                <div class="h-10 flex items-center justify-center">
-                  <Chip
-                    v-if="item.itemId && item.quantity > 0"
-                    :label="`${getItemSubtotal(item.itemId, item.quantity).toLocaleString('vi-VN')} VND`"
-                    class="bg-green-100 text-green-700 font-bold px-3 py-1"
-                  />
-                  <span v-else class="text-gray-400 text-sm">---</span>
-                </div>
-              </div>
-
-              <!-- Remove Button -->
-              <div class="w-8">
-                <label class="block mb-2 text-sm font-medium select-none"
-                  >{{ t('common.delete') }}</label
-                >
-                <div class="h-10 flex items-center justify-center">
-                  <Button
-                    icon="pi pi-trash"
-                    severity="danger"
-                    text
-                    rounded
-                    @click="removeItemRow(index)"
-                    class="hover:bg-red-50"
-                  />
-                </div>
-              </div>
+  <div>
+    <label class="text-sm font-medium text-gray-700 block mb-2">
+      {{ t('common.form.subtotal') }}
+    </label>
+    <div class="h-10 flex items-center">
+      <Chip
+        v-if="item.itemId && item.quantity > 0"
+        :label="`${getItemSubtotal(item.itemId, item.quantity).toLocaleString('vi-VN')} VND`"
+        class="bg-green-100 text-green-700 font-bold text-xs"
+      />
+      <span v-else class="text-gray-400 text-sm">---</span>
+    </div>
+  </div>
+</div>
             </div>
           </div>
         </div>
@@ -1143,22 +1195,28 @@
           class="mt-4 p-4! bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200"
         >
           <div class="flex items-center justify-between">
-            <span class="font-semibold text-gray-700">{{ t('common.form.totalItems') }}:</span>
+            <span class="font-semibold text-gray-700"
+              >{{ t("common.form.totalItems") }}:</span
+            >
             <span class="text-xl font-bold text-blue-600"
-              >{{ createOrderForm.items.length }} {{ t('common.form.itemUnit') }}</span
+              >{{ createOrderForm.items.length }}
+              {{ t("common.form.itemUnit") }}</span
             >
           </div>
           <div class="flex items-center justify-between mt-2!">
-            <span class="font-semibold text-gray-700">{{ t('common.form.totalQuantityOrdered') }}:</span>
+            <span class="font-semibold text-gray-700"
+              >{{ t("common.form.totalQuantityOrdered") }}:</span
+            >
             <span class="text-xl font-bold text-blue-600"
-              >{{ totalQuantity.toLocaleString("vi-VN") }} {{ t('common.form.productUnit') }}</span
+              >{{ totalQuantity.toLocaleString("vi-VN") }}
+              {{ t("common.form.productUnit") }}</span
             >
           </div>
           <div
             class="flex items-center justify-between mt-2! pt-2! border-t border-blue-200"
           >
             <span class="font-semibold text-gray-800"
-              >{{ t('common.form.totalOrderValue') }}:</span
+              >{{ t("common.form.totalOrderValue") }}:</span
             >
             <span class="text-2xl font-bold text-indigo-600"
               >{{ totalAmount.toLocaleString("vi-VN") }} VND</span
@@ -1217,8 +1275,8 @@ import { signalRService } from "@/services/orderNotiService";
 import Textarea from "primevue/textarea";
 import ImagePreviewDialog from "@/views/ImagePreviewDialog.vue";
 import { useImagePreview } from "@/composables/useImagePreview";
-import { usePagination } from '@/composables/usePagination'
-import AppPagination from '@/components/AppPagination.vue'
+import { usePagination } from "@/composables/usePagination";
+import AppPagination from "@/components/AppPagination.vue";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -1245,11 +1303,11 @@ const handleTableResize = () => {
 };
 
 const statusFilterOptions = [
-  { label: "Tất cả trạng thái", value: null },
-  { label: "Chờ duyệt", value: "Pending" },
-  { label: "Đã duyệt", value: "Approved" },
-  { label: "Hoàn thành", value: "Completed" },
-  { label: "Từ chối", value: "Rejected" },
+  { label: t("orderManagement.allStatus"), value: null },
+  { label: t("orderManagement.pending"), value: "Pending" },
+  { label: t("orderManagement.approved"), value: "Approved" },
+  { label: t("orderManagement.completed"), value: "Completed" },
+  { label: t("orderManagement.rejected"), value: "Rejected" },
 ];
 
 // Helper để get status label
@@ -1355,13 +1413,16 @@ const updateStatusOptions = computed(() => {
 
   if (selectedOrder.value.status === "Pending") {
     return [
-      { label: "Duyệt đơn hàng", value: "Approved" },
-      { label: "Từ chối đơn hàng", value: "Rejected" },
+      { label: t("common.createOrderAction.approveOrder"), value: "Approved" },
+      { label: t("common.createOrderAction.rejectOrder"), value: "Rejected" },
     ];
   } else if (selectedOrder.value.status === "Approved") {
     return [
-      { label: "Hoàn thành (Đã giao hàng)", value: "Completed" },
-      { label: "Từ chối đơn hàng", value: "Rejected" },
+      {
+        label: t("common.createOrderAction.completeOrder"),
+        value: "Completed",
+      },
+      { label: t("common.createOrderAction.rejectOrder"), value: "Rejected" },
     ];
   }
 
@@ -1388,9 +1449,17 @@ const filteredOrders = computed(() => {
   return filtered;
 });
 const {
-  currentPage, pageSize, totalPages, totalItems,
+  currentPage,
+  pageSize,
+  totalPages,
+  totalItems,
   paginatedList: paginatedOrders,
-  pageInfo, goToPage, nextPage, prevPage, firstPage, lastPage
+  pageInfo,
+  goToPage,
+  nextPage,
+  prevPage,
+  firstPage,
+  lastPage,
 } = usePagination(() => filteredOrders.value, isTableMobile.value ? 5 : 10);
 
 // Dialogs
@@ -1488,8 +1557,8 @@ const fetchAllOrders = async () => {
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Lỗi",
-      detail: error.message || "Không thể tải danh sách đơn hàng",
+      summary: t("orderManagement.common.error"),
+      detail: error.message || t("orderManagement.common.toast.loadOrderError"),
       life: 3000,
     });
   } finally {
@@ -1513,8 +1582,8 @@ const handleDrop = async (event: DragEvent) => {
     ) {
       toast.add({
         severity: "warn",
-        summary: "Cảnh báo",
-        detail: `File ${file.name} không đúng định dạng`,
+        summary: t("orderManagement.common.warning"),
+        detail: `File ${file.name} ${t("orderManagement.common.toast.invalidFormat")}`,
         life: 3000,
       });
       return;
@@ -1522,8 +1591,8 @@ const handleDrop = async (event: DragEvent) => {
     if (file.size > maxSize) {
       toast.add({
         severity: "warn",
-        summary: "Cảnh báo",
-        detail: `File ${file.name} quá lớn`,
+        summary: t("orderManagement.common.warning"),
+        detail: `File ${file.name} ${t("orderManagement.common.toast.fileTooLargeMax")}`,
         life: 3000,
       });
       return;
@@ -1665,7 +1734,7 @@ const viewOrderDetails = (order: Order) => {
 const openUpdateStatusDialog = (order: Order) => {
   selectedOrder.value = order;
   updateForm.value = {
-    status: order.status,
+    status: "",
     note: "",
   };
   showUpdateStatusDialog.value = true;
@@ -1678,8 +1747,8 @@ const saveUpdateStatus = async () => {
   if (!updateForm.value.status) {
     toast.add({
       severity: "warn",
-      summary: "Cảnh báo",
-      detail: "Vui lòng chọn trạng thái",
+      summary: t("orderManagement.common.warning"),
+      detail: t("orderManagement.common.toast.selectStatus"),
       life: 3000,
     });
     return;
@@ -1690,8 +1759,8 @@ const saveUpdateStatus = async () => {
     if (!updateForm.value.note || !updateForm.value.note.trim()) {
       toast.add({
         severity: "warn",
-        summary: "Thiếu thông tin",
-        detail: "Vui lòng nhập lý do từ chối đơn hàng",
+        summary: t("orderManagement.common.missingInfo"),
+        detail: t("orderManagement.common.toast.enterRejectReason"),
         life: 3000,
       });
       return;
@@ -1703,8 +1772,8 @@ const saveUpdateStatus = async () => {
     if (!selectedOrder.value.image || selectedOrder.value.image.length === 0) {
       toast.add({
         severity: "warn",
-        summary: "Thiếu hình ảnh minh chứng",
-        detail: "Vui lòng tải lên ít nhất 1 hình ảnh minh chứng đã nhận hàng",
+        summary: t("orderManagement.common.missingImage"),
+        detail: t("orderManagement.common.toast.uploadAtLeastOneImage"),
         life: 4000,
       });
       return;
@@ -1728,17 +1797,17 @@ const saveUpdateStatus = async () => {
     };
 
     const statusMessages: Record<string, string> = {
-      Approved: "Đã duyệt đơn hàng thành công",
-      Rejected: "Đã từ chối đơn hàng",
-      Completed: "Đã hoàn thành đơn hàng",
+      Approved: t("orderManagement.common.toast.approveSuccess"),
+      Rejected: t("orderManagement.common.toast.rejectSuccess"),
+      Completed: t("orderManagement.common.toast.completeSuccess"),
     };
 
     toast.add({
       severity: "success",
-      summary: "Thành công",
+      summary: t("orderManagement.common.success"),
       detail:
         statusMessages[updateForm.value.status] ||
-        "Cập nhật trạng thái thành công",
+        t("orderManagement.common.toast.updateStatusSuccess"),
       life: 3000,
     });
 
@@ -1751,8 +1820,9 @@ const saveUpdateStatus = async () => {
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Lỗi",
-      detail: error.message || "Không thể cập nhật trạng thái",
+      summary: t("orderManagement.common.error"),
+      detail:
+        error.message || t("orderManagement.common.toast.cannotUpdateStatus"),
       life: 3000,
     });
   } finally {
@@ -1761,11 +1831,11 @@ const saveUpdateStatus = async () => {
 };
 const confirmDelete = (order: Order) => {
   confirm.require({
-    message: `Bạn có chắc muốn xóa đơn hàng #${order.id}?`,
-    header: "Xác nhận xóa",
+    message: t("orderManagement.common.confirmDeleteOrder", { id: order.id }),
+    header: t("orderManagement.common.confirm"),
     icon: "pi pi-exclamation-triangle",
-    acceptLabel: "Xóa",
-    rejectLabel: "Hủy",
+    acceptLabel: t("orderManagement.common.delete"),
+    rejectLabel: t("orderManagement.common.cancel"),
     acceptClass: "p-button-danger",
     accept: async () => {
       if (order.id) {
@@ -1776,8 +1846,8 @@ const confirmDelete = (order: Order) => {
 
           toast.add({
             severity: "success",
-            summary: "Thành công",
-            detail: "Xóa đơn hàng thành công",
+            summary: t("orderManagement.common.success"),
+            detail: t("orderManagement.common.toast.deleteOrderSuccess"),
             life: 3000,
           });
 
@@ -1785,8 +1855,10 @@ const confirmDelete = (order: Order) => {
         } catch (error: any) {
           toast.add({
             severity: "error",
-            summary: "Lỗi",
-            detail: error.message || "Không thể xóa đơn hàng",
+            summary: t("orderManagement.common.error"),
+            detail:
+              error.message ||
+              t("orderManagement.common.toast.cannotDeleteOrder"),
             life: 3000,
           });
         } finally {
@@ -1829,8 +1901,8 @@ const submitCreate = async () => {
   if (!isFormValid.value) {
     toast.add({
       severity: "warn",
-      summary: "Cảnh báo",
-      detail: "Vui lòng điền đầy đủ thông tin",
+      summary: t("orderManagement.common.warning"),
+      detail: t("orderManagement.common.toast.fillAllInfo"),
       life: 3000,
     });
     return;
@@ -1851,8 +1923,8 @@ const submitCreate = async () => {
 
     toast.add({
       severity: "success",
-      summary: "Thành công",
-      detail: "Tạo đơn hàng thành công",
+      summary: t("orderManagement.common.success"),
+      detail: t("orderManagement.common.toast.createOrderSuccess"),
       life: 3000,
     });
 
@@ -1861,8 +1933,9 @@ const submitCreate = async () => {
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Lỗi",
-      detail: error.message || "Không thể tạo đơn hàng",
+      summary: t("orderManagement.common.error"),
+      detail:
+        error.message || t("orderManagement.common.toast.cannotCreateOrder"),
       life: 3000,
     });
   } finally {
@@ -1912,8 +1985,8 @@ const handleImageUpload = async (event: Event) => {
     ) {
       toast.add({
         severity: "warn",
-        summary: "Cảnh báo",
-        detail: `File ${file.name} không đúng định dạng`,
+        summary: t("orderManagement.common.warning"),
+        detail: `File ${file.name} ${t("orderManagement.common.toast.invalidFormat")}`,
         life: 3000,
       });
       return;
@@ -1921,8 +1994,8 @@ const handleImageUpload = async (event: Event) => {
     if (file.size > maxSize) {
       toast.add({
         severity: "warn",
-        summary: "Cảnh báo",
-        detail: `File ${file.name} quá lớn`,
+        summary: t("orderManagement.common.warning"),
+        detail: t("orderManagement.common.toast.fileTooLarge"),
         life: 3000,
       });
       return;
@@ -1970,8 +2043,8 @@ const handleCameraCapture = async (event: Event) => {
   ) {
     toast.add({
       severity: "warn",
-      summary: "Cảnh báo",
-      detail: "Định dạng không hỗ trợ",
+      summary: t("orderManagement.common.warning"),
+      detail: t("orderManagement.common.toast.unsupportedFormat"),
       life: 3000,
     });
     return;
@@ -1979,8 +2052,8 @@ const handleCameraCapture = async (event: Event) => {
   if (file.size > maxSize) {
     toast.add({
       severity: "warn",
-      summary: "Cảnh báo",
-      detail: "File quá lớn (max 5MB)",
+      summary: t("orderManagement.common.warning"),
+      detail: t("orderManagement.common.toast.fileTooLarge"),
       life: 3000,
     });
     return;
@@ -2034,8 +2107,8 @@ const uploadPendingImages = async () => {
   if (!selectedOrder.value?.id || !pendingImages.value.length) {
     toast.add({
       severity: "warn",
-      summary: "Cảnh báo",
-      detail: "Không có file nào",
+      summary: t("orderManagement.common.warning"),
+      detail: t("orderManagement.common.toast.noFile"), // không có ile nào
       life: 3000,
     });
     return;
@@ -2052,8 +2125,11 @@ const uploadPendingImages = async () => {
     if (result.success > 0) {
       toast.add({
         severity: "success",
-        summary: "Thành công",
-        detail: `Đã tải lên ${result.success}/${pendingImages.value.length} ảnh`,
+        summary: t("orderManagement.common.success"),
+        detail: t("orderManagement.common.toast.uploadSuccess", {
+          success: result.success,
+          total: pendingImages.value.length,
+        }),
         life: 3000,
       });
 
@@ -2072,16 +2148,18 @@ const uploadPendingImages = async () => {
     if (result.failed > 0) {
       toast.add({
         severity: "error",
-        summary: "Lỗi",
-        detail: `${result.failed} ảnh thất bại`,
+        summary: t("orderManagement.common.error"),
+        detail: t("orderManagement.common.toast.uploadFailed", {
+          failed: result.failed,
+        }),
         life: 5000,
       });
     }
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Lỗi",
-      detail: error.message || "Không thể tải lên",
+      summary: t("orderManagement.common.error"),
+      detail: error.message || t("orderManagement.common.toast.cannotUpload"), // "Không thể tải lên"
       life: 3000,
     });
   } finally {
@@ -2091,11 +2169,11 @@ const uploadPendingImages = async () => {
 
 const confirmDeleteImage = (imageName: string) => {
   confirm.require({
-    message: "Bạn có chắc muốn xóa hình ảnh này?",
-    header: "Xác nhận xóa",
+    message: t("orderManagement.common.confirmDeleteImage"), // "Bạn có chắc muốn xóa ảnh này?"
+    header: t("orderManagement.common.confirm"), // "Xác nhận xóa"
     icon: "pi pi-exclamation-triangle",
-    acceptLabel: "Xóa",
-    rejectLabel: "Hủy",
+    acceptLabel: t("orderManagement.common.delete"), // "Xóa"
+    rejectLabel: t("orderManagement.common.cancel"), // "Hủy"
     acceptClass: "p-button-danger",
     accept: async () => {
       if (!selectedOrder.value?.id) return;
@@ -2109,8 +2187,8 @@ const confirmDeleteImage = (imageName: string) => {
 
         toast.add({
           severity: "success",
-          summary: "Thành công",
-          detail: "Đã xóa hình ảnh",
+          summary: t("orderManagement.common.success"),
+          detail: t("orderManagement.common.toast.deleteImageSuccess"),
           life: 3000,
         });
 
@@ -2125,8 +2203,10 @@ const confirmDeleteImage = (imageName: string) => {
       } catch (error: any) {
         toast.add({
           severity: "error",
-          summary: "Lỗi",
-          detail: error.message || "Không thể xóa",
+          summary: t("orderManagement.common.error"),
+          detail:
+            error.message ||
+            t("orderManagement.common.toast.cannotDeleteImage"),
           life: 3000,
         });
       } finally {
@@ -2160,8 +2240,8 @@ const checkAndOpenOrder = async () => {
   // Hiển thị toast đang tìm
   toast.add({
     severity: "info",
-    summary: "Đang tìm kiếm",
-    detail: `Đang mở đơn hàng #${orderId}...`,
+    summary: t("orderManagement.common.searching"),
+    detail: t("orderManagement.common.toast.openingOrder", { id: orderId }),
     life: 1500,
   });
 
@@ -2187,8 +2267,10 @@ const checkAndOpenOrder = async () => {
       console.error("Error loading order:", error);
       toast.add({
         severity: "warn",
-        summary: "Không tìm thấy",
-        detail: `Không tìm thấy đơn hàng #${orderId}`,
+        summary: t("orderManagement.common.notFound"),
+        detail: t("orderManagement.common.toast.orderNotFound", {
+          id: orderId,
+        }),
         life: 3000,
       });
       router.replace({ query: {} });
@@ -2278,7 +2360,7 @@ watch(
 );
 
 watch(isTableMobile, (mobile) => {
-  pageSize.value = mobile ? 5 : 10
+  pageSize.value = mobile ? 5 : 10;
 });
 
 onUnmounted(() => {
@@ -2640,6 +2722,24 @@ onUnmounted(() => {
   :deep(.p-dialog .p-dialog-footer) {
     padding: 0.75rem 1rem !important;
   }
+
+  :global(.order-item-dropdown-panel) {
+    max-width: calc(100vw - 2rem) !important;
+    width: calc(100vw - 2rem) !important;
+    left: 1rem !important;
+    right: 1rem !important;
+  }
+
+  :global(.order-item-dropdown-panel .p-select-list-container),
+  :global(.order-item-dropdown-panel .p-dropdown-items-wrapper) {
+    max-width: 100% !important;
+  }
+
+  :global(.order-item-dropdown-panel .p-select-option),
+  :global(.order-item-dropdown-panel .p-dropdown-item) {
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
 }
 /* =============================================
    DIALOG PRODUCT CARDS (mobile)
@@ -2744,5 +2844,28 @@ onUnmounted(() => {
   max-width: calc(100vw - 2rem) !important;
   margin: 0 1rem !important;
   left: 0 !important;
+}
+
+/* Create Order Item Row - Desktop: horizontal, Mobile: card */
+.create-order-item-row {
+  background: #fafafa;
+  margin-bottom: 0.75rem;
+}
+
+.create-order-item-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Dropdown panel */
+:deep(.p-select-overlay) {
+  max-height: 260px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Dialog content */
+:deep(.p-select-list-container) {
+  overscroll-behavior: contain;
 }
 </style>

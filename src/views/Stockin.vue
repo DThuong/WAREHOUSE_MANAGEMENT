@@ -1830,7 +1830,7 @@ watch(isTableMobile, (mobile) => {
 
   :global(.stockin-item-dropdown-panel) {
     max-width: calc(100vw - 2rem) !important;
-    width: auto !important;
+    width: calc(100vw - 2rem) !important;
     left: 1rem !important;
     right: 1rem !important;
   }

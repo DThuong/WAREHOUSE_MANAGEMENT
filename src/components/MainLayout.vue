@@ -593,7 +593,7 @@
     </Teleport>
 
     <!-- Toast -->
-    <Toast position="top-right" group="notification" />
+    <Toast />
 
     <!-- Sidebar overlay -->
     <div
@@ -955,7 +955,7 @@ const toggleNotifications = (event: Event) => {
   :global(html, body) {
     overflow-x: hidden;
     width: 100%;
-    position: relative;
+    /* position: relative; */
   }
 
   .app-container {
