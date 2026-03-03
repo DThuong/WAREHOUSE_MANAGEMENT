@@ -12,6 +12,15 @@
       "noImages": "Chưa có hình ảnh"
     },
     "form": {
+      "purposeNote": "Mục đích sử dụng",
+      "purposeNotePlaceholder": "Nhập mục đích sử dụng...",
+      "timeUsed": "Thời gian sử dụng",
+      "timeUsedPlaceholder": "Số lượng",
+      "timeUnit": {
+        "day": "Ngày",
+        "week": "Tuần",
+        "month": "Tháng"
+      },
       "selectProduct": "Chọn sản phẩm",
       "searchProduct": "Tìm sản phẩm...",
       "stockLabel": "Tồn",
@@ -117,6 +126,10 @@
   },
   "orderManagement": {
     "common": {
+      "purpose": "Mục đích sử dụng",
+      "purposePlaceholder": "Nhập mục đích sử dụng đơn hàng...",
+      "timeUsed": "Thời gian sử dụng dự kiến",
+      "timeUsedPlaceholder": "Nhập thời gian sử dụng dự kiến...",
       "warning": "Cảnh báo",
       "error": "Lỗi",
       "success": "Thành công",

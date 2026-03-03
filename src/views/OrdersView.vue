@@ -424,10 +424,10 @@
           </div>
           <div>
             <p class="text-sm text-gray-600">
-              {{ getDepartmentLabel(selectedOrder.account?.department) }}
+              {{ t("orderManagement.orderDetail.department") }}
             </p>
             <p class="font-semibold">
-              {{ selectedOrder.account?.department || "-" }}
+              {{ getDepartmentLabel(selectedOrder.account?.department) }}
             </p>
           </div>
           <div>
@@ -479,6 +479,16 @@
                       {{ data.item?.itemIndentifyId || "-" }}
                     </p>
                   </div>
+                  <Button
+                    icon="pi pi-eye"
+                    text
+                    rounded
+                    size="small"
+                    severity="info"
+                    class="ml-auto shrink-0"
+                    @click="showItemDetail($event, data)"
+                    :title="t('orderManagement.orderDetail.viewPurpose')"
+                  />
                 </div>
               </template>
             </Column>
@@ -540,6 +550,16 @@
                     {{ data.item?.itemIndentifyId || "-" }}
                   </p>
                 </div>
+                <Button
+                    icon="pi pi-eye"
+                    text
+                    rounded
+                    size="small"
+                    severity="info"
+                    class="ml-auto shrink-0"
+                    @click="showItemDetail($event, data)"
+                    :title="t('orderManagement.orderDetail.viewPurpose')"
+                  />
               </div>
 
               <!-- Price Info Row -->
@@ -1145,47 +1165,85 @@
                 </Dropdown>
               </div>
 
-              <!-- Số lượng + Thành tiền: 2 cột cố định -->
-<div class="grid grid-cols-2 gap-3 items-end">
-  <div>
-    <div class="flex items-center justify-between mb-2">
-      <label class="text-sm font-medium text-gray-700">
-        {{ t('common.form.quantity') }}
-      </label>
-    </div>
-    <small v-if="item.itemId" class="text-gray-500 text-xs block mb-1">
-      {{ t('common.form.stockRemaining', { n: getStockQty(item.itemId) }) }}
-      {{ getSelectedItemUnit(item.itemId) }}
-    </small>
-    <small
-      v-if="item.itemId && item.quantity > getStockQty(item.itemId)"
-      class="text-red-500 text-xs block mb-1"
-    >
-      {{ t('common.form.exceedStock') }}
-    </small>
-    <InputNumber
-      v-model="item.quantity"
-      :min="1"
-      :max="getStockQty(item.itemId)"
-      showButtons
-      class="w-full"
-    />
-  </div>
+        
+        <div class="grid grid-cols-2 gap-3 items-end">
+          <!-- Quantity -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-sm font-medium text-gray-700">
+                {{ t('common.form.quantity') }}
+              </label>
+            </div>
+            <small v-if="item.itemId" class="text-gray-500 text-xs block mb-1">
+              {{ t('common.form.stockRemaining', { n: getStockQty(item.itemId) }) }}
+              {{ getSelectedItemUnit(item.itemId) }}
+            </small>
+            <small
+              v-if="item.itemId && item.quantity > getStockQty(item.itemId)"
+              class="text-red-500 text-xs block mb-1"
+            >
+              {{ t('common.form.exceedStock') }}
+            </small>
+            <InputNumber
+              v-model="item.quantity"
+              :min="1"
+              :max="getStockQty(item.itemId)"
+              showButtons
+              class="w-full"
+            />
+          </div>
 
-  <div>
-    <label class="text-sm font-medium text-gray-700 block mb-2">
-      {{ t('common.form.subtotal') }}
-    </label>
-    <div class="h-10 flex items-center">
-      <Chip
-        v-if="item.itemId && item.quantity > 0"
-        :label="`${getItemSubtotal(item.itemId, item.quantity).toLocaleString('vi-VN')} VND`"
-        class="bg-green-100 text-green-700 font-bold text-xs"
-      />
-      <span v-else class="text-gray-400 text-sm">---</span>
-    </div>
-  </div>
-</div>
+          <!-- Subtotal -->
+          <div>
+            <label class="text-sm font-medium text-gray-700 block mb-2">
+              {{ t('common.form.subtotal') }}
+            </label>
+            <div class="h-10 flex items-center">
+              <Chip
+                v-if="item.itemId && item.quantity > 0"
+                :label="`${getItemSubtotal(item.itemId, item.quantity).toLocaleString('vi-VN')} VND`"
+                class="bg-green-100 text-green-700 font-bold text-xs"
+              />
+              <span v-else class="text-gray-400 text-sm">---</span>
+            </div>
+          </div>
+        </div>
+
+              <!-- Note (mục đích sử dụng) -->
+              <div class="mt-3!">
+                <label class="text-sm font-medium text-gray-700 block mb-2">
+                  {{ t('common.form.purposeNote') }} <span class="text-red-500">*</span>
+                </label>
+                <InputText
+                  v-model="item.note"
+                  :placeholder="t('common.form.purposeNotePlaceholder')"
+                  class="w-full"
+                />
+              </div>
+
+              <!-- Time Used -->
+              <div class="mt-3!">
+                <label class="text-sm font-medium text-gray-700 block mb-2">
+                  {{ t('common.form.timeUsed') }} <span class="text-red-500">*</span>
+                </label>
+                <div class="flex gap-2">
+                  <InputNumber
+                    v-model="item.timeUsed"
+                    :min="1"
+                    :max="999"
+                    showButtons
+                    class="flex-1"
+                    :placeholder="t('common.form.timeUsedPlaceholder')"
+                  />
+                  <Dropdown
+                    v-model="item.timeUsedUnit"
+                    :options="timeUnitOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-32"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1245,6 +1303,24 @@
     </Dialog>
 
     <ConfirmDialog />
+
+    <Popover ref="detailPopover">
+      <div v-if="selectedItemDetail" class="p-3! min-w-56 max-w-72">
+        <p class="font-semibold text-sm text-gray-800 mb-3 border-b pb-2">
+          {{ selectedItemDetail.itemName }}
+        </p>
+        <div class="flex flex-col gap-2 mt-2!">
+          <div>
+            <p class="text-xs text-gray-500 mb-1!">{{ t('common.form.purposeNote') }}</p>
+            <p class="text-sm font-medium text-gray-800">{{ selectedItemDetail.note }}</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 mb-1!">{{ t('common.form.timeUsed') }}</p>
+            <p class="text-sm font-medium text-gray-800">{{ selectedItemDetail.timeUsed }}</p>
+          </div>
+        </div>
+      </div>
+    </Popover>
     <Toast />
   </MainLayout>
 </template>
@@ -1279,6 +1355,7 @@ import { useImagePreview } from "@/composables/useImagePreview";
 import { usePagination } from "@/composables/usePagination";
 import AppPagination from "@/components/AppPagination.vue";
 import { useI18n } from "vue-i18n";
+import Popover from 'primevue/popover'
 
 const { t } = useI18n();
 const imagePreview = useImagePreview();
@@ -1299,6 +1376,17 @@ const selectedDepartment = ref<string | null>(null);
 const isTableMobile = ref(window.innerWidth < 768);
 const cameraFileInput = ref<HTMLInputElement | null>(null);
 const pendingImageTimestamps = ref<string[]>([]);
+const detailPopover = ref()
+const selectedItemDetail = ref<{ note: string; timeUsed: string; itemName: string } | null>(null)
+
+const showItemDetail = (event: Event, data: OrderDetail) => {
+  selectedItemDetail.value = {
+    note: data.note || '-',
+    timeUsed: data.timeUsed || '-',
+    itemName: getItemName(data.item),
+  }
+  detailPopover.value.toggle(event)
+}
 const handleTableResize = () => {
   isTableMobile.value = window.innerWidth < 768;
 };
@@ -1319,6 +1407,12 @@ const departmentOptions = computed(() => [
   { label: t("userManagement.departments.sanXuatA"), value: "SẢN XUẤT CA A" },
   { label: t("userManagement.departments.sanXuatB"), value: "SẢN XUẤT CA B" },
 ]);
+
+const timeUnitOptions = computed(() => [
+  { label: t('common.form.timeUnit.day'), value: 'day' },
+  { label: t('common.form.timeUnit.week'), value: 'week' },
+  { label: t('common.form.timeUnit.month'), value: 'month' },
+])
 
 // Helper: value từ API → label đã dịch
 const getDepartmentLabel = (value: string): string => {
@@ -1492,15 +1586,17 @@ const updateForm = ref({
 
 // Create Order Form
 interface CreateOrderItem {
-  itemId: number;
-  quantity: number;
+  itemId: number
+  quantity: number
+  note: string
+  timeUsed: string
+  timeUsedUnit: 'day' | 'week' | 'month'
 }
 
 const createOrderForm = ref({
   nameWorker: "",
   items: [] as CreateOrderItem[],
-});
-
+})
 const availableItems = computed(() => {
   if (!itemStore.items?.length) return [];
 
@@ -1525,9 +1621,12 @@ const isFormValid = computed(() => {
       (item) =>
         item.itemId &&
         item.quantity > 0 &&
-        item.quantity <= getStockQty(item.itemId),
+        item.quantity <= getStockQty(item.itemId) &&
+        item.note.trim() !== "" &&
+        item.timeUsed !== "" &&
+        item.timeUsedUnit !== "",
     )
-  );
+  )
 });
 
 // Total quantity
@@ -1741,9 +1840,16 @@ const getItemSubtotal = (itemId: number, quantity: number) => {
 };
 
 // Dialog Handlers
-const viewOrderDetails = (order: Order) => {
+const viewOrderDetails = async (order: Order) => {
   selectedOrder.value = order;
   showDetailsDialog.value = true;
+
+  try {
+    const fullOrder = await orderAPI.getById(order.id);
+    selectedOrder.value = fullOrder;
+  } catch (error) {
+    console.error("Error loading order details:", error);
+  }
 };
 
 const openUpdateStatusDialog = (order: Order) => {
@@ -1905,7 +2011,10 @@ const addItemRow = () => {
   createOrderForm.value.items.push({
     itemId: 0,
     quantity: 1,
-  });
+    note: "",
+    timeUsed: "",
+    timeUsedUnit: "day",
+  })
 };
 
 const removeItemRow = (index: number) => {
@@ -1931,6 +2040,8 @@ const submitCreate = async () => {
       itemIds: createOrderForm.value.items.map((item) => ({
         itemId: item.itemId,
         orderQty: item.quantity,
+        note: item.note.trim(),
+        timeUsed: `${item.timeUsed} ${t(`common.form.timeUnit.${item.timeUsedUnit}`)}`,
       })),
     };
 

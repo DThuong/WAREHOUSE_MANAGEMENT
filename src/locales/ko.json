@@ -12,6 +12,15 @@
       "noImages": "이미지 없음"
     },
     "form": {
+      "purposeNote": "사용 목적",
+      "purposeNotePlaceholder": "사용 목적을 입력하세요...",
+      "timeUsed": "사용 기간",
+      "timeUsedPlaceholder": "수량",
+      "timeUnit": {
+        "day": "일",
+        "week": "주",
+        "month": "개월"
+      },
       "selectProduct": "제품 선택",
       "searchProduct": "제품 검색...",
       "stockLabel": "재고",
@@ -117,6 +126,10 @@
   },
   "orderManagement": {
     "common": {
+      "purpose": "사용 목적",
+      "purposePlaceholder": "주문자의 사용 목적을 입력해줘...",
+      "timeUsed": "사용 시간",
+      "timeUsedPlaceholder": "주문자의 사용 시간을 입력해줘...",
       "warning": "경고",
       "error": "오류",
       "success": "성공",

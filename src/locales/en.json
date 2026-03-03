@@ -12,6 +12,15 @@
       "noImages": "No images yet"
     },
     "form": {
+      "purposeNote": "Purpose",
+      "purposeNotePlaceholder": "Enter purpose of use...",
+      "timeUsed": "Duration of use",
+      "timeUsedPlaceholder": "Amount",
+      "timeUnit": {
+        "day": "Day(s)",
+        "week": "Week(s)",
+        "month": "Month(s)"
+      },
       "selectProduct": "Select product",
       "searchProduct": "Search product...",
       "stockLabel": "Stock",
@@ -117,6 +126,10 @@
   },
   "orderManagement": {
     "common": {
+      "purpose": "Purpose of use",
+      "purposePlaceholder": "Enter purpose of use...",
+      "timeUsed": "Time used",
+      "timeUsedPlaceholder": "Enter time used...",
       "warning": "Warning",
       "error": "Error",
       "success": "Success",
