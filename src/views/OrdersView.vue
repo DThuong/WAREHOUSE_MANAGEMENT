@@ -104,17 +104,16 @@
             <!-- Search & Actions -->
             <div class="flex justify-between items-center">
               <div
-                class="flex md:flex-row lg:flex-row flex-col items-center gap-4"
+                class="flex flex-col items-start gap-4"
               >
-                <span class="text-lg font-semibold text-gray-900">
-                  {{ t("orderManagement.totalOrders") }}: {{ totalItems }}
-                  {{ t("orderManagement.orders") }}
+                <span class="text-lg font-semibold text-gray-900 w-full">
+                  {{ t("orderManagement.totalOrders") }}: {{ totalItems }} {{ t("orderManagement.orders") }}
                 </span>
 
                 <Chip
                   v-if="route.query.status"
                   :label="`${getStatusLabel(route.query.status as string)}`"
-                  class="w-full"
+                  class=""
                   severity="info"
                   removable
                   @remove="clearStatusFilter"
@@ -214,7 +213,11 @@
               field="account.department"
               :header="t('orderManagement.department')"
               sortable
-            ></Column>
+            >
+              <template #body="{ data }">
+                <span>{{ getDepartmentLabel(data.account?.department) }}</span>
+              </template>
+            </Column>
             <Column :header="t('common.product')">
               <template #body="{ data }">
                 <Chip
@@ -326,9 +329,7 @@
                     <span class="order-card-label">{{
                       t("orderManagement.department")
                     }}</span>
-                    <span class="order-card-value">{{
-                      order.account?.department || "-"
-                    }}</span>
+                    <span class="order-card-value">{{ getDepartmentLabel(order.account?.department) }}</span>
                   </div>
                   <div class="order-card-row">
                     <i class="pi pi-box text-gray-400"></i>
@@ -348,7 +349,7 @@
                 <div class="order-card-footer" @click.stop>
                   <Button
                     icon="pi pi-eye"
-                    label="Chi tiết"
+                    :label="t('importManagement.card.detail')"
                     text
                     size="small"
                     severity="info"
@@ -356,7 +357,7 @@
                   />
                   <Button
                     icon="pi pi-images"
-                    label="Ảnh"
+                    :label="t('importManagement.card.images_btn')"
                     text
                     size="small"
                     severity="secondary"
@@ -423,7 +424,7 @@
           </div>
           <div>
             <p class="text-sm text-gray-600">
-              {{ t("orderManagement.orderDetail.department") }}
+              {{ getDepartmentLabel(selectedOrder.account?.department) }}
             </p>
             <p class="font-semibold">
               {{ selectedOrder.account?.department || "-" }}
@@ -1309,6 +1310,20 @@ const statusFilterOptions = [
   { label: t("orderManagement.completed"), value: "Completed" },
   { label: t("orderManagement.rejected"), value: "Rejected" },
 ];
+
+const departmentOptions = computed(() => [
+  { label: t("userManagement.departments.qc"), value: "QC" },
+  { label: t("userManagement.departments.kho"), value: "KHO" },
+  { label: t("userManagement.departments.repair"), value: "REPAIR" },
+  { label: t("userManagement.departments.engineer"), value: "ENGINEER" },
+  { label: t("userManagement.departments.sanXuatA"), value: "SẢN XUẤT CA A" },
+  { label: t("userManagement.departments.sanXuatB"), value: "SẢN XUẤT CA B" },
+]);
+
+// Helper: value từ API → label đã dịch
+const getDepartmentLabel = (value: string): string => {
+  return departmentOptions.value.find(d => d.value === value)?.label ?? value
+}
 
 // Helper để get status label
 const getStatusLabel = (status: string): string => {

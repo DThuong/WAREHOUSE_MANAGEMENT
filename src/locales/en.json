@@ -117,52 +117,52 @@
   },
   "orderManagement": {
     "common": {
-    "warning": "Warning",
-    "error": "Error",
-    "success": "Success",
-    "confirm": "Confirm Delete",
-    "delete": "Delete",
-    "cancel": "Cancel",
-    "searching": "Searching",
-    "notFound": "Not Found",
-    "missingInfo": "Missing Information",
-    "missingImage": "Missing proof image",
-    "createOrderAction": {
-      "approveOrder": "Approve Order",
-      "rejectOrder": "Reject Order",
-      "completeOrder": "Completed (Delivered)"
+      "warning": "Warning",
+      "error": "Error",
+      "success": "Success",
+      "confirm": "Confirm Delete",
+      "delete": "Delete",
+      "cancel": "Cancel",
+      "searching": "Searching",
+      "notFound": "Not Found",
+      "missingInfo": "Missing Information",
+      "missingImage": "Missing proof image",
+      "createOrderAction": {
+        "approveOrder": "Approve Order",
+        "rejectOrder": "Reject Order",
+        "completeOrder": "Completed (Delivered)"
+      },
+      "toast": {
+        "invalidFormat": "invalid format",
+        "fileTooLarge": "too large",
+        "fileTooLargeMax": "File too large (max 5MB)",
+        "unsupportedFormat": "Unsupported format",
+        "noFile": "No files selected",
+        "selectStatus": "Please select a status",
+        "enterRejectReason": "Please enter the reason for rejecting the order",
+        "uploadAtLeastOneImage": "Please upload at least 1 proof image of received goods",
+        "fillAllInfo": "Please fill in all required information",
+        "approveSuccess": "Order approved successfully",
+        "rejectSuccess": "Order rejected",
+        "completeSuccess": "Order completed",
+        "updateStatusSuccess": "Status updated successfully",
+        "cannotUpdateStatus": "Cannot update status",
+        "deleteOrderSuccess": "Order deleted successfully",
+        "cannotDeleteOrder": "Cannot delete order",
+        "createOrderSuccess": "Order created successfully",
+        "cannotCreateOrder": "Cannot create order",
+        "uploadSuccess": "Uploaded {success}/{total} images",
+        "uploadFailed": "{failed} image(s) failed",
+        "cannotUpload": "Cannot upload",
+        "deleteImageSuccess": "Image deleted",
+        "cannotDeleteImage": "Cannot delete",
+        "loadOrderError": "Cannot load order list",
+        "openingOrder": "Opening order #{id}...",
+        "orderNotFound": "Order #{id} not found"
+      },
+      "confirmDeleteOrder": "Are you sure you want to delete order #{id}?",
+      "confirmDeleteImage": "Are you sure you want to delete this image?"
     },
-    "toast": {
-      "invalidFormat": "invalid format",
-      "fileTooLarge": "too large",
-      "fileTooLargeMax": "File too large (max 5MB)",
-      "unsupportedFormat": "Unsupported format",
-      "noFile": "No files selected",
-      "selectStatus": "Please select a status",
-      "enterRejectReason": "Please enter the reason for rejecting the order",
-      "uploadAtLeastOneImage": "Please upload at least 1 proof image of received goods",
-      "fillAllInfo": "Please fill in all required information",
-      "approveSuccess": "Order approved successfully",
-      "rejectSuccess": "Order rejected",
-      "completeSuccess": "Order completed",
-      "updateStatusSuccess": "Status updated successfully",
-      "cannotUpdateStatus": "Cannot update status",
-      "deleteOrderSuccess": "Order deleted successfully",
-      "cannotDeleteOrder": "Cannot delete order",
-      "createOrderSuccess": "Order created successfully",
-      "cannotCreateOrder": "Cannot create order",
-      "uploadSuccess": "Uploaded {success}/{total} images",
-      "uploadFailed": "{failed} image(s) failed",
-      "cannotUpload": "Cannot upload",
-      "deleteImageSuccess": "Image deleted",
-      "cannotDeleteImage": "Cannot delete",
-      "loadOrderError": "Cannot load order list",
-      "openingOrder": "Opening order #{id}...",
-      "orderNotFound": "Order #{id} not found"
-    },
-    "confirmDeleteOrder": "Are you sure you want to delete order #{id}?",
-    "confirmDeleteImage": "Are you sure you want to delete this image?"
-  },
     "img": "Image",
     "currentStatus": "Current Status",
     "rejectReason": "Reject Reason",
@@ -236,7 +236,7 @@
     },
     "stockStatusOptions": {
       "inStock": "In stock",
-      "warning": "Warning (>50% & <99%)",
+      "warning": "Warning (>50% & <100%)",
       "low": "Low (≤50%)",
       "critical": "Critical (≤25%)",
       "outOfStock": "Out of stock",
@@ -450,7 +450,7 @@
       "uploadError": "Unable to upload images"
     }
   },
-    "addInventory": {
+  "addInventory": {
     "title": "Add new product",
     "tabs": {
       "engineer": "Engineering goods",
@@ -524,7 +524,15 @@
       "createError": "Unable to create product"
     }
   },
-    "userManagement": {
+  "userManagement": {
+    "departments": {
+      "qc": "QC",
+      "kho": "Warehouse",
+      "repair": "Repair",
+      "engineer": "Engineering",
+      "sanXuatA": "Production Shift A",
+      "sanXuatB": "Production Shift B"
+    },
     "title": "Account Management",
     "addAccount": "Add Account",
     "summary": {
@@ -624,39 +632,194 @@
       "description": "Track inventory over time"
     },
     "viewReport": "View Report",
+    "mobileNotSupported": {
+      "title": "Not Supported",
+      "description": "This device does not support viewing reports. Please use a computer for a better experience."
+    },
     "orderSummary": {
       "title": "Material Order Overview (status: completed)",
       "showAll": "Show All",
+      "showThisYear": "This Year",
       "totalCompleted": "Total Completed Orders",
       "viewDetail": "View Detailed Report"
     },
-    "importReport": {
-      "title": "Import Report",
-      "dateRange": "From {from} to {to}",
+    "common": {
+      "printReport": "Print Report",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "reset": "Reset",
       "printDate": "Print Date",
-      "totalImports": "Total Import Count",
-      "totalProducts": "Total Products in Warehouse",
-      "totalQuantity": "Total Import Quantity",
-      "receiptCode": "Receipt Code",
-      "importer": "Importer",
-      "totalValue": "Total Import Value"
+      "dateRange": "From {from} to {to}",
+      "noImage": "No image",
+      "status": "Status"
+    },
+    "inventoryReport": {
+      "title": "Inventory Report",
+      "reportTitle": "INVENTORY REPORT",
+      "reportDate": "Report Date",
+      "filterProductType": "Product Type",
+      "filterStockStatus": "Stock Status",
+      "filterSearch": "Search",
+      "filterSearchPlaceholder": "Product name, ID...",
+      "typeOptions": {
+        "all": "All Types",
+        "engineer": "Engineer",
+        "consumer": "Consumer"
+      },
+      "stockStatusOptions": {
+        "all": "All",
+        "normal": "In Stock",
+        "warning": "Warning (>50% & <100%)",
+        "low": "Low (≤50%)",
+        "critical": "Critical (≤25%)",
+        "outOfStock": "Out of Stock",
+        "notConfigured": "No Safety Stock"
+      },
+      "summary": {
+        "totalProducts": "Total Products",
+        "normal": "In Stock",
+        "warning": "Warning",
+        "low": "Low",
+        "critical": "Critical",
+        "outOfStock": "Out of Stock",
+        "notConfigured": "No Safety Stock"
+      },
+      "table": {
+        "productCode": "Product Code",
+        "image": "Image",
+        "productName": "Product Name",
+        "type": "Type",
+        "stock": "Stock Qty",
+        "safeStock": "Safety Stock",
+        "status": "Status",
+        "unitPrice": "Unit Price",
+        "inventoryValue": "Inventory Value",
+        "orderCount": "Order Count"
+      },
+      "stockStatus": {
+        "normal": "In Stock",
+        "warning": "Warning",
+        "low": "Low",
+        "critical": "Critical",
+        "outOfStock": "Out of Stock",
+        "notConfigured": "No Safety Stock",
+        "unknown": "Unknown"
+      },
+      "detail": "Inventory Details",
+      "emptyState": "No matching products",
+      "totalProducts": "Total Products",
+      "productUnit": "products",
+      "totalInventoryValue": "Total Inventory Value"
     },
     "orderReport": {
       "title": "Order Report",
-      "dateRange": "From {from} to {to}",
-      "totalOrders": "Total Orders",
-      "pending": "Pending",
-      "approved": "Approved",
-      "completed": "Completed",
-      "rejected": "Rejected",
-      "orderCode": "Order Code",
-      "orderDate": "Order Date",
-      "orderedBy": "Ordered By",
-      "department": "Department",
+      "reportTitle": "ORDER REPORT",
+      "filterStatus": "Status",
+      "statusOptions": {
+        "all": "All Statuses",
+        "pending": "Pending",
+        "approved": "Approved",
+        "completed": "Completed",
+        "rejected": "Rejected"
+      },
+      "statusLabel": "Status: {status}",
+      "summary": {
+        "totalOrders": "Total Orders",
+        "pending": "Pending",
+        "approved": "Approved",
+        "completed": "Completed"
+      },
+      "table": {
+        "orderCode": "Order Code",
+        "orderDate": "Order Date",
+        "orderedBy": "Ordered By",
+        "department": "Department",
+        "image": "Image",
+        "product": "Product",
+        "unitPrice": "Unit Price",
+        "qty": "Qty",
+        "subtotal": "Subtotal",
+        "status": "Status"
+      },
+      "emptyState": "No orders in this time range",
       "totalValue": "Total Order Value"
     },
-    "inventoryReport": {
-      "title": "Inventory Report"
+    "importReport": {
+      "title": "Import Report",
+      "reportTitle": "IMPORT REPORT",
+      "summary": {
+        "totalImports": "Total Imports",
+        "totalProducts": "Total Products",
+        "totalQuantity": "Total Quantity"
+      },
+      "table": {
+        "receiptCode": "Receipt Code",
+        "importDate": "Import Date",
+        "importer": "Imported By",
+        "product": "Product",
+        "image": "Image",
+        "unitPrice": "Unit Price",
+        "quantity": "Quantity",
+        "subtotal": "Subtotal",
+        "note": "Note"
+      },
+      "emptyState": "No import data in this time range",
+      "totalValue": "Total Import Value"
+    }
+  },
+  "mainLayout": {
+    "sidebar": {
+      "subtitle": "Warehouse Management",
+      "sectionMain": "Main",
+      "sectionAccount": "Account",
+      "logout": "Logout",
+      "login": "Login"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "orders": "Order Management",
+      "inventory": "Inventory Management",
+      "stockin": "Import Management",
+      "addProduct": "Add Inventory",
+      "users": "Users",
+      "reports": "Reports",
+      "settings": "Settings"
+    },
+    "menu": {
+      "home": "Home",
+      "logout": "Logout"
+    },
+    "connection": {
+      "connected": "Connected",
+      "connecting": "Connecting...",
+      "reconnecting": "Reconnecting...",
+      "disconnected": "Disconnected",
+      "unknown": "Unknown"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAllRead": "Mark all as read",
+      "deleteAll": "Delete all",
+      "empty": "No new notifications",
+      "types": {
+        "newOrder": "New Order",
+        "orderApproved": "Order Approved",
+        "orderRejected": "Order Rejected",
+        "orderStatus": "Order Updated",
+        "stockin": "Stock Import",
+        "user": "User",
+        "default": "Notification"
+      },
+      "time": {
+        "justNow": "Just now",
+        "minutesAgo": "{n} minutes ago",
+        "hoursAgo": "{n} hours ago",
+        "daysAgo": "{n} days ago"
+      }
+    },
+    "error": {
+      "logoutFail": "Unable to logout",
+      "error": "Error"
     }
   }
 }

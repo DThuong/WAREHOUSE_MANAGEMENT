@@ -1,6 +1,6 @@
 {
   "common": {
-     "upload": {
+    "upload": {
       "addImage": "Thêm ảnh",
       "addMore": "Thêm",
       "dragDropOrClick": "Kéo thả hình ảnh vào đây hoặc click để chọn",
@@ -238,7 +238,7 @@
     },
     "stockStatusOptions": {
       "inStock": "Còn hàng",
-      "warning": "Cảnh báo (>50% & <99%)",
+      "warning": "Cảnh báo (>50% & <100%)",
       "low": "Thấp (≤50%)",
       "critical": "Nguy cấp (≤25%)",
       "outOfStock": "Hết hàng",
@@ -527,6 +527,14 @@
     }
   },
   "userManagement": {
+    "departments": {
+      "qc": "QC",
+      "kho": "Kho",
+      "repair": "Sửa chữa",
+      "engineer": "Kỹ thuật",
+      "sanXuatA": "Sản xuất ca A",
+      "sanXuatB": "Sản xuất ca B"
+    },
     "title": "Quản lý tài khoản",
     "addAccount": "Thêm tài khoản",
     "summary": {
@@ -626,39 +634,194 @@
       "description": "Theo dõi hàng tồn kho theo thời gian"
     },
     "viewReport": "Xem báo cáo",
+    "mobileNotSupported": {
+      "title": "Không hỗ trợ",
+      "description": "Thiết bị này không hỗ trợ xem báo cáo. Vui lòng sử dụng máy tính để có trải nghiệm tốt hơn."
+    },
     "orderSummary": {
       "title": "Tổng quan order vật tư (trạng thái: hoàn thành)",
       "showAll": "Hiện tất cả",
+      "showThisYear": "Năm nay",
       "totalCompleted": "Tổng orders hoàn thành",
       "viewDetail": "Xem báo cáo chi tiết"
     },
-    "importReport": {
-      "title": "Báo cáo nhập kho",
-      "dateRange": "Từ {from} đến {to}",
+    "common": {
+      "printReport": "In báo cáo",
+      "fromDate": "Từ ngày",
+      "toDate": "Đến ngày",
+      "reset": "Reset",
       "printDate": "Ngày in",
-      "totalImports": "Tổng số lần nhập kho",
-      "totalProducts": "Tổng số sản phẩm trong kho",
-      "totalQuantity": "Tổng số lượng nhập",
-      "receiptCode": "Mã phiếu",
-      "importer": "Người nhập",
-      "totalValue": "Tổng giá trị nhập kho"
+      "dateRange": "Từ {from} đến {to}",
+      "noImage": "Không có ảnh",
+      "status": "Trạng thái"
+    },
+    "inventoryReport": {
+      "title": "Báo cáo tồn kho",
+      "reportTitle": "BÁO CÁO TỒN KHO",
+      "reportDate": "Ngày báo cáo",
+      "filterProductType": "Loại sản phẩm",
+      "filterStockStatus": "Trạng thái tồn kho",
+      "filterSearch": "Tìm kiếm",
+      "filterSearchPlaceholder": "Tên sản phẩm, ID...",
+      "typeOptions": {
+        "all": "Tất cả loại",
+        "engineer": "Engineer",
+        "consumer": "Consumer"
+      },
+      "stockStatusOptions": {
+        "all": "Tất cả",
+        "normal": "Còn hàng",
+        "warning": "Cảnh báo (>50% & <100%)",
+        "low": "Thấp (≤50%)",
+        "critical": "Nguy cấp (≤25%)",
+        "outOfStock": "Hết hàng",
+        "notConfigured": "Chưa có tồn an toàn"
+      },
+      "summary": {
+        "totalProducts": "Tổng sản phẩm",
+        "normal": "Còn hàng",
+        "warning": "Cảnh báo",
+        "low": "Thấp",
+        "critical": "Nguy cấp",
+        "outOfStock": "Hết hàng",
+        "notConfigured": "Chưa có tồn an toàn"
+      },
+      "table": {
+        "productCode": "Mã SP",
+        "image": "Hình ảnh",
+        "productName": "Tên sản phẩm",
+        "type": "Loại",
+        "stock": "Tồn kho",
+        "safeStock": "Tồn an toàn",
+        "status": "Trạng thái",
+        "unitPrice": "Đơn giá",
+        "inventoryValue": "Giá trị tồn",
+        "orderCount": "Số lần order"
+      },
+      "stockStatus": {
+        "normal": "Còn hàng",
+        "warning": "Cảnh báo",
+        "low": "Thấp",
+        "critical": "Nguy cấp",
+        "outOfStock": "Hết hàng",
+        "notConfigured": "Chưa có tồn an toàn",
+        "unknown": "Không xác định"
+      },
+      "detail": "Chi tiết tồn kho",
+      "emptyState": "Không có sản phẩm phù hợp",
+      "totalProducts": "Tổng số sản phẩm",
+      "productUnit": "sản phẩm",
+      "totalInventoryValue": "Tổng giá trị tồn kho"
     },
     "orderReport": {
       "title": "Báo cáo đơn hàng",
-      "dateRange": "Từ {from} đến {to}",
-      "totalOrders": "Tổng đơn hàng",
-      "pending": "Chờ duyệt",
-      "approved": "Đã duyệt",
-      "completed": "Hoàn thành",
-      "rejected": "Từ chối",
-      "orderCode": "Mã đơn hàng",
-      "orderDate": "Ngày đặt",
-      "orderedBy": "Người đặt",
-      "department": "Bộ phận",
+      "reportTitle": "BÁO CÁO ĐƠN HÀNG",
+      "filterStatus": "Trạng thái",
+      "statusOptions": {
+        "all": "Tất cả trạng thái",
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "completed": "Hoàn thành",
+        "rejected": "Từ chối"
+      },
+      "statusLabel": "Trạng thái: {status}",
+      "summary": {
+        "totalOrders": "Tổng đơn hàng",
+        "pending": "Chờ duyệt",
+        "approved": "Đã duyệt",
+        "completed": "Hoàn thành"
+      },
+      "table": {
+        "orderCode": "Mã ĐH",
+        "orderDate": "Ngày đặt",
+        "orderedBy": "Người đặt",
+        "department": "Bộ phận",
+        "image": "Hình ảnh",
+        "product": "Sản phẩm",
+        "unitPrice": "Đơn giá",
+        "qty": "SL",
+        "subtotal": "Thành tiền",
+        "status": "Trạng thái"
+      },
+      "emptyState": "Không có đơn hàng trong khoảng thời gian này",
       "totalValue": "Tổng giá trị đơn hàng"
     },
-    "inventoryReport": {
-      "title": "Báo cáo tồn kho"
+    "importReport": {
+      "title": "Báo cáo nhập kho",
+      "reportTitle": "BÁO CÁO NHẬP KHO",
+      "summary": {
+        "totalImports": "Tổng số lần nhập",
+        "totalProducts": "Tổng số sản phẩm",
+        "totalQuantity": "Tổng số lượng nhập"
+      },
+      "table": {
+        "receiptCode": "Mã phiếu",
+        "importDate": "Ngày nhập",
+        "importer": "Người nhập",
+        "product": "Sản phẩm",
+        "image": "Hình ảnh",
+        "unitPrice": "Đơn giá",
+        "quantity": "Số lượng",
+        "subtotal": "Thành tiền",
+        "note": "Ghi chú"
+      },
+      "emptyState": "Không có dữ liệu nhập kho trong khoảng thời gian này",
+      "totalValue": "Tổng giá trị nhập kho"
+    }
+  },
+  "mainLayout": {
+    "sidebar": {
+      "subtitle": "Quản lý kho",
+      "sectionMain": "Chính",
+      "sectionAccount": "Tài khoản",
+      "logout": "Đăng xuất",
+      "login": "Đăng nhập"
+    },
+    "nav": {
+      "dashboard": "Bảng điều khiển",
+      "orders": "Quản lý đơn hàng",
+      "inventory": "Quản lý tồn kho",
+      "stockin": "Quản lý nhập kho",
+      "addProduct": "Thêm tồn kho",
+      "users": "Người dùng",
+      "reports": "Báo cáo",
+      "settings": "Cấu hình"
+    },
+    "menu": {
+      "home": "Trang chủ",
+      "logout": "Đăng xuất"
+    },
+    "connection": {
+      "connected": "Đã kết nối",
+      "connecting": "Đang kết nối...",
+      "reconnecting": "Đang kết nối lại...",
+      "disconnected": "Mất kết nối",
+      "unknown": "Không xác định"
+    },
+    "notifications": {
+      "title": "Thông báo",
+      "markAllRead": "Đánh dấu đã đọc",
+      "deleteAll": "Xóa tất cả",
+      "empty": "Không có thông báo mới",
+      "types": {
+        "newOrder": "Đơn hàng mới",
+        "orderApproved": "Đơn hàng đã duyệt",
+        "orderRejected": "Đơn hàng bị từ chối",
+        "orderStatus": "Cập nhật đơn hàng",
+        "stockin": "Nhập kho",
+        "user": "Người dùng",
+        "default": "Thông báo"
+      },
+      "time": {
+        "justNow": "Vừa xong",
+        "minutesAgo": "{n} phút trước",
+        "hoursAgo": "{n} giờ trước",
+        "daysAgo": "{n} ngày trước"
+      }
+    },
+    "error": {
+      "logoutFail": "Không thể đăng xuất",
+      "error": "Lỗi"
     }
   }
 }

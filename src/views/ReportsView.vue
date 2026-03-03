@@ -9,10 +9,10 @@
           <template #content>
             <div style="text-align: center; padding: 2rem;">
               <i class="pi pi-cart-arrow-down" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
-              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Báo cáo nhập kho</h3>
-              <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">Xem chi tiết nhập kho theo thời gian</p>
+              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">{{ t('reports.import.title') }}</h3>
+              <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">{{ t('reports.import.description') }}</p>
               <Button 
-                label="Xem báo cáo" 
+                :label="t('reports.viewReport')" 
                 outlined 
                 @click="navigateToReport('stockin')"
               />
@@ -25,10 +25,10 @@
           <template #content>
             <div style="text-align: center; padding: 2rem;">
               <i class="pi pi-shopping-cart" style="font-size: 3rem; color: #10b981; margin-bottom: 1rem;"></i>
-              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Báo cáo đơn hàng</h3>
-              <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">Thống kê đơn hàng và trạng thái</p>
+              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">{{ t('reports.order.title') }}</h3>
+              <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">{{ t('reports.order.description') }}</p>
               <Button 
-                label="Xem báo cáo" 
+                :label="t('reports.viewReport')" 
                 outlined 
                 @click="navigateToReport('orders')"
               />
@@ -41,10 +41,10 @@
           <template #content>
             <div style="text-align: center; padding: 2rem;">
               <i class="pi pi-box" style="font-size: 3rem; color: #f59e0b; margin-bottom: 1rem;"></i>
-              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Báo cáo tồn kho</h3>
-              <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">Theo dõi hàng tồn kho theo thời gian</p>
+              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">{{ t('reports.inventory.title') }}</h3>
+              <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem;">{{ t('reports.inventory.description') }}</p>
               <Button 
-                label="Xem báo cáo" 
+                :label="t('reports.viewReport')" 
                 outlined 
                 @click="navigateToReport('inventory')"
               />
@@ -58,10 +58,10 @@
         <template #content>
           <div style="padding: 1.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-              <h3 style="font-size: 1.125rem; font-weight: 600;">Tổng quan order vật tư (Status: Completed)</h3>
+              <h3 style="font-size: 1.125rem; font-weight: 600;">{{ t('reports.orderSummary.title') }}</h3>
               <div style="display: flex; gap: 0.5rem;">
                 <Button 
-                  :label="showThisYearOnly ? 'Hiện tất cả' : 'Chỉ năm nay'" 
+                  :label="showThisYearOnly ? t('reports.orderSummary.showAll') : t('reports.orderSummary.showThisYear')" 
                   :severity="showThisYearOnly ? 'secondary' : 'danger'" 
                   size="small"
                   @click="toggleYearFilter"
@@ -83,10 +83,10 @@
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
               <div style="font-size: 0.875rem; color: var(--gray-600);">
-                <strong>Tổng orders hoàn thành:</strong> {{ totalCompletedOrders }}
+                <strong>{{ t('reports.orderSummary.totalCompleted') }}:</strong> {{ totalCompletedOrders }}
               </div>
               <Button 
-                label="Xem báo cáo chi tiết" 
+                :label="t('reports.orderSummary.viewDetail')" 
                 text 
                 size="small"
                 @click="navigateToReport('orders')"
@@ -106,12 +106,12 @@
   >
     <div style="text-align: center; padding: 1.5rem 1rem;">
       <i class="pi pi-mobile" style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 1rem; display: block;"></i>
-      <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; color: #1e293b;">Không hỗ trợ</h3>
+      <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; color: #1e293b;">{{ t('reports.mobileNotSupported.title') }}</h3>
       <p style="font-size: 0.875rem; color: #64748b; margin-bottom: 1.5rem; line-height: 1.5;">
-        Thiết bị này không hỗ trợ xem báo cáo. Vui lòng sử dụng máy tính để có trải nghiệm tốt hơn.
+        {{ t('reports.mobileNotSupported.description') }}
       </p>
       <Button
-        label="Đã hiểu"
+        label="OK"
         style="width: 100%;"
         @click="showUnsupportedDialog = false"
       />
@@ -131,9 +131,11 @@ import { useOrderStore } from '@/stores/orderStore'
 import { orderAPI } from '@/services/orderAPI'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const orderStore = useOrderStore()
+const { t } = useI18n()
 
 const loading = ref(false)
 const showThisYearOnly = ref(true)

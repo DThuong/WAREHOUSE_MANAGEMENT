@@ -3,9 +3,9 @@
     <div class="user-management">
       <!-- Header -->
       <div class="page-header">
-        <h2>Quản lý tài khoản</h2>
-        <Button 
-          label="Thêm tài khoản" 
+        <h2>{{ t("userManagement.title") }}</h2>
+        <Button
+          :label="t('userManagement.addAccount')"
           icon="pi pi-plus"
           severity="success"
           @click="openAddDialog"
@@ -16,7 +16,10 @@
       <Card>
         <template #content>
           <!-- Loading Skeleton -->
-          <div v-if="userStore.loading && userStore.users.length === 0" class="skeleton-container">
+          <div
+            v-if="userStore.loading && userStore.users.length === 0"
+            class="skeleton-container"
+          >
             <Skeleton height="3rem" class="mb-3"></Skeleton>
             <Skeleton height="3rem" class="mb-3"></Skeleton>
             <Skeleton height="3rem"></Skeleton>
@@ -26,21 +29,25 @@
             <!-- Table Header (search + count) - shared -->
             <div class="table-header">
               <span class="total-count">
-                Tổng: <strong>{{ userStore.totalUsers }}</strong> tài khoản
+                {{
+                  t("userManagement.summary.total", {
+                    count: userStore.totalUsers,
+                  })
+                }}
               </span>
               <span class="p-input-icon-left">
-                <InputText 
-                  v-model="searchValue" 
-                  placeholder="Tìm kiếm..." 
+                <InputText
+                  v-model="searchValue"
+                  :placeholder="t('userManagement.search')"
                   class="search-input"
                 />
               </span>
             </div>
 
             <!-- ========== DESKTOP: DataTable ========== -->
-            <DataTable 
+            <DataTable
               v-if="!isMobile"
-              :value="filteredUsers" 
+              :value="filteredUsers"
               :loading="userStore.loading"
               :rows="5"
               responsiveLayout="scroll"
@@ -49,98 +56,140 @@
               <!-- Empty State -->
               <template #empty>
                 <div class="empty-state">
-                  <i class="pi pi-users" style="font-size: 3rem; color: #94a3b8;"></i>
-                  <p>Chưa có tài khoản nào</p>
+                  <i
+                    class="pi pi-users"
+                    style="font-size: 3rem; color: #94a3b8"
+                  ></i>
+                  <p>{{ t("userManagement.empty") }}</p>
                 </div>
               </template>
 
               <!-- Columns -->
-              <Column field="id" header="ID" sortable style="min-width: 80px">
+              <Column
+                field="id"
+                :header="t('userManagement.table.id')"
+                sortable
+                style="min-width: 80px"
+              >
                 <template #body="slotProps">
                   <strong>{{ slotProps.data.id }}</strong>
                 </template>
               </Column>
-              
-              <Column header="Thông tin" style="min-width: 250px">
+
+              <Column
+                :header="t('userManagement.table.info')"
+                style="min-width: 250px"
+              >
                 <template #body="slotProps">
                   <div class="user-info">
-                    <Avatar 
-                      :label="slotProps.data.username.charAt(0).toUpperCase()" 
+                    <Avatar
+                      :label="slotProps.data.username.charAt(0).toUpperCase()"
                       shape="circle"
                       size="large"
                       class="user-avatar"
                     />
                     <div>
                       <div class="username">{{ slotProps.data.username }}</div>
-                      <div class="phone-number-table">{{ slotProps.data.phoneNumber }}</div>
+                      <div class="phone-number-table">
+                        {{ slotProps.data.phoneNumber }}
+                      </div>
                     </div>
                   </div>
                 </template>
               </Column>
-              
-              <Column field="role" header="Vai trò" sortable style="min-width: 120px">
+
+              <Column
+                field="role"
+                :header="t('userManagement.table.role')"
+                sortable
+                style="min-width: 120px"
+              >
                 <template #body="slotProps">
-                  <Tag 
-                    :value="slotProps.data.role" 
+                  <Tag
+                    :value="slotProps.data.role"
                     :severity="getRoleSeverity(slotProps.data.role)"
                   />
                 </template>
               </Column>
-              
-              <Column field="department" header="Phòng ban" sortable style="min-width: 180px">
+
+              <Column
+                field="department"
+                :header="t('userManagement.table.department')"
+                sortable
+                style="min-width: 180px"
+              >
                 <template #body="slotProps">
-                  <span class="department-text">{{ slotProps.data.department }}</span>
+                  <span class="department-text">{{ getDepartmentLabel(slotProps.data.department) }}</span>
                 </template>
               </Column>
-              
-              <Column field="isActive" header="Trạng thái" sortable style="min-width: 140px">
+
+              <Column
+                field="isActive"
+                :header="t('userManagement.table.status')"
+                sortable
+                style="min-width: 140px"
+              >
                 <template #body="slotProps">
-                  <Tag 
-                    :value="slotProps.data.isActive ? 'Hoạt động' : 'Không hoạt động'" 
+                  <Tag
+                    :value="
+                      slotProps.data.isActive
+                        ? t('userManagement.status.active')
+                        : t('userManagement.status.inactive')
+                    "
                     :severity="slotProps.data.isActive ? 'success' : 'danger'"
                   />
                 </template>
               </Column>
-              
-              <Column field="createdAt" header="Ngày tạo" sortable style="min-width: 180px">
+
+              <Column
+                field="createdAt"
+                :header="t('userManagement.table.createdAt')"
+                sortable
+                style="min-width: 180px"
+              >
                 <template #body="slotProps">
                   {{ formatDate(slotProps.data.createdAt) }}
                 </template>
               </Column>
-              
-              <Column header="Hành động" :frozen="true" alignFrozen="right" style="min-width: 180px">
+
+              <Column
+                :header="t('userManagement.table.actions')"
+                :frozen="true"
+                alignFrozen="right"
+                style="min-width: 180px"
+              >
                 <template #body="slotProps">
                   <div class="action-buttons">
-                    <Button 
-                      icon="pi pi-eye" 
-                      text 
-                      rounded 
+                    <Button
+                      icon="pi pi-eye"
+                      text
+                      rounded
                       severity="secondary"
-                      v-tooltip.top="'Xem chi tiết'"
+                      v-tooltip.top="t('userManagement.tooltip.view')"
                       @click="viewUser(slotProps.data)"
                     />
-                    <Button 
-                      icon="pi pi-pencil" 
-                      text 
-                      rounded 
+                    <Button
+                      icon="pi pi-pencil"
+                      text
+                      rounded
                       severity="secondary"
-                      v-tooltip.top="'Chỉnh sửa'"
+                      v-tooltip.top="t('userManagement.tooltip.edit')"
                       @click="editUser(slotProps.data)"
                     />
-                    <Button 
-                      icon="pi pi-key" 
-                      text 
-                      rounded 
+                    <Button
+                      icon="pi pi-key"
+                      text
+                      rounded
                       severity="warning"
-                      v-tooltip.top="'Đổi mật khẩu'"
+                      v-tooltip.top="t('userManagement.tooltip.changePassword')"
                       @click="openChangePasswordDialog(slotProps.data)"
                     />
-                    <Button 
-                      icon="pi pi-trash" 
-                      text 
-                      rounded 
+                    <Button
+                      icon="pi pi-trash"
+                      text
+                      rounded
                       severity="danger"
-                      v-tooltip.top="'Xóa'"
+                      v-tooltip.top="t('userManagement.tooltip.delete')"
                       @click="confirmDelete(slotProps.data)"
                     />
                   </div>
@@ -151,21 +200,24 @@
             <!-- ========== MOBILE: Card List ========== -->
             <div v-else class="mobile-card-list">
               <div v-if="filteredUsers.length === 0" class="empty-state">
-                <i class="pi pi-users" style="font-size: 3rem; color: #94a3b8;"></i>
-                <p>Chưa có tài khoản nào</p>
+                <i
+                  class="pi pi-users"
+                  style="font-size: 3rem; color: #94a3b8"
+                ></i>
+                <p>{{ t("userManagement.empty") }}</p>
               </div>
 
-              <div 
-                v-for="user in mobilePagination.paginatedList.value" 
-                :key="user.id" 
+              <div
+                v-for="user in mobilePagination.paginatedList.value"
+                :key="user.id"
                 class="mobile-user-card"
                 @click="viewUser(user)"
               >
                 <!-- Card Top -->
                 <div class="mobile-card-top">
                   <div class="mobile-user-info">
-                    <Avatar 
-                      :label="user.username.charAt(0).toUpperCase()" 
+                    <Avatar
+                      :label="user.username.charAt(0).toUpperCase()"
                       shape="circle"
                       size="large"
                       class="user-avatar"
@@ -173,13 +225,17 @@
                     <div>
                       <div class="mobile-username">{{ user.username }}</div>
                       <div class="mobile-phone">
-                        <i class="pi pi-phone" style="font-size:0.75rem;"></i>
+                        <i class="pi pi-phone" style="font-size: 0.75rem"></i>
                         {{ user.phoneNumber }}
                       </div>
                     </div>
                   </div>
-                  <Tag 
-                    :value="user.isActive ? 'Hoạt động' : 'Không hoạt động'" 
+                  <Tag
+                    :value="
+                      user.isActive
+                        ? t('userManagement.status.active')
+                        : t('userManagement.status.inactive')
+                    "
                     :severity="user.isActive ? 'success' : 'danger'"
                     class="mobile-status-tag"
                   />
@@ -188,48 +244,59 @@
                 <!-- Card Meta -->
                 <div class="mobile-card-meta">
                   <div class="mobile-meta-item">
-                    <span class="meta-label">Vai trò</span>
-                    <Tag :value="user.role" :severity="getRoleSeverity(user.role)" />
+                    <span class="meta-label">{{
+                      t("userManagement.mobile.role")
+                    }}</span>
+                    <Tag
+                      :value="user.role"
+                      :severity="getRoleSeverity(user.role)"
+                    />
                   </div>
                   <div class="mobile-meta-item">
-                    <span class="meta-label">Phòng ban</span>
-                    <span class="meta-value">{{ user.department }}</span>
+                    <span class="meta-label">{{
+                      t("userManagement.mobile.department")
+                    }}</span>
+                    <span class="meta-value">{{ getDepartmentLabel(user.department) }}</span>
                   </div>
                   <div class="mobile-meta-item">
-                    <span class="meta-label">Ngày tạo</span>
-                    <span class="meta-value">{{ formatDate(user.createdAt) }}</span>
+                    <span class="meta-label">{{
+                      t("userManagement.mobile.createdAt")
+                    }}</span>
+                    <span class="meta-value">{{
+                      formatDate(user.createdAt)
+                    }}</span>
                   </div>
                 </div>
 
                 <!-- Card Actions -->
                 <div class="mobile-card-actions">
-                  <Button 
-                    icon="pi pi-eye" 
-                    text 
+                  <Button
+                    icon="pi pi-eye"
+                    text
                     size="small"
                     class="action-btn btn-view"
                     severity="secondary"
                     @click.stop="viewUser(user)"
                   />
-                  <Button 
-                    icon="pi pi-pencil" 
-                    text 
+                  <Button
+                    icon="pi pi-pencil"
+                    text
                     size="small"
                     class="action-btn btn-edit"
                     severity="secondary"
                     @click.stop="editUser(user)"
                   />
-                  <Button 
-                    icon="pi pi-key" 
-                    text 
+                  <Button
+                    icon="pi pi-key"
+                    text
                     size="small"
                     class="action-btn btn-key"
                     severity="warning"
                     @click.stop="openChangePasswordDialog(user)"
                   />
-                  <Button 
-                    icon="pi pi-trash" 
-                    text 
+                  <Button
+                    icon="pi pi-trash"
+                    text
                     size="small"
                     class="action-btn btn-delete"
                     severity="danger"
@@ -257,9 +324,13 @@
     </div>
 
     <!-- Add/Edit Dialog -->
-    <Dialog 
-      v-model:visible="showDialog" 
-      :header="isEditing ? 'Chỉnh sửa tài khoản' : 'Thêm tài khoản mới'"
+    <Dialog
+      v-model:visible="showDialog"
+      :header="
+        isEditing
+          ? t('userManagement.addDialog.headerEdit')
+          : t('userManagement.addDialog.headerAdd')
+      "
       :style="{ width: isMobile ? '95vw' : '550px' }"
       :modal="true"
       :draggable="false"
@@ -268,13 +339,14 @@
         <!-- Username -->
         <div class="field">
           <label for="username">
-            Tên đăng nhập <span class="required">*</span>
+            {{ t("userManagement.addDialog.username") }}
+            <span class="required">*</span>
           </label>
-          <InputText 
-            id="username" 
-            v-model="formData.username" 
+          <InputText
+            id="username"
+            v-model="formData.username"
             :disabled="isEditing"
-            placeholder="Nhập tên đăng nhập"
+            :placeholder="t('userManagement.addDialog.usernamePlaceholder')"
             class="w-full"
           />
         </div>
@@ -282,14 +354,15 @@
         <!-- Password (chỉ hiện khi thêm mới) -->
         <div class="field" v-if="!isEditing">
           <label for="password">
-            Mật khẩu <span class="required">*</span>
+            {{ t("userManagement.addDialog.password") }}
+            <span class="required">*</span>
           </label>
-          <Password 
-            id="password" 
-            v-model="formData.password" 
+          <Password
+            id="password"
+            v-model="formData.password"
             toggleMask
             :feedback="false"
-            placeholder="Nhập mật khẩu"
+            :placeholder="t('userManagement.addDialog.passwordPlaceholder')"
             class="w-full"
           />
         </div>
@@ -297,12 +370,13 @@
         <!-- Phone Number -->
         <div class="field">
           <label for="phoneNumber">
-            Số điện thoại <span class="required">*</span>
+            {{ t("userManagement.addDialog.phoneNumber") }}
+            <span class="required">*</span>
           </label>
-          <InputText 
-            id="phoneNumber" 
-            v-model="formData.phoneNumber" 
-            placeholder="Nhập số điện thoại"
+          <InputText
+            id="phoneNumber"
+            v-model="formData.phoneNumber"
+            :placeholder="t('userManagement.addDialog.phoneNumberPlaceholder')"
             class="w-full"
           />
         </div>
@@ -310,15 +384,16 @@
         <!-- Role -->
         <div class="field">
           <label for="role">
-            Vai trò <span class="required">*</span>
+            {{ t("userManagement.addDialog.role") }}
+            <span class="required">*</span>
           </label>
-          <Dropdown 
+          <Dropdown
             id="role"
-            v-model="formData.role" 
+            v-model="formData.role"
             :options="roleOptions"
             optionLabel="label"
             optionValue="value"
-            placeholder="Chọn vai trò"
+            :placeholder="t('userManagement.addDialog.rolePlaceholder')"
             class="w-full"
           />
         </div>
@@ -326,31 +401,36 @@
         <!-- Department -->
         <div class="field">
           <label for="department">
-            Phòng ban <span class="required">*</span>
+            {{ t("userManagement.addDialog.department") }}
+            <span class="required">*</span>
           </label>
-          <Dropdown 
+          <Dropdown
             id="department"
-            v-model="formData.department" 
+            v-model="formData.department"
             :options="departmentOptions"
             optionLabel="label"
             optionValue="value"
-            placeholder="Chọn phòng ban"
+            :placeholder="t('userManagement.addDialog.departmentPlaceholder')"
             class="w-full"
           />
         </div>
       </div>
 
       <template #footer>
-        <Button 
-          label="Hủy" 
-          icon="pi pi-times" 
-          text 
+        <Button
+          :label="t('userManagement.addDialog.cancel')"
+          icon="pi pi-times"
+          text
           @click="closeDialog"
           :disabled="userStore.loading"
         />
-        <Button 
-          :label="isEditing ? 'Cập nhật' : 'Thêm'" 
-          icon="pi pi-check" 
+        <Button
+          :label="
+            isEditing
+              ? t('userManagement.addDialog.update')
+              : t('userManagement.addDialog.add')
+          "
+          icon="pi pi-check"
           @click="saveUser"
           :loading="userStore.loading"
         />
@@ -358,17 +438,17 @@
     </Dialog>
 
     <!-- View User Dialog -->
-    <Dialog 
-      v-model:visible="showViewDialog" 
-      header="Thông tin chi tiết tài khoản"
+    <Dialog
+      v-model:visible="showViewDialog"
+      :header="t('userManagement.viewDialog.header')"
       :style="{ width: isMobile ? '95vw' : '500px' }"
       :modal="true"
     >
       <div v-if="selectedUser" class="view-dialog-content">
         <!-- User Header -->
         <div class="user-header">
-          <Avatar 
-            :label="selectedUser.username.charAt(0).toUpperCase()" 
+          <Avatar
+            :label="selectedUser.username.charAt(0).toUpperCase()"
             size="xlarge"
             shape="circle"
             class="large-avatar"
@@ -382,101 +462,123 @@
         <!-- User Details -->
         <div class="user-details">
           <div class="detail-item">
-            <span class="label">ID</span>
+            <span class="label">{{ t("userManagement.viewDialog.id") }}</span>
             <span class="value">{{ selectedUser.id }}</span>
           </div>
 
           <div class="detail-item">
-            <span class="label">Vai trò</span>
-            <Tag :value="selectedUser.role" :severity="getRoleSeverity(selectedUser.role)" />
+            <span class="label">{{ t("userManagement.viewDialog.role") }}</span>
+            <Tag
+              :value="selectedUser.role"
+              :severity="getRoleSeverity(selectedUser.role)"
+            />
           </div>
 
           <div class="detail-item">
-            <span class="label">Phòng ban</span>
-            <span class="value">{{ selectedUser.department }}</span>
+            <span class="label">{{
+              t("userManagement.viewDialog.department")
+            }}</span>
+            <span class="value">{{ getDepartmentLabel(selectedUser.department) }}</span>
           </div>
 
           <div class="detail-item">
-            <span class="label">Trạng thái</span>
-            <Tag 
-              :value="selectedUser.isActive ? 'Hoạt động' : 'Không hoạt động'" 
+            <span class="label">{{
+              t("userManagement.viewDialog.status")
+            }}</span>
+            <Tag
+              :value="
+                selectedUser.isActive
+                  ? t('userManagement.status.active')
+                  : t('userManagement.status.inactive')
+              "
               :severity="selectedUser.isActive ? 'success' : 'danger'"
             />
           </div>
 
           <div class="detail-item full-width">
-            <span class="label">Ngày tạo</span>
+            <span class="label">{{
+              t("userManagement.viewDialog.createdAt")
+            }}</span>
             <span class="value">{{ formatDate(selectedUser.createdAt) }}</span>
           </div>
         </div>
       </div>
 
       <template #footer>
-        <Button 
-          label="Đóng" 
-          icon="pi pi-times" 
-          text 
+        <Button
+          :label="t('userManagement.viewDialog.close')"
+          icon="pi pi-times"
+          text
           @click="showViewDialog = false"
         />
-        <Button 
-          label="Chỉnh sửa" 
-          icon="pi pi-pencil" 
+        <Button
+          :label="t('userManagement.viewDialog.edit')"
+          icon="pi pi-pencil"
           @click="editFromView"
         />
       </template>
     </Dialog>
 
     <!-- Change Password Dialog -->
-    <Dialog 
-      v-model:visible="showPasswordDialog" 
-      header="Đổi mật khẩu"
+    <Dialog
+      v-model:visible="showPasswordDialog"
+      :header="t('userManagement.passwordDialog.header')"
       :style="{ width: isMobile ? '95vw' : '450px' }"
       :modal="true"
     >
       <div class="dialog-content">
         <div class="field">
           <label for="newPassword">
-            Mật khẩu mới <span class="required">*</span>
+            {{ t("userManagement.passwordDialog.newPassword") }}
+            <span class="required">*</span>
           </label>
-          <Password 
-            id="newPassword" 
-            v-model="newPassword" 
+          <Password
+            id="newPassword"
+            v-model="newPassword"
             toggleMask
             :feedback="false"
-            placeholder="Nhập mật khẩu mới"
+            :placeholder="
+              t('userManagement.passwordDialog.newPasswordPlaceholder')
+            "
             class="w-full"
           />
         </div>
 
         <div class="field">
           <label for="confirmPassword">
-            Xác nhận mật khẩu <span class="required">*</span>
+            {{ t("userManagement.passwordDialog.confirmPassword") }}
+            <span class="required">*</span>
           </label>
-          <Password 
-            id="confirmPassword" 
-            v-model="confirmPassword" 
+          <Password
+            id="confirmPassword"
+            v-model="confirmPassword"
             toggleMask
             :feedback="false"
-            placeholder="Nhập lại mật khẩu mới"
+            :placeholder="
+              t('userManagement.passwordDialog.confirmPasswordPlaceholder')
+            "
             class="w-full"
           />
-          <small v-if="confirmPassword && newPassword !== confirmPassword" class="p-error">
-            Mật khẩu không khớp
+          <small
+            v-if="confirmPassword && newPassword !== confirmPassword"
+            class="p-error"
+          >
+            {{ t("userManagement.passwordDialog.mismatch") }}
           </small>
         </div>
       </div>
 
       <template #footer>
-        <Button 
-          label="Hủy" 
-          icon="pi pi-times" 
-          text 
+        <Button
+          :label="t('userManagement.passwordDialog.cancel')"
+          icon="pi pi-times"
+          text
           @click="closePasswordDialog"
           :disabled="userStore.loading"
         />
-        <Button 
-          label="Đổi mật khẩu" 
-          icon="pi pi-check" 
+        <Button
+          :label="t('userManagement.passwordDialog.submit')"
+          icon="pi pi-check"
           @click="savePassword"
           :loading="userStore.loading"
         />
@@ -485,245 +587,304 @@
 
     <!-- Confirm Dialog -->
     <ConfirmDialog></ConfirmDialog>
-    
+
     <!-- Toast -->
     <Toast />
   </MainLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useUserStore } from '@/stores/userStore'
-import { useToast } from 'primevue/usetoast'
-import { useConfirm } from 'primevue/useconfirm'
-import MainLayout from '@/components/MainLayout.vue'
-import type { User, RegisterData } from '@/types/user.types'
-import { usePagination } from '@/composables/usePagination'
-import AppPagination from '@/components/AppPagination.vue'
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { useUserStore } from "@/stores/userStore";
+import { useToast } from "primevue/usetoast";
+import { useConfirm } from "primevue/useconfirm";
+import MainLayout from "@/components/MainLayout.vue";
+import type { User, RegisterData } from "@/types/user.types";
+import { usePagination } from "@/composables/usePagination";
+import AppPagination from "@/components/AppPagination.vue";
 
 // PrimeVue Components
-import Button from 'primevue/button'
-import Card from 'primevue/card'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Avatar from 'primevue/avatar'
-import Dialog from 'primevue/dialog'
-import InputText from 'primevue/inputtext'
-import Password from 'primevue/password'
-import Dropdown from 'primevue/dropdown'
-import Tag from 'primevue/tag'
-import Skeleton from 'primevue/skeleton'
-import Toast from 'primevue/toast'
-import ConfirmDialog from 'primevue/confirmdialog'
+import Button from "primevue/button";
+import Card from "primevue/card";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Avatar from "primevue/avatar";
+import Dialog from "primevue/dialog";
+import InputText from "primevue/inputtext";
+import Password from "primevue/password";
+import Dropdown from "primevue/dropdown";
+import Tag from "primevue/tag";
+import Skeleton from "primevue/skeleton";
+import Toast from "primevue/toast";
+import ConfirmDialog from "primevue/confirmdialog";
+import { useI18n } from "vue-i18n";
 
-const userStore = useUserStore()
-const toast = useToast()
-const confirm = useConfirm()
+const { t } = useI18n();
+const userStore = useUserStore();
+const toast = useToast();
+const confirm = useConfirm();
 
 // ==================== RESPONSIVE ====================
-const isMobile = ref(window.innerWidth < 768)
+const isMobile = ref(window.innerWidth < 768);
 
 const handleResize = () => {
-  isMobile.value = window.innerWidth < 768
-}
+  isMobile.value = window.innerWidth < 768;
+};
 
 onMounted(async () => {
-  window.addEventListener('resize', handleResize)
-  await userStore.fetchUsers()
-})
+  window.addEventListener("resize", handleResize);
+  await userStore.fetchUsers();
+});
 
 onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
-})
+  window.removeEventListener("resize", handleResize);
+});
 
 // ==================== STATES ====================
-const showDialog = ref(false)
-const showViewDialog = ref(false)
-const showPasswordDialog = ref(false)
-const isEditing = ref(false)
-const editingUserId = ref<number | null>(null)
-const selectedUser = ref<User | null>(null)
-const searchValue = ref('')
+const showDialog = ref(false);
+const showViewDialog = ref(false);
+const showPasswordDialog = ref(false);
+const isEditing = ref(false);
+const editingUserId = ref<number | null>(null);
+const selectedUser = ref<User | null>(null);
+const searchValue = ref("");
 
 const formData = ref<RegisterData>({
-  username: '',
-  password: '',
-  phoneNumber: '',
-  role: '',
-  department: ''
-})
+  username: "",
+  password: "",
+  phoneNumber: "",
+  role: "",
+  department: "",
+});
 
-const newPassword = ref('')
-const confirmPassword = ref('')
-const changingPasswordFor = ref<number | null>(null)
+const newPassword = ref("");
+const confirmPassword = ref("");
+const changingPasswordFor = ref<number | null>(null);
 
 // Options
 const roleOptions = [
-  { label: 'Admin', value: 'Admin' },
-  { label: 'User', value: 'User' },
-]
+  { label: "Admin", value: "Admin" },
+  { label: "User", value: "User" },
+];
 
-const departmentOptions = [
-  { label: 'QC', value: 'QC' },
-  { label: 'KHO', value: 'KHO' },
-  { label: 'REPAIR', value: 'REPAIR' },
-  { label: 'ENGINEER', value: 'ENGINEER' },
-  { label: 'SẢN XUẤT CA A', value: 'SẢN XUẤT CA A' },
-  { label: 'SẢN XUẤT CA B', value: 'SẢN XUẤT CA B' }
-]
+const departmentOptions = computed(() => [
+  { label: t("userManagement.departments.qc"), value: "QC" },
+  { label: t("userManagement.departments.kho"), value: "KHO" },
+  { label: t("userManagement.departments.repair"), value: "REPAIR" },
+  { label: t("userManagement.departments.engineer"), value: "ENGINEER" },
+  { label: t("userManagement.departments.sanXuatA"), value: "SẢN XUẤT CA A" },
+  { label: t("userManagement.departments.sanXuatB"), value: "SẢN XUẤT CA B" },
+]);
+
+// Helper: value từ API → label đã dịch
+const getDepartmentLabel = (value: string): string => {
+  return departmentOptions.value.find(d => d.value === value)?.label ?? value
+}
 
 // ==================== COMPUTED ====================
 
 // Shared filtered users (for both desktop DataTable and mobile cards)
 const filteredUsers = computed(() => {
-  if (!searchValue.value) return userStore.users
-  const q = searchValue.value.toLowerCase()
-  return userStore.users.filter(u =>
-    u.username?.toLowerCase().includes(q) ||
-    u.phoneNumber?.toLowerCase().includes(q) ||
-    u.role?.toLowerCase().includes(q) ||
-    u.department?.toLowerCase().includes(q)
-  )
-})
+  if (!searchValue.value) return userStore.users;
+  const q = searchValue.value.toLowerCase();
+  return userStore.users.filter(
+    (u) =>
+      u.username?.toLowerCase().includes(q) ||
+      u.phoneNumber?.toLowerCase().includes(q) ||
+      u.role?.toLowerCase().includes(q) ||
+      u.department?.toLowerCase().includes(q),
+  );
+});
 
 // Mobile pagination
-const mobilePagination = usePagination(() => filteredUsers.value, isMobile.value ? 5 : 10)
+const mobilePagination = usePagination(
+  () => filteredUsers.value,
+  isMobile.value ? 5 : 10,
+);
 watch(isMobile, (mobile) => {
-  mobilePagination.setPageSize(mobile ? 5 : 10)
-})
-
+  mobilePagination.setPageSize(mobile ? 5 : 10);
+});
 
 // ==================== METHODS ====================
 
 const openAddDialog = () => {
-  isEditing.value = false
-  editingUserId.value = null
-  resetForm()
-  showDialog.value = true
-}
+  isEditing.value = false;
+  editingUserId.value = null;
+  resetForm();
+  showDialog.value = true;
+};
 
 const viewUser = (user: User) => {
-  selectedUser.value = user
-  showViewDialog.value = true
-}
+  selectedUser.value = user;
+  showViewDialog.value = true;
+};
 
 const editUser = (user: User) => {
-  isEditing.value = true
-  editingUserId.value = user.id
+  isEditing.value = true;
+  editingUserId.value = user.id;
   formData.value = {
     username: user.username,
-    password: '',
+    password: "",
     phoneNumber: user.phoneNumber,
     role: user.role,
-    department: user.department
-  }
-  showDialog.value = true
-}
+    department: user.department,
+  };
+  showDialog.value = true;
+};
 
 const editFromView = () => {
   if (selectedUser.value) {
-    showViewDialog.value = false
-    editUser(selectedUser.value)
+    showViewDialog.value = false;
+    editUser(selectedUser.value);
   }
-}
+};
 
 const saveUser = async () => {
-  if (!formData.value.username || !formData.value.phoneNumber || 
-      !formData.value.role || !formData.value.department) {
-    toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng điền đầy đủ thông tin', life: 3000 })
-    return
+  if (
+    !formData.value.username ||
+    !formData.value.phoneNumber ||
+    !formData.value.role ||
+    !formData.value.department
+  ) {
+    toast.add({
+      severity: "warn",
+      summary: t("userManagement.toast.warningTitle"),
+      detail: t("userManagement.toast.requiredFields"),
+      life: 3000,
+    });
+    return;
   }
 
   if (!isEditing.value && !formData.value.password) {
-    toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập mật khẩu', life: 3000 })
-    return
+    toast.add({
+      severity: "warn",
+      summary: t("userManagement.toast.warningTitle"),
+      detail: t("userManagement.toast.requiredPassword"),
+      life: 3000,
+    });
+    return;
   }
 
   try {
-    let result
+    let result;
     if (isEditing.value && editingUserId.value) {
       result = await userStore.updateUser(editingUserId.value, {
         phoneNumber: formData.value.phoneNumber,
         role: formData.value.role,
-        department: formData.value.department
-      })
+        department: formData.value.department,
+      });
     } else {
-      result = await userStore.addUser(formData.value)
+      result = await userStore.addUser(formData.value);
     }
-    if (result.success) closeDialog()
+    if (result.success) closeDialog();
   } catch (error) {
-    console.error('❌ Save user error:', error)
-    toast.add({ severity: 'error', summary: 'Lỗi', detail: 'Không thể lưu tài khoản', life: 3000 })
+    console.error("❌ Save user error:", error);
+    toast.add({
+      severity: "error",
+      summary: t("userManagement.toast.errorTitle"),
+      detail: t("userManagement.toast.saveError"),
+      life: 3000,
+    });
   }
-}
+};
 
 const confirmDelete = (user: User) => {
   confirm.require({
-    message: `Bạn có chắc chắn muốn xóa tài khoản "${user.username}"?`,
-    header: 'Xác nhận xóa',
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: 'Xóa',
-    rejectLabel: 'Hủy',
-    acceptClass: 'p-button-danger',
-    accept: async () => { await userStore.deleteUser(user.id) },
-    reject: () => { console.log('❌ Delete cancelled') }
-  })
-}
+    message: t("userManagement.confirmDelete.message", {
+      username: user.username,
+    }),
+    header: t("userManagement.confirmDelete.header"),
+    icon: "pi pi-exclamation-triangle",
+    acceptLabel: t("userManagement.confirmDelete.accept"),
+    rejectLabel: t("userManagement.confirmDelete.reject"),
+    acceptClass: "p-button-danger",
+    accept: async () => {
+      await userStore.deleteUser(user.id);
+    },
+    reject: () => {
+      console.log("❌ Delete cancelled");
+    },
+  });
+};
 
 const openChangePasswordDialog = (user: User) => {
-  changingPasswordFor.value = user.id
-  selectedUser.value = user
-  newPassword.value = ''
-  confirmPassword.value = ''
-  showPasswordDialog.value = true
-}
+  changingPasswordFor.value = user.id;
+  selectedUser.value = user;
+  newPassword.value = "";
+  confirmPassword.value = "";
+  showPasswordDialog.value = true;
+};
 
 const savePassword = async () => {
   if (!newPassword.value || !confirmPassword.value) {
-    toast.add({ severity: 'warn', summary: 'Cảnh báo', detail: 'Vui lòng nhập đầy đủ thông tin', life: 3000 })
-    return
+    toast.add({
+      severity: "warn",
+      summary: t("userManagement.toast.warningTitle"),
+      detail: t("userManagement.toast.requiredPasswordFields"),
+      life: 3000,
+    });
+    return;
   }
   if (newPassword.value !== confirmPassword.value) {
-    toast.add({ severity: 'error', summary: 'Lỗi', detail: 'Mật khẩu không khớp', life: 3000 })
-    return
+    toast.add({
+      severity: "error",
+      summary: t("userManagement.toast.errorTitle"),
+      detail: t("userManagement.toast.passwordMismatch"),
+      life: 3000,
+    });
+    return;
   }
   if (changingPasswordFor.value) {
-    const result = await userStore.changePassword(changingPasswordFor.value, newPassword.value)
-    if (result.success) closePasswordDialog()
+    const result = await userStore.changePassword(
+      changingPasswordFor.value,
+      newPassword.value,
+    );
+    if (result.success) closePasswordDialog();
   }
-}
+};
 
 const closeDialog = () => {
-  showDialog.value = false
-  resetForm()
-}
+  showDialog.value = false;
+  resetForm();
+};
 
 const closePasswordDialog = () => {
-  showPasswordDialog.value = false
-  newPassword.value = ''
-  confirmPassword.value = ''
-  changingPasswordFor.value = null
-}
+  showPasswordDialog.value = false;
+  newPassword.value = "";
+  confirmPassword.value = "";
+  changingPasswordFor.value = null;
+};
 
 const resetForm = () => {
-  formData.value = { username: '', password: '', phoneNumber: '', role: '', department: '' }
-  editingUserId.value = null
-}
+  formData.value = {
+    username: "",
+    password: "",
+    phoneNumber: "",
+    role: "",
+    department: "",
+  };
+  editingUserId.value = null;
+};
 
 const getRoleSeverity = (role: string): string => {
-  const severityMap: Record<string, string> = { 'Admin': 'danger', 'User': 'success' }
-  return severityMap[role] || 'info'
-}
+  const severityMap: Record<string, string> = {
+    Admin: "danger",
+    User: "success",
+  };
+  return severityMap[role] || "info";
+};
 
 const formatDate = (dateString: string): string => {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('vi-VN', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit'
-  })
-}
+  const date = new Date(dateString);
+  return date.toLocaleDateString("vi-VN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 </script>
-
 <style scoped>
 .user-management {
   animation: fadeIn 0.3s ease-in;
@@ -825,12 +986,12 @@ const formatDate = (dateString: string): string => {
   border-radius: 12px;
   padding: 1rem;
   background: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   transition: box-shadow 0.2s;
 }
 
 .mobile-user-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .mobile-card-top {
@@ -993,7 +1154,7 @@ const formatDate = (dateString: string): string => {
   font-size: 1rem;
 }
 
- .mobile-card-actions {
+.mobile-card-actions {
   display: flex;
   gap: 0.5rem;
   padding-top: 0.75rem;
@@ -1010,22 +1171,52 @@ const formatDate = (dateString: string): string => {
   border: 1px solid transparent;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.12s;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    color 0.18s,
+    transform 0.12s;
   background: transparent;
 }
-.action-btn:active { transform: scale(0.93); }
+.action-btn:active {
+  transform: scale(0.93);
+}
 
-.btn-view   { color: #64748b; }
-.btn-view:hover   { background: #f1f5f9; border-color: #cbd5e1; color: #334155; }
+.btn-view {
+  color: #64748b;
+}
+.btn-view:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #334155;
+}
 
-.btn-edit   { color: #2563eb; }
-.btn-edit:hover   { background: #eff6ff; border-color: #93c5fd; color: #1d4ed8; }
+.btn-edit {
+  color: #2563eb;
+}
+.btn-edit:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
 
-.btn-key    { color: #d97706; }
-.btn-key:hover    { background: #fffbeb; border-color: #fcd34d; color: #b45309; }
+.btn-key {
+  color: #d97706;
+}
+.btn-key:hover {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #b45309;
+}
 
-.btn-delete { color: #ef4444; }
-.btn-delete:hover { background: #fef2f2; border-color: #fca5a5; color: #dc2626; }
+.btn-delete {
+  color: #ef4444;
+}
+.btn-delete:hover {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
 
 /* ========== PRIMEVUE OVERRIDES ========== */
 :deep(.p-password) {
@@ -1064,8 +1255,14 @@ const formatDate = (dateString: string): string => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .mb-3 {

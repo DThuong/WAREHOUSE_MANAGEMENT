@@ -43,7 +43,7 @@
               Dongyang
             </h2>
             <p style="font-size: 0.75rem; color: var(--gray-500)">
-              Quản lý kho
+              {{ t("mainLayout.sidebar.subtitle") }}
             </p>
           </div>
         </router-link>
@@ -61,7 +61,7 @@
                 padding-left: 1rem;
               "
             >
-              Main
+              {{ t("mainLayout.sidebar.sectionMain") }}
             </p>
             <router-link
               v-for="link in mainLinks"
@@ -88,12 +88,12 @@
                 padding-left: 1rem;
               "
             >
-              Tài khoản
+              {{ t("mainLayout.sidebar.sectionAccount") }}
             </p>
             <template v-if="userStore.isAuthenticated">
               <a href="/signin" class="nav-link" @click.prevent="handleLogout">
                 <i class="pi pi-sign-out"></i>
-                <span>Đăng xuất</span>
+                <span>{{ t("mainLayout.sidebar.logout") }}</span>
               </a>
             </template>
             <template v-else>
@@ -167,22 +167,27 @@
               v-if="notificationStore.unreadCount > 0"
               style="
                 position: absolute;
-                top: 1px;
-                right: 5px;
+                top: -1px;
+                right: 0px;
                 background: #ef4444;
                 color: white;
                 border-radius: 50%;
-                width: 18px;
-                height: 18px;
+                min-width: 18px;
+                padding: 4px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 11px;
+                font-size: 10px;
                 font-weight: 600;
                 border: 2px solid white;
+                line-height: 1;
               "
             >
-              {{ notificationStore.unreadCount }}
+              {{
+                notificationStore.unreadCount > 99
+                  ? "99+"
+                  : notificationStore.unreadCount
+              }}
             </span>
           </div>
 
@@ -261,12 +266,12 @@
         "
       >
         <h3 style="font-weight: 600; margin: 0; font-size: 1.125rem">
-          Thông báo
+          {{ t("mainLayout.notifications.title") }}
         </h3>
         <div style="display: flex; align-items: center; gap: 0.5rem">
           <Button
             v-if="notificationStore.unreadCount > 0"
-            label="Đánh dấu đã đọc"
+            :label="t('mainLayout.notifications.markAllRead')"
             text
             size="small"
             @click="markAllAsRead"
@@ -276,7 +281,7 @@
             v-if="
               allNotificationsRead && notificationStore.notifications.length > 0
             "
-            label="Xóa tất cả"
+            :label="t('mainLayout.notifications.deleteAll')"
             text
             size="small"
             icon="pi pi-trash"
@@ -308,11 +313,14 @@
             margin-bottom: 1rem;
           "
         ></i>
-        <p style="margin: 0">Không có thông báo mới</p>
+        <p style="margin: 0">{{ t("mainLayout.notifications.empty") }}</p>
       </div>
 
       <!-- List -->
-      <div v-else style="max-height: 400px; overflow-y: auto; margin: 0 -0.75rem">
+      <div
+        v-else
+        style="max-height: 400px; overflow-y: auto; margin: 0 -0.75rem"
+      >
         <div
           v-for="notification in notificationStore.recentNotifications"
           :key="notification.id"
@@ -441,12 +449,12 @@
             "
           >
             <h3 style="font-weight: 600; margin: 0; font-size: 1.125rem">
-              Thông báo
+              {{ t("mainLayout.notifications.title") }}
             </h3>
             <div style="display: flex; align-items: center; gap: 0.5rem">
               <Button
                 v-if="notificationStore.unreadCount > 0"
-                label="Đánh dấu đã đọc"
+                :label="t('mainLayout.notifications.markAllRead')"
                 text
                 size="small"
                 @click="markAllAsRead"
@@ -457,7 +465,7 @@
                   allNotificationsRead &&
                   notificationStore.notifications.length > 0
                 "
-                label="Xóa tất cả"
+                :label="t('mainLayout.notifications.deleteAll')"
                 text
                 size="small"
                 icon="pi pi-trash"
@@ -500,11 +508,11 @@
                 margin-bottom: 1rem;
               "
             ></i>
-            <p style="margin: 0">Không có thông báo mới</p>
+            <p style="margin: 0">{{ t("mainLayout.notifications.empty") }}</p>
           </div>
 
           <!-- List -->
-          <div v-else style="max-height: calc(100vh - 200px); overflow-y: auto;">
+          <div v-else style="max-height: calc(100vh - 200px); overflow-y: auto">
             <div
               v-for="notification in notificationStore.recentNotifications"
               :key="notification.id"
@@ -620,11 +628,13 @@ import { useToast } from "primevue/usetoast";
 import logoImg from "../assets/images/newLogo.jpg";
 import type { Notification } from "@/types/notification.types";
 import notificationSound from "@/assets/notiSound/notification-sound.mp3";
+import { useI18n } from "vue-i18n";
 
 const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
+const { t } = useI18n();
 const toast = useToast();
 
 const sidebarOpen = ref(true);
@@ -665,15 +675,15 @@ const connectionStatusText = computed(() => {
   const state = signalRService.getConnectionState();
   switch (state) {
     case 0:
-      return "Đã kết nối";
+      return t("mainLayout.connection.connected");
     case 1:
-      return "Đang kết nối...";
+      return t("mainLayout.connection.connecting");
     case 2:
-      return "Đang kết nối lại...";
+      return t("mainLayout.connection.reconnecting");
     case 4:
-      return "Mất kết nối";
+      return t("mainLayout.connection.disconnected");
     default:
-      return "Không xác định";
+      return t("mainLayout.connection.unknown");
   }
 });
 
@@ -769,19 +779,19 @@ const getNotificationTitle = (type: string): string => {
   switch (type?.toLowerCase()) {
     case "order":
     case "neworder":
-      return "Đơn hàng mới";
+      return t("mainLayout.notifications.types.newOrder");
     case "orderapproved":
-      return "Đơn hàng đã duyệt";
+      return t("mainLayout.notifications.types.orderApproved");
     case "orderrejected":
-      return "Đơn hàng bị từ chối";
+      return t("mainLayout.notifications.types.orderRejected");
     case "orderstatus":
-      return "Cập nhật đơn hàng";
+      return t("mainLayout.notifications.types.orderStatus");
     case "stockin":
-      return "Nhập kho";
+      return t("mainLayout.notifications.types.stockin");
     case "user":
-      return "Người dùng";
+      return t("mainLayout.notifications.types.user");
     default:
-      return "Thông báo";
+      return t("mainLayout.notifications.types.default");
   }
 };
 
@@ -808,10 +818,12 @@ const formatTime = (dateString: string): string => {
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
 
-  if (minutes < 1) return "Vừa xong";
-  if (minutes < 60) return `${minutes} phút trước`;
-  if (hours < 24) return `${hours} giờ trước`;
-  if (days < 7) return `${days} ngày trước`;
+  if (minutes < 1) return t("mainLayout.notifications.time.justNow");
+  if (minutes < 60)
+    return t("mainLayout.notifications.time.minutesAgo", { n: minutes });
+  if (hours < 24)
+    return t("mainLayout.notifications.time.hoursAgo", { n: hours });
+  if (days < 7) return t("mainLayout.notifications.time.daysAgo", { n: days });
   return date.toLocaleDateString("vi-VN");
 };
 
@@ -852,42 +864,73 @@ const handleLogout = async () => {
     console.error("Logout error:", error);
     toast.add({
       severity: "error",
-      summary: "Lỗi",
-      detail: "Không thể đăng xuất",
+      summary: t("mainLayout.error.error"),
+      detail: t("mainLayout.error.logoutFail"),
       life: 3000,
     });
   }
 };
 
-const menuItems = [
-  { label: "Trang chủ", icon: "pi pi-home", command: () => router.push("/") },
+// menuItems → computed
+const menuItems = computed(() => [
+  {
+    label: t("mainLayout.menu.home"),
+    icon: "pi pi-home",
+    command: () => router.push("/"),
+  },
   { separator: true },
-  { label: "Đăng xuất", icon: "pi pi-sign-out", command: handleLogout },
-];
-
-const mainLinks = [
-  { path: "/", label: "Bảng điều khiển", icon: "pi pi-home" },
-  { path: "/orders", label: "Quản lý đơn hàng", icon: "pi pi-flag" },
-  { path: "/inventory", label: "Quản lý tồn kho", icon: "pi pi-box" },
+  {
+    label: t("mainLayout.menu.logout"),
+    icon: "pi pi-sign-out",
+    command: handleLogout,
+  },
+]);
+const mainLinks = computed(() => [
+  { path: "/", label: t("mainLayout.nav.dashboard"), icon: "pi pi-home" },
+  { path: "/orders", label: t("mainLayout.nav.orders"), icon: "pi pi-flag" },
+  {
+    path: "/inventory",
+    label: t("mainLayout.nav.inventory"),
+    icon: "pi pi-box",
+  },
   {
     path: "/stockin",
-    label: "Quản lý nhập kho",
+    label: t("mainLayout.nav.stockin"),
     icon: "pi pi-cart-arrow-down",
   },
-  { path: "/add-product", label: "Thêm tồn kho", icon: "pi pi-plus-circle" },
-  { path: "/users", label: "Người dùng", icon: "pi pi-user" },
-  { path: "/reports", label: "Báo cáo", icon: "pi pi-chart-bar" },
-  { path: "/settings", label: "Cấu hình", icon: "pi pi-cog" },
-];
+  {
+    path: "/add-product",
+    label: t("mainLayout.nav.addProduct"),
+    icon: "pi pi-plus-circle",
+  },
+  { path: "/users", label: t("mainLayout.nav.users"), icon: "pi pi-user" },
+  {
+    path: "/reports",
+    label: t("mainLayout.nav.reports"),
+    icon: "pi pi-chart-bar",
+  },
+  { path: "/settings", label: t("mainLayout.nav.settings"), icon: "pi pi-cog" },
+]);
 
-const accountLinks = [
-  { path: "/signin", label: "Đăng nhập", icon: "pi pi-sign-in" },
-];
+const allRouteLabels = computed(() => [
+  ...mainLinks.value,
+  { path: '/reports/stockin', label: t('reports.importReport.title') },
+  { path: '/reports/orders', label: t('reports.orderReport.title') },
+  { path: '/reports/inventory', label: t('reports.inventoryReport.title') },
+])
+
+const accountLinks = computed(() => [
+  {
+    path: "/signin",
+    label: t("mainLayout.sidebar.login"),
+    icon: "pi pi-sign-in",
+  },
+]);
 
 const pageTitle = computed(() => {
-  const currentRoute = mainLinks.find((link) => link.path === route.path);
-  return currentRoute ? currentRoute.label : "Dashboard";
-});
+  const currentRoute = allRouteLabels.value.find((link) => link.path === route.path)
+  return currentRoute ? currentRoute.label : 'Dashboard'
+})
 
 const toggleSidebar = () => {
   if (window.innerWidth < 768) {

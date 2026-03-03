@@ -150,11 +150,11 @@
         <div class="chart-legend">
           <div class="legend-item">
             <span class="legend-color" style="background: #BDB2FF;"></span>
-            <span>{{ t('inventoryManagement.technical') }}</span>
+            <span>{{ t('inventoryManagement.category.engineering') }}</span>
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #FFC6FF;"></span>
-            <span>{{ t('inventoryManagement.consumer') }}</span>
+            <span>{{ t('inventoryManagement.category.consumer') }}</span>
           </div>
         </div>
       </div>
@@ -799,7 +799,7 @@ onUnmounted(() => {
 .list-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #4A4A4A;
+  color: #000;
   margin: 0;
   display: flex;
   align-items: center;
@@ -808,7 +808,7 @@ onUnmounted(() => {
 
 .chart-title i,
 .list-title i {
-  color: var(--pastel-purple);
+  color: #000;
 }
 
 .chart-wrapper {
@@ -991,13 +991,13 @@ onUnmounted(() => {
 }
 
 .list-title {
-  color: #0c1ba3 !important;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  color: #000 !important;
+  /* text-shadow: 0 1px 2px rgba(0,0,0,0.1); */
   font-weight: 700;
 }
 
 .list-title i {
-  color: #1e29ca !important;
+  color: #000 !important;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
   font-size: 1.3rem;
 }
