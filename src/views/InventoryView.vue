@@ -74,7 +74,7 @@
             
             <!-- Summary & Actions Row -->
             <div class="flex md:flex-row lg:flex-row flex-col justify-between md:items-center lg:items-center items-start gap-4">
-              <div class="flex md:flex-row lg:flex-row flex-col md:items-center lg:items-center gap-4 w-full! text-sm!">
+              <div class="flex md:flex-row lg:flex-row flex-col md:items-center lg:items-center gap-4 text-sm!">
                 <span class="text-lg font-semibold text-gray-900">
                   {{ t("inventoryManagement.summary.total", { count: totalFilteredItems }) }}
                 </span>
@@ -136,7 +136,7 @@
               </div>
               
               <Button 
-                label="Reset" 
+                :label="t('common.filter.reset')"
                 icon="pi pi-refresh"
                 severity="secondary"
                 @click="resetFilter"

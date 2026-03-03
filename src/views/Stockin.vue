@@ -85,7 +85,7 @@
                   />
                 </span>
                 <Button
-                  :label="t('importManagement.filters.reset')"
+                  :label="t('common.filter.reset')"
                   icon="pi pi-refresh"
                   severity="secondary"
                   class="w-full md:w-auto"
