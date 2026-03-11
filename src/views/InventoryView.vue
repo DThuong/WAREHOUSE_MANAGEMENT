@@ -387,7 +387,7 @@
           </div>
           <div>
             <label class="block mb-2 font-semibold">{{ t('inventoryManagement.editDialog.stockQty') }} <span class="text-red-500">*</span></label>
-            <InputText v-model.number="editForm.stockQty" type="number" class="w-full" placeholder="0" />
+            <InputText v-model.number="editForm.stockQty" type="number" class="w-full opacity-60 cursor-not-allowed" placeholder="0" disabled />
           </div>
         </div>
       </div>
