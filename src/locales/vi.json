@@ -231,7 +231,8 @@
     "units": {
       "cai": "cái",
       "hop": "hộp",
-      "bich": "bịch"
+      "bich": "bịch",
+      "kg": "kg"
     },
     "title": "Kho hàng",
     "subtitle": "Quản lý tồn kho sản phẩm",
@@ -291,6 +292,7 @@
     },
     "editDialog": {
       "header": "Chỉnh sửa sản phẩm",
+      "specification": "Thông số sản phẩm",
       "type": "Loại",
       "typePlaceholder": "Nhập loại sản phẩm",
       "unit": "Đơn vị",

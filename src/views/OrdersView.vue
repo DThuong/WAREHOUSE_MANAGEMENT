@@ -1127,7 +1127,8 @@
                               slotProps.value,
                             ).toLocaleString("vi-VN")
                           }}
-                          VND/{{ getSelectedItemUnit(slotProps.value) }}
+                          VND/{{ getSelectedItemUnit(slotProps.value) }} -
+                          {{ getSelectedItemSpecs(slotProps.value) }}
                         </div>
                       </div>
                     </div>
@@ -1157,7 +1158,7 @@
                               "vi-VN",
                             )
                           }}
-                          VND
+                          VND - {{ slotProps.option.specifications }}
                         </div>
                       </div>
                     </div>
@@ -1419,6 +1420,57 @@ const getDepartmentLabel = (value: string): string => {
   return departmentOptions.value.find(d => d.value === value)?.label ?? value
 }
 
+// paste hình ảnh từ window shift S
+const handleGlobalPaste = async (event: ClipboardEvent) => {
+  if (!showImageDialog.value) return;
+  if (orderStore.uploadingImages) return;
+
+  const target = event.target as HTMLElement;
+  if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+
+  const items = event.clipboardData?.items;
+  if (!items) return;
+
+  const hasImage = Array.from(items).some((i) => i.type.startsWith("image/"));
+  if (!hasImage) return;
+
+  event.preventDefault();
+
+  const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+  const maxSize = 5 * 1024 * 1024;
+
+  for (const item of Array.from(items)) {
+    if (!allowedTypes.includes(item.type)) continue;
+    const file = item.getAsFile();
+    if (!file) continue;
+    if (file.size > maxSize) {
+      toast.add({ severity: "warn", summary: t("orderManagement.common.warning"), detail: t("orderManagement.common.toast.fileTooLarge"), life: 3000 });
+      continue;
+    }
+
+    const now = new Date();
+    const timestamp = now.toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    const ext = item.type === "image/jpeg" ? "jpg" : item.type.split("/")[1] || "png";
+    const newName = `paste_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}_${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}${String(now.getSeconds()).padStart(2,"0")}.${ext}`;
+
+    const watermarked = await addTimestampToImage(new File([file], newName, { type: item.type }), timestamp);
+    pendingImages.value.push(watermarked);
+    pendingImageTimestamps.value.push(timestamp);
+
+    await new Promise<void>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) pendingImagePreviews.value.push(e.target.result as string);
+        resolve();
+      };
+      reader.onerror = () => resolve();
+      reader.readAsDataURL(watermarked);
+    });
+
+    toast.add({ severity: "success", summary: t("orderManagement.common.success"), detail: "Đã dán ảnh từ clipboard", life: 2000 });
+  }
+};
+
 // Helper để get status label
 const getStatusLabel = (status: string): string => {
   const labels: Record<string, string> = {
@@ -1609,6 +1661,7 @@ const availableItems = computed(() => {
     price: item.price || 0,
     itemIndentifyId: item.itemIndentifyId,
     image: item.picture?.length ? getItemImageUrl(item.picture[0]) : null,
+    specifications: item.eng?.description || item.com?.specifications || null, 
   }));
 });
 
@@ -1776,6 +1829,11 @@ const getItemImageUrl = (filename: string) => {
 
 const getItemName = (item: any) =>
   item.eng?.partname || item.com?.name || "Unknown";
+
+const getSelectedItemSpecs = (itemId: number) => {
+  const item = availableItems.value.find((i) => i.value === itemId);
+  return item?.specifications || null;
+};
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleString("vi-VN", {
@@ -2444,6 +2502,7 @@ const handleNewOrderCreated = async (orderData: OrderPendingRealtime) => {
 
 onMounted(async () => {
   window.addEventListener("resize", handleTableResize);
+  window.addEventListener("paste", handleGlobalPaste);
   if (!signalRService.isConnected()) {
     await signalRService.start();
   }
@@ -2491,6 +2550,7 @@ watch(isTableMobile, (mobile) => {
 
 onUnmounted(() => {
   window.removeEventListener("resize", handleTableResize);
+  window.removeEventListener("paste", handleGlobalPaste);
   signalRService.off("NewOrderCreated");
 });
 </script>

@@ -190,6 +190,7 @@
                     text
                     size="small"
                     severity="danger"
+                    disabled="true"
                     @click="confirmDelete(stockin)"
                   />
                 </div>
@@ -334,7 +335,8 @@
                           {{ getSelectedItemType(slotProps.value) }} -
                           {{ t("importManagement.createDialog.stockLabel") }}:
                           {{ getSelectedItemStock(slotProps.value) }}
-                          {{ getSelectedItemUnit(slotProps.value) }}
+                          {{ getSelectedItemUnit(slotProps.value) }} -
+                          {{ getSelectedItemSpecs(slotProps.value) }}
                         </div>
                       </div>
                     </div>
@@ -361,10 +363,11 @@
                           {{ slotProps.option.label }}
                         </div>
                         <div class="text-xs text-gray-500">
-                          {{ slotProps.option.type }} ·
+                          {{ slotProps.option.type }} -
                           {{ t("importManagement.createDialog.stockLabel") }}:
                           {{ slotProps.option.stock }}
-                          {{ slotProps.option.unit }}
+                          {{ slotProps.option.unit }} -
+                          {{ slotProps.option.specifications }}
                         </div>
                       </div>
                     </div>
@@ -728,7 +731,7 @@
       :modal="true"
       :dismissableMask="true"
     >
-      <div class="mt-4">
+      <div class="mt-4" @click="pasteInput?.focus()">
         <!-- Upload Area -->
         <div class="mb-6">
           <label class="block mb-2 font-semibold">
@@ -777,7 +780,7 @@
           >
             <div
               v-if="pendingImages.length > 0"
-              class="grid grid-cols-5 gap-3 mb-4"
+              class="grid grid-cols-5 gap-3 mb-4 p-4!"
             >
               <div
                 v-for="(preview, index) in pendingImagePreviews"
@@ -943,6 +946,12 @@
           </div>
         </div>
       </div>
+      <input
+        ref="pasteInput"
+        type="text"
+        class="opacity-0 absolute w-0 h-0 pointer-events-none"
+        @paste="handleDialogPaste"
+      />
 
       <template #footer>
         <Button
@@ -959,7 +968,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from "vue";
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from "vue";
 import { useStockinStore } from "@/stores/stockinStore";
 import { useItemStore } from "@/stores/itemStore";
 import { stockinAPI } from "@/services/stockinAPI";
@@ -990,6 +999,7 @@ const stockinStore = useStockinStore();
 const itemStore = useItemStore();
 const imagePreview = useImagePreview();
 const { t } = useI18n();
+const pasteInput = ref<HTMLInputElement | null>(null);
 
 // ── Resize ────────────────────────────────────────────────
 const isTableMobile = ref(window.innerWidth < 768);
@@ -1079,6 +1089,73 @@ const handleCreateImageUpload = async (event: Event) => {
   }
 
   if (createImageFileInput.value) createImageFileInput.value.value = "";
+};
+
+const handleDialogPaste = async (event: ClipboardEvent) => {
+  if (stockinStore.uploadingImages) return;
+  console.log("=== PASTE FIRED ===");
+  console.log("items:", event.clipboardData?.items);
+  console.log(
+    "types:",
+    Array.from(event.clipboardData?.items || []).map((i) => i.type),
+  );
+
+  const items = event.clipboardData?.items;
+  if (!items) return;
+
+  const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+  const maxSize = 5 * 1024 * 1024;
+
+  for (const item of Array.from(items)) {
+    if (!allowedTypes.includes(item.type)) continue;
+
+    const file = item.getAsFile();
+    if (!file) continue;
+
+    if (file.size > maxSize) {
+      toast.add({
+        severity: "warn",
+        summary: t("importManagement.toast.warningTitle"),
+        detail: t("importManagement.toast.fileTooLargeSimple"),
+        life: 3000,
+      });
+      continue;
+    }
+
+    const now = new Date();
+    const timestamp = now.toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    const ext =
+      item.type === "image/jpeg" ? "jpg" : item.type.split("/")[1] || "png";
+    const newName = `paste_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}.${ext}`;
+
+    const watermarked = await addTimestampToImage(
+      new File([file], newName, { type: item.type }),
+      timestamp,
+    );
+    pendingImages.value.push(watermarked);
+    pendingImageTimestamps.value.push(timestamp);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result)
+        pendingImagePreviews.value.push(e.target.result as string);
+    };
+    reader.readAsDataURL(watermarked);
+
+    toast.add({
+      severity: "success",
+      summary: t("importManagement.toast.successTitle"),
+      detail: "Đã dán ảnh từ clipboard",
+      life: 2000,
+    });
+  }
 };
 
 // handleCreateDrop — kéo thả ảnh vào dialog tạo phiếu, cũng đè timestamp
@@ -1264,6 +1341,7 @@ const availableItems = computed(() => {
     stock: item.stockQty,
     unit: item.unit,
     image: item.picture?.length ? getItemImageUrl(item.picture[0]) : null,
+    specifications: item.eng?.description || item.com?.specifications || null,
   }));
 });
 
@@ -1290,26 +1368,144 @@ const pendingImageTimestamps = ref<string[]>([]);
 const imageFileInput = ref<HTMLInputElement | null>(null);
 const cameraFileInput = ref<HTMLInputElement | null>(null);
 
+const handleGlobalPaste = async (event: ClipboardEvent) => {
+  console.log(
+    "=== GLOBAL PASTE ===",
+    "imageDialog:",
+    showImageDialog.value,
+    "createImageDialog:",
+    showCreateImageDialog.value,
+  );
+
+  // Check cả 2 dialog
+  const isImageDialogOpen =
+    showImageDialog.value || showCreateImageDialog.value;
+  if (!isImageDialogOpen) return;
+  if (stockinStore.uploadingImages) return;
+
+  const target = event.target as HTMLElement;
+  const isInputFocused =
+    target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+  if (isInputFocused) return;
+
+  const items = event.clipboardData?.items;
+  if (!items) return;
+
+  const hasImage = Array.from(items).some((i) => i.type.startsWith("image/"));
+  if (!hasImage) return;
+
+  event.preventDefault();
+
+  const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+  const maxSize = 5 * 1024 * 1024;
+
+  for (const item of Array.from(items)) {
+    if (!allowedTypes.includes(item.type)) continue;
+    const file = item.getAsFile();
+    if (!file) continue;
+    if (file.size > maxSize) {
+      toast.add({
+        severity: "warn",
+        summary: t("importManagement.toast.warningTitle"),
+        detail: t("importManagement.toast.fileTooLargeSimple"),
+        life: 3000,
+      });
+      continue;
+    }
+
+    const now = new Date();
+    const timestamp = now.toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    const ext =
+      item.type === "image/jpeg" ? "jpg" : item.type.split("/")[1] || "png";
+    const newName = `paste_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}.${ext}`;
+    const watermarked = await addTimestampToImage(
+      new File([file], newName, { type: item.type }),
+      timestamp,
+    );
+
+    // Push vào đúng array tương ứng với dialog đang mở
+    if (showCreateImageDialog.value) {
+      console.log(
+        "watermarked file:",
+        watermarked,
+        "size:",
+        watermarked.size,
+        "type:",
+        watermarked.type,
+      );
+
+      createPendingImages.value.push(watermarked);
+      createPendingTimestamps.value.push(timestamp);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        console.log(
+          "FileReader onload fired, result length:",
+          (e.target?.result as string)?.length,
+        );
+        if (e.target?.result)
+          createPendingPreviews.value.push(e.target.result as string);
+        console.log(
+          "preview pushed, total:",
+          createPendingPreviews.value.length,
+        );
+      };
+      reader.onerror = (e) => {
+        console.error("FileReader error:", e);
+      };
+      reader.onloadstart = () => console.log("FileReader loadstart");
+      reader.readAsDataURL(watermarked);
+
+      console.log(
+        "after readAsDataURL, createPendingImages length:",
+        createPendingImages.value.length,
+      );
+    } else {
+      pendingImages.value.push(watermarked);
+      pendingImageTimestamps.value.push(timestamp);
+
+      await new Promise<void>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target?.result)
+            pendingImagePreviews.value.push(e.target.result as string);
+          resolve();
+        };
+        reader.onerror = () => resolve();
+        reader.readAsDataURL(watermarked);
+      });
+    }
+
+    toast.add({
+      severity: "success",
+      summary: t("importManagement.toast.successTitle"),
+      detail: "Đã dán ảnh từ clipboard",
+      life: 2000,
+    });
+  }
+};
+
 // ── Lifecycle ─────────────────────────────────────────────
 onMounted(async () => {
   window.addEventListener("resize", handleTableResize);
+  window.addEventListener("paste", handleGlobalPaste);
   await Promise.all([fetchAllStockins(), fetchAllItems()]);
 });
 
 onUnmounted(() => {
   window.removeEventListener("resize", handleTableResize);
+  window.removeEventListener("paste", handleGlobalPaste);
   stockinStore.setCurrentStockin(null);
 });
 
 // ── API calls ─────────────────────────────────────────────
-const formatDateTimeForAPI = (date: Date): string => {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  const h = String(date.getHours()).padStart(2, "0");
-  const min = String(date.getMinutes()).padStart(2, "0");
-  return `${y}-${m}-${d} ${h}:${min}`;
-};
 
 const fetchAllStockins = async () => {
   stockinStore.setLoading(true);
@@ -1401,6 +1597,8 @@ const getSelectedItemUnit = (id: number) =>
   availableItems.value.find((i) => i.value === id)?.unit || "";
 const getSelectedItemStock = (id: number) =>
   availableItems.value.find((i) => i.value === id)?.stock || 0;
+const getSelectedItemSpecs = (id: number) =>
+  availableItems.value.find((i) => i.value === id)?.specifications || null;
 
 // ── Timestamp watermark ───────────────────────────────────
 const addTimestampToImage = (file: File, timestamp: string): Promise<File> =>
@@ -1738,6 +1936,15 @@ const viewImageFullscreen = (imageUrl: string) => {
   imagePreview.open(getImageUrl(imageUrl), fullUrls);
 };
 
+watch(showImageDialog, (val) => {
+  if (val) {
+    nextTick(() => {
+      console.log("pasteInput ref:", pasteInput.value); // null hay có element?
+      pasteInput.value?.focus();
+      console.log("focused element:", document.activeElement); // có phải pasteInput không?
+    });
+  }
+});
 watch(isTableMobile, (mobile) => {
   pageSize.value = mobile ? 5 : 10;
 });

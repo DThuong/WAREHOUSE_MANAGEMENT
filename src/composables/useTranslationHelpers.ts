@@ -20,6 +20,7 @@ export function useTranslationHelpers() {
     { label: t('inventoryManagement.units.cai'), value: 'cái' },
     { label: t('inventoryManagement.units.hop'), value: 'hộp' },
     { label: t('inventoryManagement.units.bich'), value: 'bịch' },
+    { label: t('inventoryManagement.units.kg'), value: 'kg' },
   ])
 
   const typeOptions = computed(() => [
@@ -59,5 +60,5 @@ export function useTranslationHelpers() {
     return t(key, t('reports.inventoryReport.stockStatus.unknown'))
     }
 
-  return { getDepartmentLabel, getUnitLabel, typeOptions, stockStatusOptions, getStockStatusLabel, statusOptions }
+  return { getDepartmentLabel, getUnitLabel, typeOptions, stockStatusOptions, getStockStatusLabel, statusOptions, unitOptions }
 }

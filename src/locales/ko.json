@@ -231,7 +231,8 @@
     "units": {
       "cai": "개",
       "hop": "박스",
-      "bich": "봉지"
+      "bich": "봉지",
+      "kg": "Kilogram"
     },
     "title": "창고",
     "subtitle": "제품 재고 관리",
@@ -291,6 +292,7 @@
     },
     "editDialog": {
       "header": "제품 수정",
+      "specification": "제품 정보",
       "type": "유형",
       "typePlaceholder": "제품 유형 입력",
       "unit": "단위",

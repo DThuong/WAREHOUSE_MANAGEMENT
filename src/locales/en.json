@@ -229,7 +229,8 @@
     "units": {
       "cai": "Piece",
       "hop": "Box",
-      "bich": "Bag"
+      "bich": "Bag",
+      "kg": "Kilogram"
     },
     "title": "Warehouse",
     "subtitle": "Manage product inventory",
@@ -289,6 +290,7 @@
     },
     "editDialog": {
       "header": "Edit product",
+      "specification": "Product specification",
       "type": "Type",
       "typePlaceholder": "Enter product type",
       "unit": "Unit",

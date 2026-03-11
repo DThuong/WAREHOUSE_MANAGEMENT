@@ -380,6 +380,18 @@
           <InputText v-model="editForm.price" class="w-full" placeholder="0.00" />
         </div>
 
+        <div>
+          <label class="block mb-2 font-semibold">
+            {{ t('inventoryManagement.editDialog.specification') }}
+            <span class="text-xs text-gray-400 ml-1">
+              ({{ editingItem?.eng ? 'Description' : 'Specifications' }})
+            </span>
+          </label>
+          <InputText v-model="editForm.specification" class="w-full" 
+            :placeholder="editingItem?.eng ? 'Description' : 'Specifications'" 
+          />
+        </div>
+
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block mb-2 font-semibold">{{ t('inventoryManagement.editDialog.safeQty') }} <span class="text-red-500">*</span></label>
@@ -446,7 +458,7 @@
           ? 'opacity-50 cursor-not-allowed border-gray-300'
           : 'border-gray-400 hover:bg-gray-50 cursor-pointer'"
       >
-        <div v-if="pendingImages.length > 0" class="grid grid-cols-5 gap-3 mb-4">
+        <div v-if="pendingImages.length > 0" class="grid grid-cols-5 gap-3 mb-4 p-4!">
           <div
             v-for="(preview, index) in pendingImagePreviews"
             :key="`pending-${index}`"
@@ -609,6 +621,7 @@ import {useImagePreview} from '@/composables/useImagePreview'
 import { usePagination } from '@/composables/usePagination'
 import AppPagination from '@/components/AppPagination.vue'
 import { useI18n } from 'vue-i18n'
+import {useTranslationHelpers} from '@/composables/useTranslationHelpers'
 
 const router = useRouter()
 const confirm = useConfirm()
@@ -619,6 +632,7 @@ const imagePreview = useImagePreview()
 const cameraFileInput = ref<HTMLInputElement | null>(null)
 const pendingImageTimestamps = ref<string[]>([])
 const { t } = useI18n()
+const {unitOptions} = useTranslationHelpers()
 
 // Search & Filter
 const searchQuery = ref('')
@@ -688,12 +702,6 @@ const addTimestampToImage = (file: File, timestamp: string): Promise<File> => {
 const typeEditOptions = [
   { label: 'Engineer', value: 'ENG' },
   { label: 'Consumer', value: 'COM' }
-]
-
-const unitOptions = [
-  { label: t('inventoryManagement.units.cai'), value: 'cái' },
-  { label: t('inventoryManagement.units.hop'), value: 'hộp' },
-  { label: t('inventoryManagement.units.bich'), value: 'bịch' }
 ]
 
 const typeOptions = [
@@ -843,7 +851,8 @@ const editForm = ref({
   unit: '',
   price: '',
   saveQuantity: 0,
-  stockQty: 0
+  stockQty: 0,
+  specification: ''
 })
 
 // Image Management
@@ -899,7 +908,8 @@ const openEditDialog = (item: Item) => {
     unit: item.unit,
     price: item.price,
     saveQuantity: item.saveQuantity,
-    stockQty: item.stockQty
+    stockQty: item.stockQty,
+    specification: item.eng?.description || item.com?.specifications || ''
   }
   showEditDialog.value = true
 }
@@ -910,7 +920,22 @@ const saveEdit = async () => {
   itemStore.setLoading(true)
   
   try {
-    await itemAPI.update(editingItem.value.id, editForm.value)
+    const payload: UpdateItemRequest = {
+      type: editForm.value.type,
+      unit: editForm.value.unit,
+      price: editForm.value.price,
+      saveQuantity: editForm.value.saveQuantity,
+      stockQty: editForm.value.stockQty,
+    }
+
+    // Map specification về đúng nested field
+    if (editingItem.value.eng) {
+      payload.eng = { ...editingItem.value.eng, description: editForm.value.specification }
+    } else if (editingItem.value.com) {
+      payload.com = { ...editingItem.value.com, specifications: editForm.value.specification }
+    }
+
+    await itemAPI.update(editingItem.value.id, payload)
     
     toast.add({
       severity: 'success',

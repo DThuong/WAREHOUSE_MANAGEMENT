@@ -629,6 +629,7 @@ import logoImg from "../assets/images/newLogo.jpg";
 import type { Notification } from "@/types/notification.types";
 import notificationSound from "@/assets/notiSound/notification-sound.mp3";
 import { useI18n } from "vue-i18n";
+import { useFaviconBadge } from '@/composables/useFaviconBadge'
 
 const route = useRoute();
 const router = useRouter();
@@ -636,6 +637,7 @@ const userStore = useUserStore();
 const notificationStore = useNotificationStore();
 const { t } = useI18n();
 const toast = useToast();
+useFaviconBadge()
 
 const sidebarOpen = ref(true);
 const mobileSidebarOpen = ref(false);
