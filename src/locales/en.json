@@ -230,7 +230,8 @@
       "cai": "Piece",
       "hop": "Box",
       "bich": "Bag",
-      "kg": "Kilogram"
+      "kg": "Kilogram",
+      "cuon": "Roll"
     },
     "title": "Warehouse",
     "subtitle": "Manage product inventory",

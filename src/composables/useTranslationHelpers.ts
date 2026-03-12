@@ -21,6 +21,7 @@ export function useTranslationHelpers() {
     { label: t('inventoryManagement.units.hop'), value: 'hộp' },
     { label: t('inventoryManagement.units.bich'), value: 'bịch' },
     { label: t('inventoryManagement.units.kg'), value: 'kg' },
+    { label: t('inventoryManagement.units.cuon'), value: 'cuộn' },
   ])
 
   const typeOptions = computed(() => [

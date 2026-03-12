@@ -232,7 +232,8 @@
       "cai": "개",
       "hop": "박스",
       "bich": "봉지",
-      "kg": "Kilogram"
+      "kg": "Kilogram",
+      "cuon": "롤"
     },
     "title": "창고",
     "subtitle": "제품 재고 관리",
