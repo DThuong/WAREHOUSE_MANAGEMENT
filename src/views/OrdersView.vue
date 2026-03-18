@@ -1227,7 +1227,7 @@
                 <label class="text-sm font-medium text-gray-700 block mb-2">
                   {{ t('common.form.timeUsed') }} <span class="text-red-500">*</span>
                 </label>
-                <div class="flex gap-2">
+                <div class="flex lg:flex-row md:flex-row flex-col gap-2">
                   <InputNumber
                     v-model="item.timeUsed"
                     :min="1"
