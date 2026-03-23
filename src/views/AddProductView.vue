@@ -467,8 +467,6 @@
         </template>
       </Card>
     </div>
-
-    <Toast />
   </MainLayout>
 </template>
 
@@ -485,7 +483,6 @@ import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
-import Toast from 'primevue/toast'
 import Dropdown from 'primevue/dropdown'
 import { useI18n } from 'vue-i18n'
 import {useTranslationHelpers} from '@/composables/useTranslationHelpers'
@@ -496,7 +493,6 @@ const activeTab = ref(0)
 const router = useRouter()
 const toast = useToast()
 const itemStore = useItemStore()
-
 interface SelectedFile {
   id: string
   file: File
@@ -565,53 +561,58 @@ const triggerFileInput = () => {
 }
 
 const handleGlobalPaste = async (event: ClipboardEvent) => {
-  if (itemStore.uploadingImages) return;
+  try {
+    if (itemStore.uploadingImages) return
 
-  const target = event.target as HTMLElement;
-  if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+    const target = event.target as HTMLElement
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
 
-  const items = event.clipboardData?.items;
-  if (!items) return;
+    const items = event.clipboardData?.items
+    if (!items) return
 
-  const hasImage = Array.from(items).some((i) => i.type.startsWith("image/"));
-  if (!hasImage) return;
+    const hasImage = Array.from(items).some((i) => i.type.startsWith('image/'))
+    if (!hasImage) return
 
-  event.preventDefault();
+    event.preventDefault()
 
-  const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
-  const maxSize = 5 * 1024 * 1024;
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp']
+    const maxSize = 5 * 1024 * 1024
 
-  for (const item of Array.from(items)) {
-    if (!allowedTypes.includes(item.type)) continue;
-    const file = item.getAsFile();
-    if (!file) continue;
+    for (const item of Array.from(items)) {
+      console.log('item type:', item.type)
+      if (!allowedTypes.includes(item.type)) continue
+      const file = item.getAsFile()
+      if (!file) continue
 
-    if (file.size > maxSize) {
-      toast.add({ severity: "warn", summary: t("addInventory.toast.warningTitle"), detail: t("addInventory.toast.fileTooLarge", { name: file.name }), life: 3000 });
-      continue;
-    }
+      if (file.size > maxSize) {
+        toast.add({ severity: 'warn', summary: t('addInventory.toast.warningTitle'), detail: t('addInventory.toast.fileTooLarge', { name: file.name }), life: 3000 })
+        continue
+      }
 
-    const now = new Date();
-    const ext = item.type === "image/jpeg" ? "jpg" : item.type.split("/")[1] || "png";
-    const newName = `paste_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}_${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}${String(now.getSeconds()).padStart(2,"0")}.${ext}`;
-    const renamedFile = new File([file], newName, { type: item.type });
+      const now = new Date()
+      const ext = item.type === 'image/jpeg' ? 'jpg' : item.type.split('/')[1] || 'png'
+      const newName = `paste_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.${ext}`
+      const renamedFile = new File([file], newName, { type: item.type })
 
-    const id = `paste-${Date.now()}-${Math.random()}`;
-    await new Promise<void>((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          selectedFiles.value.push({ id, file: renamedFile, preview: e.target.result as string });
+      const id = `paste-${Date.now()}-${Math.random()}`
+      await new Promise<void>((resolve) => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            selectedFiles.value.push({ id, file: renamedFile, preview: e.target.result as string })
+          }
+          resolve()
         }
-        resolve();
-      };
-      reader.onerror = () => resolve();
-      reader.readAsDataURL(renamedFile);
-    });
+        reader.onerror = () => resolve()
+        reader.readAsDataURL(renamedFile)
+      })
 
-    toast.add({ severity: "success", summary: t("addInventory.toast.successTitle"), detail: "Đã dán ảnh từ clipboard", life: 2000 });
+      toast.add({ severity: 'success', summary: t('addInventory.toast.successTitle'), detail: 'Đã dán ảnh từ clipboard', life: 2000 })
+    }
+  } catch (error) {
+    console.error(error)
   }
-};
+}
 
 const handleFileChange = (event: Event) => {
   const input = event.target as HTMLInputElement

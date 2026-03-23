@@ -963,7 +963,6 @@
     </Dialog>
 
     <ConfirmDialog />
-    <Toast />
   </MainLayout>
 </template>
 
@@ -984,7 +983,6 @@ import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
 import Dropdown from "primevue/dropdown";
 import Calendar from "primevue/calendar";
-import Toast from "primevue/toast";
 import ConfirmDialog from "primevue/confirmdialog";
 import type { Stockin, CreateStockinDetail } from "@/types/stockin.types";
 import ImagePreviewDialog from "@/views/ImagePreviewDialog.vue";

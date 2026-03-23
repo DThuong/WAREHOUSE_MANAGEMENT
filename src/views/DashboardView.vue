@@ -3,18 +3,24 @@
     <!-- Loading Overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-spinner">
-        <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: #8B7AB8;"></i>
-        <p>{{ t('common.loadingData') }}</p>
+        <i
+          class="pi pi-spin pi-spinner"
+          style="font-size: 3rem; color: #8b7ab8"
+        ></i>
+        <p>{{ t("common.loadingData") }}</p>
       </div>
     </div>
 
     <!-- Stats Cards Row -->
     <div class="stats-grid">
-      <div 
-        v-for="(stat, key, index) in dashboardStore.dashboardStats" 
+      <div
+        v-for="(stat, key, index) in dashboardStore.dashboardStats"
         :key="key"
         class="stat-card-compact"
-        :class="getStatCardClass(index), { 'cursor-pointer': statRoutes[key as string] }"
+        :class="
+          (getStatCardClass(index),
+          { 'cursor-pointer': statRoutes[key as string] })
+        "
         @click="navigateToStat(key as string)"
       >
         <div class="stat-icon" :class="getIconBgClass(index)">
@@ -22,8 +28,11 @@
         </div>
         <div class="stat-content">
           <div class="stat-label-compact">{{ statLabels[key as string] }}</div>
-          <div class="stat-value-compact">  <article></article>
-            {{ key === 'totalPurchase' ? formatCurrency(stat.value) : stat.value }}
+          <div class="stat-value-compact">
+            <article></article>
+            {{
+              key === "totalPurchase" ? formatCurrency(stat.value) : stat.value
+            }}
           </div>
         </div>
       </div>
@@ -31,12 +40,12 @@
 
     <!-- Order Status Summary Row -->
     <div class="order-status-grid">
-      <div 
-        class="status-card status-pending clickable-status-card" 
-        :class="{ 
+      <div
+        class="status-card status-pending clickable-status-card"
+        :class="{
           'pulse-animation': hasPendingOrders,
           'has-update': hasPendingOrders,
-          'has-new-update': hasNewPending 
+          'has-new-update': hasNewPending,
         }"
         @click="navigateToOrdersByStatus('Pending')"
       >
@@ -44,23 +53,28 @@
           <i class="pi pi-clock"></i>
         </div>
         <div class="status-content">
-          <div class="status-value">{{ dashboardStore.orderStatusSummary.pending }}</div>
-          <div class="status-label">{{ t('dashboard.pendingOrders') }}</div>
+          <div class="status-value">
+            {{ dashboardStore.orderStatusSummary.pending }}
+          </div>
+          <div class="status-label">{{ t("dashboard.pendingOrders") }}</div>
         </div>
         <i class="pi pi-chevron-right nav-arrow"></i>
-        
+
         <!-- Badge thông báo - hiển thị số lượng -->
         <div v-if="hasPendingOrders" class="update-badge">
-          <span class="badge-count">{{ dashboardStore.orderStatusSummary.pending }} {{ t('dashboard.orderToProcess') }}</span>
+          <span class="badge-count"
+            >{{ dashboardStore.orderStatusSummary.pending }}
+            {{ t("dashboard.orderToProcess") }}</span
+          >
         </div>
       </div>
 
-      <div 
-        class="status-card status-approved clickable-status-card" 
-        :class="{ 
+      <div
+        class="status-card status-approved clickable-status-card"
+        :class="{
           'pulse-animation': hasApprovedOrders,
           'has-update': hasApprovedOrders,
-          'has-new-update': hasNewApproved 
+          'has-new-update': hasNewApproved,
         }"
         @click="navigateToOrdersByStatus('Approved')"
       >
@@ -68,36 +82,51 @@
           <i class="pi pi-check-circle"></i>
         </div>
         <div class="status-content">
-          <div class="status-value">{{ dashboardStore.orderStatusSummary.approved }}</div>
-          <div class="status-label">{{ t('dashboard.approvedOrders') }}</div>
+          <div class="status-value">
+            {{ dashboardStore.orderStatusSummary.approved }}
+          </div>
+          <div class="status-label">{{ t("dashboard.approvedOrders") }}</div>
         </div>
         <i class="pi pi-chevron-right nav-arrow"></i>
-        
+
         <!-- Badge thông báo - hiển thị số lượng -->
         <div v-if="hasApprovedOrders" class="update-badge approved-badge">
-          <span class="badge-count">{{ dashboardStore.orderStatusSummary.approved }} {{ t('dashboard.orderToProcess') }}</span>
+          <span class="badge-count"
+            >{{ dashboardStore.orderStatusSummary.approved }}
+            {{ t("dashboard.orderToProcess") }}</span
+          >
         </div>
       </div>
 
       <!-- Completed và Rejected cards giữ nguyên -->
-      <div class="status-card status-completed clickable-status-card" @click="navigateToOrdersByStatus('Completed')">
+      <div
+        class="status-card status-completed clickable-status-card"
+        @click="navigateToOrdersByStatus('Completed')"
+      >
         <div class="status-icon">
           <i class="pi pi-check"></i>
         </div>
         <div class="status-content">
-          <div class="status-value">{{ dashboardStore.orderStatusSummary.completed }}</div>
-          <div class="status-label">{{ t('dashboard.completedOrders') }}</div>
+          <div class="status-value">
+            {{ dashboardStore.orderStatusSummary.completed }}
+          </div>
+          <div class="status-label">{{ t("dashboard.completedOrders") }}</div>
         </div>
         <i class="pi pi-chevron-right nav-arrow"></i>
       </div>
 
-      <div class="status-card status-rejected clickable-status-card" @click="navigateToOrdersByStatus('Rejected')">
+      <div
+        class="status-card status-rejected clickable-status-card"
+        @click="navigateToOrdersByStatus('Rejected')"
+      >
         <div class="status-icon">
           <i class="pi pi-times-circle"></i>
         </div>
         <div class="status-content">
-          <div class="status-value">{{ dashboardStore.orderStatusSummary.rejected }}</div>
-          <div class="status-label">{{ t('dashboard.rejectedOrders') }}</div>
+          <div class="status-value">
+            {{ dashboardStore.orderStatusSummary.rejected }}
+          </div>
+          <div class="status-label">{{ t("dashboard.rejectedOrders") }}</div>
         </div>
         <i class="pi pi-chevron-right nav-arrow"></i>
       </div>
@@ -108,30 +137,30 @@
       <!-- Orders Status Chart -->
       <div class="chart-container">
         <div class="chart-header">
-          <h3 class="chart-title">{{ t('dashboard.orderStatusChart') }}</h3>
+          <h3 class="chart-title">{{ t("dashboard.orderStatusChart") }}</h3>
         </div>
         <div class="chart-wrapper">
-          <DoughnutChart 
+          <DoughnutChart
             :chartData="dashboardStore.ordersByStatusChartData"
             :height="300"
           />
         </div>
         <div class="chart-legend">
           <div class="legend-item">
-            <span class="legend-color" style="background: #FFD6A5;"></span>
-            <span>{{ t('dashboard.pending') }}</span>
+            <span class="legend-color" style="background: #ffd6a5"></span>
+            <span>{{ t("dashboard.pending") }}</span>
           </div>
           <div class="legend-item">
-            <span class="legend-color" style="background: #A0C4FF;"></span>
-            <span>{{ t('dashboard.approved') }}</span>
+            <span class="legend-color" style="background: #a0c4ff"></span>
+            <span>{{ t("dashboard.approved") }}</span>
           </div>
           <div class="legend-item">
-            <span class="legend-color" style="background: #CAFFBF;"></span>
-            <span>{{ t('dashboard.completed') }}</span>
+            <span class="legend-color" style="background: #caffbf"></span>
+            <span>{{ t("dashboard.completed") }}</span>
           </div>
           <div class="legend-item">
-            <span class="legend-color" style="background: #FFADAD;"></span>
-            <span>{{ t('dashboard.rejected') }}</span>
+            <span class="legend-color" style="background: #ffadad"></span>
+            <span>{{ t("dashboard.rejected") }}</span>
           </div>
         </div>
       </div>
@@ -139,22 +168,22 @@
       <!-- Stock Value Chart -->
       <div class="chart-container">
         <div class="chart-header">
-          <h3 class="chart-title">{{ t('dashboard.orderCategoryChart') }}</h3>
+          <h3 class="chart-title">{{ t("dashboard.orderCategoryChart") }}</h3>
         </div>
         <div class="chart-wrapper">
-          <DoughnutChart 
+          <DoughnutChart
             :chartData="dashboardStore.stockValueChartData"
             :height="300"
           />
         </div>
         <div class="chart-legend">
           <div class="legend-item">
-            <span class="legend-color" style="background: #BDB2FF;"></span>
-            <span>{{ t('inventoryManagement.category.engineering') }}</span>
+            <span class="legend-color" style="background: #bdb2ff"></span>
+            <span>{{ t("inventoryManagement.category.engineering") }}</span>
           </div>
           <div class="legend-item">
-            <span class="legend-color" style="background: #FFC6FF;"></span>
-            <span>{{ t('inventoryManagement.category.consumer') }}</span>
+            <span class="legend-color" style="background: #ffc6ff"></span>
+            <span>{{ t("inventoryManagement.category.consumer") }}</span>
           </div>
         </div>
       </div>
@@ -162,7 +191,7 @@
       <!-- Overview Stats -->
       <div class="overview-container">
         <div class="chart-header">
-          <h3 class="chart-title">{{ t('dashboard.systemOverview') }}</h3>
+          <h3 class="chart-title">{{ t("dashboard.systemOverview") }}</h3>
         </div>
         <div class="overview-grid">
           <RouterLink to="/inventory" class="overview-item overview-purple">
@@ -170,8 +199,10 @@
               <i class="pi pi-box"></i>
             </div>
             <div class="overview-content">
-              <div class="overview-value">{{ dashboardStore.overviewStats.totalItems }}</div>
-              <div class="overview-label">{{ t('dashboard.stock') }}</div>
+              <div class="overview-value">
+                {{ dashboardStore.overviewStats.totalItems }}
+              </div>
+              <div class="overview-label">{{ t("dashboard.stock") }}</div>
             </div>
           </RouterLink>
 
@@ -180,8 +211,10 @@
               <i class="pi pi-users"></i>
             </div>
             <div class="overview-content">
-              <div class="overview-value">{{ dashboardStore.overviewStats.totalUsers }}</div>
-              <div class="overview-label">{{ t('dashboard.users') }}</div>
+              <div class="overview-value">
+                {{ dashboardStore.overviewStats.totalUsers }}
+              </div>
+              <div class="overview-label">{{ t("dashboard.users") }}</div>
             </div>
           </RouterLink>
 
@@ -190,45 +223,59 @@
               <i class="pi pi-sign-in"></i>
             </div>
             <div class="overview-content">
-              <div class="overview-value">{{ dashboardStore.overviewStats.totalStockins }}</div>
-              <div class="overview-label">{{ t('dashboard.importReceipts') }}</div>
+              <div class="overview-value">
+                {{ dashboardStore.overviewStats.totalStockins }}
+              </div>
+              <div class="overview-label">
+                {{ t("dashboard.importReceipts") }}
+              </div>
             </div>
           </RouterLink>
 
           <RouterLink to="/orders" class="overview-item overview-pink">
             <div class="overview-icon">
-              <i class="pi pi-database" style="font-size: 1.5rem;"></i>
+              <i class="pi pi-database" style="font-size: 1.5rem"></i>
             </div>
             <div class="overview-content">
               <div class="overview-value">{{ totalOrders }}</div>
-              <div class="overview-label">{{ t('dashboard.orders') }}</div>
+              <div class="overview-label">{{ t("dashboard.orders") }}</div>
             </div>
           </RouterLink>
 
-          <div 
+          <div
             class="overview-item overview-gray clickable-overview"
             @click="scrollToSection('top-orders-section')"
           >
             <div class="overview-icon">
-              <i class="pi pi-cart-arrow-down" style="font-size: 1.5rem;"></i>
+              <i class="pi pi-cart-arrow-down" style="font-size: 1.5rem"></i>
             </div>
             <div class="overview-content">
-              <div class="overview-value">{{ dashboardStore.topOrderedItems.length }}</div>
-              <div class="overview-label">{{ t('dashboard.topOrders') }}</div>
+              <div class="overview-value">
+                {{ dashboardStore.topOrderedItems.length }}
+              </div>
+              <div class="overview-label">{{ t("dashboard.topOrders") }}</div>
             </div>
           </div>
 
-          <div 
+          <div
             class="overview-item overview-critical clickable-overview"
-            :class="{ 'has-critical-stock': dashboardStore.lowStockCountByStatus.critical > 0 }"
+            :class="{
+              'has-critical-stock':
+                dashboardStore.lowStockCountByStatus.critical > 0,
+            }"
             @click="scrollToSection('critical-stock-section')"
           >
             <div class="overview-icon">
-              <i class="pi pi-exclamation-triangle" style="font-size: 1.5rem;"></i>
+              <i
+                class="pi pi-exclamation-triangle"
+                style="font-size: 1.5rem"
+              ></i>
             </div>
             <div class="overview-content">
-              <div class="overview-value">{{ dashboardStore.lowStockCountByStatus.critical }}</div>
-              <div class="overview-label">{{ t('dashboard.critical') }}</div>
+              <div class="overview-value">
+                {{ dashboardStore.lowStockCountByStatus.critical }}
+              </div>
+              <div class="overview-label">{{ t("dashboard.critical") }}</div>
             </div>
           </div>
         </div>
@@ -242,12 +289,12 @@
         <div class="list-header">
           <h3 class="list-title">
             <i class="pi pi-chart-line"></i>
-            {{ t('dashboard.topOrderedMaterials') }}
+            {{ t("dashboard.topOrderedMaterials") }}
           </h3>
         </div>
         <div class="list-content">
-          <div 
-            v-for="item in dashboardStore.topOrderedItems" 
+          <div
+            v-for="item in dashboardStore.topOrderedItems"
             :key="item.id"
             class="list-item"
           >
@@ -257,15 +304,23 @@
               <div class="item-code">{{ item.code }}</div>
             </div>
             <div class="item-stats">
-              <div class="item-qty">{{ t('dashboard.orderCount') }}: {{ item.totalOrdered }} </div>
+              <div class="item-qty">
+                {{ t("dashboard.orderCount") }}: {{ item.totalOrdered }}
+              </div>
               <div class="progress-bar">
-                <div class="progress-fill" :style="{ width: item.percentage + '%' }"></div>
+                <div
+                  class="progress-fill"
+                  :style="{ width: item.percentage + '%' }"
+                ></div>
               </div>
             </div>
           </div>
-          <div v-if="dashboardStore.topOrderedItems.length === 0" class="empty-state">
+          <div
+            v-if="dashboardStore.topOrderedItems.length === 0"
+            class="empty-state"
+          >
             <i class="pi pi-cart-arrow-down"></i>
-            <p>{{ t('dashboard.noOrders') }}</p>
+            <p>{{ t("dashboard.noOrders") }}</p>
           </div>
         </div>
       </div>
@@ -275,12 +330,14 @@
         <div class="list-header">
           <h3 class="list-title">
             <i class="pi pi-exclamation-triangle"></i>
-            {{ t('dashboard.criticalStock') }} ({{ dashboardStore.lowStockCountByStatus.critical }})
+            {{ t("dashboard.criticalStock") }} ({{
+              dashboardStore.lowStockCountByStatus.critical
+            }})
           </h3>
         </div>
         <div class="list-content">
-          <div 
-            v-for="item in dashboardStore.criticalStockItems.slice(0, 50)" 
+          <div
+            v-for="item in dashboardStore.criticalStockItems.slice(0, 50)"
             :key="item.id"
             class="list-item"
           >
@@ -293,12 +350,17 @@
               <div class="stock-badge" :class="'badge-' + item.status">
                 {{ item.stockQty }}/{{ item.safetyStock }}
               </div>
-              <div class="stock-label">{{ getStockStatusLabel(item.status) }}</div>
+              <div class="stock-label">
+                {{ getStockStatusLabel(item.status) }}
+              </div>
             </div>
           </div>
-          <div v-if="dashboardStore.criticalStockItems.length === 0" class="empty-state">
+          <div
+            v-if="dashboardStore.criticalStockItems.length === 0"
+            class="empty-state"
+          >
             <i class="pi pi-check-circle"></i>
-            <p>{{ t('dashboard.noLowStock') }}</p>
+            <p>{{ t("dashboard.noLowStock") }}</p>
           </div>
         </div>
       </div>
@@ -308,34 +370,45 @@
         <div class="list-header">
           <h3 class="list-title">
             <i class="pi pi-list"></i>
-            {{ t('dashboard.recentOrders') }}
+            {{ t("dashboard.recentOrders") }}
           </h3>
         </div>
         <div class="list-content">
-          <div 
-            v-for="order in dashboardStore.recentOrderStatus.slice(0, 10)" 
+          <div
+            v-for="order in dashboardStore.recentOrderStatus.slice(0, 10)"
             :key="order.id"
             class="list-item"
           >
-            <div class="order-icon" :class="'order-icon-' + order.status.toLowerCase()">
+            <div
+              class="order-icon"
+              :class="'order-icon-' + order.status.toLowerCase()"
+            >
               <i :class="getOrderStatusIcon(order.status)"></i>
             </div>
             <div class="order-info">
               <div class="order-number">Order ID: {{ order.id }}</div>
               <div class="order-meta">
-                {{ order.workerName }} - Order: {{ order.totalItems }} {{ t('common.product') }} - {{ t('common.quantity') }}: {{ order.totalQty }}
+                {{ order.workerName }} - Order: {{ order.totalItems }}
+                {{ t("common.product") }} - {{ t("common.quantity") }}:
+                {{ order.totalQty }}
               </div>
             </div>
             <div class="order-status">
-              <span class="status-badge" :class="'status-' + order.status.toLowerCase()">
+              <span
+                class="status-badge"
+                :class="'status-' + order.status.toLowerCase()"
+              >
                 {{ getOrderStatusLabel(order.status) }}
               </span>
               <div class="order-date">{{ formatDate(order.orderDate) }}</div>
             </div>
           </div>
-          <div v-if="dashboardStore.recentOrderStatus.length === 0" class="empty-state">
+          <div
+            v-if="dashboardStore.recentOrderStatus.length === 0"
+            class="empty-state"
+          >
             <i class="pi pi-cart-arrow-down"></i>
-            <p>{{ t('dashboard.noOrders') }}</p>
+            <p>{{ t("dashboard.noOrders") }}</p>
           </div>
         </div>
       </div>
@@ -344,216 +417,229 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, onUnmounted } from 'vue'
-import { useDashboardStore } from '@/stores/dashboard'
-import { useItemStore } from '@/stores/itemStore'
-import { useOrderStore } from '@/stores/orderStore'
-import { useStockinStore } from '@/stores/stockinStore'
-import { useUserStore } from '@/stores/userStore'
-import { itemAPI } from '@/services/itemAPI'
-import { orderAPI } from '@/services/orderAPI'
-import { stockinAPI } from '@/services/stockinAPI'
-import { userAPI } from '@/services/userAPI'
-import MainLayout from '@/components/MainLayout.vue'
-import DoughnutChart from '@/components/DoughnutChart.vue'
-import { useToast } from 'primevue/usetoast'
-import { useRouter, useRoute } from 'vue-router'
-import { signalRService } from '@/services/orderNotiService'
-import type { OrderPendingRealtime } from '@/types/order.types'
-import { useI18n } from 'vue-i18n'
+import { onMounted, ref, computed, onUnmounted } from "vue";
+import { useDashboardStore } from "@/stores/dashboard";
+import { useItemStore } from "@/stores/itemStore";
+import { useOrderStore } from "@/stores/orderStore";
+import { useStockinStore } from "@/stores/stockinStore";
+import { useUserStore } from "@/stores/userStore";
+import { itemAPI } from "@/services/itemAPI";
+import { orderAPI } from "@/services/orderAPI";
+import { stockinAPI } from "@/services/stockinAPI";
+import { userAPI } from "@/services/userAPI";
+import MainLayout from "@/components/MainLayout.vue";
+import DoughnutChart from "@/components/DoughnutChart.vue";
+import { useToast } from "primevue/usetoast";
+import { useRouter, useRoute } from "vue-router";
+import { signalRService } from "@/services/orderNotiService";
+import type { OrderPendingRealtime } from "@/types/order.types";
+import { useI18n } from "vue-i18n";
 
-const { t } = useI18n()
+const { t } = useI18n();
 
-const dashboardStore = useDashboardStore()
-const itemStore = useItemStore()
-const orderStore = useOrderStore()
-const stockinStore = useStockinStore()
-const userStore = useUserStore()
-const toast = useToast()
-const router = useRouter()
-const route = useRoute()
+const dashboardStore = useDashboardStore();
+const itemStore = useItemStore();
+const orderStore = useOrderStore();
+const stockinStore = useStockinStore();
+const userStore = useUserStore();
+const toast = useToast();
+const router = useRouter();
+const route = useRoute();
 
-const loading = ref(false)
-const hasPendingOrders = computed(() => dashboardStore.orderStatusSummary.pending > 0)
-const hasApprovedOrders = computed(() => dashboardStore.orderStatusSummary.approved > 0)
+const loading = ref(false);
+const hasPendingOrders = computed(
+  () => dashboardStore.orderStatusSummary.pending > 0,
+);
+const hasApprovedOrders = computed(
+  () => dashboardStore.orderStatusSummary.approved > 0,
+);
 
-const totalOrders = computed(() => orderStore.totalOrders)
+const totalOrders = computed(() => orderStore.totalOrders);
 
 const statRoutes: Record<string, string> = {
-  totalOrders: '/orders',
-  totalStockins: '/stockin',
-  totalStock: '/inventory',
-  totalPurchase: ''
-}
+  totalOrders: "/orders",
+  totalStockins: "/stockin",
+  totalStock: "/inventory",
+  totalPurchase: "",
+};
 
 const statLabels: Record<string, string> = computed(() => ({
-  totalPurchase: t('dashboard.totalPurchaseValue'),
-  totalOrders:   t('dashboard.totalOrders'),
-  totalStockins: t('dashboard.totalImports'),
-  totalStock:    t('dashboard.totalStock'),
-}))
+  totalPurchase: t("dashboard.totalPurchaseValue"),
+  totalOrders: t("dashboard.totalOrders"),
+  totalStockins: t("dashboard.totalImports"),
+  totalStock: t("dashboard.totalStock"),
+}));
 
 const scrollToSection = (sectionId: string) => {
-  const element = document.getElementById(sectionId)
+  const element = document.getElementById(sectionId);
   if (element) {
-    element.scrollIntoView({ 
-      behavior: 'smooth', 
-      block: 'start' 
-    })
-    
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+
     // Highlight effect (optional)
-    element.classList.add('highlight-section')
+    element.classList.add("highlight-section");
     setTimeout(() => {
-      element.classList.remove('highlight-section')
-    }, 2000)
+      element.classList.remove("highlight-section");
+    }, 2000);
   }
-}
+};
 
 const navigateToStat = (key: string) => {
-  const route = statRoutes[key]
+  const route = statRoutes[key];
   if (route) {
-    router.push(route)
+    router.push(route);
   }
-}
+};
 
 const navigateToOrdersByStatus = (status: string | null) => {
   router.push({
-    path: '/orders',
-    query: status ? { status } : {}
-  })
-}
+    path: "/orders",
+    query: status ? { status } : {},
+  });
+};
 
 const fetchAllData = async () => {
-  loading.value = true
-  
+  loading.value = true;
+
   try {
     const [items, orders, stockins, users] = await Promise.all([
       itemAPI.getAll(),
       orderAPI.getAll(),
       stockinAPI.getAllStockin(),
-      userAPI.getAllAccounts()
-    ])
+      userAPI.getAllAccounts(),
+    ]);
 
-    itemStore.setItems(items)
-    orderStore.setOrders(orders)
-    stockinStore.setStockins(stockins)
-    userStore.users = users
-
+    itemStore.setItems(items);
+    orderStore.setOrders(orders);
+    stockinStore.setStockins(stockins);
+    userStore.users = users;
   } catch (error: any) {
-    console.error('❌ Error loading dashboard data:', error)
+    console.error("❌ Error loading dashboard data:", error);
     toast.add({
-      severity: 'error',
-      summary: 'Lỗi tải dữ liệu',
-      detail: 'Không thể tải dữ liệu dashboard',
-      life: 3000
-    })
+      severity: "error",
+      summary: "Lỗi tải dữ liệu",
+      detail: "Không thể tải dữ liệu dashboard",
+      life: 3000,
+    });
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND'
-  }).format(value)
-}
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(value);
+};
 
 const formatDate = (dateStr: string): string => {
-  const date = new Date(dateStr)
-  return new Intl.DateTimeFormat('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  }).format(date)
-}
+  const date = new Date(dateStr);
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+};
 
 const getStatCardClass = (index: number): string => {
-  const classes = ['card-blue', 'card-pink', 'card-yellow', 'card-purple']
-  return classes[index] || 'card-blue'
-}
+  const classes = ["card-blue", "card-pink", "card-yellow", "card-purple"];
+  return classes[index] || "card-blue";
+};
 
 const getIconBgClass = (index: number): string => {
-  const classes = ['icon-bg-blue', 'icon-bg-pink', 'icon-bg-yellow', 'icon-bg-purple']
-  return classes[index] || 'icon-bg-blue'
-}
+  const classes = [
+    "icon-bg-blue",
+    "icon-bg-pink",
+    "icon-bg-yellow",
+    "icon-bg-purple",
+  ];
+  return classes[index] || "icon-bg-blue";
+};
 
 const getIconClass = (index: number): string => {
-  const icons = ['pi pi-shopping-cart', 'pi pi-file', 'pi pi-sign-in', 'pi pi-database']
-  return icons[index] || 'pi pi-shopping-cart'
-}
+  const icons = [
+    "pi pi-shopping-cart",
+    "pi pi-file",
+    "pi pi-sign-in",
+    "pi pi-database",
+  ];
+  return icons[index] || "pi pi-shopping-cart";
+};
 
 const getStockStatusLabel = (status: string): string => {
   const labels: Record<string, string> = {
-    critical: t('dashboard.critical'),
-    low: t('dashboard.low'),
-    warning: t('dashboard.warning')
-  }
-  return labels[status] || status
-}
+    critical: t("dashboard.critical"),
+    low: t("dashboard.low"),
+    warning: t("dashboard.warning"),
+  };
+  return labels[status] || status;
+};
 
 const getOrderStatusIcon = (status: string): string => {
   const icons: Record<string, string> = {
-    Pending: 'pi pi-clock',
-    Approved: 'pi pi-check-circle',
-    Completed: 'pi pi-check',
-    Rejected: 'pi pi-times-circle'
-  }
-  return icons[status] || 'pi pi-file'
-}
+    Pending: "pi pi-clock",
+    Approved: "pi pi-check-circle",
+    Completed: "pi pi-check",
+    Rejected: "pi pi-times-circle",
+  };
+  return icons[status] || "pi pi-file";
+};
 
 const getOrderStatusLabel = (status: string): string => {
   const labels: Record<string, string> = {
-    Pending: t('dashboard.pending'),
-    Approved: t('dashboard.approved'),
-    Completed: t('dashboard.completed'),
-    Rejected: t('dashboard.rejected')
-  }
-  return labels[status] || status
-}
+    Pending: t("dashboard.pending"),
+    Approved: t("dashboard.approved"),
+    Completed: t("dashboard.completed"),
+    Rejected: t("dashboard.rejected"),
+  };
+  return labels[status] || status;
+};
 
 const handleNewOrderCreated = async (orderData: OrderPendingRealtime) => {
   // Reload data (animation sẽ tự động chạy vì computed)
-  await fetchAllData()
-}
+  await fetchAllData();
+};
 
 const handleOrderStatusUpdated = async (data: any) => {
   // Reload data
-  await fetchAllData()
-}
+  await fetchAllData();
+};
 
 onMounted(async () => {
   // Kết nối SignalR
   if (!signalRService.isConnected()) {
-    await signalRService.start()
+    await signalRService.start();
   }
-  
+
   // Register event handlers
-  signalRService.on('NewOrderCreated', handleNewOrderCreated)
-  signalRService.on('OrderStatusUpdated', handleOrderStatusUpdated)
-  
+  signalRService.on("NewOrderCreated", handleNewOrderCreated);
+  signalRService.on("OrderStatusUpdated", handleOrderStatusUpdated);
+
   // Load data
-  await fetchAllData()
-  dashboardStore.refreshDashboard()
-})
+  await fetchAllData();
+  dashboardStore.refreshDashboard();
+});
 
 onUnmounted(() => {
-  signalRService.off('NewOrderCreated')
-  signalRService.off('OrderStatusUpdated')
-})
+  signalRService.off("NewOrderCreated");
+  signalRService.off("OrderStatusUpdated");
+});
 </script>
 
 <style scoped>
 /* Pastel Color Palette */
 :root {
-  --pastel-blue: #A0C4FF;
-  --pastel-pink: #FFC6FF;
-  --pastel-yellow: #FFD6A5;
-  --pastel-purple: #BDB2FF;
-  --pastel-green: #CAFFBF;
-  --pastel-red: #FFADAD;
-  --pastel-orange: #FDFFB6;
-  --pastel-mint: #9BF6FF;
+  --pastel-blue: #a0c4ff;
+  --pastel-pink: #ffc6ff;
+  --pastel-yellow: #ffd6a5;
+  --pastel-purple: #bdb2ff;
+  --pastel-green: #caffbf;
+  --pastel-red: #ffadad;
+  --pastel-orange: #fdffb6;
+  --pastel-mint: #9bf6ff;
 }
 
 /* Loading Overlay */
@@ -577,7 +663,7 @@ onUnmounted(() => {
 .loading-spinner p {
   margin-top: 1rem;
   font-size: 1rem;
-  color: #8B7AB8;
+  color: #8b7ab8;
   font-weight: 500;
 }
 
@@ -591,13 +677,13 @@ onUnmounted(() => {
 
 /* Stat Cards - Pastel Colors */
 .stat-card-compact {
-    border-radius: 16px;
-    padding: 2rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-    transition: all 0.3s ease;
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .stat-card-compact:hover {
@@ -605,19 +691,19 @@ onUnmounted(() => {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-.card-blue { 
-  background: linear-gradient(135deg, #F0F7FF 0%, #E0EFFF 100%);
+.card-blue {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e0efff 100%);
 }
 
-.card-pink { 
-  background: linear-gradient(135deg, #FFF0FF 0%, #FFE0FF 100%);
+.card-pink {
+  background: linear-gradient(135deg, #fff0ff 0%, #ffe0ff 100%);
 }
 
-.card-yellow { 
-  background: linear-gradient(135deg, #FFF8E8 0%, #FFE8C8 100%);
+.card-yellow {
+  background: linear-gradient(135deg, #fff8e8 0%, #ffe8c8 100%);
 }
 
-.card-purple { 
+.card-purple {
   background: linear-gradient(135deg, #e0dbfa 0%, #e7e4f8 100%);
 }
 
@@ -636,23 +722,23 @@ onUnmounted(() => {
   color: white;
 }
 
-.icon-bg-blue { 
-  background: linear-gradient(135deg, #1976D2, #1565C0);
+.icon-bg-blue {
+  background: linear-gradient(135deg, #1976d2, #1565c0);
   box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
 }
 
-.icon-bg-pink { 
-  background: linear-gradient(135deg, #D81B60, #C2185B);
+.icon-bg-pink {
+  background: linear-gradient(135deg, #d81b60, #c2185b);
   box-shadow: 0 4px 12px rgba(216, 27, 96, 0.3);
 }
 
-.icon-bg-yellow { 
-  background: linear-gradient(135deg, #F57C00, #EF6C00);
+.icon-bg-yellow {
+  background: linear-gradient(135deg, #f57c00, #ef6c00);
   box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
 }
 
-.icon-bg-purple { 
-  background: linear-gradient(135deg, #7B1FA2, #6A1B9A);
+.icon-bg-purple {
+  background: linear-gradient(135deg, #7b1fa2, #6a1b9a);
   box-shadow: 0 4px 12px rgba(123, 31, 162, 0.3);
 }
 
@@ -662,7 +748,7 @@ onUnmounted(() => {
 
 .stat-label-compact {
   font-size: 0.875rem;
-  color: #5A4A7A;
+  color: #5a4a7a;
   font-weight: 700;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
@@ -673,7 +759,7 @@ onUnmounted(() => {
 .stat-value-compact {
   font-size: 2rem;
   font-weight: 800;
-  color: #2D2D2D;
+  color: #2d2d2d;
   margin-bottom: 0.5rem;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
 }
@@ -702,23 +788,23 @@ onUnmounted(() => {
   transform: translateY(-2px);
 }
 
-.status-pending { 
-  background-color:#FFECB3;
+.status-pending {
+  background-color: #ffecb3;
   /* border-color: var(--pastel-yellow); */
 }
 
-.status-approved { 
-  background-color: #BBDEFB;
+.status-approved {
+  background-color: #bbdefb;
   /* border-color: var(--pastel-blue); */
 }
 
-.status-completed { 
-  background-color: #C8E6C9;
+.status-completed {
+  background-color: #c8e6c9;
   /* border-color: var(--pastel-green); */
 }
 
-.status-rejected { 
-  background-color: #FFCDD2;
+.status-rejected {
+  background-color: #ffcdd2;
   /* border-color: var(--pastel-red); */
 }
 
@@ -733,22 +819,22 @@ onUnmounted(() => {
 }
 
 .status-pending .status-icon {
-  background: linear-gradient(135deg, #F57C00, #EF6C00);
+  background: linear-gradient(135deg, #f57c00, #ef6c00);
   color: white;
 }
 
 .status-approved .status-icon {
-  background: linear-gradient(135deg, #1976D2, #1565C0);
+  background: linear-gradient(135deg, #1976d2, #1565c0);
   color: white;
 }
 
 .status-completed .status-icon {
-  background: linear-gradient(135deg, #388E3C, #2E7D32);
+  background: linear-gradient(135deg, #388e3c, #2e7d32);
   color: white;
 }
 
 .status-rejected .status-icon {
-  background: linear-gradient(135deg, #D32F2F, #C62828);
+  background: linear-gradient(135deg, #d32f2f, #c62828);
   color: white;
 }
 
@@ -759,14 +845,14 @@ onUnmounted(() => {
 .status-value {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #2D2D2D;
+  color: #2d2d2d;
   margin-bottom: 0.25rem;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
 .status-label {
   font-size: 0.875rem;
-  color: #5A4A7A;
+  color: #5a4a7a;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
@@ -792,7 +878,7 @@ onUnmounted(() => {
 .chart-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #F5F3FF;
+  border-bottom: 2px solid #f5f3ff;
 }
 
 .chart-title,
@@ -831,7 +917,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.875rem;
-  color: #6B6B6B;
+  color: #6b6b6b;
   font-weight: 500;
 }
 
@@ -863,31 +949,31 @@ onUnmounted(() => {
 }
 
 .overview-blue {
-  background: linear-gradient(135deg, #F0F7FF 0%, #E0EFFF 100%);
+  background: linear-gradient(135deg, #f0f7ff 0%, #e0efff 100%);
 }
 
 .overview-pink {
-  background: linear-gradient(135deg, #FFF0FF 0%, #FFE0FF 100%);
+  background: linear-gradient(135deg, #fff0ff 0%, #ffe0ff 100%);
 }
 
 .overview-green {
-  background: linear-gradient(135deg, #F0FFF0 0%, #E0FFE0 100%);
+  background: linear-gradient(135deg, #f0fff0 0%, #e0ffe0 100%);
 }
 
 .overview-yellow {
-  background: linear-gradient(135deg, #FFF8E8 0%, #FFE8C8 100%);
+  background: linear-gradient(135deg, #fff8e8 0%, #ffe8c8 100%);
 }
 
-.overview-purple{
+.overview-purple {
   background: linear-gradient(135deg, #e0dbfa 0%, #e7e4f8 100%);
 }
-.overview-gray{
-  background: linear-gradient(135deg, #E0E0E0 0%, #E0E0E0 100%);
+.overview-gray {
+  background: linear-gradient(135deg, #e0e0e0 0%, #e0e0e0 100%);
 }
 
 /* Critical stock - màu đỏ nhạt với animation */
 .overview-critical {
-  background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
 }
 
 .overview-critical .overview-icon {
@@ -907,7 +993,8 @@ onUnmounted(() => {
 }
 
 @keyframes criticalPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
   }
@@ -951,13 +1038,13 @@ onUnmounted(() => {
 .overview-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #4A4A4A;
+  color: #4a4a4a;
   margin-bottom: 0.25rem;
 }
 
 .overview-label {
   font-size: 0.8125rem;
-  color: #8B7AB8;
+  color: #8b7ab8;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -987,7 +1074,7 @@ onUnmounted(() => {
 
 .list-header {
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #FFF1E6 0%, #FFE5D9 100%);
+  background: linear-gradient(135deg, #fff1e6 0%, #ffe5d9 100%);
 }
 
 .list-title {
@@ -998,10 +1085,9 @@ onUnmounted(() => {
 
 .list-title i {
   color: #000 !important;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
   font-size: 1.3rem;
 }
-
 
 .list-content {
   max-height: 500px;
@@ -1013,12 +1099,12 @@ onUnmounted(() => {
   align-items: center;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #F5F3FF;
+  border-bottom: 1px solid #f5f3ff;
   transition: background 0.2s;
 }
 
 .list-item:hover {
-  background: linear-gradient(135deg, #FAFAFA 0%, #F5F5F5 100%);
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
 }
 
 .list-item:last-child {
@@ -1042,7 +1128,7 @@ onUnmounted(() => {
 .item-name {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #4A4A4A;
+  color: #4a4a4a;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1051,7 +1137,7 @@ onUnmounted(() => {
 
 .item-code {
   font-size: 0.8125rem;
-  color: #8B7AB8;
+  color: #8b7ab8;
   font-weight: 500;
 }
 
@@ -1069,7 +1155,7 @@ onUnmounted(() => {
 .progress-bar {
   width: 90px;
   height: 8px;
-  background: #F0F0F0;
+  background: #f0f0f0;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -1096,22 +1182,22 @@ onUnmounted(() => {
 
 .badge-critical {
   background: var(--pastel-red);
-  color: #B84A4A;
+  color: #b84a4a;
 }
 
 .badge-low {
   background: var(--pastel-yellow);
-  color: #B8860B;
+  color: #b8860b;
 }
 
 .badge-warning {
   background: var(--pastel-orange);
-  color: #B89F0B;
+  color: #b89f0b;
 }
 
 .stock-label {
   font-size: 0.75rem;
-  color: #8B7AB8;
+  color: #8b7ab8;
   font-weight: 500;
 }
 
@@ -1132,22 +1218,22 @@ onUnmounted(() => {
 
 .order-icon-pending {
   background: var(--pastel-yellow);
-  color: #B8860B;
+  color: #b8860b;
 }
 
 .order-icon-approved {
   background: var(--pastel-blue);
-  color: #4A80C0;
+  color: #4a80c0;
 }
 
 .order-icon-completed {
   background: var(--pastel-green);
-  color: #5FA85F;
+  color: #5fa85f;
 }
 
 .order-icon-rejected {
   background: var(--pastel-red);
-  color: #D66B6B;
+  color: #d66b6b;
 }
 
 .order-info {
@@ -1157,13 +1243,13 @@ onUnmounted(() => {
 .order-number {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: #4A4A4A;
+  color: #4a4a4a;
   margin-bottom: 0.25rem;
 }
 
 .order-meta {
   font-size: 0.8125rem;
-  color: #8B7AB8;
+  color: #8b7ab8;
   font-weight: 500;
 }
 
@@ -1183,27 +1269,27 @@ onUnmounted(() => {
 
 .status-pending {
   background: var(--pastel-yellow);
-  color: #B8860B;
+  color: #b8860b;
 }
 
 .status-approved {
   background: var(--pastel-blue);
-  color: #4A80C0;
+  color: #4a80c0;
 }
 
 .status-completed {
   background: var(--pastel-green);
-  color: #5FA85F;
+  color: #5fa85f;
 }
 
 .status-rejected {
   background: var(--pastel-red);
-  color: #D66B6B;
+  color: #d66b6b;
 }
 
 .order-date {
   font-size: 0.75rem;
-  color: #8B7AB8;
+  color: #8b7ab8;
   font-weight: 500;
 }
 
@@ -1243,10 +1329,18 @@ onUnmounted(() => {
     grid-template-columns: 1fr !important;
   }
 
-  .stat-card-compact { padding: 1.25rem !important; }
-  .status-card       { padding: 1rem !important; }
-  .stat-value-compact { font-size: 1.5rem !important; }
-  .status-value      { font-size: 1.75rem !important; }
+  .stat-card-compact {
+    padding: 1.25rem !important;
+  }
+  .status-card {
+    padding: 1rem !important;
+  }
+  .stat-value-compact {
+    font-size: 1.5rem !important;
+  }
+  .status-value {
+    font-size: 1.75rem !important;
+  }
 
   .chart-container,
   .overview-container,
@@ -1255,7 +1349,7 @@ onUnmounted(() => {
     width: 100% !important;
     box-sizing: border-box !important;
   }
-   /* Overview grid: mobile 1 cột */
+  /* Overview grid: mobile 1 cột */
   .overview-grid {
     grid-template-columns: 1fr !important;
     gap: 0.75rem !important;
@@ -1314,11 +1408,15 @@ onUnmounted(() => {
 
 /* Subtle shine effect on hover */
 .clickable-status-card::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 16px;
-  background: linear-gradient(45deg, transparent 0%, rgba(255,255,255,0.2) 100%);
+  background: linear-gradient(
+    45deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -1371,7 +1469,8 @@ onUnmounted(() => {
 }
 
 @keyframes cardPulseSoft {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
@@ -1387,7 +1486,8 @@ onUnmounted(() => {
 }
 
 @keyframes cardPulseStrong {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
@@ -1402,7 +1502,8 @@ onUnmounted(() => {
 }
 
 @keyframes cardPulseSoftBlue {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
@@ -1417,7 +1518,8 @@ onUnmounted(() => {
 }
 
 @keyframes cardPulseStrongBlue {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }

@@ -78,8 +78,6 @@
       </form>
     </div>
 
-    <!-- Toast for notifications -->
-    <Toast />
   </div>
 </template>
 
@@ -90,7 +88,6 @@ import InputText from 'primevue/inputtext'
 import Password from 'primevue/password' 
 import Button from 'primevue/button'
 import Message from 'primevue/message'
-import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
 import logoImg from '@/assets/images/newLogo.jpg'
 import { useUserStore } from '@/stores/userStore'

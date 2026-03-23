@@ -587,9 +587,6 @@
 
     <!-- Confirm Dialog -->
     <ConfirmDialog></ConfirmDialog>
-
-    <!-- Toast -->
-    <Toast />
   </MainLayout>
 </template>
 
@@ -615,7 +612,6 @@ import Password from "primevue/password";
 import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Skeleton from "primevue/skeleton";
-import Toast from "primevue/toast";
 import ConfirmDialog from "primevue/confirmdialog";
 import { useI18n } from "vue-i18n";
 

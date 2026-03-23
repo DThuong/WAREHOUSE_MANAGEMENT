@@ -600,9 +600,6 @@
       </div>
     </Teleport>
 
-    <!-- Toast -->
-    <Toast />
-
     <!-- Sidebar overlay -->
     <div
       v-if="mobileSidebarOpen"

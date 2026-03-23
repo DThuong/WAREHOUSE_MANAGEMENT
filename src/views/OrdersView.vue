@@ -103,11 +103,10 @@
 
             <!-- Search & Actions -->
             <div class="flex justify-between items-center">
-              <div
-                class="flex flex-col items-start gap-4"
-              >
+              <div class="flex flex-col items-start gap-4">
                 <span class="text-lg font-semibold text-gray-900 w-full">
-                  {{ t("orderManagement.totalOrders") }}: {{ totalItems }} {{ t("orderManagement.orders") }}
+                  {{ t("orderManagement.totalOrders") }}: {{ totalItems }}
+                  {{ t("orderManagement.orders") }}
                 </span>
 
                 <Chip
@@ -176,6 +175,7 @@
             :loading="orderStore.loading"
             responsiveLayout="scroll"
             :rowClass="getRowClass"
+            @row-click="(e) => viewOrderDetails(e.data)"
           >
             <template #empty>
               <div class="text-center py-8">
@@ -329,7 +329,9 @@
                     <span class="order-card-label">{{
                       t("orderManagement.department")
                     }}</span>
-                    <span class="order-card-value">{{ getDepartmentLabel(order.account?.department) }}</span>
+                    <span class="order-card-value">{{
+                      getDepartmentLabel(order.account?.department)
+                    }}</span>
                   </div>
                   <div class="order-card-row">
                     <i class="pi pi-box text-gray-400"></i>
@@ -551,15 +553,15 @@
                   </p>
                 </div>
                 <Button
-                    icon="pi pi-eye"
-                    text
-                    rounded
-                    size="small"
-                    severity="info"
-                    class="ml-auto shrink-0"
-                    @click="showItemDetail($event, data)"
-                    :title="t('orderManagement.orderDetail.viewPurpose')"
-                  />
+                  icon="pi pi-eye"
+                  text
+                  rounded
+                  size="small"
+                  severity="info"
+                  class="ml-auto shrink-0"
+                  @click="showItemDetail($event, data)"
+                  :title="t('orderManagement.orderDetail.viewPurpose')"
+                />
               </div>
 
               <!-- Price Info Row -->
@@ -1166,54 +1168,63 @@
                 </Dropdown>
               </div>
 
-        
-        <div class="grid grid-cols-2 gap-3 items-end">
-          <!-- Quantity -->
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <label class="text-sm font-medium text-gray-700">
-                {{ t('common.form.quantity') }}
-              </label>
-            </div>
-            <small v-if="item.itemId" class="text-gray-500 text-xs block mb-1">
-              {{ t('common.form.stockRemaining', { n: getStockQty(item.itemId) }) }}
-              {{ getSelectedItemUnit(item.itemId) }}
-            </small>
-            <small
-              v-if="item.itemId && item.quantity > getStockQty(item.itemId)"
-              class="text-red-500 text-xs block mb-1"
-            >
-              {{ t('common.form.exceedStock') }}
-            </small>
-            <InputNumber
-              v-model="item.quantity"
-              :min="1"
-              :max="getStockQty(item.itemId)"
-              showButtons
-              class="w-full"
-            />
-          </div>
+              <div class="grid grid-cols-2 gap-3 items-end">
+                <!-- Quantity -->
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <label class="text-sm font-medium text-gray-700">
+                      {{ t("common.form.quantity") }}
+                    </label>
+                  </div>
+                  <small
+                    v-if="item.itemId"
+                    class="text-gray-500 text-xs block mb-1"
+                  >
+                    {{
+                      t("common.form.stockRemaining", {
+                        n: getStockQty(item.itemId),
+                      })
+                    }}
+                    {{ getSelectedItemUnit(item.itemId) }}
+                  </small>
+                  <small
+                    v-if="
+                      item.itemId && item.quantity > getStockQty(item.itemId)
+                    "
+                    class="text-red-500 text-xs block mb-1"
+                  >
+                    {{ t("common.form.exceedStock") }}
+                  </small>
+                  <InputNumber
+                    v-model="item.quantity"
+                    :min="1"
+                    :max="getStockQty(item.itemId)"
+                    showButtons
+                    class="w-full"
+                  />
+                </div>
 
-          <!-- Subtotal -->
-          <div>
-            <label class="text-sm font-medium text-gray-700 block mb-2">
-              {{ t('common.form.subtotal') }}
-            </label>
-            <div class="h-10 flex items-center">
-              <Chip
-                v-if="item.itemId && item.quantity > 0"
-                :label="`${getItemSubtotal(item.itemId, item.quantity).toLocaleString('vi-VN')} VND`"
-                class="bg-green-100 text-green-700 font-bold text-xs"
-              />
-              <span v-else class="text-gray-400 text-sm">---</span>
-            </div>
-          </div>
-        </div>
+                <!-- Subtotal -->
+                <div>
+                  <label class="text-sm font-medium text-gray-700 block mb-2">
+                    {{ t("common.form.subtotal") }}
+                  </label>
+                  <div class="h-10 flex items-center">
+                    <Chip
+                      v-if="item.itemId && item.quantity > 0"
+                      :label="`${getItemSubtotal(item.itemId, item.quantity).toLocaleString('vi-VN')} VND`"
+                      class="bg-green-100 text-green-700 font-bold text-xs"
+                    />
+                    <span v-else class="text-gray-400 text-sm">---</span>
+                  </div>
+                </div>
+              </div>
 
               <!-- Note (mục đích sử dụng) -->
               <div class="mt-3!">
                 <label class="text-sm font-medium text-gray-700 block mb-2">
-                  {{ t('common.form.purposeNote') }} <span class="text-red-500">*</span>
+                  {{ t("common.form.purposeNote") }}
+                  <span class="text-red-500">*</span>
                 </label>
                 <InputText
                   v-model="item.note"
@@ -1225,7 +1236,8 @@
               <!-- Time Used -->
               <div class="mt-3!">
                 <label class="text-sm font-medium text-gray-700 block mb-2">
-                  {{ t('common.form.timeUsed') }} <span class="text-red-500">*</span>
+                  {{ t("common.form.timeUsed") }}
+                  <span class="text-red-500">*</span>
                 </label>
                 <div class="flex lg:flex-row md:flex-row flex-col gap-2">
                   <InputNumber
@@ -1312,17 +1324,24 @@
         </p>
         <div class="flex flex-col gap-2 mt-2!">
           <div>
-            <p class="text-xs text-gray-500 mb-1!">{{ t('common.form.purposeNote') }}</p>
-            <p class="text-sm font-medium text-gray-800">{{ selectedItemDetail.note }}</p>
+            <p class="text-xs text-gray-500 mb-1!">
+              {{ t("common.form.purposeNote") }}
+            </p>
+            <p class="text-sm font-medium text-gray-800">
+              {{ selectedItemDetail.note }}
+            </p>
           </div>
           <div>
-            <p class="text-xs text-gray-500 mb-1!">{{ t('common.form.timeUsed') }}</p>
-            <p class="text-sm font-medium text-gray-800">{{ selectedItemDetail.timeUsed }}</p>
+            <p class="text-xs text-gray-500 mb-1!">
+              {{ t("common.form.timeUsed") }}
+            </p>
+            <p class="text-sm font-medium text-gray-800">
+              {{ selectedItemDetail.timeUsed }}
+            </p>
           </div>
         </div>
       </div>
     </Popover>
-    <Toast />
   </MainLayout>
 </template>
 
@@ -1356,7 +1375,7 @@ import { useImagePreview } from "@/composables/useImagePreview";
 import { usePagination } from "@/composables/usePagination";
 import AppPagination from "@/components/AppPagination.vue";
 import { useI18n } from "vue-i18n";
-import Popover from 'primevue/popover'
+import Popover from "primevue/popover";
 
 const { t } = useI18n();
 const imagePreview = useImagePreview();
@@ -1377,17 +1396,21 @@ const selectedDepartment = ref<string | null>(null);
 const isTableMobile = ref(window.innerWidth < 768);
 const cameraFileInput = ref<HTMLInputElement | null>(null);
 const pendingImageTimestamps = ref<string[]>([]);
-const detailPopover = ref()
-const selectedItemDetail = ref<{ note: string; timeUsed: string; itemName: string } | null>(null)
+const detailPopover = ref();
+const selectedItemDetail = ref<{
+  note: string;
+  timeUsed: string;
+  itemName: string;
+} | null>(null);
 
 const showItemDetail = (event: Event, data: OrderDetail) => {
   selectedItemDetail.value = {
-    note: data.note || '-',
-    timeUsed: data.timeUsed || '-',
+    note: data.note || "-",
+    timeUsed: data.timeUsed || "-",
     itemName: getItemName(data.item),
-  }
-  detailPopover.value.toggle(event)
-}
+  };
+  detailPopover.value.toggle(event);
+};
 const handleTableResize = () => {
   isTableMobile.value = window.innerWidth < 768;
 };
@@ -1410,15 +1433,15 @@ const departmentOptions = computed(() => [
 ]);
 
 const timeUnitOptions = computed(() => [
-  { label: t('common.form.timeUnit.day'), value: 'day' },
-  { label: t('common.form.timeUnit.week'), value: 'week' },
-  { label: t('common.form.timeUnit.month'), value: 'month' },
-])
+  { label: t("common.form.timeUnit.day"), value: "day" },
+  { label: t("common.form.timeUnit.week"), value: "week" },
+  { label: t("common.form.timeUnit.month"), value: "month" },
+]);
 
 // Helper: value từ API → label đã dịch
 const getDepartmentLabel = (value: string): string => {
-  return departmentOptions.value.find(d => d.value === value)?.label ?? value
-}
+  return departmentOptions.value.find((d) => d.value === value)?.label ?? value;
+};
 
 // paste hình ảnh từ window shift S
 const handleGlobalPaste = async (event: ClipboardEvent) => {
@@ -1444,30 +1467,52 @@ const handleGlobalPaste = async (event: ClipboardEvent) => {
     const file = item.getAsFile();
     if (!file) continue;
     if (file.size > maxSize) {
-      toast.add({ severity: "warn", summary: t("orderManagement.common.warning"), detail: t("orderManagement.common.toast.fileTooLarge"), life: 3000 });
+      toast.add({
+        severity: "warn",
+        summary: t("orderManagement.common.warning"),
+        detail: t("orderManagement.common.toast.fileTooLarge"),
+        life: 3000,
+      });
       continue;
     }
 
     const now = new Date();
-    const timestamp = now.toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    const ext = item.type === "image/jpeg" ? "jpg" : item.type.split("/")[1] || "png";
-    const newName = `paste_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}_${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}${String(now.getSeconds()).padStart(2,"0")}.${ext}`;
+    const timestamp = now.toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    const ext =
+      item.type === "image/jpeg" ? "jpg" : item.type.split("/")[1] || "png";
+    const newName = `paste_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}.${ext}`;
 
-    const watermarked = await addTimestampToImage(new File([file], newName, { type: item.type }), timestamp);
+    const watermarked = await addTimestampToImage(
+      new File([file], newName, { type: item.type }),
+      timestamp,
+    );
     pendingImages.value.push(watermarked);
     pendingImageTimestamps.value.push(timestamp);
 
     await new Promise<void>((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
-        if (e.target?.result) pendingImagePreviews.value.push(e.target.result as string);
+        if (e.target?.result)
+          pendingImagePreviews.value.push(e.target.result as string);
         resolve();
       };
       reader.onerror = () => resolve();
       reader.readAsDataURL(watermarked);
     });
 
-    toast.add({ severity: "success", summary: t("orderManagement.common.success"), detail: "Đã dán ảnh từ clipboard", life: 2000 });
+    toast.add({
+      severity: "success",
+      summary: t("orderManagement.common.success"),
+      detail: "Đã dán ảnh từ clipboard",
+      life: 2000,
+    });
   }
 };
 
@@ -1638,17 +1683,17 @@ const updateForm = ref({
 
 // Create Order Form
 interface CreateOrderItem {
-  itemId: number
-  quantity: number
-  note: string
-  timeUsed: string
-  timeUsedUnit: 'day' | 'week' | 'month'
+  itemId: number;
+  quantity: number;
+  note: string;
+  timeUsed: string;
+  timeUsedUnit: "day" | "week" | "month";
 }
 
 const createOrderForm = ref({
   nameWorker: "",
   items: [] as CreateOrderItem[],
-})
+});
 const availableItems = computed(() => {
   if (!itemStore.items?.length) return [];
 
@@ -1661,7 +1706,7 @@ const availableItems = computed(() => {
     price: item.price || 0,
     itemIndentifyId: item.itemIndentifyId,
     image: item.picture?.length ? getItemImageUrl(item.picture[0]) : null,
-    specifications: item.eng?.description || item.com?.specifications || null, 
+    specifications: item.eng?.description || item.com?.specifications || null,
   }));
 });
 
@@ -1679,7 +1724,7 @@ const isFormValid = computed(() => {
         item.timeUsed !== "" &&
         item.timeUsedUnit !== "",
     )
-  )
+  );
 });
 
 // Total quantity
@@ -2072,7 +2117,7 @@ const addItemRow = () => {
     note: "",
     timeUsed: "",
     timeUsedUnit: "day",
-  })
+  });
 };
 
 const removeItemRow = (index: number) => {
