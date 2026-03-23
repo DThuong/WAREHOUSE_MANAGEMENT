@@ -231,7 +231,8 @@
       "hop": "Box",
       "bich": "Bag",
       "kg": "Kilogram",
-      "cuon": "Roll"
+      "cuon": "Roll",
+      "doi": "pair"
     },
     "title": "Warehouse",
     "subtitle": "Manage product inventory",

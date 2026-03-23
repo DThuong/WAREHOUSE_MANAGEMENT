@@ -22,6 +22,7 @@ export function useTranslationHelpers() {
     { label: t('inventoryManagement.units.bich'), value: 'bịch' },
     { label: t('inventoryManagement.units.kg'), value: 'kg' },
     { label: t('inventoryManagement.units.cuon'), value: 'cuộn' },
+    { label: t('inventoryManagement.units.doi'), value: 'đôi' },
   ])
 
   const typeOptions = computed(() => [
