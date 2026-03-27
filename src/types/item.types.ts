@@ -15,10 +15,12 @@ export interface ComItem {
 
 export interface Item {
   id?: number
+  itemIndentifyId?: string
   type: string
   saveQuantity: number
   price: string
   unit: string
+  stockPrice: number
   stockQty: number
   picture: string[]
   eng?: EngItem
@@ -50,6 +52,7 @@ export interface UpdateItemRequest {
 export interface UsedInRangeItem {
   itemId: number
   totalOrdered: number
+  totalStockIn: number
   item: Item
 }
 
