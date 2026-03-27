@@ -713,7 +713,8 @@
         "status": "Trạng thái",
         "unitPrice": "Đơn giá",
         "inventoryValue": "Giá trị tồn",
-        "orderCount": "Số lần order"
+        "orderCount": "Số lượng order",
+        "stockInCount": "Số lượng nhập"
       },
       "stockStatus": {
         "normal": "Còn hàng",

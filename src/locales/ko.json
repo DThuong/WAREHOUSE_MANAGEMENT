@@ -713,7 +713,8 @@
         "status": "상태",
         "unitPrice": "단가",
         "inventoryValue": "재고 가치",
-        "orderCount": "주문 횟수"
+        "orderCount": "주문 횟수",
+        "stockInCount": "입고 횟수"
       },
       "stockStatus": {
         "normal": "재고 있음",

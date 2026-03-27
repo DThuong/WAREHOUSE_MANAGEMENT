@@ -71,7 +71,7 @@
             >
               <div class="flex items-center">
                 <span class="text-lg font-semibold text-gray-900">
-                  Tổng: {{ totalItems }} phiếu nhập
+                  {{ t("importManagement.summary.total", { count: totalItems })  }}
                 </span>
               </div>
               <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
@@ -117,83 +117,224 @@
                 v-for="stockin in paginatedStockins"
                 :key="stockin.id"
                 class="stockin-card"
-                @click="viewDetail(stockin)"
               >
-                <div class="stockin-card-header">
-                  <span class="stockin-card-id">#{{ stockin.id }}</span>
-                  <span class="stockin-card-date">{{
-                    formatDate(stockin.stockInDate)
-                  }}</span>
-                </div>
-                <div class="stockin-card-body">
-                  <div class="stockin-card-row">
-                    <i class="pi pi-user text-gray-400"></i>
-                    <span class="stockin-card-label">{{
-                      t("importManagement.card.createdBy")
-                    }}</span>
-                    <span class="stockin-card-value">{{
-                      stockin.account?.username || "-"
+                <!-- ===== MOBILE: giữ nguyên layout cũ ===== -->
+                <template v-if="isTableMobile">
+                  <div class="stockin-card-header">
+                    <span class="stockin-card-id">#{{ stockin.id }}</span>
+                    <span class="stockin-card-date">{{
+                      formatDate(stockin.stockInDate)
                     }}</span>
                   </div>
-                  <div class="stockin-card-row">
-                    <i class="pi pi-box text-gray-400"></i>
-                    <span class="stockin-card-label">{{
-                      t("importManagement.card.products")
-                    }}</span>
-                    <span class="stockin-card-value">{{
-                      t("importManagement.card.productCount", {
-                        count: stockin.stockInDetails?.length || 0,
-                      })
-                    }}</span>
+                  <div class="stockin-card-body">
+                    <div class="stockin-card-row">
+                      <i class="pi pi-user text-gray-400"></i>
+                      <span class="stockin-card-label">{{
+                        t("importManagement.card.createdBy")
+                      }}</span>
+                      <span class="stockin-card-value">{{
+                        stockin.account?.username || "-"
+                      }}</span>
+                    </div>
+                    <div class="stockin-card-row">
+                      <i class="pi pi-box text-gray-400"></i>
+                      <span class="stockin-card-label">{{
+                        t("importManagement.card.products")
+                      }}</span>
+                      <span class="stockin-card-value">{{
+                        t("importManagement.card.productCount", {
+                          count: stockin.stockInDetails?.length || 0,
+                        })
+                      }}</span>
+                    </div>
+                    <div class="stockin-card-row">
+                      <i class="pi pi-images text-gray-400"></i>
+                      <span class="stockin-card-label">{{
+                        t("importManagement.card.images")
+                      }}</span>
+                      <span class="stockin-card-value">{{
+                        t("importManagement.card.imageCount", {
+                          count: stockin.image?.length || 0,
+                        })
+                      }}</span>
+                    </div>
+                    <div v-if="stockin.note" class="stockin-card-row">
+                      <i class="pi pi-file-edit text-gray-400"></i>
+                      <span class="stockin-card-label">{{
+                        t("importManagement.card.note")
+                      }}</span>
+                      <span class="stockin-card-value truncate">{{
+                        stockin.note
+                      }}</span>
+                    </div>
                   </div>
-                  <div class="stockin-card-row">
-                    <i class="pi pi-images text-gray-400"></i>
-                    <span class="stockin-card-label">{{
-                      t("importManagement.card.images")
-                    }}</span>
-                    <span class="stockin-card-value">{{
-                      t("importManagement.card.imageCount", {
-                        count: stockin.image?.length || 0,
-                      })
-                    }}</span>
+                  <div class="stockin-card-footer" @click.stop>
+                    <Button
+                      icon="pi pi-eye"
+                      :label="t('importManagement.card.detail')"
+                      text
+                      size="small"
+                      severity="info"
+                      @click="viewDetail(stockin)"
+                    />
+                    <Button
+                      icon="pi pi-images"
+                      :label="t('importManagement.card.images_btn')"
+                      text
+                      size="small"
+                      severity="secondary"
+                      @click="viewImages(stockin)"
+                    />
+                    <Button
+                      icon="pi pi-trash"
+                      :label="t('importManagement.card.delete')"
+                      text
+                      size="small"
+                      severity="danger"
+                      disabled="true"
+                      @click="confirmDelete(stockin)"
+                    />
                   </div>
-                  <div v-if="stockin.note" class="stockin-card-row">
-                    <i class="pi pi-file-edit text-gray-400"></i>
-                    <span class="stockin-card-label">{{
-                      t("importManagement.card.note")
-                    }}</span>
-                    <span class="stockin-card-value truncate">{{
-                      stockin.note
-                    }}</span>
+                </template>
+
+                <!-- ===== DESKTOP: layout mới 2 cột ===== -->
+                <template v-else>
+                  <div class="stockin-desktop-card">
+                    <!-- Cột trái: id, ngày, người tạo → click xem chi tiết -->
+                    <div
+                      class="stockin-desktop-left"
+                      @click="viewDetail(stockin)"
+                    >
+                      <div class="stockin-desktop-meta">
+                        <div class="stockin-desktop-id">#{{ stockin.id }}</div>
+                        <div class="stockin-desktop-date">
+                          <i class="pi pi-calendar text-gray-400"></i>
+                          {{ formatDate(stockin.stockInDate) }}
+                        </div>
+                        <div class="stockin-desktop-creator">
+                          <i class="pi pi-user text-gray-400"></i>
+                          {{ stockin.account?.username || "-" }}
+                        </div>
+                        <div class="stockin-desktop-counts">
+                          <span class="stockin-count-badge">
+                            <i class="pi pi-box"></i>
+                            {{ stockin.stockInDetails?.length || 0 }}
+                          </span>
+                          <span class="stockin-count-badge">
+                            <i class="pi pi-images"></i>
+                            {{ stockin.image?.length || 0 }}
+                          </span>
+                        </div>
+                        <div v-if="stockin.note" class="stockin-desktop-note">
+                          <i class="pi pi-file-edit text-gray-400"></i>
+                          <span class="truncate">{{ stockin.note }}</span>
+                        </div>
+                      </div>
+                      <div class="stockin-desktop-right-hint">
+                        <i class="pi pi-eye"></i>
+                      </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="stockin-desktop-divider"></div>
+
+                    <!-- Cột phải: ảnh + thông tin sản phẩm → click xem ảnh -->
+                    <div
+                      class="stockin-desktop-right"
+                      @click="viewImages(stockin)"
+                    >
+                      <div class="stockin-desktop-images" @click.stop>
+                        <template
+                          v-if="stockin.image && stockin.image.length > 0"
+                        >
+                          <div
+                            v-if="stockin.image.length === 1"
+                            class="stockin-desktop-thumb stockin-thumb-full"
+                            @click="openImagePreview(stockin, stockin.image[0])"
+                          >
+                            <img :src="getImageUrl(stockin.image[0])" alt="" />
+                          </div>
+                          <template v-else-if="stockin.image.length === 2">
+                            <div
+                              v-for="(img, idx) in stockin.image"
+                              :key="idx"
+                              class="stockin-desktop-thumb stockin-thumb-half"
+                              @click="openImagePreview(stockin, img)"
+                            >
+                              <img :src="getImageUrl(img)" alt="" />
+                            </div>
+                          </template>
+                          <template v-else>
+                            <div
+                              v-for="(img, idx) in stockin.image.slice(0, 4)"
+                              :key="idx"
+                              class="stockin-desktop-thumb"
+                              :class="{
+                                'stockin-desktop-thumb-more':
+                                  idx === 3 && stockin.image.length > 4,
+                              }"
+                              @click="openImagePreview(stockin, img)"
+                            >
+                              <img :src="getImageUrl(img)" alt="" />
+                              <div
+                                v-if="idx === 3 && stockin.image.length > 4"
+                                class="stockin-thumb-overlay"
+                              >
+                                +{{ stockin.image.length - 4 }}
+                              </div>
+                            </div>
+                          </template>
+                        </template>
+                        <div
+                          v-else
+                          class="stockin-desktop-no-img"
+                          @click.stop="viewImages(stockin)"
+                        >
+                          <i
+                            class="pi pi-images text-gray-300"
+                            style="font-size: 2rem"
+                          ></i>
+                        </div>
+                      </div>
+                      <div class="stockin-desktop-product-info">
+                        <template v-if="stockin.stockInDetails?.length">
+                          <div
+                            v-for="(
+                              detail, idx
+                            ) in stockin.stockInDetails.slice(0, 3)"
+                            :key="idx"
+                            class="stockin-desktop-product-row"
+                          >
+                            <span class="stockin-desktop-product-name">{{
+                              getDetailItemName(detail.item)
+                            }}</span>
+                            <span class="stockin-desktop-product-type">{{
+                              detail.item?.type || "-"
+                            }}</span>
+                            <span class="stockin-desktop-product-qty"
+                              >+{{ detail.quantity }}
+                              {{ detail.item?.unit || "" }}</span
+                            >
+                          </div>
+                          <div
+                            v-if="stockin.stockInDetails.length > 3"
+                            class="stockin-desktop-more-products"
+                          >
+                            +{{ stockin.stockInDetails.length - 3 }}
+                            {{ t("importManagement.card.products") }} khác
+                          </div>
+                        </template>
+                        <div v-else class="text-gray-400 text-sm">
+                          Không có sản phẩm
+                        </div>
+                      </div>
+                      <div class="stockin-desktop-left-hint">
+                        <i class="pi pi-images"></i>
+                        {{ t("importManagement.card.images_btn") }}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div class="stockin-card-footer" @click.stop>
-                  <Button
-                    icon="pi pi-eye"
-                    :label="t('importManagement.card.detail')"
-                    text
-                    size="small"
-                    severity="info"
-                    @click="viewDetail(stockin)"
-                  />
-                  <Button
-                    icon="pi pi-images"
-                    :label="t('importManagement.card.images_btn')"
-                    text
-                    size="small"
-                    severity="secondary"
-                    @click="viewImages(stockin)"
-                  />
-                  <Button
-                    icon="pi pi-trash"
-                    :label="t('importManagement.card.delete')"
-                    text
-                    size="small"
-                    severity="danger"
-                    disabled="true"
-                    @click="confirmDelete(stockin)"
-                  />
-                </div>
+                </template>
               </div>
             </div>
           </div>
@@ -813,7 +954,7 @@
                 }}</span>
               </div>
             </div>
-            <div class="flex flex-col items-center justify-center py-6">
+            <div class="flex flex-col items-center justify-center p-4!">
               <i class="pi pi-cloud-upload text-4xl text-gray-400 mb-2"></i>
               <p class="text-gray-600 text-sm font-medium mb-1">
                 {{ t("importManagement.imageDialog.dropzone") }}
@@ -1087,6 +1228,12 @@ const handleCreateImageUpload = async (event: Event) => {
   }
 
   if (createImageFileInput.value) createImageFileInput.value.value = "";
+};
+
+const openImagePreview = (stockin: Stockin, clickedImg: string) => {
+  const fullUrls = (stockin.image || []).map((img) => getImageUrl(img));
+  const clickedUrl = getImageUrl(clickedImg);
+  imagePreview.open(clickedUrl, fullUrls);
 };
 
 const handleDialogPaste = async (event: ClipboardEvent) => {
@@ -2032,7 +2179,6 @@ watch(isTableMobile, (mobile) => {
   border-radius: 12px;
   background: white;
   overflow: hidden;
-  cursor: pointer;
   transition: box-shadow 0.2s;
 }
 
@@ -2090,6 +2236,253 @@ watch(isTableMobile, (mobile) => {
   padding: 0.5rem 0.75rem;
   border-top: 1px solid #f3f4f6;
   background: #fafafa;
+}
+
+/* ===== DESKTOP CARD ===== */
+.stockin-desktop-card {
+  display: flex;
+  height: 160px;
+  cursor: default;
+}
+
+/* Cột trái */
+.stockin-desktop-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  transition: background 0.18s;
+  position: relative;
+  border-radius: 12px 0 0 12px;
+}
+
+.stockin-desktop-left:hover {
+  background: #f0f9ff;
+}
+
+.stockin-desktop-left-hint {
+  position: absolute;
+  bottom: 0.6rem;
+  right: 1rem;
+  font-size: 0.7rem;
+  color: #93c5fd;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+
+.stockin-desktop-left:hover .stockin-desktop-left-hint {
+  opacity: 1;
+}
+
+/** Ảnh thumbnails */
+.stockin-desktop-images {
+  display: grid;
+  grid-template-columns: repeat(2, 56px);
+  grid-template-rows: repeat(2, 56px);
+  gap: 4px;
+  flex-shrink: 0;
+  width: 116px;
+  height: 116px;
+}
+
+/* 1 ảnh: chiếm full 116x116 */
+.stockin-thumb-full {
+  grid-column: 1 / 3;
+  grid-row: 1 / 3;
+  width: 116px !important;
+  height: 116px !important;
+}
+
+/* 2 ảnh: mỗi ảnh chiếm 1 cột, full chiều cao */
+.stockin-thumb-half {
+  grid-row: 1 / 3;
+  width: 56px !important;
+  height: 116px !important;
+}
+
+.stockin-desktop-thumb {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.stockin-desktop-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stockin-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-weight: 700;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stockin-desktop-no-img {
+  width: 116px;
+  height: 116px;
+  border-radius: 8px;
+  background: #f9fafb;
+  border: 2px dashed #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Danh sách sản phẩm */
+.stockin-desktop-product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow: hidden;
+}
+
+.stockin-desktop-product-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.stockin-desktop-product-name {
+  font-weight: 600;
+  color: #111827;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stockin-desktop-product-type {
+  font-size: 0.72rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #f3f4f6;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.stockin-desktop-product-qty {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.stockin-desktop-more-products {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* Divider */
+.stockin-desktop-divider {
+  width: 1px;
+  background: #e5e7eb;
+  margin: 1rem 0;
+}
+
+/* Cột phải */
+.stockin-desktop-right {
+  width: 40%;
+  flex-shrink: 0;
+  padding: 1rem 1.25rem 1rem 1.5rem;  /* ← thêm padding trái nhiều hơn */
+  cursor: pointer;
+  transition: background 0.18s;
+  position: relative;
+  border-radius: 0 12px 12px 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;    
+  gap: 1rem;       
+  justify-content: space-between;
+}
+
+.stockin-desktop-right:hover {
+  background: #f5f3ff;
+}
+
+.stockin-desktop-right-hint {
+  font-size: 0.7rem;
+  color: #a78bfa;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.18s;
+}
+
+.stockin-desktop-right:hover .stockin-desktop-right-hint {
+  opacity: 1;
+}
+
+.stockin-desktop-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.stockin-desktop-id {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.stockin-desktop-date,
+.stockin-desktop-creator {
+  font-size: 0.85rem;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.stockin-desktop-counts {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.stockin-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.stockin-desktop-note {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  overflow: hidden;
+}
+
+.stockin-desktop-note span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ── Dropdown fix mobile ── */

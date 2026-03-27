@@ -711,7 +711,8 @@
         "status": "Status",
         "unitPrice": "Unit Price",
         "inventoryValue": "Inventory Value",
-        "orderCount": "Order Count"
+        "orderCount": "Order Count",
+        "stockInCount": "Stock In Count"
       },
       "stockStatus": {
         "normal": "In Stock",

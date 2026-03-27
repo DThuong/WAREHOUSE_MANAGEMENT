@@ -312,13 +312,8 @@
           </div>
         </div>
 
-        <!-- Loading -->
-        <div v-if="loading" style="text-align: center; padding: 3rem">
-          <ProgressSpinner />
-        </div>
-
         <!-- Data Table -->
-        <div v-else>
+        <div>
           <h3
             style="font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem"
           >
@@ -420,6 +415,16 @@
                   "
                 >
                   {{ t("reports.inventoryReport.table.orderCount") }}
+                </th>
+                <!-- Số lần nhập -->
+                <th
+                  style="
+                    padding: 0.75rem;
+                    text-align: center;
+                    border: 1px solid #e5e7eb;
+                  "
+                >
+                  {{ t("reports.inventoryReport.table.stockInCount") }}
                 </th>
               </tr>
             </thead>
@@ -553,11 +558,7 @@
                   "
                 >
                   <strong>
-                    {{
-                      formatCurrency(
-                        item.stockQty * parseFloat(item.price || "0"),
-                      )
-                    }}
+                    {{ formatCurrency(parseFloat(item.stockPrice || "0")) }}
                   </strong>
                 </td>
 
@@ -580,6 +581,28 @@
                     }"
                   >
                     {{ item.totalOrdered || 0 }}
+                  </span>
+                </td>
+
+                <!-- Số lần nhập kho -->
+                <td
+                  style="
+                    padding: 0.75rem;
+                    border: 1px solid #e5e7eb;
+                    text-align: center;
+                  "
+                >
+                  <span
+                    :style="{
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '12px',
+                      fontSize: '0.875rem',
+                      fontWeight: '700',
+                      background: item.totalStockIn > 0 ? '#d1fae5' : '#f3f4f6',
+                      color: item.totalStockIn > 0 ? '#065f46' : '#6b7280',
+                    }"
+                  >
+                    {{ item.totalStockIn || 0 }}
                   </span>
                 </td>
               </tr>
@@ -649,8 +672,6 @@ import { useRouter } from "vue-router";
 import MainLayout from "@/components/MainLayout.vue";
 import Dropdown from "primevue/dropdown";
 import InputText from "primevue/inputtext";
-import ProgressSpinner from "primevue/progressspinner";
-import { useItemStore } from "@/stores/itemStore";
 import { useDashboardStore } from "@/stores/dashboard";
 import { itemAPI } from "@/services/itemAPI";
 import type { UsedInRangeItem } from "@/types/item.types";
@@ -659,13 +680,10 @@ import { useI18n } from "vue-i18n";
 import { useTranslationHelpers } from "@/composables/useTranslationHelpers";
 
 const router = useRouter();
-const itemStore = useItemStore();
 const dashboardStore = useDashboardStore();
 const { t } = useI18n();
 const { getUnitLabel, typeOptions, stockStatusOptions, getStockStatusLabel } =
   useTranslationHelpers();
-
-const loading = ref(false);
 // filter 1 sản phẩm trong tất cả các đơn hàng có trạng thái Completed
 const usedInRangeData = ref<UsedInRangeItem[]>([]);
 const dateRange = ref({
@@ -698,19 +716,6 @@ const selectedType = ref<string | null>(null);
 const selectedStockStatus = ref<string | null>(null);
 const searchQuery = ref("");
 
-// Load data
-const loadData = async () => {
-  loading.value = true;
-  try {
-    const data = await itemAPI.getAll();
-    itemStore.setItems(data);
-  } catch (error) {
-    console.error("Error loading items:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
 // Reset filter
 const resetFilter = () => {
   selectedType.value = null;
@@ -722,19 +727,8 @@ const resetFilter = () => {
   };
 };
 
-// Helper để lấy totalOrdered từ usedInRangeData
-const getItemOrderCount = (itemId: number): number => {
-  const found = usedInRangeData.value.find((x) => x.itemId === itemId);
-  return found?.totalOrdered || 0;
-};
-
 // Merge filteredItems với order count
-const itemsWithOrderCount = computed(() => {
-  return filteredItems.value.map((item) => ({
-    ...item,
-    totalOrdered: getItemOrderCount(item.id || 0),
-  }));
-});
+const itemsWithOrderCount = computed(() => filteredItems.value);
 
 // ===== FILTERED ITEMS (Filter từ baseItems theo Stock Status) =====
 const filteredItems = computed(() => {
@@ -772,18 +766,20 @@ const filteredItems = computed(() => {
 
 // ===== BASE ITEMS (Bị ảnh hưởng bởi Type filter, KHÔNG bị ảnh hưởng bởi Stock Status filter) =====
 const baseItems = computed(() => {
-  if (!itemStore.items?.length) return [];
+  if (!usedInRangeData.value?.length) return [];
 
-  let items = itemStore.items;
+  let items = usedInRangeData.value.map((x) => ({
+    ...x.item, // spread toàn bộ item data lên trên
+    totalOrdered: x.totalOrdered,
+    totalStockIn: x.totalStockIn,
+  }));
 
-  // Chỉ filter theo Type
   if (selectedType.value === "ENG") {
     items = items.filter((item) => item.eng !== null);
   } else if (selectedType.value === "COM") {
     items = items.filter((item) => item.com !== null);
   }
 
-  // Chỉ filter theo Search Query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
     items = items.filter((item) => {
@@ -792,7 +788,6 @@ const baseItems = computed(() => {
         item.eng?.description || item.com?.specifications || "";
       const id = item.id?.toString() || "";
       const itemId = item.itemIndentifyId || "";
-
       return (
         name.toLowerCase().includes(query) ||
         description.toLowerCase().includes(query) ||
@@ -804,7 +799,6 @@ const baseItems = computed(() => {
 
   return items;
 });
-
 // ===== SUMMARY COUNTS (Tính từ baseItems - bị ảnh hưởng bởi Type & Search, KHÔNG bị ảnh hưởng bởi Stock Status) =====
 const totalItems = computed(() => baseItems.value.length);
 
@@ -909,7 +903,7 @@ const handleSummaryClick = (status: string | null) => {
 };
 
 onMounted(async () => {
-  await Promise.all([loadData(), loadUsedInRangeData()]);
+  await loadUsedInRangeData();
 });
 </script>
 
