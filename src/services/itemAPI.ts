@@ -3,7 +3,8 @@ import type {
   Item,
   CreateItemRequest, 
   UpdateItemRequest,
-  UsedInRangeItem
+  UsedInRangeItem,
+  DailyMovement
 } from '@/types/item.types'
 
 export const itemAPI = {
@@ -131,5 +132,16 @@ export const itemAPI = {
       console.error('Error loading used in range:', error)
       throw error
     }
+  },
+
+  getItemRange: async (fromDate: string, toDate: string): Promise<DailyMovement[]> => {
+  try {
+    return await api.get<DailyMovement[]>(`/api/Item/range`, {
+      params: { fromDate, toDate }
+    })
+  } catch (error: any) {
+    console.error('Error loading item range:', error)
+    return []
   }
+}
 }

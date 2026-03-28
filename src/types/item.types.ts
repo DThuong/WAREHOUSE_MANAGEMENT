@@ -61,3 +61,17 @@ export enum ItemCategory {
   ENGINEER = 'ENGINEER',
   CONSUMER = 'CONSUMER'
 }
+
+export interface DailyMovementItem {
+  itemId: number
+  totalOrdered: number
+  totalStockIn: number
+  openingStock: number
+  closingStock: number
+  item: Item
+}
+
+export interface DailyMovement {
+  date: string
+  items: DailyMovementItem[]
+}

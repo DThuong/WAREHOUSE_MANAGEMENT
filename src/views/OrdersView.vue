@@ -1363,7 +1363,6 @@ import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import InputNumber from "primevue/inputnumber";
-import Toast from "primevue/toast";
 import ConfirmDialog from "primevue/confirmdialog";
 import type { Order, OrderPendingRealtime } from "@/types/order.types";
 import Calendar from "primevue/calendar";
