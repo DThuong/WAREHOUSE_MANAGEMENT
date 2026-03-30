@@ -362,27 +362,28 @@ const getDefaultRange = (type: string) => {
 
 // ── Generate chunks — chỉ đến hôm nay ──────────────────
 // Với chế độ Tháng: luôn sinh đủ 12 tháng nhưng cắt tháng tương lai
-const generateTimeChunks = () => {
+const generateTimeChunks = (
+  timeType: string,
+  from: Date,
+  to: Date,
+) => {
   const chunks: { label: string; fromDate: Date; toDate: Date }[] = [];
   const todayEnd = getTodayEnd();
 
-  if (selectedTime.value === "Ngày") {
-    const from = new Date(fromDate.value); from.setHours(0, 0, 0, 0);
-    const effectiveTo = toDate.value > todayEnd ? new Date(todayEnd) : new Date(toDate.value);
+  if (timeType === "Ngày") {
+    const start = new Date(from); start.setHours(0, 0, 0, 0);
+    const effectiveTo = to > todayEnd ? new Date(todayEnd) : new Date(to);
     effectiveTo.setHours(23, 59, 59, 999);
-    const cursor = new Date(from);
+    const cursor = new Date(start);
     while (cursor <= effectiveTo) {
-      chunks.push({
-        label: fmtDate(cursor),
-        fromDate: new Date(cursor),
-        toDate: (() => { const e = new Date(cursor); e.setHours(23, 59, 59, 999); return e; })(),
-      });
+      const s = new Date(cursor); s.setHours(0, 0, 0, 0);
+      const e = new Date(cursor); e.setHours(23, 59, 59, 999);
+      chunks.push({ label: fmtDate(cursor), fromDate: s, toDate: e });
       cursor.setDate(cursor.getDate() + 1);
     }
 
-  } else if (selectedTime.value === "Tuần") {
-    const from = new Date(fromDate.value);
-    const effectiveTo = toDate.value > todayEnd ? new Date(todayEnd) : new Date(toDate.value);
+  } else if (timeType === "Tuần") {
+    const effectiveTo = to > todayEnd ? new Date(todayEnd) : new Date(to);
     const cursor = new Date(from);
     const dow = cursor.getDay();
     const diffToMon = dow === 0 ? -6 : 1 - dow;
@@ -407,10 +408,8 @@ const generateTimeChunks = () => {
       chunks.push({ label: `T${m + 1}/${year}`, fromDate: start, toDate: chunkTo });
     }
   }
-
   return chunks;
 };
-
 // ── Items trend: tính closingStock ───────────────────────
 const computeItemClosingStockAt = (toDate: Date, itemId: number): number => {
   if (!rawData.value.length) {
@@ -441,7 +440,7 @@ const computeItemClosingStockAt = (toDate: Date, itemId: number): number => {
 
 // ── TOTAL TREND ───────────────────────────────────────────
 const loadTotalTrend = async () => {
-  const chunks = generateTimeChunks();
+  const chunks = generateTimeChunks(selectedTime.value, fromDate.value, toDate.value);
   if (!chunks.length) { fullReportData.value = []; chartData.value = null; return; }
 
   const todayEnd = getTodayEnd();
@@ -472,7 +471,8 @@ const loadTotalTrend = async () => {
     // Phân nhỏ data theo từng chunk xử lý locally
     const chunkStockins = allStockins.filter((s: any) => {
       const d = new Date(s.stockInDate);
-      return d >= chunk.fromDate && d <= chunk.toDate;
+      // Dùng getTime() để so sánh timestamp chính xác
+      return d.getTime() >= chunk.fromDate.getTime() && d.getTime() <= chunk.toDate.getTime();
     });
     const chunkOrders = allOrders.filter((o: any) => {
       const d = new Date(o.orderDate);
@@ -490,17 +490,14 @@ const loadTotalTrend = async () => {
     };
   });
 
-  const hasStockIn = results.some(r => r.totalIn > 0);
-  const hasOrders = results.some(r => r.totalOut > 0);
-
   // Luôn hiển thị đủ tất cả các mốc (kể cả mốc = 0) để chart nhất quán giữa các chế độ
   fullReportData.value = results;
 
   chartData.value = {
     labels: results.map(r => r.label),
     datasets: [
-      ...(hasStockIn ? [{ label: "Số phiếu nhập", backgroundColor: "#3b82f6", ...DS, data: results.map(r => r.totalIn) }] : []),
-      ...(hasOrders ? [{ label: "Số đơn hoàn thành", backgroundColor: "#eab308", ...DS, data: results.map(r => r.totalOut) }] : []),
+      { label: "Số phiếu nhập", backgroundColor: "#3b82f6", ...DS, data: results.map(r => r.totalIn) },
+      { label: "Số đơn hoàn thành", backgroundColor: "#eab308", ...DS, data: results.map(r => r.totalOut) },
     ],
   };
 };
@@ -515,7 +512,7 @@ const loadItemsTrend = async () => {
 };
 
 const buildItemsChart = () => {
-  const chunks = generateTimeChunks();
+  const chunks = generateTimeChunks(selectedTime.value, fromDate.value, toDate.value);
   const trackedId = selectedItem.value?.id;
   if (!chunks.length || !trackedId) { fullReportData.value = []; chartData.value = null; return; }
 
@@ -546,14 +543,11 @@ const buildItemsChart = () => {
     };
   });
 
-  const hasStockIn = fullReportData.value.some(r => r.totalIn > 0);
-  const hasOrdered = fullReportData.value.some(r => r.totalOut > 0);
-
   chartData.value = {
     labels: fullReportData.value.map(r => r.label),
     datasets: [
-      ...(hasStockIn ? [{ label: "Nhập bao nhiêu", backgroundColor: "#3b82f6", ...DS, data: fullReportData.value.map(r => r.totalIn) }] : []),
-      ...(hasOrdered ? [{ label: "Sử dụng bao nhiêu", backgroundColor: "#eab308", ...DS, data: fullReportData.value.map(r => r.totalOut) }] : []),
+      { label: "Nhập bao nhiêu", backgroundColor: "#3b82f6", ...DS, data: fullReportData.value.map(r => r.totalIn) },
+      { label: "Sử dụng bao nhiêu", backgroundColor: "#eab308", ...DS, data: fullReportData.value.map(r => r.totalOut) },
       { label: "Còn lại (Tồn kho)", backgroundColor: "#10b981", ...DS, data: fullReportData.value.map(r => r.totalStock) },
     ],
   };
@@ -630,27 +624,24 @@ const onTimeTabClick = (opt: string) => {
   if (selectedTime.value === opt) return;
   selectedTime.value = opt;
   selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
+  chartData.value = null;
+
+  // Tính range mới
+  let newFrom: Date, newTo: Date;
   if (opt === "Tháng") {
     const today = new Date();
-    fromDate.value = new Date(today.getFullYear(), 0, 1, 0, 0, 0, 0);
-    toDate.value = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
+    newFrom = new Date(today.getFullYear(), 0, 1, 0, 0, 0, 0);
+    newTo = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
   } else {
     const range = getDefaultRange(opt);
-    fromDate.value = range.from; toDate.value = range.to;
+    newFrom = range.from; newTo = range.to;
   }
-  loadReportData();
-};
 
-const onTimeChange = () => {
-  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
-  if (selectedTime.value === "Tháng") {
-    const today = new Date();
-    fromDate.value = new Date(today.getFullYear(), 0, 1, 0, 0, 0, 0);
-    toDate.value = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
-  } else {
-    const range = getDefaultRange(selectedTime.value);
-    fromDate.value = range.from; toDate.value = range.to;
-  }
+  // Set ref trước
+  fromDate.value = newFrom;
+  toDate.value = newTo;
+
+  // Gọi load sau
   loadReportData();
 };
 
@@ -669,7 +660,11 @@ const onResetRange = () => {
 };
 
 const onTrendChange = () => {
-  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
+  selectedChartData.value = [];
+  selectedChunkLabel.value = "";
+  detailClickedCol.value = "";
+  chartData.value = null;  
+  rawData.value = [];   
   loadReportData();
 };
 
