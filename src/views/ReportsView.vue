@@ -149,7 +149,7 @@
                   <Column header="Ngày nhập"><template #body="{ data }">{{ formatDate(data.stockInDate) }}</template></Column>
                   <Column header="Người tạo"><template #body="{ data }">{{ data.account?.username || "-" }}</template></Column>
                   <Column header="Số loại SP" alignHeader="right">
-                    <template #body="{ data }"><div class="text-right font-semibold text-slate-700">{{ data.stockInDetails?.length || 0 }} loại</div></template>
+                    <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.stockInDetails?.length || 0 }} loại</div></template>
                   </Column>
                   <Column header="Ghi chú"><template #body="{ data }"><span class="text-slate-500 text-sm">{{ data.note || "-" }}</span></template></Column>
                 </DataTable>
@@ -167,7 +167,7 @@
                   <Column header="Người đặt"><template #body="{ data }">{{ data.nameWorker || data.account?.username || "-" }}</template></Column>
                   <Column header="Bộ phận"><template #body="{ data }">{{ data.account?.department || "-" }}</template></Column>
                   <Column header="Số loại SP" alignHeader="right">
-                    <template #body="{ data }"><div class="text-right font-semibold text-slate-700">{{ data.orderDetails?.length || 0 }} loại</div></template>
+                    <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.orderDetails?.length || 0 }} loại</div></template>
                   </Column>
                 </DataTable>
 
@@ -194,19 +194,19 @@
                   <Column alignHeader="right">
                     <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Nhập</div></template>
                     <template #body="{ data }">
-                      <div class="text-right font-bold text-blue-600">{{ formatNumber(data.totalStockIn) }}<span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
+                      <div class="text-right font-bold text-blue-600">{{ formatNumber(data.totalStockIn) }} <span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
                     </template>
                   </Column>
                   <Column alignHeader="right">
                     <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-yellow-500"></div> Sử dụng</div></template>
                     <template #body="{ data }">
-                      <div class="text-right font-bold text-yellow-600">{{ formatNumber(data.totalOrdered) }}<span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
+                      <div class="text-right font-bold text-yellow-600">{{ formatNumber(data.totalOrdered) }} <span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
                     </template>
                   </Column>
                   <Column alignHeader="right">
                     <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> Tồn kho</div></template>
                     <template #body="{ data }">
-                      <div class="text-right font-bold text-emerald-600">{{ formatNumber(data.stockQty) }}<span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
+                      <div class="text-right font-bold text-emerald-600">{{ formatNumber(data.stockQty) }} <span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
                     </template>
                   </Column>
                 </DataTable>
@@ -413,12 +413,24 @@ const generateTimeChunks = () => {
 
 // ── Items trend: tính closingStock ───────────────────────
 const computeItemClosingStockAt = (toDate: Date, itemId: number): number => {
-  if (!rawData.value.length) return 0;
-  let baseStock = 0;
+  if (!rawData.value.length) {
+    const currentItem = allItems.value.find(i => i.id === itemId);
+    return currentItem ? currentItem.stockQty : 0;
+  }
+
+  let baseStock: number | null = null;
   for (const day of rawData.value) {
     const found = day.items.find(i => i.itemId === itemId);
     if (found) { baseStock = found.openingStock; break; }
   }
+
+  // Nếu không tìm thấy MỘT RECORD NÀO của item này trong suốt thời gian qua
+  // -> Món này không có biến động. Tồn kho quá khứ = Tồn kho hiện tại.
+  if (baseStock === null) {
+    const currentItem = allItems.value.find(i => i.id === itemId);
+    return currentItem ? currentItem.stockQty : 0;
+  }
+
   let total = baseStock;
   rawData.value.filter(d => new Date(d.date) <= toDate).forEach(day => {
     const found = day.items.find(i => i.itemId === itemId);
@@ -433,19 +445,50 @@ const loadTotalTrend = async () => {
   if (!chunks.length) { fullReportData.value = []; chartData.value = null; return; }
 
   const todayEnd = getTodayEnd();
-  const results = await Promise.all(
-    chunks.map(async chunk => {
-      // Tháng tương lai (fromDate > hôm nay) → bỏ qua API, trả 0
-      if (chunk.fromDate > todayEnd) {
-        return { label: chunk.label, fromDate: chunk.fromDate, toDate: chunk.toDate, totalIn: 0, totalOut: 0 };
-      }
-      const [stockins, orders] = await Promise.all([
-        stockinAPI.filterStockin(fmtAPI(chunk.fromDate), fmtAPI(chunk.toDate)),
-        orderAPI.filterOrders({ fromDate: fmtAPI(chunk.fromDate), toDate: fmtAPI(chunk.toDate), status: "Completed" }),
-      ]);
-      return { label: chunk.label, fromDate: chunk.fromDate, toDate: chunk.toDate, totalIn: stockins.length, totalOut: orders.length };
-    })
-  );
+  const validChunks = chunks.filter(c => c.fromDate <= todayEnd);
+  
+  let allStockins: any[] = [];
+  let allOrders: any[] = [];
+
+  if (validChunks.length > 0) {
+    const overallFrom = validChunks[0].fromDate;
+    const overallTo = validChunks[validChunks.length - 1].toDate;
+    
+    // Gộp tất cả các khoảng thời gian lại fetch 1 lần duy nhất để tối ưu API (N+1 problem fix)
+    const [stockinsRes, ordersRes] = await Promise.all([
+      stockinAPI.filterStockin(fmtAPI(overallFrom), fmtAPI(overallTo)),
+      orderAPI.filterOrders({ fromDate: fmtAPI(overallFrom), toDate: fmtAPI(overallTo), status: "Completed" }),
+    ]);
+    allStockins = stockinsRes;
+    allOrders = ordersRes;
+  }
+
+  const results = chunks.map(chunk => {
+    // Tháng tương lai (fromDate > hôm nay) → trả 0
+    if (chunk.fromDate > todayEnd) {
+      return { label: chunk.label, fromDate: chunk.fromDate, toDate: chunk.toDate, totalIn: 0, totalOut: 0, rawStockins: [], rawOrders: [] };
+    }
+    
+    // Phân nhỏ data theo từng chunk xử lý locally
+    const chunkStockins = allStockins.filter((s: any) => {
+      const d = new Date(s.stockInDate);
+      return d >= chunk.fromDate && d <= chunk.toDate;
+    });
+    const chunkOrders = allOrders.filter((o: any) => {
+      const d = new Date(o.orderDate);
+      return d >= chunk.fromDate && d <= chunk.toDate;
+    });
+
+    return { 
+      label: chunk.label, 
+      fromDate: chunk.fromDate, 
+      toDate: chunk.toDate, 
+      totalIn: chunkStockins.length, 
+      totalOut: chunkOrders.length,
+      rawStockins: chunkStockins,
+      rawOrders: chunkOrders
+    };
+  });
 
   const hasStockIn = results.some(r => r.totalIn > 0);
   const hasOrders = results.some(r => r.totalOut > 0);
@@ -552,19 +595,15 @@ const onChartClick = async (event: any, elements: any[], chart: any) => {
   const label = chartData.value?.datasets?.[datasetIndex]?.label ?? "";
 
   if (selectedTrend.value === "Total trend") {
-    detailLoading.value = true; selectedChartData.value = [];
-    try {
-      const fromStr = fmtAPI(clickedChunk.fromDate);
-      const toStr = fmtAPI(clickedChunk.toDate);
-      if (label.includes("phiếu") || label.includes("nhập")) {
-        detailClickedCol.value = "stockin";
-        selectedChartData.value = await stockinAPI.filterStockin(fromStr, toStr);
-      } else if (label.includes("đơn") || label.includes("hoàn thành")) {
-        detailClickedCol.value = "order";
-        selectedChartData.value = await orderAPI.filterOrders({ fromDate: fromStr, toDate: toStr, status: "Completed" });
-      }
-    } catch (err) { console.error("Failed to load detail:", err); }
-    finally { detailLoading.value = false; }
+    selectedChartData.value = [];
+    // Sử dụng data lấy được từ lúc init thay vì gọi lại API
+    if (label.includes("phiếu") || label.includes("nhập")) {
+      detailClickedCol.value = "stockin";
+      selectedChartData.value = clickedChunk.rawStockins || [];
+    } else if (label.includes("đơn") || label.includes("hoàn thành")) {
+      detailClickedCol.value = "order";
+      selectedChartData.value = clickedChunk.rawOrders || [];
+    }
   } else {
     detailClickedCol.value = "items";
     const trackedId = selectedItem.value?.id;
