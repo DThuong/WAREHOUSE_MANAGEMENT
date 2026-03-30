@@ -64,6 +64,7 @@ export enum ItemCategory {
 
 export interface DailyMovementItem {
   itemId: number
+  itemName: string
   totalOrdered: number
   totalStockIn: number
   openingStock: number

@@ -1,6 +1,7 @@
 <template>
   <MainLayout>
     <div class="animate-fade-in">
+      <!-- 3 report cards -->
       <div class="grid grid-cols-3 gap-4 mb-6">
         <Card>
           <template #content>
@@ -34,136 +35,178 @@
         </Card>
       </div>
 
-      <!-- BIỂU ĐỒ BAR CHART -->
-      <Card v-if="!isMobile" class="mb-6 shadow-sm border border-slate-100">
+      <!-- BAR CHART -->
+      <Card v-if="!isMobile" class="mb-6 chart-card">
         <template #content>
-          <div style="padding: 1rem">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
-              <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <i class="pi pi-chart-bar text-slate-600"></i>
+          <div class="chart-wrapper">
+
+            <!-- Row 1: Title + Trend toggle + Item selector -->
+            <div class="chart-header">
+              <h3 class="chart-title">
+                <i class="pi pi-chart-bar"></i>
                 Phân tích Tồn kho từng Sản phẩm
               </h3>
-
-              <div class="flex flex-col sm:flex-row flex-wrap gap-2 w-full lg:w-auto p-1 bg-slate-50 rounded-lg">
-                <SelectButton v-model="selectedTrend" :options="trendOptions" @change="onTrendChange" :allowEmpty="false" />
-
+              <div class="header-controls">
+                <SelectButton v-model="selectedTrend" :options="trendOptions" @change="onTrendChange" :allowEmpty="false" class="trend-select" />
                 <template v-if="selectedTrend === 'Items trend'">
-                  <div class="w-px bg-slate-300 hidden sm:block mx-1"></div>
+                  <div class="divider-v"></div>
                   <Dropdown
-                    v-model="selectedItem"
-                    :options="allItems"
-                    placeholder="Tìm kiếm SP"
-                    filter
+                    v-model="selectedItem" :options="allItems" placeholder="Tìm kiếm SP" filter
                     :filterFields="['eng.partname', 'com.name', 'id', 'itemIndentifyId']"
-                    @change="onItemChange"
-                    class="w-full sm:w-64"
+                    @change="onItemChange" class="item-dropdown"
                   >
                     <template #value="slotProps">
-                      <div v-if="slotProps.value" class="flex items-center gap-2">
-                        <i class="pi pi-box text-sm"></i>
-                        <span class="truncate max-w-[150px]">
-                          {{ slotProps.value.eng?.partname || slotProps.value.com?.name || "SP" }}
-                        </span>
+                      <div v-if="slotProps.value" class="dropdown-value">
+                        <i class="pi pi-box"></i>
+                        <span class="truncate">{{ slotProps.value.eng?.partname || slotProps.value.com?.name || "SP" }}</span>
                       </div>
-                      <span v-else>{{ slotProps.placeholder }}</span>
+                      <span v-else class="text-slate-400">{{ slotProps.placeholder }}</span>
                     </template>
                     <template #option="slotProps">
-                      <div class="flex flex-col">
-                        <span class="font-medium text-slate-800">{{ slotProps.option.eng?.partname || slotProps.option.com?.name || "Unknown" }}</span>
-                        <span class="text-xs text-slate-500">{{ slotProps.option.type || "N/A" }} - Tồn: {{ slotProps.option.stockQty }}</span>
+                      <div class="dropdown-option">
+                        <span class="option-name">{{ slotProps.option.eng?.partname || slotProps.option.com?.name || "Unknown" }}</span>
+                        <span class="option-meta">{{ slotProps.option.type || "N/A" }} · Tồn: {{ slotProps.option.stockQty }}</span>
                       </div>
                     </template>
                   </Dropdown>
                 </template>
-
-                <div class="w-px bg-slate-300 hidden sm:block mx-1"></div>
-                <!-- Đổi time chỉ re-group rawData, KHÔNG gọi API -->
-                <SelectButton v-model="selectedTime" :options="timeOptions" @change="onTimeChange" :allowEmpty="false" />
               </div>
             </div>
 
-            <div v-if="loading" class="flex justify-center items-center py-20">
-              <ProgressSpinner style="width: 50px; height: 50px" strokeWidth="4" />
+            <!-- Row 2: Filter bar -->
+            <div class="filter-bar">
+              <div class="filter-group">
+                <span class="filter-label">Từ</span>
+                <Calendar v-model="fromDate" dateFormat="dd/mm/yy" showIcon :manualInput="false" class="report-calendar" @date-select="onRangeChange" />
+              </div>
+              <i class="pi pi-arrow-right filter-arrow"></i>
+              <div class="filter-group">
+                <span class="filter-label">Đến</span>
+                <Calendar v-model="toDate" dateFormat="dd/mm/yy" showIcon :manualInput="false" class="report-calendar" @date-select="onRangeChange" />
+              </div>
+
+              <div class="filter-separator"></div>
+
+              <div class="time-tabs">
+                <button
+                  v-for="opt in timeOptions" :key="opt"
+                  :class="['time-tab', { active: selectedTime === opt }]"
+                  @click="onTimeTabClick(opt)"
+                >{{ opt }}</button>
+              </div>
+
+              <div class="filter-separator"></div>
+
+              <button class="reset-btn" @click="onResetRange">
+                <i class="pi pi-refresh"></i>
+                Reset
+              </button>
+            </div>
+
+            <!-- Loading -->
+            <div v-if="loading" class="loading-state">
+              <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
+              <span class="loading-text">Đang tải dữ liệu...</span>
             </div>
 
             <div v-else>
-              <div class="bg-white rounded-lg" style="height: 450px">
+              <!-- Chart -->
+              <div class="chart-area">
                 <Chart type="bar" :data="chartData" :options="chartOptions" style="height: 100%; width: 100%" />
               </div>
 
-              <!-- BẢNG CHI TIẾT -->
-              <div v-if="selectedChartData.length > 0" class="mt-8 animate-fade-in transition-all">
-                <div class="flex items-center justify-between mb-3">
-                  <h4 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <!-- Detail table -->
+              <div v-if="selectedChartData.length > 0 || detailLoading" class="detail-section animate-fade-in">
+                <div class="detail-header">
+                  <h4 class="detail-title">
                     Dữ liệu chi tiết
-                    <span class="text-sm font-normal text-slate-500">({{ selectedChunkLabel }})</span>
+                    <span class="detail-period">{{ selectedChunkLabel }}</span>
+                    <span v-if="detailClickedCol" class="detail-badge"
+                      :class="{
+                        'badge-blue': detailClickedCol === 'stockin',
+                        'badge-yellow': detailClickedCol === 'order',
+                        'badge-green': detailClickedCol === 'items',
+                      }">
+                      {{ detailClickedCol === 'stockin' ? 'Phiếu nhập' : detailClickedCol === 'order' ? 'Đơn hoàn thành' : 'Chi tiết SP' }}
+                    </span>
                   </h4>
-                  <Button icon="pi pi-times" rounded text severity="secondary" @click="selectedChartData = []" />
+                  <Button icon="pi pi-times" rounded text severity="secondary" size="small" @click="selectedChartData = []; detailClickedCol = ''" />
                 </div>
 
-                <DataTable
+                <div v-if="detailLoading" class="flex justify-center py-8">
+                  <ProgressSpinner style="width: 30px; height: 30px" strokeWidth="4" />
+                </div>
+
+                <!-- Total trend: Phiếu nhập -->
+                <DataTable v-else-if="selectedTrend === 'Total trend' && detailClickedCol === 'stockin'"
                   :value="selectedChartData"
-                  class="p-datatable-sm shadow-sm border border-slate-200 rounded-lg overflow-hidden [&_.p-datatable-thead>tr>th]:bg-slate-50 [&_.p-datatable-thead>tr>th]:text-slate-700"
-                  responsiveLayout="scroll"
-                  stripedRows
-                  :paginator="selectedChartData.length > 10"
-                  :rows="10"
-                  :rowsPerPageOptions="[10, 25, 50]"
-                >
-                  <template #empty>
-                    <div class="text-center py-4 text-slate-500">Không có dữ liệu chi tiết</div>
-                  </template>
-                  <Column header="Sản phẩm" class="w-1/3">
+                  class="p-datatable-sm detail-table"
+                  responsiveLayout="scroll" stripedRows :paginator="selectedChartData.length > 10" :rows="10" :rowsPerPageOptions="[10, 25, 50]">
+                  <template #empty><div class="table-empty">Không có phiếu nhập trong khoảng thời gian này</div></template>
+                  <Column header="Mã phiếu" style="width: 100px">
+                    <template #body="{ data }"><span class="font-bold text-blue-600">#{{ data.id }}</span></template>
+                  </Column>
+                  <Column header="Ngày nhập"><template #body="{ data }">{{ formatDate(data.stockInDate) }}</template></Column>
+                  <Column header="Người tạo"><template #body="{ data }">{{ data.account?.username || "-" }}</template></Column>
+                  <Column header="Số loại SP" alignHeader="right">
+                    <template #body="{ data }"><div class="text-right font-semibold text-slate-700">{{ data.stockInDetails?.length || 0 }} loại</div></template>
+                  </Column>
+                  <Column header="Ghi chú"><template #body="{ data }"><span class="text-slate-500 text-sm">{{ data.note || "-" }}</span></template></Column>
+                </DataTable>
+
+                <!-- Total trend: Đơn hoàn thành -->
+                <DataTable v-else-if="selectedTrend === 'Total trend' && detailClickedCol === 'order'"
+                  :value="selectedChartData"
+                  class="p-datatable-sm detail-table"
+                  responsiveLayout="scroll" stripedRows :paginator="selectedChartData.length > 10" :rows="10" :rowsPerPageOptions="[10, 25, 50]">
+                  <template #empty><div class="table-empty">Không có đơn hoàn thành trong khoảng thời gian này</div></template>
+                  <Column header="Mã đơn" style="width: 100px">
+                    <template #body="{ data }"><span class="font-bold text-yellow-600">#{{ data.id }}</span></template>
+                  </Column>
+                  <Column header="Ngày đặt"><template #body="{ data }">{{ formatDate(data.orderDate) }}</template></Column>
+                  <Column header="Người đặt"><template #body="{ data }">{{ data.nameWorker || data.account?.username || "-" }}</template></Column>
+                  <Column header="Bộ phận"><template #body="{ data }">{{ data.account?.department || "-" }}</template></Column>
+                  <Column header="Số loại SP" alignHeader="right">
+                    <template #body="{ data }"><div class="text-right font-semibold text-slate-700">{{ data.orderDetails?.length || 0 }} loại</div></template>
+                  </Column>
+                </DataTable>
+
+                <!-- Items trend -->
+                <DataTable v-else-if="selectedTrend === 'Items trend' && detailClickedCol === 'items'"
+                  :value="selectedChartData"
+                  class="p-datatable-sm detail-table"
+                  responsiveLayout="scroll" stripedRows :paginator="selectedChartData.length > 10" :rows="10" :rowsPerPageOptions="[10, 25, 50]">
+                  <template #empty><div class="table-empty">Không có dữ liệu trong khoảng này</div></template>
+                  <Column header="Sản phẩm" style="width: 35%">
                     <template #body="{ data }">
-                      <span class="font-semibold text-slate-800 uppercase">
-                        {{ data.item.eng?.partname || data.item.com?.name || `Mã: ${data.item.id}` }}
+                      <span class="font-semibold text-slate-800 uppercase text-sm">
+                        {{ data.itemName || data.item?.eng?.partname || data.item?.com?.name || `Mã: ${data.itemId}` }}
                       </span>
                     </template>
                   </Column>
-                  <Column header="Phân loại">
+                  <Column header="Loại" style="width: 80px">
                     <template #body="{ data }">
-                      <span :class="['px-2 py-1 rounded text-xs font-medium border', data.item.eng ? 'bg-blue-50 text-blue-800 border-blue-200' : 'bg-emerald-50 text-emerald-800 border-emerald-200']">
-                        {{ data.item.eng ? "ENG" : "COM" }}
+                      <span :class="['px-2 py-0.5 rounded text-xs font-medium border', data.item?.eng ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200']">
+                        {{ data.item?.eng ? "ENG" : "COM" }}
                       </span>
                     </template>
                   </Column>
                   <Column alignHeader="right">
-                    <template #header>
-                      <div class="flex items-center gap-1 justify-end w-full">
-                        <div class="w-2 h-2 rounded-full bg-blue-500"></div> Nhập bao nhiêu
-                      </div>
-                    </template>
+                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Nhập</div></template>
                     <template #body="{ data }">
-                      <div class="text-right font-bold text-blue-600">
-                        {{ formatNumber(data.totalStockIn) }}
-                        <span class="text-xs font-normal text-slate-400">{{ data.item.unit }}</span>
-                      </div>
+                      <div class="text-right font-bold text-blue-600">{{ formatNumber(data.totalStockIn) }}<span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
                     </template>
                   </Column>
                   <Column alignHeader="right">
-                    <template #header>
-                      <div class="flex items-center gap-1 justify-end w-full">
-                        <div class="w-2 h-2 rounded-full bg-yellow-500"></div> Sử dụng bao nhiêu
-                      </div>
-                    </template>
+                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-yellow-500"></div> Sử dụng</div></template>
                     <template #body="{ data }">
-                      <div class="text-right font-bold text-yellow-600">
-                        {{ formatNumber(data.totalOrdered) }}
-                        <span class="text-xs font-normal text-slate-400">{{ data.item.unit }}</span>
-                      </div>
+                      <div class="text-right font-bold text-yellow-600">{{ formatNumber(data.totalOrdered) }}<span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
                     </template>
                   </Column>
                   <Column alignHeader="right">
-                    <template #header>
-                      <div class="flex items-center gap-1 justify-end w-full">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div> Còn lại (Tồn kho)
-                      </div>
-                    </template>
+                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> Tồn kho</div></template>
                     <template #body="{ data }">
-                      <div class="text-right font-bold text-emerald-600">
-                        {{ formatNumber(data.stockQty) }}
-                        <span class="text-xs font-normal text-slate-400">{{ data.item.unit }}</span>
-                      </div>
+                      <div class="text-right font-bold text-emerald-600">{{ formatNumber(data.stockQty) }}<span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
                     </template>
                   </Column>
                 </DataTable>
@@ -174,6 +217,7 @@
       </Card>
     </div>
 
+    <!-- Mobile dialog -->
     <Dialog v-model:visible="showUnsupportedDialog" :modal="true" :draggable="false" :style="{ width: '85vw', maxWidth: '320px' }" :showHeader="false" :closable="false">
       <div style="text-align: center; padding: 1.5rem 1rem">
         <i class="pi pi-mobile" style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 1rem; display: block"></i>
@@ -196,10 +240,13 @@ import Button from "primevue/button";
 import Card from "primevue/card";
 import SelectButton from "primevue/selectbutton";
 import Dropdown from "primevue/dropdown";
+import Calendar from "primevue/calendar";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import { useI18n } from "vue-i18n";
 import { itemAPI } from "@/services/itemAPI";
+import { stockinAPI } from "@/services/stockinAPI";
+import { orderAPI } from "@/services/orderAPI";
 import type { Item, DailyMovement, DailyMovementItem } from "@/types/item.types";
 
 const router = useRouter();
@@ -209,74 +256,18 @@ const { t } = useI18n();
 const isMobile = ref(window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
 const handleResize = () => { isMobile.value = window.innerWidth < 768; };
 const showUnsupportedDialog = ref(false);
-
 const navigateToReport = (type: string) => {
   if (isMobile.value) { showUnsupportedDialog.value = true; return; }
   router.push({ name: `${type.charAt(0).toUpperCase() + type.slice(1)}Report` });
 };
 
-// ── Formatting ────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────
 const formatNumber = (num: number) => new Intl.NumberFormat("vi-VN").format(num || 0);
-
-// ── State ─────────────────────────────────────────────────
-const loading = ref(false);
-const trendOptions = ref(["Total trend", "Items trend"]);
-const selectedTrend = ref("Total trend");
-const timeOptions = ref(["Ngày", "Tuần", "Tháng"]);
-const selectedTime = ref("Tuần");
-const allItems = ref<Item[]>([]);
-const selectedItem = ref<Item | null>(null);
-const selectedChartData = ref<any[]>([]);
-const selectedChunkLabel = ref("");
-const fullReportData = ref<any[]>([]);
-const chartData = ref<any>(null);
-
-// Raw data — load 1 lần, dùng cho tất cả filter
-const rawData = ref<DailyMovement[]>([]);
-
-// ── Chunks ────────────────────────────────────────────────
-const generateTimeChunks = (type: string) => {
-  const chunks: { label: string; fromDate: Date; toDate: Date }[] = [];
-  const today = new Date();
-
-  if (type === "Ngày") {
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      const start = new Date(d); start.setHours(0, 0, 0, 0);
-      const end = new Date(d); end.setHours(23, 59, 59, 999);
-      chunks.push({
-        label: `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`,
-        fromDate: start, toDate: end,
-      });
-    }
-  } else if (type === "Tuần") {
-    // 7 tuần gần nhất (T2 → CN)
-    for (let i = 6; i >= 0; i--) {
-      const curr = new Date(today);
-      curr.setDate(today.getDate() - i * 7);
-      const dow = curr.getDay();
-      const diff = dow === 0 ? -6 : 1 - dow;
-      const monday = new Date(curr); monday.setDate(curr.getDate() + diff); monday.setHours(0, 0, 0, 0);
-      const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6); sunday.setHours(23, 59, 59, 999);
-      const fmt = (d: Date) => `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
-      chunks.push({ label: `${fmt(monday)}-${fmt(sunday)}`, fromDate: monday, toDate: sunday });
-    }
-  } else if (type === "Tháng") {
-    const year = today.getFullYear();
-    for (let m = 0; m < 12; m++) {
-      chunks.push({
-        label: `T${m + 1}`,
-        fromDate: new Date(year, m, 1, 0, 0, 0, 0),
-        toDate: new Date(year, m + 1, 0, 23, 59, 59, 999),
-      });
-    }
-  }
-
-  return chunks;
-};
-
-const formatDateTimeForAPI = (date: Date): string => {
+const formatDate = (str: string) =>
+  new Date(str).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+const fmtDate = (d: Date) =>
+  `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+const fmtAPI = (date: Date) => {
   const y = date.getFullYear();
   const mo = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
@@ -285,193 +276,734 @@ const formatDateTimeForAPI = (date: Date): string => {
   return `${y}-${mo}-${d} ${h}:${mi}`;
 };
 
-// ── Load API — chỉ gọi 1 lần ────────────────────────────
-const loadReportData = async () => {
-  loading.value = true;
-  selectedChartData.value = [];
-  selectedChunkLabel.value = "";
+// ── Today boundary ────────────────────────────────────────
+const getTodayEnd = () => {
+  const d = new Date();
+  d.setHours(23, 59, 59, 999);
+  return d;
+};
 
-  try {
-    const fetchedItems = await itemAPI.getAll();
-    allItems.value = fetchedItems;
-    if (!selectedItem.value || !fetchedItems.find(it => it.id === selectedItem.value?.id)) {
-      selectedItem.value = fetchedItems[0] ?? null;
-    }
+// ── Plugin: căn giữa cột đơn lẻ khi dataset kia = null/0 ─────
+// → khi chỉ có 1 dataset có giá trị tại 1 category, dời bar đó về đúng tâm label
+const centerLoneBarsPlugin = {
+  id: 'centerLoneBars',
+  afterUpdate(chart: any) {
+    const { datasets } = chart.data;
+    if (!datasets || datasets.length < 2) return;
+    const hasVal = (v: any) => v !== null && v !== undefined && v !== 0;
+    datasets.forEach((_: any, dsIdx: number) => {
+      const meta = chart.getDatasetMeta(dsIdx);
+      if (!meta || meta.hidden) return;
+      meta.data.forEach((bar: any, i: number) => {
+        if (!hasVal(datasets[dsIdx].data[i])) return;
+        const activeCount = datasets.filter((ds: any) => hasVal(ds.data[i])).length;
+        if (activeCount === 1) {
+          // Chỉ mình dataset này có giá trị → căn vào đúng tâm category
+          bar.x = chart.scales['x'].getPixelForValue(i);
+          bar.width = Math.min(bar.width * datasets.length, 80);
+        }
+      });
+    });
+  },
+};
 
-    // Range rộng: đủ cho Ngày (7 ngày), Tuần (7 tuần = ~49 ngày), Tháng (cả năm)
-    const today = new Date();
-    const year = today.getFullYear();
-    // Lấy từ 49 ngày trước hoặc đầu năm (lấy cái nào sớm hơn)
-    const weekRangeStart = new Date(today); weekRangeStart.setDate(today.getDate() - 49);
-    const yearStart = new Date(year, 0, 1, 0, 0, 0, 0);
-    const rangeFrom = weekRangeStart < yearStart ? weekRangeStart : yearStart;
-    const rangeTo = new Date(year, 11, 31, 23, 59, 59, 999);
+// ── Dataset config ────────────────────────────────────────
+// barPercentage: 1.0 → 2 cột sát nhau hoàn toàn trong nhóm (không gap)
+// categoryPercentage: 0.85 → nhóm chiếm 85% slot → còn 15% gap giữa các tuần
+const DS = {
+  barPercentage: 1.0,
+  categoryPercentage: 0.85,
+  maxBarThickness: 80,
+  borderRadius: 2,
+  borderWidth: 0,
+};
 
-    rawData.value = await itemAPI.getItemRange(
-      formatDateTimeForAPI(rangeFrom),
-      formatDateTimeForAPI(rangeTo),
-    );
+// ── State ─────────────────────────────────────────────────
+const loading = ref(false);
+const detailLoading = ref(false);
+const detailClickedCol = ref("");
 
-    buildChartFromRawData();
-  } catch (err) {
-    console.error("Failed to load report data", err);
-  } finally {
-    loading.value = false;
+const trendOptions = ["Total trend", "Items trend"];
+const selectedTrend = ref("Total trend");
+const timeOptions = ["Ngày", "Tuần", "Tháng"];
+const selectedTime = ref("Tuần");
+
+const allItems = ref<Item[]>([]);
+const selectedItem = ref<Item | null>(null);
+const rawData = ref<DailyMovement[]>([]);
+
+const fullReportData = ref<any[]>([]);
+const chartData = ref<any>(null);
+const selectedChartData = ref<any[]>([]);
+const selectedChunkLabel = ref("");
+const fromDate = ref<Date>(new Date());
+const toDate = ref<Date>(new Date());
+
+// ── Default range ─────────────────────────────────────────
+const getDefaultRange = (type: string) => {
+  const today = new Date();
+  if (type === "Ngày") {
+    const from = new Date(today); from.setDate(today.getDate() - 6); from.setHours(0, 0, 0, 0);
+    const to = new Date(today); to.setHours(23, 59, 59, 999);
+    return { from, to };
+  } else if (type === "Tuần") {
+    const dow = today.getDay();
+    const diffToMon = dow === 0 ? -6 : 1 - dow;
+    const thisMon = new Date(today); thisMon.setDate(today.getDate() + diffToMon); thisMon.setHours(0, 0, 0, 0);
+    const from = new Date(thisMon); from.setDate(thisMon.getDate() - 11 * 7); // 12 tuần: tuần hiện tại + 11 tuần trước
+    const thisSun = new Date(thisMon); thisSun.setDate(thisMon.getDate() + 6); thisSun.setHours(23, 59, 59, 999);
+    return { from, to: thisSun };
+  } else {
+    const from = new Date(today.getFullYear(), 0, 1, 0, 0, 0, 0);
+    const to = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
+    return { from, to };
   }
 };
 
-// ── Build chart từ rawData — KHÔNG gọi API ───────────────
-const buildChartFromRawData = () => {
-  const chunks = generateTimeChunks(selectedTime.value);
-  const isTotal = selectedTrend.value === "Total trend";
+// ── Generate chunks — chỉ đến hôm nay ──────────────────
+// Với chế độ Tháng: luôn sinh đủ 12 tháng nhưng cắt tháng tương lai
+const generateTimeChunks = () => {
+  const chunks: { label: string; fromDate: Date; toDate: Date }[] = [];
+  const todayEnd = getTodayEnd();
+
+  if (selectedTime.value === "Ngày") {
+    const from = new Date(fromDate.value); from.setHours(0, 0, 0, 0);
+    const effectiveTo = toDate.value > todayEnd ? new Date(todayEnd) : new Date(toDate.value);
+    effectiveTo.setHours(23, 59, 59, 999);
+    const cursor = new Date(from);
+    while (cursor <= effectiveTo) {
+      chunks.push({
+        label: fmtDate(cursor),
+        fromDate: new Date(cursor),
+        toDate: (() => { const e = new Date(cursor); e.setHours(23, 59, 59, 999); return e; })(),
+      });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+  } else if (selectedTime.value === "Tuần") {
+    const from = new Date(fromDate.value);
+    const effectiveTo = toDate.value > todayEnd ? new Date(todayEnd) : new Date(toDate.value);
+    const cursor = new Date(from);
+    const dow = cursor.getDay();
+    const diffToMon = dow === 0 ? -6 : 1 - dow;
+    cursor.setDate(cursor.getDate() + diffToMon); cursor.setHours(0, 0, 0, 0);
+    while (cursor <= effectiveTo) {
+      const monday = new Date(cursor);
+      const sunday = new Date(cursor); sunday.setDate(cursor.getDate() + 6); sunday.setHours(23, 59, 59, 999);
+      if (monday > todayEnd) break;
+      const chunkTo = sunday > todayEnd ? new Date(todayEnd) : sunday;
+      chunks.push({ label: `${fmtDate(monday)}-${fmtDate(sunday)}`, fromDate: monday, toDate: chunkTo });
+      cursor.setDate(cursor.getDate() + 7);
+    }
+
+  } else {
+    // Tháng: luôn sinh đủ 12 tháng. Tháng tương lai bar = 0, label vẫn hiện
+    const year = new Date().getFullYear();
+    for (let m = 0; m < 12; m++) {
+      const start = new Date(year, m, 1, 0, 0, 0, 0);
+      const end = new Date(year, m + 1, 0, 23, 59, 59, 999);
+      // chunkTo: nếu tháng tương lai thì fromDate = toDate = start (không truy vấn dữ liệu)
+      const chunkTo = start > todayEnd ? new Date(start) : end > todayEnd ? new Date(todayEnd) : end;
+      chunks.push({ label: `T${m + 1}/${year}`, fromDate: start, toDate: chunkTo });
+    }
+  }
+
+  return chunks;
+};
+
+// ── Items trend: tính closingStock ───────────────────────
+const computeItemClosingStockAt = (toDate: Date, itemId: number): number => {
+  if (!rawData.value.length) return 0;
+  let baseStock = 0;
+  for (const day of rawData.value) {
+    const found = day.items.find(i => i.itemId === itemId);
+    if (found) { baseStock = found.openingStock; break; }
+  }
+  let total = baseStock;
+  rawData.value.filter(d => new Date(d.date) <= toDate).forEach(day => {
+    const found = day.items.find(i => i.itemId === itemId);
+    if (found) { total += found.totalStockIn; total -= found.totalOrdered; }
+  });
+  return total;
+};
+
+// ── TOTAL TREND ───────────────────────────────────────────
+const loadTotalTrend = async () => {
+  const chunks = generateTimeChunks();
+  if (!chunks.length) { fullReportData.value = []; chartData.value = null; return; }
+
+  const todayEnd = getTodayEnd();
+  const results = await Promise.all(
+    chunks.map(async chunk => {
+      // Tháng tương lai (fromDate > hôm nay) → bỏ qua API, trả 0
+      if (chunk.fromDate > todayEnd) {
+        return { label: chunk.label, fromDate: chunk.fromDate, toDate: chunk.toDate, totalIn: 0, totalOut: 0 };
+      }
+      const [stockins, orders] = await Promise.all([
+        stockinAPI.filterStockin(fmtAPI(chunk.fromDate), fmtAPI(chunk.toDate)),
+        orderAPI.filterOrders({ fromDate: fmtAPI(chunk.fromDate), toDate: fmtAPI(chunk.toDate), status: "Completed" }),
+      ]);
+      return { label: chunk.label, fromDate: chunk.fromDate, toDate: chunk.toDate, totalIn: stockins.length, totalOut: orders.length };
+    })
+  );
+
+  const hasStockIn = results.some(r => r.totalIn > 0);
+  const hasOrders = results.some(r => r.totalOut > 0);
+
+  // Luôn hiển thị đủ tất cả các mốc (kể cả mốc = 0) để chart nhất quán giữa các chế độ
+  fullReportData.value = results;
+
+  chartData.value = {
+    labels: results.map(r => r.label),
+    datasets: [
+      ...(hasStockIn ? [{ label: "Số phiếu nhập", backgroundColor: "#3b82f6", ...DS, data: results.map(r => r.totalIn) }] : []),
+      ...(hasOrders ? [{ label: "Số đơn hoàn thành", backgroundColor: "#eab308", ...DS, data: results.map(r => r.totalOut) }] : []),
+    ],
+  };
+};
+
+// ── ITEMS TREND ───────────────────────────────────────────
+const loadItemsTrend = async () => {
+  // Fetch từ đầu năm để computeItemClosingStockAt luôn có đủ lịch sử mở kho
+  // (nếu chỉ fetch trong range hiển thị, item không có biến động sẽ mất openingStock)
+  const yearStart = fmtAPI(new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0));
+  rawData.value = await itemAPI.getItemRange(yearStart, fmtAPI(toDate.value));
+  buildItemsChart();
+};
+
+const buildItemsChart = () => {
+  const chunks = generateTimeChunks();
   const trackedId = selectedItem.value?.id;
+  if (!chunks.length || !trackedId) { fullReportData.value = []; chartData.value = null; return; }
+
+  const todayEnd = getTodayEnd();
 
   fullReportData.value = chunks.map(chunk => {
     const daysInChunk = rawData.value.filter(d => {
       const date = new Date(d.date);
       return date >= chunk.fromDate && date <= chunk.toDate;
     });
-
-    let totalIn = 0, totalOut = 0, closingStock = 0;
-
-    if (isTotal) {
-      daysInChunk.forEach(day => {
-        day.items.forEach(item => {
-          totalIn += item.totalStockIn;
-          totalOut += item.totalOrdered;
-        });
-      });
-      const lastDay = daysInChunk.at(-1);
-      if (lastDay) closingStock = lastDay.items.reduce((sum, i) => sum + i.closingStock, 0);
-    } else {
-      daysInChunk.forEach(day => {
-        const found = day.items.find(i => i.itemId === trackedId);
-        if (found) {
-          totalIn += found.totalStockIn;
-          totalOut += found.totalOrdered;
-          closingStock = found.closingStock;
-        }
-      });
-    }
-
-    return { label: chunk.label, fromDate: chunk.fromDate, toDate: chunk.toDate, totalIn, totalOut, totalStock: closingStock, rawDays: daysInChunk };
-  });
-
-  updateChartData();
-};
-
-// ── Update datasets ───────────────────────────────────────
-const updateChartData = () => {
-  const isTotal = selectedTrend.value === "Total trend";
-  const hasStockIn = fullReportData.value.some(r => r.totalIn > 0);
-  const datasets: any[] = [];
-
-  if (!isTotal || hasStockIn) {
-    datasets.push({
-      label: isTotal ? "Số phiếu nhập" : "Nhập bao nhiêu",
-      backgroundColor: "#3b82f6", borderColor: "#2563eb",
-      borderWidth: 1, borderRadius: 4, maxBarThickness: 100, barPercentage: 1.0, categoryPercentage: 0.8,
-      data: fullReportData.value.map(r => r.totalIn),
+    let totalIn = 0, totalOut = 0;
+    daysInChunk.forEach(day => {
+      const found = day.items.find(i => i.itemId === trackedId);
+      if (found) { totalIn += found.totalStockIn; totalOut += found.totalOrdered; }
     });
-  }
-
-  datasets.push({
-    label: isTotal ? "Số đơn hoàn thành" : "Sử dụng bao nhiêu",
-    backgroundColor: "#eab308", borderColor: "#ca8a04",
-    borderWidth: 1, borderRadius: 4, maxBarThickness: 100, barPercentage: 1.0, categoryPercentage: 0.8,
-    data: fullReportData.value.map(r => r.totalOut),
+    // Chunk thuộc tương lai → không tính tồn kho (chưa có data)
+    const totalStock = chunk.fromDate > todayEnd
+      ? null
+      : computeItemClosingStockAt(chunk.toDate, trackedId);
+    return {
+      label: chunk.label,
+      fromDate: chunk.fromDate,
+      toDate: chunk.toDate,
+      totalIn,
+      totalOut,
+      totalStock,
+      rawDays: daysInChunk,
+    };
   });
 
-  // Tồn kho luôn hiện — closingStock chính xác từ API
-  datasets.push({
-    label: "Còn lại (Tồn kho)",
-    backgroundColor: "#10b981", borderColor: "#059669",
-    borderWidth: 1, borderRadius: 4, maxBarThickness: 100, barPercentage: 1.0, categoryPercentage: 0.8,
-    data: fullReportData.value.map(r => r.totalStock),
-  });
+  const hasStockIn = fullReportData.value.some(r => r.totalIn > 0);
+  const hasOrdered = fullReportData.value.some(r => r.totalOut > 0);
 
-  chartData.value = { labels: fullReportData.value.map(r => r.label), datasets };
+  chartData.value = {
+    labels: fullReportData.value.map(r => r.label),
+    datasets: [
+      ...(hasStockIn ? [{ label: "Nhập bao nhiêu", backgroundColor: "#3b82f6", ...DS, data: fullReportData.value.map(r => r.totalIn) }] : []),
+      ...(hasOrdered ? [{ label: "Sử dụng bao nhiêu", backgroundColor: "#eab308", ...DS, data: fullReportData.value.map(r => r.totalOut) }] : []),
+      { label: "Còn lại (Tồn kho)", backgroundColor: "#10b981", ...DS, data: fullReportData.value.map(r => r.totalStock) },
+    ],
+  };
 };
 
-// ── Chart click — filter rawDays, KHÔNG gọi API ──────────
-const onChartClick = (e: any, elements: any[]) => {
+// ── Load ──────────────────────────────────────────────────
+const loadReportData = async () => {
+  loading.value = true;
+  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
+  try {
+    if (selectedTrend.value === "Total trend") await loadTotalTrend();
+    else await loadItemsTrend();
+  } catch (err) {
+    console.error("Failed to load report:", err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// ── Chart click ───────────────────────────────────────────
+const onChartClick = async (event: any, elements: any[], chart: any) => {
   if (!elements.length) return;
+
+  // Với mode="index", elements chứa tất cả dataset ở cùng x
+  // Cần lấy đúng element được click (intersect=true để lấy bar đúng)
+  const exactElements = chart.getElementsAtEventForMode(
+    event.native ?? event,
+    "nearest",
+    { intersect: true },
+    false,
+  );
   const dataIndex = elements[0].index;
-  const datasetIndex = elements[0].datasetIndex;
+  const datasetIndex = exactElements.length ? exactElements[0].datasetIndex : elements[0].datasetIndex;
+
   const clickedChunk = fullReportData.value[dataIndex];
   if (!clickedChunk) return;
 
-  const label = chartData.value?.datasets?.[datasetIndex]?.label ?? "";
-  const isStockInCol = label.includes("nhập") || label.includes("phiếu");
-  const isOrderCol = label.includes("hoàn thành") || label.includes("Sử dụng");
-
-  const isTotal = selectedTrend.value === "Total trend";
-  const trackedId = selectedItem.value?.id;
-
-  const itemMap = new Map<number, any>();
-  clickedChunk.rawDays.forEach((day: DailyMovement) => {
-    day.items.forEach((d: DailyMovementItem) => {
-      if (!isTotal && d.itemId !== trackedId) return;
-      if (!itemMap.has(d.itemId)) {
-        itemMap.set(d.itemId, { itemId: d.itemId, item: d.item, totalStockIn: 0, totalOrdered: 0, stockQty: d.closingStock });
-      }
-      const entry = itemMap.get(d.itemId)!;
-      entry.totalStockIn += d.totalStockIn;
-      entry.totalOrdered += d.totalOrdered;
-      entry.stockQty = d.closingStock;
-    });
-  });
-
-  let result = Array.from(itemMap.values());
-  if (isStockInCol) result = result.filter(d => d.totalStockIn > 0);
-  else if (isOrderCol) result = result.filter(d => d.totalOrdered > 0);
-  // Tồn kho: hiện tất cả
-
-  selectedChartData.value = result;
   selectedChunkLabel.value = clickedChunk.label;
+  const label = chartData.value?.datasets?.[datasetIndex]?.label ?? "";
+
+  if (selectedTrend.value === "Total trend") {
+    detailLoading.value = true; selectedChartData.value = [];
+    try {
+      const fromStr = fmtAPI(clickedChunk.fromDate);
+      const toStr = fmtAPI(clickedChunk.toDate);
+      if (label.includes("phiếu") || label.includes("nhập")) {
+        detailClickedCol.value = "stockin";
+        selectedChartData.value = await stockinAPI.filterStockin(fromStr, toStr);
+      } else if (label.includes("đơn") || label.includes("hoàn thành")) {
+        detailClickedCol.value = "order";
+        selectedChartData.value = await orderAPI.filterOrders({ fromDate: fromStr, toDate: toStr, status: "Completed" });
+      }
+    } catch (err) { console.error("Failed to load detail:", err); }
+    finally { detailLoading.value = false; }
+  } else {
+    detailClickedCol.value = "items";
+    const trackedId = selectedItem.value?.id;
+    const isStockInCol = label.includes("Nhập");
+    const isOrderCol = label.includes("Sử dụng");
+    const itemMap = new Map<number, any>();
+    clickedChunk.rawDays?.forEach((day: DailyMovement) => {
+      day.items.forEach((d: DailyMovementItem) => {
+        if (d.itemId !== trackedId) return;
+        if (!itemMap.has(d.itemId)) itemMap.set(d.itemId, { itemId: d.itemId, itemName: d.itemName, item: d.item, totalStockIn: 0, totalOrdered: 0, stockQty: d.closingStock });
+        const entry = itemMap.get(d.itemId)!;
+        entry.totalStockIn += d.totalStockIn; entry.totalOrdered += d.totalOrdered; entry.stockQty = d.closingStock;
+      });
+    });
+    let result = Array.from(itemMap.values());
+    if (isStockInCol) result = result.filter(d => d.totalStockIn > 0);
+    else if (isOrderCol) result = result.filter(d => d.totalOrdered > 0);
+    selectedChartData.value = result;
+  }
 };
 
 // ── Event handlers ────────────────────────────────────────
-const onTimeChange = () => { selectedChartData.value = []; selectedChunkLabel.value = ""; buildChartFromRawData(); };
-const onTrendChange = () => { selectedChartData.value = []; selectedChunkLabel.value = ""; buildChartFromRawData(); };
-const onItemChange = () => { selectedChartData.value = []; selectedChunkLabel.value = ""; buildChartFromRawData(); };
+const onTimeTabClick = (opt: string) => {
+  if (selectedTime.value === opt) return;
+  selectedTime.value = opt;
+  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
+  if (opt === "Tháng") {
+    const today = new Date();
+    fromDate.value = new Date(today.getFullYear(), 0, 1, 0, 0, 0, 0);
+    toDate.value = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
+  } else {
+    const range = getDefaultRange(opt);
+    fromDate.value = range.from; toDate.value = range.to;
+  }
+  loadReportData();
+};
+
+const onTimeChange = () => {
+  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
+  if (selectedTime.value === "Tháng") {
+    const today = new Date();
+    fromDate.value = new Date(today.getFullYear(), 0, 1, 0, 0, 0, 0);
+    toDate.value = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
+  } else {
+    const range = getDefaultRange(selectedTime.value);
+    fromDate.value = range.from; toDate.value = range.to;
+  }
+  loadReportData();
+};
+
+const onRangeChange = () => {
+  if (!fromDate.value || !toDate.value || fromDate.value > toDate.value) return;
+  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
+  loadReportData();
+};
+
+const onResetRange = () => {
+  selectedTime.value = "Tuần";
+  const range = getDefaultRange("Tuần");
+  fromDate.value = range.from; toDate.value = range.to;
+  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
+  loadReportData();
+};
+
+const onTrendChange = () => {
+  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
+  loadReportData();
+};
+
+const onItemChange = () => {
+  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
+  buildItemsChart();
+};
 
 // ── Chart options ─────────────────────────────────────────
 const chartOptions = ref({
-  responsive: true, maintainAspectRatio: false,
-  animation: { duration: 800, easing: "easeOutQuart" },
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: { duration: 500, easing: "easeOutQuart" },
   plugins: {
-    legend: { display: true, position: "bottom" as const, labels: { usePointStyle: true, padding: 20, font: { family: "'Inter', sans-serif", size: 13, weight: "600" } } },
+    centerLoneBars: {},   // kích hoạt plugin căn giữa cột đơn lẻ
+    legend: {
+      display: true,
+      position: "bottom" as const,
+      labels: {
+        usePointStyle: true,
+        pointStyle: "circle",
+        padding: 24,
+        font: { family: "'Inter', sans-serif", size: 13, weight: "600" },
+      },
+    },
     tooltip: {
-      mode: "nearest" as const, intersect: true,
-      backgroundColor: "rgba(15, 23, 42, 0.9)",
-      titleFont: { size: 14, family: "'Inter', sans-serif" },
+      mode: "index" as const,
+      intersect: false,
+      backgroundColor: "rgba(15, 23, 42, 0.92)",
+      titleFont: { size: 13, family: "'Inter', sans-serif", weight: "700" },
       bodyFont: { size: 13, family: "'Inter', sans-serif" },
-      padding: 12, cornerRadius: 6,
+      padding: 12,
+      cornerRadius: 8,
       callbacks: {
-        label: (context: any) => {
-          let label = context.dataset.label || "";
-          if (label) label += ": ";
-          if (context.parsed.y !== null) label += new Intl.NumberFormat("vi-VN").format(context.parsed.y);
-          return label;
+        label: (ctx: any) => {
+          if (ctx.parsed.y === 0 || ctx.parsed.y === null) return null as any;
+          const label = ctx.dataset.label || "";
+          const val = new Intl.NumberFormat("vi-VN").format(ctx.parsed.y);
+          return ` ${label}: ${val}`;
         },
       },
     },
   },
   scales: {
-    x: { stacked: false, grid: { display: false, drawBorder: false }, ticks: { maxRotation: 45, minRotation: 0, font: { family: "'Inter', sans-serif", size: 11 } } },
-    y: { beginAtZero: true, stacked: false, grid: { color: "#f1f5f9", drawBorder: false, borderDash: [5, 5] }, ticks: { font: { family: "'Inter', sans-serif" } } },
+    x: {
+      stacked: false,
+      offset: true,
+      grid: { display: false },
+      ticks: {
+        maxRotation: 45,
+        minRotation: 0,
+        font: { family: "'Inter', sans-serif", size: 11 },
+        autoSkip: true,
+        maxTicksLimit: 20,
+      },
+    },
+    y: {
+      beginAtZero: true,
+      stacked: false,
+      grid: { color: "#f1f5f9", borderDash: [4, 4] },
+      ticks: { font: { family: "'Inter', sans-serif", size: 11 } },
+    },
   },
-  interaction: { mode: "nearest" as const, axis: "x" as const, intersect: true },
+  interaction: {
+    mode: "index" as const,
+    axis: "x" as const,
+    intersect: false,
+  },
   onClick: onChartClick,
 });
 
 // ── Lifecycle ─────────────────────────────────────────────
-onMounted(() => { window.addEventListener("resize", handleResize); loadReportData(); });
+onMounted(async () => {
+  window.addEventListener("resize", handleResize);
+  const items = await itemAPI.getAll();
+  allItems.value = items;
+  selectedItem.value = items[0] ?? null;
+  const range = getDefaultRange("Tuần");
+  fromDate.value = range.from; toDate.value = range.to;
+  await loadReportData();
+});
+
 onUnmounted(() => { window.removeEventListener("resize", handleResize); });
 </script>
 
 <style scoped>
-.p-card { border-radius: 12px; }
-:deep(.p-selectbutton .p-button) { padding: 0.5rem 1.25rem; font-weight: 600; font-size: 0.875rem; }
+/* ── Card wrapper ─────────────────────────────────────── */
+.chart-card {
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+
+.chart-wrapper {
+  padding: 1.25rem 1.5rem;
+}
+
+/* ── Header ───────────────────────────────────────────── */
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.chart-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.chart-title .pi {
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.divider-v {
+  width: 1px;
+  height: 1.5rem;
+  background: #cbd5e1;
+  margin: 0 0.25rem;
+}
+
+/* ── Filter bar ───────────────────────────────────────── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0.875rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.filter-arrow {
+  color: #cbd5e1;
+  font-size: 0.7rem;
+}
+
+.filter-separator {
+  width: 1px;
+  height: 1.25rem;
+  background: #e2e8f0;
+  margin: 0 0.125rem;
+}
+
+/* ── Time tabs (Ngày / Tuần / Tháng) ─────────────────── */
+.time-tabs {
+  display: flex;
+  gap: 2px;
+  background: #e2e8f0;
+  padding: 2px;
+  border-radius: 8px;
+}
+
+.time-tab {
+  padding: 0.3rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #64748b;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.time-tab:hover {
+  color: #334155;
+  background: #f1f5f9;
+}
+
+.time-tab.active {
+  background: #fff;
+  color: #2563eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+}
+
+/* ── Reset button ─────────────────────────────────────── */
+.reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #64748b;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.reset-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.reset-btn .pi {
+  font-size: 0.75rem;
+}
+
+/* ── Item dropdown ────────────────────────────────────── */
+.item-dropdown {
+  width: 15rem;
+}
+
+.dropdown-value {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.875rem;
+  max-width: 12rem;
+  overflow: hidden;
+}
+
+.dropdown-value .pi {
+  font-size: 0.75rem;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.dropdown-option {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.option-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.option-meta {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* ── Loading state ────────────────────────────────────── */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 5rem 0;
+}
+
+.loading-text {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ── Chart area ───────────────────────────────────────── */
+.chart-area {
+  background: #fff;
+  border-radius: 10px;
+  height: 400px;
+}
+
+/* ── Detail section ───────────────────────────────────── */
+.detail-section {
+  margin-top: 1.75rem;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.detail-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.detail-period {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.detail-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+}
+
+.badge-blue  { background: #dbeafe; color: #1d4ed8; }
+.badge-yellow { background: #fef9c3; color: #a16207; }
+.badge-green { background: #d1fae5; color: #065f46; }
+
+.detail-table {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+:deep(.detail-table .p-datatable-thead > tr > th) {
+  background: #f8fafc;
+}
+
+.table-empty {
+  text-align: center;
+  padding: 1.5rem;
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+/* ── Calendar & SelectButton overrides ───────────────── */
+:deep(.report-calendar .p-inputtext) {
+  font-size: 0.8125rem;
+  padding: 0.3rem 0.5rem;
+  width: 8rem;
+  border-radius: 7px;
+}
+
+:deep(.report-calendar .p-datepicker-trigger) {
+  padding: 0.3rem 0.45rem;
+}
+
+:deep(.report-calendar .p-datepicker-dropdown) {
+  padding: 0.45rem;
+}
+
+:deep(.report-calendar) {
+  display: flex;
+  align-items: center;
+}
+
+:deep(.trend-select .p-button) {
+  padding: 0.4rem 1rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
 </style>

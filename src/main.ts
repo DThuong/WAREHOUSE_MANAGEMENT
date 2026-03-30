@@ -27,6 +27,29 @@ import 'primeicons/primeicons.css'
 // Custom styles
 import './style.css'
 
+// Register custom Chart.js plugin: center lone bars that have no partner dataset
+import { Chart as ChartJS } from 'chart.js';
+ChartJS.register({
+  id: 'centerLoneBars',
+  afterUpdate(chart: any) {
+    const { datasets } = chart.data;
+    if (!datasets || datasets.length < 2) return;
+    const hasVal = (v: any) => v !== null && v !== undefined && v !== 0;
+    datasets.forEach((_: any, dsIdx: number) => {
+      const meta = chart.getDatasetMeta(dsIdx);
+      if (!meta || meta.hidden) return;
+      meta.data.forEach((bar: any, i: number) => {
+        if (!hasVal(datasets[dsIdx].data[i])) return;
+        const activeCount = datasets.filter((ds: any) => hasVal(ds.data[i])).length;
+        if (activeCount === 1) {
+          bar.x = chart.scales['x'].getPixelForValue(i);
+          bar.width = Math.min(bar.width * datasets.length, 80);
+        }
+      });
+    });
+  },
+});
+
 const pinia = createPinia()
 const app = createApp(App)
 app.use(i18n)
