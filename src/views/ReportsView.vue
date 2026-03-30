@@ -440,7 +440,12 @@ const computeItemClosingStockAt = (toDate: Date, itemId: number): number => {
 
 // ── TOTAL TREND ───────────────────────────────────────────
 const loadTotalTrend = async () => {
+  console.log("=== loadTotalTrend ===");
+  console.log("selectedTime:", selectedTime.value);
+  console.log("fromDate:", fromDate.value);
+  console.log("toDate:", toDate.value);
   const chunks = generateTimeChunks(selectedTime.value, fromDate.value, toDate.value);
+  console.log("chunks:", chunks.map(c => `${c.label} (${c.fromDate.toLocaleDateString()} - ${c.toDate.toLocaleDateString()})`));
   if (!chunks.length) { fullReportData.value = []; chartData.value = null; return; }
 
   const todayEnd = getTodayEnd();
@@ -458,8 +463,8 @@ const loadTotalTrend = async () => {
       stockinAPI.filterStockin(fmtAPI(overallFrom), fmtAPI(overallTo)),
       orderAPI.filterOrders({ fromDate: fmtAPI(overallFrom), toDate: fmtAPI(overallTo), status: "Completed" }),
     ]);
-    allStockins = stockinsRes;
-    allOrders = ordersRes;
+    allStockins = Array.isArray(stockinsRes) ? stockinsRes : [];
+    allOrders = Array.isArray(ordersRes) ? ordersRes : [];
   }
 
   const results = chunks.map(chunk => {
@@ -489,6 +494,9 @@ const loadTotalTrend = async () => {
       rawOrders: chunkOrders
     };
   });
+
+  console.log("results:", results.map(r => `${r.label}: in=${r.totalIn} out=${r.totalOut}`));
+  console.log("chartData datasets:", chartData.value?.datasets?.map((d: any) => `${d.label}: [${d.data.join(',')}]`));
 
   // Luôn hiển thị đủ tất cả các mốc (kể cả mốc = 0) để chart nhất quán giữa các chế độ
   fullReportData.value = results;
