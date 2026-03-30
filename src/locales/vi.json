@@ -637,6 +637,48 @@
     }
   },
   "reports": {
+    "chart": {
+      "title": "Phân tích Tồn kho từng Sản phẩm",
+      "from": "Từ",
+      "to": "Đến",
+      "searchProduct": "Tìm kiếm SP",
+      "loading": "Đang tải dữ liệu...",
+      "reset": "Reset",
+      "detailTitle": "Dữ liệu chi tiết",
+      "badge": {
+        "stockin": "Phiếu nhập",
+        "order": "Đơn hoàn thành",
+        "items": "Chi tiết SP"
+      },
+      "dataset": {
+        "stockinCount": "Số phiếu nhập",
+        "orderCount": "Số đơn hoàn thành",
+        "importQty": "Nhập bao nhiêu",
+        "usageQty": "Sử dụng bao nhiêu",
+        "remainingQty": "Còn lại (Tồn kho)"
+      },
+      "col": {
+        "receiptCode": "Mã phiếu",
+        "importDate": "Ngày nhập",
+        "creator": "Người tạo",
+        "productTypeCount": "Số loại SP",
+        "note": "Ghi chú",
+        "orderCode": "Mã đơn",
+        "orderDate": "Ngày đặt",
+        "orderer": "Người đặt",
+        "department": "Bộ phận",
+        "product": "Sản phẩm",
+        "type": "Loại",
+        "import": "Nhập",
+        "usage": "Sử dụng",
+        "stock": "Tồn kho"
+      },
+      "empty": {
+        "stockin": "Không có phiếu nhập trong khoảng thời gian này",
+        "order": "Không có đơn hoàn thành trong khoảng thời gian này",
+        "items": "Không có dữ liệu trong khoảng này"
+      }
+    },
     "title": "Báo cáo",
     "import": {
       "title": "Báo cáo nhập kho",

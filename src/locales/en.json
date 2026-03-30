@@ -635,6 +635,48 @@
     }
   },
   "reports": {
+    "chart": {
+      "title": "Inventory Analysis by Product",
+      "from": "From",
+      "to": "To",
+      "searchProduct": "Search product",
+      "loading": "Loading data...",
+      "reset": "Reset",
+      "detailTitle": "Detailed Data",
+      "badge": {
+        "stockin": "Import Receipt",
+        "order": "Completed Order",
+        "items": "Product Detail"
+      },
+      "dataset": {
+        "stockinCount": "Import receipts",
+        "orderCount": "Completed orders",
+        "importQty": "Imported quantity",
+        "usageQty": "Used quantity",
+        "remainingQty": "Remaining (Stock)"
+      },
+      "col": {
+        "receiptCode": "Receipt No.",
+        "importDate": "Import Date",
+        "creator": "Created By",
+        "productTypeCount": "Product Types",
+        "note": "Note",
+        "orderCode": "Order No.",
+        "orderDate": "Order Date",
+        "orderer": "Ordered By",
+        "department": "Department",
+        "product": "Product",
+        "type": "Type",
+        "import": "Import",
+        "usage": "Usage",
+        "stock": "Stock"
+      },
+      "empty": {
+        "stockin": "No import receipts in this period",
+        "order": "No completed orders in this period",
+        "items": "No data available in this range"
+      }
+    },
     "title": "Reports",
     "import": {
       "title": "Import Report",

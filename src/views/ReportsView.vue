@@ -44,14 +44,14 @@
             <div class="chart-header">
               <h3 class="chart-title">
                 <i class="pi pi-chart-bar"></i>
-                Phân tích Tồn kho từng Sản phẩm
+                {{ t('reports.chart.title') }}
               </h3>
               <div class="header-controls">
                 <SelectButton v-model="selectedTrend" :options="trendOptions" @change="onTrendChange" :allowEmpty="false" class="trend-select" />
                 <template v-if="selectedTrend === 'Items trend'">
                   <div class="divider-v"></div>
                   <Dropdown
-                    v-model="selectedItem" :options="allItems" placeholder="Tìm kiếm SP" filter
+                    v-model="selectedItem" :options="allItems" filter
                     :filterFields="['eng.partname', 'com.name', 'id', 'itemIndentifyId']"
                     @change="onItemChange" class="item-dropdown"
                   >
@@ -76,12 +76,12 @@
             <!-- Row 2: Filter bar -->
             <div class="filter-bar">
               <div class="filter-group">
-                <span class="filter-label">Từ</span>
+                <span class="filter-label">{{ t('reports.chart.from') }}</span>
                 <Calendar v-model="fromDate" dateFormat="dd/mm/yy" showIcon :manualInput="false" class="report-calendar" @date-select="onRangeChange" />
               </div>
               <i class="pi pi-arrow-right filter-arrow"></i>
               <div class="filter-group">
-                <span class="filter-label">Đến</span>
+                <span class="filter-label">{{ t('reports.chart.to') }}</span>
                 <Calendar v-model="toDate" dateFormat="dd/mm/yy" showIcon :manualInput="false" class="report-calendar" @date-select="onRangeChange" />
               </div>
 
@@ -106,7 +106,7 @@
             <!-- Loading -->
             <div v-if="loading" class="loading-state">
               <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
-              <span class="loading-text">Đang tải dữ liệu...</span>
+              <span class="loading-text">{{ t('reports.chart.loading') }}</span>
             </div>
 
             <div v-else>
@@ -119,7 +119,7 @@
               <div v-if="selectedChartData.length > 0 || detailLoading" class="detail-section animate-fade-in">
                 <div class="detail-header">
                   <h4 class="detail-title">
-                    Dữ liệu chi tiết
+                    {{ t('reports.chart.detailTitle') }}
                     <span class="detail-period">{{ selectedChunkLabel }}</span>
                     <span v-if="detailClickedCol" class="detail-badge"
                       :class="{
@@ -127,7 +127,12 @@
                         'badge-yellow': detailClickedCol === 'order',
                         'badge-green': detailClickedCol === 'items',
                       }">
-                      {{ detailClickedCol === 'stockin' ? 'Phiếu nhập' : detailClickedCol === 'order' ? 'Đơn hoàn thành' : 'Chi tiết SP' }}
+                      {{ detailClickedCol === 'stockin' 
+                        ? t('reports.chart.badge.stockin') 
+                        : detailClickedCol === 'order' 
+                          ? t('reports.chart.badge.order') 
+                          : t('reports.chart.badge.items') 
+                      }}
                     </span>
                   </h4>
                   <Button icon="pi pi-times" rounded text severity="secondary" size="small" @click="selectedChartData = []; detailClickedCol = ''" />
@@ -142,16 +147,16 @@
                   :value="selectedChartData"
                   class="p-datatable-sm detail-table"
                   responsiveLayout="scroll" stripedRows :paginator="selectedChartData.length > 10" :rows="10" :rowsPerPageOptions="[10, 25, 50]">
-                  <template #empty><div class="table-empty">Không có phiếu nhập trong khoảng thời gian này</div></template>
-                  <Column header="Mã phiếu" style="width: 100px">
+                  <template #empty><div class="table-empty">{{ t('reports.chart.empty.stockin') }}</div></template>
+                  <Column :header="t('reports.chart.col.receiptCode')" style="width: 100px">
                     <template #body="{ data }"><span class="font-bold text-blue-600">#{{ data.id }}</span></template>
                   </Column>
-                  <Column header="Ngày nhập"><template #body="{ data }">{{ formatDate(data.stockInDate) }}</template></Column>
-                  <Column header="Người tạo"><template #body="{ data }">{{ data.account?.username || "-" }}</template></Column>
-                  <Column header="Số loại SP" alignHeader="right">
-                    <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.stockInDetails?.length || 0 }} loại</div></template>
+                  <Column :header="t('reports.chart.col.importDate')"><template #body="{ data }">{{ formatDate(data.stockInDate) }}</template></Column>
+                  <Column :header="t('reports.chart.col.creator')"><template #body="{ data }">{{ data.account?.username || "-" }}</template></Column>
+                  <Column :header="t('reports.chart.col.productTypeCount')" alignHeader="right">
+                    <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.stockInDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
                   </Column>
-                  <Column header="Ghi chú"><template #body="{ data }"><span class="text-slate-500 text-sm">{{ data.note || "-" }}</span></template></Column>
+                  <Column :header="t('reports.chart.col.note')"><template #body="{ data }"><span class="text-slate-500 text-sm">{{ data.note || "-" }}</span></template></Column>
                 </DataTable>
 
                 <!-- Total trend: Đơn hoàn thành -->
@@ -159,15 +164,15 @@
                   :value="selectedChartData"
                   class="p-datatable-sm detail-table"
                   responsiveLayout="scroll" stripedRows :paginator="selectedChartData.length > 10" :rows="10" :rowsPerPageOptions="[10, 25, 50]">
-                  <template #empty><div class="table-empty">Không có đơn hoàn thành trong khoảng thời gian này</div></template>
-                  <Column header="Mã đơn" style="width: 100px">
+                  <template #empty><div class="table-empty">{{ t('reports.chart.empty.order') }}</div></template>
+                  <Column :header="t('reports.chart.col.orderCode')" style="width: 100px">
                     <template #body="{ data }"><span class="font-bold text-yellow-600">#{{ data.id }}</span></template>
                   </Column>
-                  <Column header="Ngày đặt"><template #body="{ data }">{{ formatDate(data.orderDate) }}</template></Column>
-                  <Column header="Người đặt"><template #body="{ data }">{{ data.nameWorker || data.account?.username || "-" }}</template></Column>
-                  <Column header="Bộ phận"><template #body="{ data }">{{ data.account?.department || "-" }}</template></Column>
-                  <Column header="Số loại SP" alignHeader="right">
-                    <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.orderDetails?.length || 0 }} loại</div></template>
+                  <Column :header="t('reports.chart.col.orderDate')"><template #body="{ data }">{{ formatDate(data.orderDate) }}</template></Column>
+                  <Column :header="t('reports.chart.col.orderer')"><template #body="{ data }">{{ data.nameWorker || data.account?.username || "-" }}</template></Column>
+                  <Column :header="t('reports.chart.col.department')"><template #body="{ data }">{{ data.account?.department || "-" }}</template></Column>
+                  <Column :header="t('reports.chart.col.productTypeCount')" alignHeader="right">
+                    <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.orderDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
                   </Column>
                 </DataTable>
 
@@ -176,15 +181,15 @@
                   :value="selectedChartData"
                   class="p-datatable-sm detail-table"
                   responsiveLayout="scroll" stripedRows :paginator="selectedChartData.length > 10" :rows="10" :rowsPerPageOptions="[10, 25, 50]">
-                  <template #empty><div class="table-empty">Không có dữ liệu trong khoảng này</div></template>
-                  <Column header="Sản phẩm" style="width: 35%">
+                  <template #empty><div class="table-empty">{{ t('reports.chart.empty.items') }}</div></template>
+                  <Column :header="t('reports.chart.col.product')" style="width: 35%">
                     <template #body="{ data }">
                       <span class="font-semibold text-slate-800 uppercase text-sm">
                         {{ data.itemName || data.item?.eng?.partname || data.item?.com?.name || `Mã: ${data.itemId}` }}
                       </span>
                     </template>
                   </Column>
-                  <Column header="Loại" style="width: 80px">
+                  <Column :header="t('reports.chart.col.type')" style="width: 80px">
                     <template #body="{ data }">
                       <span :class="['px-2 py-0.5 rounded text-xs font-medium border', data.item?.eng ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200']">
                         {{ data.item?.eng ? "ENG" : "COM" }}
@@ -192,19 +197,19 @@
                     </template>
                   </Column>
                   <Column alignHeader="right">
-                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Nhập</div></template>
+                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-blue-500"></div> {{ t('reports.chart.col.import') }}</div></template>
                     <template #body="{ data }">
                       <div class="text-right font-bold text-blue-600">{{ formatNumber(data.totalStockIn) }} <span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
                     </template>
                   </Column>
                   <Column alignHeader="right">
-                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-yellow-500"></div> Sử dụng</div></template>
+                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-yellow-500"></div> {{ t('reports.chart.col.usage') }}</div></template>
                     <template #body="{ data }">
                       <div class="text-right font-bold text-yellow-600">{{ formatNumber(data.totalOrdered) }} <span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
                     </template>
                   </Column>
                   <Column alignHeader="right">
-                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> Tồn kho</div></template>
+                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> {{ t('reports.chart.col.stock') }}</div></template>
                     <template #body="{ data }">
                       <div class="text-right font-bold text-emerald-600">{{ formatNumber(data.stockQty) }} <span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
                     </template>
@@ -223,7 +228,7 @@
         <i class="pi pi-mobile" style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 1rem; display: block"></i>
         <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; color: #1e293b">{{ t("reports.mobileNotSupported.title") }}</h3>
         <p style="font-size: 0.875rem; color: #64748b; margin-bottom: 1.5rem; line-height: 1.5">{{ t("reports.mobileNotSupported.description") }}</p>
-        <Button label="Đóng" style="width: 100%" @click="showUnsupportedDialog = false" />
+        <Button :label="t('common.close')" style="width: 100%" @click="showUnsupportedDialog = false" />
       </div>
     </Dialog>
   </MainLayout>
