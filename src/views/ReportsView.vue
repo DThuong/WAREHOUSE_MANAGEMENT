@@ -65,7 +65,7 @@
                     <template #option="slotProps">
                       <div class="dropdown-option">
                         <span class="option-name">{{ slotProps.option.eng?.partname || slotProps.option.com?.name || "Unknown" }}</span>
-                        <span class="option-meta">{{ slotProps.option.type || "N/A" }} · Tồn: {{ slotProps.option.stockQty }}</span>
+                        <span class="option-meta">{{ slotProps.option.type || "N/A" }} · {{ t('common.form.stockLabel') }}: {{ slotProps.option.stockQty }}</span>
                       </div>
                     </template>
                   </Dropdown>
@@ -99,7 +99,7 @@
 
               <button class="reset-btn" @click="onResetRange">
                 <i class="pi pi-refresh"></i>
-                Reset
+                {{ t('reports.chart.reset') }}
               </button>
             </div>
 
@@ -330,8 +330,8 @@ const detailClickedCol = ref("");
 
 const trendOptions = ["Total trend", "Items trend"];
 const selectedTrend = ref("Total trend");
-const timeOptions = ["Ngày", "Tuần", "Tháng"];
-const selectedTime = ref("Tuần");
+const timeOptions = ["Day", "Week", "Month"];
+const selectedTime = ref("Week");
 
 const allItems = ref<Item[]>([]);
 const selectedItem = ref<Item | null>(null);
@@ -347,11 +347,11 @@ const toDate = ref<Date>(new Date());
 // ── Default range ─────────────────────────────────────────
 const getDefaultRange = (type: string) => {
   const today = new Date();
-  if (type === "Ngày") {
+  if (type === "Day") {
     const from = new Date(today); from.setDate(today.getDate() - 6); from.setHours(0, 0, 0, 0);
     const to = new Date(today); to.setHours(23, 59, 59, 999);
     return { from, to };
-  } else if (type === "Tuần") {
+  } else if (type === "Week") {
     const dow = today.getDay();
     const diffToMon = dow === 0 ? -6 : 1 - dow;
     const thisMon = new Date(today); thisMon.setDate(today.getDate() + diffToMon); thisMon.setHours(0, 0, 0, 0);
@@ -375,7 +375,7 @@ const generateTimeChunks = (
   const chunks: { label: string; fromDate: Date; toDate: Date }[] = [];
   const todayEnd = getTodayEnd();
 
-  if (timeType === "Ngày") {
+  if (timeType === "Day") {
     const start = new Date(from); start.setHours(0, 0, 0, 0);
     const effectiveTo = to > todayEnd ? new Date(todayEnd) : new Date(to);
     effectiveTo.setHours(23, 59, 59, 999);
@@ -387,7 +387,7 @@ const generateTimeChunks = (
       cursor.setDate(cursor.getDate() + 1);
     }
 
-  } else if (timeType === "Tuần") {
+  } else if (timeType === "Week") {
     const effectiveTo = to > todayEnd ? new Date(todayEnd) : new Date(to);
     const cursor = new Date(from);
     const dow = cursor.getDay();
@@ -509,8 +509,8 @@ const loadTotalTrend = async () => {
   chartData.value = {
     labels: results.map(r => r.label),
     datasets: [
-      { label: "Số phiếu nhập", backgroundColor: "#3b82f6", ...DS, data: results.map(r => r.totalIn) },
-      { label: "Số đơn hoàn thành", backgroundColor: "#eab308", ...DS, data: results.map(r => r.totalOut) },
+      { label: t('reports.chart.dataset.stockinCount'), backgroundColor: "#3b82f6", ...DS, data: results.map(r => r.totalIn) },
+      { label: t('reports.chart.dataset.orderCount'), backgroundColor: "#eab308", ...DS, data: results.map(r => r.totalOut) },
     ],
   };
 };
@@ -559,9 +559,9 @@ const buildItemsChart = () => {
   chartData.value = {
     labels: fullReportData.value.map(r => r.label),
     datasets: [
-      { label: "Nhập bao nhiêu", backgroundColor: "#3b82f6", ...DS, data: fullReportData.value.map(r => r.totalIn) },
-      { label: "Sử dụng bao nhiêu", backgroundColor: "#eab308", ...DS, data: fullReportData.value.map(r => r.totalOut) },
-      { label: "Còn lại (Tồn kho)", backgroundColor: "#10b981", ...DS, data: fullReportData.value.map(r => r.totalStock) },
+      { label: t('reports.chart.dataset.importQty'), backgroundColor: "#3b82f6", ...DS, data: fullReportData.value.map(r => r.totalIn) },
+      { label: t('reports.chart.dataset.usageQty'), backgroundColor: "#eab308", ...DS, data: fullReportData.value.map(r => r.totalOut) },
+      { label: t('reports.chart.dataset.remainingQty'), backgroundColor: "#10b981", ...DS, data: fullReportData.value.map(r => r.totalStock) },
     ],
   };
 };
@@ -604,18 +604,18 @@ const onChartClick = async (event: any, elements: any[], chart: any) => {
   if (selectedTrend.value === "Total trend") {
     selectedChartData.value = [];
     // Sử dụng data lấy được từ lúc init thay vì gọi lại API
-    if (label.includes("phiếu") || label.includes("nhập")) {
+    if (label === t('reports.chart.dataset.stockinCount')) {
       detailClickedCol.value = "stockin";
       selectedChartData.value = clickedChunk.rawStockins || [];
-    } else if (label.includes("đơn") || label.includes("hoàn thành")) {
+    } else if (label === t('reports.chart.dataset.orderCount')) {
       detailClickedCol.value = "order";
       selectedChartData.value = clickedChunk.rawOrders || [];
     }
   } else {
     detailClickedCol.value = "items";
     const trackedId = selectedItem.value?.id;
-    const isStockInCol = label.includes("Nhập");
-    const isOrderCol = label.includes("Sử dụng");
+    const isStockInCol = label === t('reports.chart.dataset.importQty');
+    const isOrderCol = label === t('reports.chart.dataset.usageQty');
     const itemMap = new Map<number, any>();
     clickedChunk.rawDays?.forEach((day: DailyMovement) => {
       day.items.forEach((d: DailyMovementItem) => {
@@ -641,7 +641,7 @@ const onTimeTabClick = (opt: string) => {
 
   // Tính range mới
   let newFrom: Date, newTo: Date;
-  if (opt === "Tháng") {
+  if (opt === "Month") {
     const today = new Date();
     newFrom = new Date(today.getFullYear(), 0, 1, 0, 0, 0, 0);
     newTo = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
@@ -665,8 +665,8 @@ const onRangeChange = () => {
 };
 
 const onResetRange = () => {
-  selectedTime.value = "Tuần";
-  const range = getDefaultRange("Tuần");
+  selectedTime.value = "Week";
+  const range = getDefaultRange("Week");
   fromDate.value = range.from; toDate.value = range.to;
   selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
   loadReportData();
@@ -755,7 +755,7 @@ onMounted(async () => {
   const items = await itemAPI.getAll();
   allItems.value = items;
   selectedItem.value = items[0] ?? null;
-  const range = getDefaultRange("Tuần");
+  const range = getDefaultRange("Week");
   fromDate.value = range.from; toDate.value = range.to;
   await loadReportData();
 });
