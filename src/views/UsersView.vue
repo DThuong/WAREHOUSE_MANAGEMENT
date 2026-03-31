@@ -47,9 +47,8 @@
             <!-- ========== DESKTOP: DataTable ========== -->
             <DataTable
               v-if="!isMobile"
-              :value="filteredUsers"
+              :value="mobilePagination.paginatedList.value"
               :loading="userStore.loading"
-              :rows="5"
               responsiveLayout="scroll"
               paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             >
