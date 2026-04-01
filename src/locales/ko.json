@@ -206,7 +206,8 @@
       "department": "부서",
       "orderDate": "주문일",
       "status": "상태",
-      "productList": "제품 목록"
+      "productList": "제품 목록",
+      "viewPurpose": "사용 목적 보기"
     },
     "imageManagement": {
       "title": "이미지 관리 - 주문",

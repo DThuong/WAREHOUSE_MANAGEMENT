@@ -204,7 +204,8 @@
       "department": "Department",
       "orderDate": "Order Date",
       "status": "Status",
-      "productList": "Product List"
+      "productList": "Product List",
+      "viewPurpose": "View Purpose of Use"
     },
     "imageManagement": {
       "title": "Image Management - Order",

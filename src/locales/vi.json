@@ -206,7 +206,8 @@
       "department": "Phòng ban",
       "orderDate": "Ngày đặt",
       "status": "Trạng thái",
-      "productList": "Danh sách sản phẩm"
+      "productList": "Danh sách sản phẩm",
+      "viewPurpose": "Xem mục đích sử dụng"
     },
     "imageManagement": {
       "title": "Quản lý hình ảnh - Đơn hàng",
