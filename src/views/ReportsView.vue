@@ -157,6 +157,15 @@
                     <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.stockInDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
                   </Column>
                   <Column :header="t('reports.chart.col.note')"><template #body="{ data }"><span class="text-slate-500 text-sm">{{ data.note || "-" }}</span></template></Column>
+                  <Column :header="t('common.action')" style="width: 60px">
+                    <template #body="{ data }">
+                      <Button
+                        icon="pi pi-eye"
+                        text rounded severity="info" size="small"
+                        @click="openStockinDetail(data)"
+                      />
+                    </template>
+                  </Column>
                 </DataTable>
 
                 <!-- Total trend: Đơn hoàn thành -->
@@ -174,6 +183,15 @@
                   <Column :header="t('reports.chart.col.productTypeCount')" alignHeader="right">
                     <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.orderDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
                   </Column>
+                  <Column :header="t('common.action')" style="width: 60px">
+                  <template #body="{ data }">
+                    <Button
+                      icon="pi pi-eye"
+                      text rounded severity="info" size="small"
+                      @click="openOrderDetail(data)"
+                    />
+                  </template>
+                </Column>
                 </DataTable>
 
                 <!-- Items trend -->
@@ -231,6 +249,139 @@
         <Button :label="t('common.close')" style="width: 100%" @click="showUnsupportedDialog = false" />
       </div>
     </Dialog>
+
+    <!-- Stockin Detail Dialog -->
+    <Dialog
+      v-model:visible="showStockinDetail"
+      :header="detailStockin ? `Phiếu nhập #${detailStockin.id}` : 'Chi tiết phiếu nhập'"
+      :style="{ width: '700px' }"
+      :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
+      :modal="true"
+    >
+      <div v-if="detailDialogLoading" class="flex justify-center py-8">
+        <ProgressSpinner style="width: 40px; height: 40px" strokeWidth="4" />
+      </div>
+      <div v-else-if="detailStockin" class="mt-2">
+        <div class="grid grid-cols-2 gap-4 mb-4 p-4! bg-gray-50 rounded-lg">
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Ngày nhập</p>
+            <p class="font-semibold">{{ formatDate(detailStockin.stockInDate) }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Người tạo</p>
+            <p class="font-semibold">{{ detailStockin.account?.username || "-" }}</p>
+          </div>
+          <div class="col-span-2">
+            <p class="text-sm text-gray-500 mb-1">Ghi chú</p>
+            <p>{{ detailStockin.note || "-" }}</p>
+          </div>
+        </div>
+
+        <h4 class="font-semibold mb-3">
+          Danh sách sản phẩm ({{ detailStockin.stockInDetails?.length || 0 }})
+        </h4>
+        <div class="flex flex-col gap-2">
+          <div
+            v-for="(detail, idx) in detailStockin.stockInDetails"
+            :key="idx"
+            class="flex items-center gap-3 p-3! mt-3! rounded-xl border border-gray-200 bg-gray-50"
+          >
+            <img
+              v-if="detail.item?.picture?.length"
+              :src="getItemImageUrl(detail.item.picture[0])"
+              class="w-11 h-11 rounded-lg object-cover shrink-0 border border-gray-200"
+            />
+            <div v-else class="w-11 h-11 rounded-lg bg-gray-200 flex items-center justify-center shrink-0">
+              <i class="pi pi-image text-gray-400"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-sm truncate">{{ getItemName(detail.item) }}</p>
+              <p class="text-xs text-gray-500">{{ detail.item?.type || "-" }}</p>
+            </div>
+            <Chip
+              :label="`+${detail.quantity} ${detail.item?.unit || ''}`"
+              style="background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; font-weight: 600"
+            />
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Đóng" icon="pi pi-times" text @click="showStockinDetail = false" />
+      </template>
+    </Dialog>
+
+    <!-- Order Detail Dialog -->
+    <Dialog
+      v-model:visible="showOrderDetail"
+      :header="detailOrder ? `Đơn hàng #${detailOrder.id}` : 'Chi tiết đơn hàng'"
+      :style="{ width: '800px' }"
+      :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
+      :modal="true"
+    >
+      <div v-if="detailDialogLoading" class="flex justify-center py-8">
+        <ProgressSpinner style="width: 40px; height: 40px" strokeWidth="4" />
+      </div>
+      <div v-else-if="detailOrder" class="mt-2">
+        <div class="grid grid-cols-2 gap-4 mb-4 p-4! bg-gray-50 rounded-lg">
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Ngày đặt</p>
+            <p class="font-semibold">{{ formatDate(detailOrder.orderDate) }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Người đặt</p>
+            <p class="font-semibold">{{ detailOrder.nameWorker || detailOrder.account?.username || "-" }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Bộ phận</p>
+            <p class="font-semibold">{{ detailOrder.account?.department || "-" }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Trạng thái</p>
+            <Chip
+              :label="detailOrder.status"
+              style="background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; font-weight: 600"
+            />
+          </div>
+        </div>
+
+        <h4 class="font-semibold mb-3">
+          Danh sách sản phẩm ({{ detailOrder.orderDetails?.length || 0 }})
+        </h4>
+        <DataTable :value="detailOrder.orderDetails" class="p-datatable-sm" responsiveLayout="scroll">
+          <Column :header="t('common.product')">
+            <template #body="{ data }">
+              <div class="flex items-center gap-2">
+                <img
+                  v-if="data.item?.picture?.length"
+                  :src="getItemImageUrl(data.item.picture[0])"
+                  class="w-10 h-10 rounded object-cover"
+                />
+                <div v-else class="w-10 h-10 rounded bg-gray-200 flex items-center justify-center">
+                  <i class="pi pi-image text-gray-400"></i>
+                </div>
+                <div>
+                  <p class="font-semibold text-sm">{{ getItemName(data.item) }}</p>
+                  <p class="text-xs text-gray-500">{{ data.item?.itemIndentifyId || "-" }}</p>
+                </div>
+              </div>
+            </template>
+          </Column>
+          <Column field="orderQty" :header="t('common.quantity')">
+            <template #body="{ data }">
+              <span class="font-medium">{{ data.orderQty }} {{ data.item?.unit || "" }}</span>
+            </template>
+          </Column>
+          <Column :header="t('common.form.purposeNote')">
+            <template #body="{ data }">
+              <span class="text-sm text-gray-600">{{ data.note || "-" }}</span>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+      <template #footer>
+        <Button label="Đóng" icon="pi pi-times" text @click="showOrderDetail = false" />
+      </template>
+    </Dialog>
   </MainLayout>
 </template>
 
@@ -256,6 +407,11 @@ import type { Item, DailyMovement, DailyMovementItem } from "@/types/item.types"
 
 const router = useRouter();
 const { t } = useI18n();
+const showStockinDetail = ref(false);
+const showOrderDetail = ref(false);
+const detailStockin = ref<any>(null);
+const detailOrder = ref<any>(null);
+const detailDialogLoading = ref(false);
 
 // ── Mobile ────────────────────────────────────────────────
 const isMobile = ref(window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
@@ -281,35 +437,45 @@ const fmtAPI = (date: Date) => {
   return `${y}-${mo}-${d} ${h}:${mi}`;
 };
 
+const openStockinDetail = async (stockin: any) => {
+  detailDialogLoading.value = true;
+  showStockinDetail.value = true;
+  try {
+    detailStockin.value = await stockinAPI.getStockinById(stockin.id);
+  } catch {
+    detailStockin.value = stockin;
+  } finally {
+    detailDialogLoading.value = false;
+  }
+};
+
+const openOrderDetail = async (order: any) => {
+  detailDialogLoading.value = true;
+  showOrderDetail.value = true;
+  try {
+    detailOrder.value = await orderAPI.getById(order.id);
+  } catch {
+    detailOrder.value = order;
+  } finally {
+    detailDialogLoading.value = false;
+  }
+};
+
+const getItemImageUrl = (filename: string) => {
+  if (!filename) return "";
+  if (filename.startsWith("http")) return filename;
+  return `${import.meta.env.WAREHOUSE_URL}/api/Item/image/${filename}`;
+};
+
+const getItemName = (item: any) =>
+  item?.eng?.partname || item?.com?.name || "Unknown";
+
+
 // ── Today boundary ────────────────────────────────────────
 const getTodayEnd = () => {
   const d = new Date();
   d.setHours(23, 59, 59, 999);
   return d;
-};
-
-// ── Plugin: căn giữa cột đơn lẻ khi dataset kia = null/0 ─────
-// → khi chỉ có 1 dataset có giá trị tại 1 category, dời bar đó về đúng tâm label
-const centerLoneBarsPlugin = {
-  id: 'centerLoneBars',
-  afterUpdate(chart: any) {
-    const { datasets } = chart.data;
-    if (!datasets || datasets.length < 2) return;
-    const hasVal = (v: any) => v !== null && v !== undefined && v !== 0;
-    datasets.forEach((_: any, dsIdx: number) => {
-      const meta = chart.getDatasetMeta(dsIdx);
-      if (!meta || meta.hidden) return;
-      meta.data.forEach((bar: any, i: number) => {
-        if (!hasVal(datasets[dsIdx].data[i])) return;
-        const activeCount = datasets.filter((ds: any) => hasVal(ds.data[i])).length;
-        if (activeCount === 1) {
-          // Chỉ mình dataset này có giá trị → căn vào đúng tâm category
-          bar.x = chart.scales['x'].getPixelForValue(i);
-          bar.width = Math.min(bar.width * datasets.length, 80);
-        }
-      });
-    });
-  },
 };
 
 // ── Dataset config ────────────────────────────────────────
