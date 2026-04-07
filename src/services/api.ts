@@ -64,32 +64,39 @@ axiosInstance.interceptors.response.use(
     return response.data
   },
   (error: AxiosError): Promise<ApiError> => {
-    // Xử lý 401 với flag để tránh loop
+    const currentPath = window.location.pathname
+
+    // Handle 401 with flag to avoid redirect loops
     if (error.response?.status === 401 && !isRedirecting) {
-      isRedirecting = true
-      
-      // Clear auth data
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('user_info')
-      
-      // Redirect về signin
-      const currentPath = window.location.pathname
+      // Don't redirect if already on signin page
       if (currentPath !== '/signin') {
-        window.location.href = `/signin?redirect=${encodeURIComponent(currentPath)}`
+        isRedirecting = true
+
+        // Clear auth data
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('user_info')
+
+        // Clear any stale authError so signin page stays clean
+        try {
+          const userStore = useUserStore()
+          userStore.authError = null
+          userStore.currentUser = null
+          userStore.authToken = null
+        } catch (_) { /* store may not be ready */ }
+
+        window.location.href = `/signin?reason=expired`
+
+        // Reset flag after redirect
+        setTimeout(() => { isRedirecting = false }, 1000)
       }
-      
-      // Reset flag sau 1s
-      setTimeout(() => {
-        isRedirecting = false
-      }, 1000)
     }
-    
+
     const apiError: ApiError = {
       message: (error.response?.data as any)?.message || error.message || 'Đã có lỗi xảy ra',
       status: error.response?.status,
       data: error.response?.data
     }
-    
+
     return Promise.reject(apiError)
   }
 )

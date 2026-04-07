@@ -12,15 +12,20 @@ import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
 import { useTokenMonitor } from '@/composables/useToken'
 import { signalRService } from './services/signalrService'
+import { isTokenExpired } from '@/utils/checkToken'
 
 const userStore = useUserStore()
 const toast = useToast()
 const { scheduleExactExpiry } = useTokenMonitor()
 
+// Helper: chỉ start SignalR nếu token chưa hết hạn
+const isTokenValid = () =>
+  userStore.currentUser?.expiresAt && !isTokenExpired(userStore.currentUser.expiresAt)
+
 watch(
   () => userStore.isAuthenticated,
   async (isAuthenticated) => {
-    if (isAuthenticated) {
+    if (isAuthenticated && isTokenValid()) {
       await signalRService.start()
     } else {
       await signalRService.stop()
@@ -29,7 +34,7 @@ watch(
   { immediate: true }
 )
 onMounted(async () => {
-  if (userStore.isAuthenticated) {
+  if (userStore.isAuthenticated && isTokenValid()) {
     await signalRService.start()
   }
 })

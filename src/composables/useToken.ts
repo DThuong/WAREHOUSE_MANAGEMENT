@@ -18,9 +18,18 @@ export function useTokenMonitor() {
     }
   }
 
-  const forceLogout = async () => {
+  const forceLogout = () => {
     clearTimer()
-    await userStore.logout()
+
+    // Clear auth state directly — do NOT call userAPI.logout() here.
+    // The token is already expired so the API would return 401, which
+    // previously caused a spurious "Request failed 401" error on the signin page.
+    userStore.authError = null
+    userStore.currentUser = null
+    userStore.authToken = null
+    localStorage.removeItem('auth_token')
+    localStorage.removeItem('user_info')
+
     router.push({
       path: '/signin',
       query: { reason: 'expired' }

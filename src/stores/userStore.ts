@@ -88,19 +88,26 @@ export const useUserStore = defineStore('user', {
     async logout() {
       this.authLoading = true
       this.authError = null
-      
+
+      // Clear local state FIRST so the UI reflects logout immediately
+      // and any subsequent 401 from the API call doesn't set authError
+      this.currentUser = null
+      this.authToken = null
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('user_info')
+
       try {
+        // Best-effort server-side logout; token may already be expired
         await userAPI.logout()
-        
-        this.currentUser = null
-        this.authToken = null
-        localStorage.removeItem('auth_token')
-        localStorage.removeItem('user_info')
-        
         return { success: true }
       } catch (error: any) {
-        this.authError = error.message || 'Đăng xuất thất bại'
-        return { success: false, error: this.authError }
+        // Silently ignore 401 — expected when token is already expired.
+        // For other errors, log but do NOT surface authError to the UI
+        // because the user is already logged out locally.
+        if (error?.status !== 401) {
+          console.warn('Logout API error (non-critical):', error?.message)
+        }
+        return { success: true }
       } finally {
         this.authLoading = false
       }

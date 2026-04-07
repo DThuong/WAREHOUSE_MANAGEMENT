@@ -11,6 +11,24 @@ export const authGuard = (
   const token = localStorage.getItem('auth_token')
   const userInfo = localStorage.getItem('user_info')
 
+  // ★ Check expiration ngay cả khi store đã có auth data
+  if (userStore.isAuthenticated && userStore.currentUser?.expiresAt) {
+    if (isTokenExpired(userStore.currentUser.expiresAt)) {
+      userStore.authError = null
+      userStore.currentUser = null
+      userStore.authToken = null
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('user_info')
+
+      if (to.path === '/signin') {
+        next()
+      } else {
+        next({ path: '/signin', query: { reason: 'expired' } })
+      }
+      return
+    }
+  }
+
   // Sync store từ localStorage (KHÔNG gán isAuthenticated)
   if (token && userInfo && !userStore.isAuthenticated) {
     try {
@@ -35,7 +53,6 @@ export const authGuard = (
 
   // Đã login mà vào signin → redirect về home
   if (userStore.isAuthenticated && to.path === '/signin') {
-    console.log('🔄 Already logged in, redirecting to home')
     next('/')
     return
   }
