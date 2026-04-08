@@ -156,8 +156,7 @@
                   <Column :header="t('reports.chart.col.productTypeCount')" alignHeader="right">
                     <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.stockInDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
                   </Column>
-                  <Column :header="t('reports.chart.col.note')"><template #body="{ data }"><span class="text-slate-500 text-sm">{{ data.note || "-" }}</span></template></Column>
-                  <Column :header="t('common.action')" style="width: 60px">
+                  <Column :header="t('common.action')">
                     <template #body="{ data }">
                       <Button
                         icon="pi pi-eye"
@@ -183,7 +182,7 @@
                   <Column :header="t('reports.chart.col.productTypeCount')" alignHeader="right">
                     <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.orderDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
                   </Column>
-                  <Column :header="t('common.action')" style="width: 60px">
+                  <Column :header="t('common.action')">
                   <template #body="{ data }">
                     <Button
                       icon="pi pi-eye"
@@ -253,7 +252,7 @@
     <!-- Stockin Detail Dialog -->
     <Dialog
       v-model:visible="showStockinDetail"
-      :header="detailStockin ? `Phiếu nhập #${detailStockin.id}` : 'Chi tiết phiếu nhập'"
+      :header="detailStockin ? t('importManagement.detailDialog.header', { id: detailStockin.id }) : t('importManagement.title')"
       :style="{ width: '700px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -264,21 +263,21 @@
       <div v-else-if="detailStockin" class="mt-2">
         <div class="grid grid-cols-2 gap-4 mb-4 p-4! bg-gray-50 rounded-lg">
           <div>
-            <p class="text-sm text-gray-500 mb-1">Ngày nhập</p>
+            <p class="text-sm text-gray-500 mb-1">{{ t('importManagement.detailDialog.stockInDate') }}</p>
             <p class="font-semibold">{{ formatDate(detailStockin.stockInDate) }}</p>
           </div>
           <div>
-            <p class="text-sm text-gray-500 mb-1">Người tạo</p>
+            <p class="text-sm text-gray-500 mb-1">{{ t('importManagement.detailDialog.createdBy') }}</p>
             <p class="font-semibold">{{ detailStockin.account?.username || "-" }}</p>
           </div>
           <div class="col-span-2">
-            <p class="text-sm text-gray-500 mb-1">Ghi chú</p>
+            <p class="text-sm text-gray-500 mb-1">{{ t('importManagement.detailDialog.note') }}</p>
             <p>{{ detailStockin.note || "-" }}</p>
           </div>
         </div>
 
         <h4 class="font-semibold mb-3">
-          Danh sách sản phẩm ({{ detailStockin.stockInDetails?.length || 0 }})
+          {{ t('importManagement.detailDialog.productList', { count: detailStockin.stockInDetails?.length || 0 }) }}
         </h4>
         <div class="flex flex-col gap-2">
           <div
@@ -306,14 +305,14 @@
         </div>
       </div>
       <template #footer>
-        <Button label="Đóng" icon="pi pi-times" text @click="showStockinDetail = false" />
+        <Button :label="t('common.close')" icon="pi pi-times" text @click="showStockinDetail = false" />
       </template>
     </Dialog>
 
     <!-- Order Detail Dialog -->
     <Dialog
       v-model:visible="showOrderDetail"
-      :header="detailOrder ? `Đơn hàng #${detailOrder.id}` : 'Chi tiết đơn hàng'"
+      :header="detailOrder ? `${t('orderManagement.orders')} #${detailOrder.id}` : t('orderManagement.orderDetail.title')"
       :style="{ width: '800px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
@@ -324,28 +323,28 @@
       <div v-else-if="detailOrder" class="mt-2">
         <div class="grid grid-cols-2 gap-4 mb-4 p-4! bg-gray-50 rounded-lg">
           <div>
-            <p class="text-sm text-gray-500 mb-1">Ngày đặt</p>
+            <p class="text-sm text-gray-500 mb-1">{{ t('orderManagement.orderDetail.orderDate') }}</p>
             <p class="font-semibold">{{ formatDate(detailOrder.orderDate) }}</p>
           </div>
           <div>
-            <p class="text-sm text-gray-500 mb-1">Người đặt</p>
+            <p class="text-sm text-gray-500 mb-1">{{ t('orderManagement.orderDetail.orderedBy') }}</p>
             <p class="font-semibold">{{ detailOrder.nameWorker || detailOrder.account?.username || "-" }}</p>
           </div>
           <div>
-            <p class="text-sm text-gray-500 mb-1">Bộ phận</p>
+            <p class="text-sm text-gray-500 mb-1">{{ t('orderManagement.orderDetail.department') }}</p>
             <p class="font-semibold">{{ detailOrder.account?.department || "-" }}</p>
           </div>
           <div>
-            <p class="text-sm text-gray-500 mb-1">Trạng thái</p>
+            <p class="text-sm text-gray-500 mb-1">{{ t('orderManagement.orderDetail.status') }}</p>
             <Chip
-              :label="detailOrder.status"
+              :label="detailOrder.status ? t(`orderManagement.${detailOrder.status.toLowerCase()}`) : ''"
               style="background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; font-weight: 600"
             />
           </div>
         </div>
 
         <h4 class="font-semibold mb-3">
-          Danh sách sản phẩm ({{ detailOrder.orderDetails?.length || 0 }})
+          {{ t('orderManagement.orderDetail.productList') }} ({{ detailOrder.orderDetails?.length || 0 }})
         </h4>
         <DataTable :value="detailOrder.orderDetails" class="p-datatable-sm" responsiveLayout="scroll">
           <Column :header="t('common.product')">
@@ -379,7 +378,7 @@
         </DataTable>
       </div>
       <template #footer>
-        <Button label="Đóng" icon="pi pi-times" text @click="showOrderDetail = false" />
+        <Button :label="t('common.close')" icon="pi pi-times" text @click="showOrderDetail = false" />
       </template>
     </Dialog>
   </MainLayout>
