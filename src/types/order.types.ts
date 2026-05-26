@@ -1,7 +1,8 @@
 import { Item } from "./item.types"
 import { User } from "./user.types"
+import { machine, line } from "./line_machine.types"
 
-// Order Detail - chi tiết từng sản phẩm trong đơn hàng
+// Order Detail 
 export interface OrderDetail {
   id: number
   orderId: number
@@ -10,9 +11,11 @@ export interface OrderDetail {
   item: Item
   note: string
   timeUsed: string
+  machineId: number
+  machine: machine
 }
 
-// Order - đơn hàng chính
+// Order
 export interface Order {
   id: number
   accountId: number
@@ -40,6 +43,7 @@ export interface CreateOrderRequest {
     orderQty: number
     note: string
     timeUsed: string
+    machineId: number
   }[]
 }
 

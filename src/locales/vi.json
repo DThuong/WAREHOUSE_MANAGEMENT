@@ -367,6 +367,7 @@
       "type": "Type",
       "unit": "Unit",
       "unitPlaceholder": "Chọn đơn vị",
+      "factoryPlaceholder": "Chọn xưởng sản xuất",
       "price": "Price",
       "safeQuantity": "Safe Quantity",
       "inventoryQuantity": "Inventory Quantity",
@@ -727,6 +728,11 @@
         "all": "Tất cả loại",
         "engineer": "Engineer",
         "consumer": "Consumer"
+      },
+      "factoryOptions": {
+        "all": "Tất cả",
+        "factoryA": "SMD",
+        "factoryB": "Mainline"
       },
       "stockStatusOptions": {
         "all": "Tất cả",

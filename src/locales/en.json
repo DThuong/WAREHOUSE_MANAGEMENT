@@ -478,6 +478,7 @@
       "type": "Type",
       "unit": "Unit",
       "unitPlaceholder": "Select unit",
+      "factoryPlaceholder": "Select factory",
       "price": "Price",
       "safeQuantity": "Safe Quantity",
       "inventoryQuantity": "Inventory Quantity",
@@ -725,6 +726,11 @@
         "all": "All Types",
         "engineer": "Engineer",
         "consumer": "Consumer"
+      },
+      "factoryOptions": {
+        "all": "All Factories",
+        "factoryA": "SMD",
+        "factoryB": "Mainline"
       },
       "stockStatusOptions": {
         "all": "All",

@@ -39,19 +39,40 @@
         <template #content>
           <div class="flex flex-col gap-4">
             <!-- Filters Row -->
-            <div class="grid grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700">{{
-                  t("inventoryManagement.filters.productType")
-                }}</label>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">
+                  Xưởng
+                </label>
+
+                <Dropdown
+                  v-model="selectedFactory"
+                  :options="factoryOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Chọn xưởng"
+                  class="w-full"
+                  showClear
+                />
+              </div>
+              <div>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">
+                  {{ t("inventoryManagement.filters.productType") }}
+                </label>
+
                 <Dropdown
                   v-model="selectedType"
                   :options="typeOptions"
                   optionLabel="label"
                   optionValue="value"
-                  :placeholder="t('inventoryManagement.filters.allTypes')"
+                  :placeholder="
+                    selectedFactory
+                      ? t('inventoryManagement.filters.allTypes')
+                      : 'Vui lòng chọn xưởng trước'
+                  "
                   class="w-full"
                   showClear
+                  :disabled="!selectedFactory"
                 />
               </div>
 
@@ -193,7 +214,7 @@
 
             <Column field="id" header="ID" sortable class="w-32">
               <template #body="{ data }">
-                <div :data-product-id="data.id">STT: {{ data.id }}</div>
+                <!-- <div :data-product-id="data.id">STT: {{ data.id }}</div> -->
                 <div :data-item-id="data.itemIndentifyId" class="text-xs!">
                   {{ data.itemIndentifyId }}
                 </div>
@@ -202,21 +223,25 @@
 
             <Column :header="t('common.product')" sortable>
               <template #body="{ data }">
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 min-w-0">
                   <img
                     :src="getProductImage(data)"
                     :alt="getProductName(data)"
                     class="w-12 h-12 rounded-lg object-cover cursor-pointer"
-                    @click="viewImages(data)"
                   />
-                  <div>
-                    <p class="font-semibold text-gray-900">
+
+                  <div class="min-w-0 max-w-70">
+                    <p
+                      class="font-semibold text-gray-900 line-clamp-2 leading-snug"
+                    >
                       {{ getProductName(data) }}
                     </p>
-                    <p class="text-sm text-gray-500">
+
+                    <p class="text-sm text-gray-500 truncate">
                       {{ getDistinguishName(data) }}
                     </p>
-                    <p class="text-sm text-gray-500">
+
+                    <p class="text-sm text-gray-500 truncate">
                       {{ getProductCategory(data) }}
                     </p>
                   </div>
@@ -229,6 +254,19 @@
               :header="t('inventoryManagement.table.type')"
               sortable
             ></Column>
+
+            <Column header="Xưởng" sortable>
+              <template #body="{ data }">
+                <Chip
+                  :label="getFactoryName(data)"
+                  :class="
+                    getFactoryName(data) === 'SMD'
+                      ? 'chip-warning'
+                      : 'chip-normal'
+                  "
+                />
+              </template>
+            </Column>
 
             <Column field="price" :header="t('common.price')" sortable>
               <template #body="{ data }">
@@ -271,23 +309,25 @@
                     text
                     rounded
                     severity="info"
-                    @click="viewImages(data)"
+                    @click.stop="viewImages(data)"
                     :title="t('inventoryManagement.actions.manageImages')"
                   />
+
                   <Button
                     icon="pi pi-pencil"
                     text
                     rounded
                     severity="secondary"
-                    @click="openEditDialog(data)"
+                    @click.stop="openEditDialog(data)"
                     :title="t('inventoryManagement.actions.edit')"
                   />
+
                   <Button
                     icon="pi pi-trash"
                     text
                     rounded
                     severity="danger"
-                    @click="confirmDelete(data)"
+                    @click.stop="confirmDelete(data)"
                     :title="t('inventoryManagement.actions.delete')"
                   />
                 </div>
@@ -323,7 +363,6 @@
                     :src="getProductImage(item)"
                     :alt="getProductName(item)"
                     class="w-12 h-12 rounded-lg object-cover cursor-pointer"
-                    @click.stop="viewImages(item)"
                   />
                   <div>
                     <p class="font-semibold text-gray-900">
@@ -368,6 +407,11 @@
                       >{{ t("inventoryManagement.table.safeQty") }}:</span
                     >
                     <span>{{ item.saveQuantity }} {{ item.unit }}</span>
+                  </div>
+
+                  <div class="flex items-center gap-2 mt-2">
+                    <span class="font-semibold">Xưởng:</span>
+                    <Chip :label="getFactoryName(item)" />
                   </div>
                 </div>
 
@@ -503,9 +547,8 @@
             <InputText
               v-model.number="editForm.stockQty"
               type="number"
-              class="w-full opacity-60 cursor-not-allowed"
+              class="w-full opacity-60"
               placeholder="0"
-              disabled
             />
           </div>
         </div>
@@ -819,13 +862,14 @@ const imagePreview = useImagePreview();
 const cameraFileInput = ref<HTMLInputElement | null>(null);
 const pendingImageTimestamps = ref<string[]>([]);
 const { t } = useI18n();
-const { unitOptions } = useTranslationHelpers();
+const { unitOptions, factoryOptions } = useTranslationHelpers();
 
 // Search & Filter
 const searchQuery = ref("");
 
 const selectedType = ref<string | null>(null);
 const selectedStockStatus = ref<string | null>(null);
+const selectedFactory = ref<string | null>(null);
 const isTableMobile = ref(window.innerWidth < 768);
 // resize
 const handleResize = () => {
@@ -926,12 +970,27 @@ const stockStatusOptions = [
   },
 ];
 
+const getFactoryName = (item: Item) => {
+  const areaPart = item.areaPart || "";
+  const code = item.itemIndentifyId || "";
+
+  if (areaPart.toUpperCase() === "SMD" || code.startsWith("SMD-")) {
+    return "SMD";
+  }
+
+  if (areaPart.toUpperCase() === "MAINLINE" || code.startsWith("MAINLINE-")) {
+    return "Mainline";
+  }
+
+  return areaPart || "-";
+};
+
 const resetFilter = () => {
+  selectedFactory.value = null;
   selectedType.value = null;
   selectedStockStatus.value = null;
   searchQuery.value = "";
 };
-
 // Utility Functions
 const getProductName = (item: Item) =>
   item.eng?.partname || item.com?.name || "Unknown";
@@ -986,25 +1045,45 @@ const baseItems = computed(() => {
 
   let items = itemStore.items;
 
-  // Chỉ filter theo Type
-  if (selectedType.value === "ENG") {
-    items = items.filter((item) => item.eng !== null);
-  } else if (selectedType.value === "COM") {
-    items = items.filter((item) => item.com !== null);
+  // Filter theo xưởng: SMD / Mainline
+  if (selectedFactory.value) {
+    items = items.filter((item) => {
+      return getFactoryName(item) === selectedFactory.value;
+    });
   }
 
-  // Chỉ filter theo Search Query
+  // Chỉ cho filter type sau khi đã chọn xưởng
+  if (selectedFactory.value && selectedType.value === "ENG") {
+    items = items.filter((item) => {
+      const code = item.itemIndentifyId?.toUpperCase() || "";
+      return item.eng !== null && code.includes("-ENG-");
+    });
+  } else if (selectedFactory.value && selectedType.value === "COM") {
+    items = items.filter((item) => {
+      const code = item.itemIndentifyId?.toUpperCase() || "";
+      return item.com !== null && code.includes("-COM-");
+    });
+  }
+
+  // Search Query
   if (searchQuery.value) {
     const term = searchQuery.value.toLowerCase();
+
     items = items.filter((item) => {
       const name = getProductName(item).toLowerCase();
       const category = getProductCategory(item).toLowerCase();
+      const type = item.type?.toLowerCase() || "";
+      const id = item.id?.toString() || "";
+      const identifyId = item.itemIndentifyId?.toLowerCase() || "";
+      const factory = item.areaPart?.toLowerCase() || "";
+
       return (
         name.includes(term) ||
         category.includes(term) ||
-        item.type.toLowerCase().includes(term) ||
-        item.id?.toString().includes(term) ||
-        item.itemIndentifyId?.toLowerCase().includes(term)
+        type.includes(term) ||
+        id.includes(term) ||
+        identifyId.includes(term) ||
+        factory.includes(term)
       );
     });
   }
@@ -1094,16 +1173,16 @@ const pendingImages = ref<File[]>([]);
 const pendingImagePreviews = ref<string[]>([]);
 const imageFileInput = ref<HTMLInputElement | null>(null);
 
-//  Load items on mount
 onMounted(async () => {
   await fetchAllItems();
   window.addEventListener("resize", handleResize);
+  document.addEventListener("paste", handleImageDialogPaste);
 });
 
-//  Clear shared state on unmount
 onUnmounted(() => {
   itemStore.setCurrentItem(null);
   window.removeEventListener("resize", handleResize);
+  document.removeEventListener("paste", handleImageDialogPaste);
 });
 
 //  Fetch all items
@@ -1260,6 +1339,108 @@ const closeImageDialog = () => {
   currentImages.value = [];
   clearPendingImages();
   itemStore.setCurrentItem(null);
+};
+
+const addClipboardImageToPending = async (file: File, mimeType: string) => {
+  const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+  const maxSize = 5 * 1024 * 1024;
+
+  if (!allowedTypes.includes(mimeType)) {
+    toast.add({
+      severity: "warn",
+      summary: t("inventoryManagement.toast.warningTitle"),
+      detail: t("inventoryManagement.toast.unsupportedFormat"),
+      life: 3000,
+    });
+    return;
+  }
+
+  if (file.size > maxSize) {
+    toast.add({
+      severity: "warn",
+      summary: t("inventoryManagement.toast.warningTitle"),
+      detail: t("inventoryManagement.toast.fileTooLargeSimple"),
+      life: 3000,
+    });
+    return;
+  }
+
+  const now = new Date();
+
+  const timestamp = now.toLocaleString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  const ext =
+    mimeType === "image/jpeg" ? "jpg" : mimeType.split("/")[1] || "png";
+
+  const newName = `paste_${now.getFullYear()}${String(
+    now.getMonth() + 1,
+  ).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(
+    now.getHours(),
+  ).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(
+    now.getSeconds(),
+  ).padStart(2, "0")}.${ext}`;
+
+  const renamedFile = new File([file], newName, { type: mimeType });
+
+  // Nếu muốn giữ timestamp giống ảnh chụp/chọn ảnh hiện tại
+  const watermarked = await addTimestampToImage(renamedFile, timestamp);
+
+  pendingImages.value.push(watermarked);
+  pendingImageTimestamps.value.push(timestamp);
+
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    if (e.target?.result) {
+      pendingImagePreviews.value.push(e.target.result as string);
+    }
+  };
+
+  reader.readAsDataURL(watermarked);
+
+  toast.add({
+    severity: "success",
+    summary: t("inventoryManagement.toast.uploadSuccessTitle"),
+    detail: "Đã dán ảnh từ clipboard",
+    life: 2000,
+  });
+};
+
+const handleImageDialogPaste = async (event: ClipboardEvent) => {
+  try {
+    // Chỉ cho paste khi dialog quản lý ảnh đang mở
+    if (!showImageDialog.value) return;
+
+    // Không paste khi đang upload
+    if (itemStore.uploadingImages) return;
+
+    const items = event.clipboardData?.items;
+    if (!items) return;
+
+    const imageItems = Array.from(items).filter((item) =>
+      item.type.startsWith("image/"),
+    );
+
+    if (imageItems.length === 0) return;
+
+    event.preventDefault();
+
+    for (const item of imageItems) {
+      const file = item.getAsFile();
+      if (!file) continue;
+
+      await addClipboardImageToPending(file, item.type);
+    }
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 const handleImageUpload = async (event: Event) => {
@@ -1513,6 +1694,10 @@ const viewImageFullscreen = (imageUrl: string) => {
 
 watch(isTableMobile, (mobile) => {
   pageSize.value = mobile ? 5 : 10;
+});
+
+watch(selectedFactory, () => {
+  selectedType.value = null;
 });
 </script>
 

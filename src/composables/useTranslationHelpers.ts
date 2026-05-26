@@ -25,6 +25,11 @@ export function useTranslationHelpers() {
     { label: t('inventoryManagement.units.doi'), value: 'đôi' },
   ])
 
+  const factoryOptions = computed(() => [
+    { label: t('reports.inventoryReport.factoryOptions.factoryA'), value: 'SMD' },
+    { label: t('reports.inventoryReport.factoryOptions.factoryB'), value: 'Mainline' },
+  ])
+
   const typeOptions = computed(() => [
     { label: t('reports.inventoryReport.typeOptions.all'), value: null },
     { label: t('reports.inventoryReport.typeOptions.engineer'), value: 'ENG' },
@@ -62,5 +67,5 @@ export function useTranslationHelpers() {
     return t(key, t('reports.inventoryReport.stockStatus.unknown'))
     }
 
-  return { getDepartmentLabel, getUnitLabel, typeOptions, stockStatusOptions, getStockStatusLabel, statusOptions, unitOptions }
+  return { getDepartmentLabel, getUnitLabel, typeOptions, stockStatusOptions, getStockStatusLabel, statusOptions, unitOptions, factoryOptions }
 }

@@ -18,6 +18,7 @@ export interface Item {
   itemIndentifyId?: string
   type: string
   saveQuantity: number
+  areaPart: string
   price: string
   unit: string
   stockPrice: number

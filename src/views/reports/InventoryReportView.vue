@@ -142,6 +142,7 @@
 
         <!-- Summary -->
         <div
+          class="summary-cards"
           style="
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -371,7 +372,7 @@
                 >
                   {{ t("reports.inventoryReport.table.stock") }}
                 </th>
-                <th
+                <!-- <th
                   style="
                     padding: 0.75rem;
                     text-align: center;
@@ -381,15 +382,11 @@
                   {{ t("reports.inventoryReport.table.safeStock") }}
                 </th>
                 <th
-                  style="
-                    padding: 0.75rem;
-                    text-align: center;
-                    border: 1px solid #e5e7eb;
-                  "
+                  style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb; white-space: nowrap;"
                 >
                   {{ t("reports.inventoryReport.table.status") }}
-                </th>
-                <th
+                </th> -->
+                <!-- <th
                   style="
                     padding: 0.75rem;
                     text-align: center;
@@ -397,8 +394,8 @@
                   "
                 >
                   {{ t("reports.inventoryReport.table.unitPrice") }}
-                </th>
-                <th
+                </th> -->
+                <!-- <th
                   style="
                     padding: 0.75rem;
                     text-align: center;
@@ -406,8 +403,8 @@
                   "
                 >
                   {{ t("reports.inventoryReport.table.inventoryValue") }}
-                </th>
-                <th
+                </th> -->
+                <!-- <th
                   style="
                     padding: 0.75rem;
                     text-align: center;
@@ -415,9 +412,9 @@
                   "
                 >
                   {{ t("reports.inventoryReport.table.orderCount") }}
-                </th>
+                </th> -->
                 <!-- Số lần nhập -->
-                <th
+                <!-- <th
                   style="
                     padding: 0.75rem;
                     text-align: center;
@@ -425,7 +422,7 @@
                   "
                 >
                   {{ t("reports.inventoryReport.table.stockInCount") }}
-                </th>
+                </th> -->
               </tr>
             </thead>
             <tbody>
@@ -507,12 +504,12 @@
                     text-align: center;
                   "
                 >
-                  <strong>{{ item.stockQty }}</strong>
-                  {{ getUnitLabel(item.unit) }}
+                  <!-- <strong>{{ item.stockQty }}</strong> -->
+                  <!-- {{ getUnitLabel(item.unit) }} -->
                 </td>
 
                 <!-- Tồn an toàn -->
-                <td
+                <!-- <td
                   style="
                     padding: 0.75rem;
                     border: 1px solid #e5e7eb;
@@ -520,26 +517,27 @@
                   "
                 >
                   {{ item.saveQuantity }} {{ getUnitLabel(item.unit) }}
-                </td>
+                </td> -->
 
                 <!-- Trạng thái -->
-                <td style="padding: 0.75rem; border: 1px solid #e5e7eb">
+                <!-- <td style="padding: 0.75rem; border: 1px solid #e5e7eb">
                   <span
                     :style="{
                       padding: '0.25rem 0.5rem',
                       borderRadius: '4px',
                       fontSize: '0.75rem',
                       fontWeight: '600',
+                      whiteSpace: 'nowrap',
                       background: getStockStatusColor(item).bg,
                       color: getStockStatusColor(item).text,
                     }"
                   >
                     {{ getStockStatusLabel(item) }}
                   </span>
-                </td>
+                </td> -->
 
                 <!-- Đơn giá -->
-                <td
+                <!-- <td
                   style="
                     padding: 0.75rem;
                     border: 1px solid #e5e7eb;
@@ -547,10 +545,10 @@
                   "
                 >
                   {{ formatCurrency(parseFloat(item.price || "0")) }}
-                </td>
+                </td> -->
 
                 <!-- Giá trị tồn -->
-                <td
+                <!-- <td
                   style="
                     padding: 0.75rem;
                     border: 1px solid #e5e7eb;
@@ -560,10 +558,10 @@
                   <strong>
                     {{ formatCurrency(parseFloat(item.stockPrice || "0")) }}
                   </strong>
-                </td>
+                </td> -->
 
                 <!-- Số lần order -->
-                <td
+                <!-- <td
                   style="
                     padding: 0.75rem;
                     border: 1px solid #e5e7eb;
@@ -582,10 +580,10 @@
                   >
                     {{ item.totalOrdered || 0 }}
                   </span>
-                </td>
+                </td> -->
 
                 <!-- Số lần nhập kho -->
-                <td
+                <!-- <td
                   style="
                     padding: 0.75rem;
                     border: 1px solid #e5e7eb;
@@ -604,7 +602,7 @@
                   >
                     {{ item.totalStockIn || 0 }}
                   </span>
-                </td>
+                </td> -->
               </tr>
             </tbody>
           </table>
@@ -678,9 +676,11 @@ import type { UsedInRangeItem } from "@/types/item.types";
 import Calendar from "primevue/calendar";
 import { useI18n } from "vue-i18n";
 import { useTranslationHelpers } from "@/composables/useTranslationHelpers";
+import { useItemStore } from "@/stores/itemStore";
 
 const router = useRouter();
 const dashboardStore = useDashboardStore();
+const itemStore = useItemStore();
 const { t } = useI18n();
 const { getUnitLabel, typeOptions, stockStatusOptions, getStockStatusLabel } =
   useTranslationHelpers();
@@ -765,14 +765,43 @@ const filteredItems = computed(() => {
 });
 
 // ===== BASE ITEMS (Bị ảnh hưởng bởi Type filter, KHÔNG bị ảnh hưởng bởi Stock Status filter) =====
-const baseItems = computed(() => {
-  if (!usedInRangeData.value?.length) return [];
+// const baseItems = computed(() => {
+//   if (!usedInRangeData.value?.length) return [];
 
-  let items = usedInRangeData.value.map((x) => ({
-    ...x.item, // spread toàn bộ item data lên trên
-    totalOrdered: x.totalOrdered,
-    totalStockIn: x.totalStockIn,
-  }));
+//   let items = usedInRangeData.value.map((x) => ({
+//     ...x.item, // spread toàn bộ item data lên trên
+//     totalOrdered: x.totalOrdered,
+//     totalStockIn: x.totalStockIn,
+//   }));
+
+//   if (selectedType.value === "ENG") {
+//     items = items.filter((item) => item.eng !== null);
+//   } else if (selectedType.value === "COM") {
+//     items = items.filter((item) => item.com !== null);
+//   }
+
+//   if (searchQuery.value) {
+//     const query = searchQuery.value.toLowerCase();
+//     items = items.filter((item) => {
+//       const name = item.eng?.partname || item.com?.name || "";
+//       const description =
+//         item.eng?.description || item.com?.specifications || "";
+//       const id = item.id?.toString() || "";
+//       const itemId = item.itemIndentifyId || "";
+//       return (
+//         name.toLowerCase().includes(query) ||
+//         description.toLowerCase().includes(query) ||
+//         id.includes(query) ||
+//         itemId.toLowerCase().includes(query)
+//       );
+//     });
+//   }
+
+//   return items;
+// });
+
+const baseItems = computed(() => {
+  let items = [...itemStore.items]; // ← itemStore.items thay vì dashboardStore.items
 
   if (selectedType.value === "ENG") {
     items = items.filter((item) => item.eng !== null);
@@ -784,8 +813,7 @@ const baseItems = computed(() => {
     const query = searchQuery.value.toLowerCase();
     items = items.filter((item) => {
       const name = item.eng?.partname || item.com?.name || "";
-      const description =
-        item.eng?.description || item.com?.specifications || "";
+      const description = item.eng?.description || item.com?.specifications || "";
       const id = item.id?.toString() || "";
       const itemId = item.itemIndentifyId || "";
       return (
@@ -903,7 +931,17 @@ const handleSummaryClick = (status: string | null) => {
 };
 
 onMounted(async () => {
-  await loadUsedInRangeData();
+  if (itemStore.items.length === 0) {
+    itemStore.setLoading(true);
+    try {
+      const items = await itemAPI.getAll();
+      itemStore.setItems(items);
+    } catch (error) {
+      console.error("Error loading items:", error);
+    } finally {
+      itemStore.setLoading(false);
+    }
+  }
 });
 </script>
 
@@ -974,6 +1012,10 @@ onMounted(async () => {
   :deep(.navbar),
   :deep(aside),
   :deep(header) {
+    display: none !important;
+  }
+
+  .summary-cards {
     display: none !important;
   }
 

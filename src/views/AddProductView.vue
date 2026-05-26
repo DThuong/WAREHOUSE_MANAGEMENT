@@ -9,6 +9,19 @@
             <!-- Engineer Tab -->
             <TabPanel :header="t('addInventory.tabs.engineer')">
               <form @submit.prevent="handleSubmit" class="grid gap-6">
+                <div>
+                  <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                    Product Factory <span style="color: #ef4444;">*</span>
+                  </label>
+                  <Dropdown
+                    v-model="form.areaPart"
+                    :options="factoryOptions"
+                    option-label="label"
+                    option-value="value"
+                    :placeholder="t('addInventory.fields.factoryPlaceholder')"
+                    style="width: 100%;"
+                  />
+                </div>
                 <!-- Common Fields (giữ nguyên) -->
                 <div class="grid grid-cols-2 gap-4">
                   <div>
@@ -241,6 +254,21 @@
             <!-- Consumer Tab -->
             <TabPanel :header="t('addInventory.tabs.consumer')">
               <form @submit.prevent="handleSubmit" class="grid gap-6">
+                <!-- Factory Field -->
+                <div>
+                  <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">
+                    Product Factory <span style="color: #ef4444;">*</span>
+                  </label>
+                  <Dropdown
+                    v-model="form.areaPart"
+                    :options="factoryOptions"
+                    option-label="label"
+                    option-value="value"
+                    :placeholder="t('addInventory.fields.factoryPlaceholder')"
+                    style="width: 100%;"
+                  />
+                </div>
+
                 <!-- Common Fields -->
                 <div class="grid grid-cols-2 gap-4">
                   <div>
@@ -499,7 +527,7 @@ interface SelectedFile {
   preview: string
 }
 
-const { unitOptions } = useTranslationHelpers()
+const { unitOptions, factoryOptions } = useTranslationHelpers()
 
 const selectedFiles = ref<SelectedFile[]>([])
 const createdItemId = ref<number | null>(null)
@@ -532,6 +560,7 @@ const form = ref<CreateItemRequest>({
   saveQuantity: 0,
   price: '',
   unit: '',
+  areaPart: '',
   stockQty: 0,
   picture: [],
   eng: {
@@ -761,7 +790,7 @@ const handleDeleteImage = async (imageName: string) => {
 }
 
 const validateForm = (): boolean => {
-  if (!form.value.type || !form.value.unit) {
+  if (!form.value.type || !form.value.unit || !form.value.areaPart) {
     toast.add({
       severity: 'warn',
       summary: t('addInventory.toast.warningTitle'),
@@ -807,6 +836,7 @@ const handleSubmit = async () => {
     price: form.value.price,
     unit: form.value.unit,
     stockQty: form.value.stockQty,
+    areaPart: form.value.areaPart,
     picture: [],
     ...(activeTab.value === 0 
       ? { eng: form.value.eng } 
@@ -860,6 +890,7 @@ const resetForm = () => {
     price: '',
     unit: '',
     stockQty: 0,
+    areaPart: '',
     picture: [],
     eng: {
       partname: '',
@@ -914,10 +945,6 @@ watch(activeTab, (tab) => {
   }
 }
 
-/* ========================================
-   ✅ FIXED IMAGE UPLOAD STYLES
-   ======================================== */
-
 .image-upload-container {
   border: 2px dashed var(--gray-300);
   border-radius: 12px;
@@ -926,7 +953,6 @@ watch(activeTab, (tab) => {
   overflow: hidden;
 }
 
-/* ✅ FIXED: Consistent grid with fixed columns */
 .image-grid {
   display: grid;
   /* FIX: Use fixed 120px columns instead of minmax */
@@ -936,7 +962,6 @@ watch(activeTab, (tab) => {
   justify-content: start; /* FIX: Align items to start */
 }
 
-/* ✅ FIXED: Image item with fixed aspect ratio */
 .image-item {
   position: relative;
   width: 120px; /* FIX: Fixed width */
@@ -955,7 +980,6 @@ watch(activeTab, (tab) => {
   border: 2px solid var(--orange-400);
 }
 
-/* ✅ Image thumbnail */
 .image-thumbnail {
   position: absolute;
   inset: 0;
@@ -964,7 +988,6 @@ watch(activeTab, (tab) => {
   object-fit: cover;
 }
 
-/* ✅ Image badges */
 .image-badge {
   position: absolute;
   top: 4px;
@@ -992,7 +1015,6 @@ watch(activeTab, (tab) => {
   font-size: 0.625rem;
 }
 
-/* ✅ Delete button */
 .image-delete-btn {
   position: absolute !important;
   top: 4px !important;
@@ -1003,7 +1025,6 @@ watch(activeTab, (tab) => {
   z-index: 2;
 }
 
-/* ✅ FIXED: Add image button with fixed size */
 .add-image-btn {
   position: relative;
   width: 120px; /* FIX: Match image item size */
@@ -1043,7 +1064,6 @@ watch(activeTab, (tab) => {
   font-weight: 500;
 }
 
-/* ✅ Empty state */
 .empty-state {
   padding: 3rem 2rem;
   text-align: center;
@@ -1080,7 +1100,6 @@ watch(activeTab, (tab) => {
   margin-top: 0.25rem;
 }
 
-/* ✅ Image actions */
 .image-actions {
   display: flex;
   justify-content: space-between;
