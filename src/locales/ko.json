@@ -732,7 +732,7 @@
       "factoryOptions": {
         "all": "전체 공장",
         "factoryA": "SMD",
-        "factoryB": "Mainline"
+        "factoryB": "MAINLINE"
       },
       "stockStatusOptions": {
         "all": "전체",
@@ -852,7 +852,8 @@
       "addProduct": "재고 추가",
       "users": "사용자",
       "reports": "보고서",
-      "settings": "설정"
+      "settings": "설정",
+      "lineMachine": "Line & Machine 관리"
     },
     "menu": {
       "home": "홈",

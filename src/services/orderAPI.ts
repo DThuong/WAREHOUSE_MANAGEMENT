@@ -22,6 +22,7 @@ export const orderAPI = {
     toDate?: string
     status?: string
     department?: string
+    areaPart?: string
   }): Promise<Order[]> => {
     try {
       const queryParams = new URLSearchParams()
@@ -31,7 +32,8 @@ export const orderAPI = {
       if (params.toDate) queryParams.append('ToDate', params.toDate)
       if (params.status) queryParams.append('Status', params.status)
       if (params.department) queryParams.append('Department', params.department)
-      
+      if (params.areaPart) queryParams.append('AreaPart', params.areaPart)
+
       const queryString = queryParams.toString()
       const url = `/api/Order/filter${queryString ? `?${queryString}` : ''}`
       

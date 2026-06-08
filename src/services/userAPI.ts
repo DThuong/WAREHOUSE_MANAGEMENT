@@ -1,9 +1,10 @@
 import api from './api'
-import type { 
-  User, 
-  LoginCredentials, 
-  RegisterData, 
-  ChangePasswordByAdminData
+import type {
+  User,
+  LoginCredentials,
+  RegisterData,
+  UpdateAccountData,
+  ChangePasswordByAdminData,
 } from '@/types/user.types'
 
 export const userAPI = {
@@ -29,7 +30,7 @@ export const userAPI = {
     return api.get(`/api/Account/${accountId}`)
   },
 
-  updateAccount(accountId: number, userData: Partial<RegisterData>): Promise<User> {
+  updateAccount(accountId: number, userData: UpdateAccountData): Promise<User> {
     return api.put(`/api/Account/${accountId}`, userData)
   },
 
@@ -39,5 +40,5 @@ export const userAPI = {
 
   changePasswordByAdmin(data: ChangePasswordByAdminData): Promise<{ message: string }> {
     return api.put('/api/Account/change-password-by-admin', data)
-  }
+  },
 }

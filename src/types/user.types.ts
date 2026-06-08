@@ -1,9 +1,11 @@
 export interface User {
   id: number
   username: string
+  password?: string | null
   role: string
-  token: string
+  token?: string
   department: string
+  areaPart: string
   phoneNumber: string
   expiresAt?: string
   createdAt: string
@@ -21,7 +23,15 @@ export interface RegisterData {
   password: string
   role: string
   department: string
+  areaPart: string
   phoneNumber: string
+}
+
+export interface UpdateAccountData {
+  phoneNumber?: string
+  role?: string
+  department?: string
+  areaPart?: string
 }
 
 export interface ChangePasswordByAdminData {

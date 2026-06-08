@@ -33,69 +33,101 @@
       </div>
 
       <!-- Filter Section -->
-      <Card class="mb-6">
-        <template #content>
-          <div class="flex flex-col gap-4">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700">{{
-                  t("importManagement.filters.fromDate")
-                }}</label>
-                <Calendar
-                  v-model="fromDate"
-                  dateFormat="dd/mm/yy"
-                  showIcon
-                  showTime
-                  hourFormat="24"
-                  class="w-full calendar-full-width"
-                  @date-select="fetchAllStockins"
-                />
-              </div>
-              <div>
-                <label class="block mb-2 text-sm font-semibold text-gray-700">{{
-                  t("importManagement.filters.toDate")
-                }}</label>
-                <Calendar
-                  v-model="toDate"
-                  dateFormat="dd/mm/yy"
-                  showIcon
-                  showTime
-                  hourFormat="24"
-                  class="w-full calendar-full-width"
-                  @date-select="fetchAllStockins"
-                />
-              </div>
-            </div>
-            <div
-              class="flex flex-col md:flex-row md:justify-between md:items-center gap-4"
-            >
-              <div class="flex items-center">
-                <span class="text-lg font-semibold text-gray-900">
-                  {{ t("importManagement.summary.total", { count: totalItems })  }}
-                </span>
-              </div>
-              <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-                <span class="p-input-icon-left w-full md:w-80">
-                  <InputText
-                    v-model="searchQuery"
-                    :placeholder="
-                      t('importManagement.filters.searchPlaceholder')
-                    "
-                    class="w-full"
-                  />
-                </span>
-                <Button
-                  :label="t('common.filter.reset')"
-                  icon="pi pi-refresh"
-                  severity="secondary"
-                  class="w-full md:w-auto"
-                  @click="clearDateFilter"
-                />
-              </div>
-            </div>
-          </div>
-        </template>
-      </Card>
+<Card class="mb-6">
+  <template #content>
+    <div class="flex flex-col gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div>
+          <label class="block mb-2 text-sm font-semibold text-gray-700">
+            Xưởng
+          </label>
+          <Dropdown
+            v-model="selectedAreaFilter"
+            :options="stockinAreaFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Chọn xưởng"
+            class="w-full"
+            showClear
+            @change="currentPage = 1"
+          />
+        </div>
+
+        <div>
+          <label class="block mb-2 text-sm font-semibold text-gray-700">
+            {{ t("importManagement.filters.fromDate") }}
+          </label>
+          <Calendar
+            v-model="fromDate"
+            dateFormat="dd/mm/yy"
+            showIcon
+            showTime
+            hourFormat="24"
+            class="w-full calendar-full-width"
+            @date-select="currentPage = 1"
+          />
+        </div>
+
+        <div>
+          <label class="block mb-2 text-sm font-semibold text-gray-700">
+            {{ t("importManagement.filters.toDate") }}
+          </label>
+          <Calendar
+            v-model="toDate"
+            dateFormat="dd/mm/yy"
+            showIcon
+            showTime
+            hourFormat="24"
+            class="w-full calendar-full-width"
+            @date-select="currentPage = 1"
+          />
+        </div>
+
+        <div>
+          <label class="block mb-2 text-sm font-semibold text-gray-700">
+            {{ t("inventoryManagement.filters.search") || "Tìm kiếm" }}
+          </label>
+          <span class="p-input-icon-left w-full">
+            <InputText
+              v-model="searchQuery"
+              placeholder="Tìm mã phiếu, người tạo, sản phẩm..."
+              class="w-full"
+              @input="currentPage = 1"
+            />
+          </span>
+        </div>
+      </div>
+
+      <div
+        class="flex flex-col md:flex-row md:items-center md:justify-between gap-3"
+      >
+        <div class="flex flex-wrap items-center gap-2">
+          <Chip
+            :label="`Tổng phiếu: ${totalItems}`"
+            class="chip-normal"
+          />
+          <Chip
+            :label="`Tổng SL nhập: ${totalImportQuantity}`"
+            class="chip-warning"
+          />
+          <Chip
+            v-if="selectedAreaFilter"
+            :label="`Xưởng: ${selectedAreaFilter}`"
+            class="chip-not-configured"
+          />
+        </div>
+
+        <Button
+          :label="t('common.filter.reset')"
+          icon="pi pi-refresh"
+          severity="secondary"
+          class="w-full md:w-auto"
+          @click="clearDateFilter"
+        />
+      </div>
+    </div>
+  </template>
+</Card>
 
       <Card>
         <template #content>
@@ -112,231 +144,288 @@
                 {{ t("importManagement.empty") }}
               </p>
             </div>
-            <div v-else class="stockin-card-list">
-              <div
-                v-for="stockin in paginatedStockins"
-                :key="stockin.id"
-                class="stockin-card"
-              >
-                <!-- ===== MOBILE: giữ nguyên layout cũ ===== -->
-                <template v-if="isTableMobile">
-                  <div class="stockin-card-header">
-                    <span class="stockin-card-id">#{{ stockin.id }}</span>
-                    <span class="stockin-card-date">{{
-                      formatDate(stockin.stockInDate)
-                    }}</span>
-                  </div>
-                  <div class="stockin-card-body">
-                    <div class="stockin-card-row">
-                      <i class="pi pi-user text-gray-400"></i>
-                      <span class="stockin-card-label">{{
-                        t("importManagement.card.createdBy")
-                      }}</span>
-                      <span class="stockin-card-value">{{
-                        stockin.account?.username || "-"
-                      }}</span>
-                    </div>
-                    <div class="stockin-card-row">
-                      <i class="pi pi-box text-gray-400"></i>
-                      <span class="stockin-card-label">{{
-                        t("importManagement.card.products")
-                      }}</span>
-                      <span class="stockin-card-value">{{
-                        t("importManagement.card.productCount", {
-                          count: stockin.stockInDetails?.length || 0,
-                        })
-                      }}</span>
-                    </div>
-                    <div class="stockin-card-row">
-                      <i class="pi pi-images text-gray-400"></i>
-                      <span class="stockin-card-label">{{
-                        t("importManagement.card.images")
-                      }}</span>
-                      <span class="stockin-card-value">{{
-                        t("importManagement.card.imageCount", {
-                          count: stockin.image?.length || 0,
-                        })
-                      }}</span>
-                    </div>
-                    <div v-if="stockin.note" class="stockin-card-row">
-                      <i class="pi pi-file-edit text-gray-400"></i>
-                      <span class="stockin-card-label">{{
-                        t("importManagement.card.note")
-                      }}</span>
-                      <span class="stockin-card-value truncate">{{
-                        stockin.note
-                      }}</span>
-                    </div>
-                  </div>
-                  <div class="stockin-card-footer" @click.stop>
-                    <Button
-                      icon="pi pi-eye"
-                      :label="t('importManagement.card.detail')"
-                      text
-                      size="small"
-                      severity="info"
-                      @click="viewDetail(stockin)"
-                    />
-                    <Button
-                      icon="pi pi-images"
-                      :label="t('importManagement.card.images_btn')"
-                      text
-                      size="small"
-                      severity="secondary"
-                      @click="viewImages(stockin)"
-                    />
-                    <Button
-                      icon="pi pi-trash"
-                      :label="t('importManagement.card.delete')"
-                      text
-                      size="small"
-                      severity="danger"
-                      disabled="true"
-                      @click="confirmDelete(stockin)"
-                    />
-                  </div>
-                </template>
+            <div v-else>
+  <!-- DESKTOP: TABLE -->
+<DataTable
+  v-if="!isTableMobile"
+  :value="paginatedStockins"
+  :paginator="false"
+  responsiveLayout="scroll"
+  class="stockin-table"
+  @row-click="(event) => viewDetail(event.data)"
+>
+  <Column header="Phiếu" class="w-28 max-w-28">
+    <template #body="{ data }">
+      <div class="max-w-24">
+        <p class="font-bold text-gray-900 truncate">
+          #{{ data.id || "-" }}
+        </p>
+        <p class="text-xs text-gray-500 truncate">
+          {{ data.stockInDate ? formatDate(data.stockInDate) : "-" }}
+        </p>
+      </div>
+    </template>
+  </Column>
 
-                <!-- ===== DESKTOP: layout mới 2 cột ===== -->
-                <template v-else>
-                  <div class="stockin-desktop-card">
-                    <!-- Cột trái: id, ngày, người tạo → click xem chi tiết -->
-                    <div
-                      class="stockin-desktop-left"
-                      @click="viewDetail(stockin)"
-                    >
-                      <div class="stockin-desktop-meta">
-                        <div class="stockin-desktop-id">#{{ stockin.id }}</div>
-                        <div class="stockin-desktop-date">
-                          <i class="pi pi-calendar text-gray-400"></i>
-                          {{ formatDate(stockin.stockInDate) }}
-                        </div>
-                        <div class="stockin-desktop-creator">
-                          <i class="pi pi-user text-gray-400"></i>
-                          {{ stockin.account?.username || "-" }}
-                        </div>
-                        <div class="stockin-desktop-counts">
-                          <span class="stockin-count-badge">
-                            <i class="pi pi-box"></i>
-                            {{ stockin.stockInDetails?.length || 0 }}
-                          </span>
-                          <span class="stockin-count-badge">
-                            <i class="pi pi-images"></i>
-                            {{ stockin.image?.length || 0 }}
-                          </span>
-                        </div>
-                        <div v-if="stockin.note" class="stockin-desktop-note">
-                          <i class="pi pi-file-edit text-gray-400"></i>
-                          <span class="truncate">{{ stockin.note }}</span>
-                        </div>
-                      </div>
-                      <div class="stockin-desktop-right-hint">
-                        <i class="pi pi-eye"></i>
-                      </div>
-                    </div>
+  <Column header="Xưởng" class="w-28 max-w-28">
+    <template #body="{ data }">
+      <Chip
+        :label="getStockinAreaPart(data) || '-'"
+        :class="
+          getStockinAreaPart(data) === 'SMD'
+            ? 'chip-warning'
+            : 'chip-normal'
+        "
+      />
+    </template>
+  </Column>
 
-                    <!-- Divider -->
-                    <div class="stockin-desktop-divider"></div>
+  <Column header="Người tạo" class="w-36 max-w-36">
+    <template #body="{ data }">
+      <span class="block max-w-32 truncate font-medium text-gray-800">
+        {{ data.account?.username || "-" }}
+      </span>
+    </template>
+  </Column>
 
-                    <!-- Cột phải: ảnh + thông tin sản phẩm → click xem ảnh -->
-                    <div
-                      class="stockin-desktop-right"
-                      @click="viewImages(stockin)"
-                    >
-                      <div class="stockin-desktop-images" @click.stop>
-                        <template
-                          v-if="stockin.image && stockin.image.length > 0"
-                        >
-                          <div
-                            v-if="stockin.image.length === 1"
-                            class="stockin-desktop-thumb stockin-thumb-full"
-                            @click="openImagePreview(stockin, stockin.image[0])"
-                          >
-                            <img :src="getImageUrl(stockin.image[0])" alt="" />
-                          </div>
-                          <template v-else-if="stockin.image.length === 2">
-                            <div
-                              v-for="(img, idx) in stockin.image"
-                              :key="idx"
-                              class="stockin-desktop-thumb stockin-thumb-half"
-                              @click="openImagePreview(stockin, img)"
-                            >
-                              <img :src="getImageUrl(img)" alt="" />
-                            </div>
-                          </template>
-                          <template v-else>
-                            <div
-                              v-for="(img, idx) in stockin.image.slice(0, 4)"
-                              :key="idx"
-                              class="stockin-desktop-thumb"
-                              :class="{
-                                'stockin-desktop-thumb-more':
-                                  idx === 3 && stockin.image.length > 4,
-                              }"
-                              @click="openImagePreview(stockin, img)"
-                            >
-                              <img :src="getImageUrl(img)" alt="" />
-                              <div
-                                v-if="idx === 3 && stockin.image.length > 4"
-                                class="stockin-thumb-overlay"
-                              >
-                                +{{ stockin.image.length - 4 }}
-                              </div>
-                            </div>
-                          </template>
-                        </template>
-                        <div
-                          v-else
-                          class="stockin-desktop-no-img"
-                          @click.stop="viewImages(stockin)"
-                        >
-                          <i
-                            class="pi pi-images text-gray-300"
-                            style="font-size: 2rem"
-                          ></i>
-                        </div>
-                      </div>
-                      <div class="stockin-desktop-product-info">
-                        <template v-if="stockin.stockInDetails?.length">
-                          <div
-                            v-for="(
-                              detail, idx
-                            ) in stockin.stockInDetails.slice(0, 3)"
-                            :key="idx"
-                            class="stockin-desktop-product-row"
-                          >
-                            <span class="stockin-desktop-product-name">{{
-                              getDetailItemName(detail.item)
-                            }}</span>
-                            <span class="stockin-desktop-product-type">{{
-                              detail.item?.type || "-"
-                            }}</span>
-                            <span class="stockin-desktop-product-qty"
-                              >+{{ detail.quantity }}
-                              {{ detail.item?.unit || "" }}</span
-                            >
-                          </div>
-                          <div
-                            v-if="stockin.stockInDetails.length > 3"
-                            class="stockin-desktop-more-products"
-                          >
-                            +{{ stockin.stockInDetails.length - 3 }}
-                            {{ t("importManagement.card.products") }} khác
-                          </div>
-                        </template>
-                        <div v-else class="text-gray-400 text-sm">
-                          Không có sản phẩm
-                        </div>
-                      </div>
-                      <div class="stockin-desktop-left-hint">
-                        <i class="pi pi-images"></i>
-                        {{ t("importManagement.card.images_btn") }}
-                      </div>
-                    </div>
-                  </div>
-                </template>
-              </div>
-            </div>
+  <Column header="Sản phẩm nhập" class="min-w-96 max-w-96">
+    <template #body="{ data }">
+      <div
+        v-if="data.stockInDetails?.length"
+        class="flex flex-col gap-2 max-w-96"
+      >
+        <div
+          v-for="(detail, idx) in data.stockInDetails.slice(0, 3)"
+          :key="idx"
+          class="grid grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 max-w-96"
+        >
+          <img
+            v-if="detail.item?.picture?.length"
+            :src="getItemImageUrl(detail.item.picture[0])"
+            class="w-9 h-9 rounded-lg object-cover shrink-0 border border-gray-200"
+            alt=""
+          />
+          <div
+            v-else
+            class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 border border-gray-200"
+          >
+            <i class="pi pi-box text-gray-400"></i>
+          </div>
+
+          <div class="min-w-0">
+            <p class="font-semibold text-sm text-gray-900 truncate">
+              {{ getDetailItemName(detail.item) || "-" }}
+            </p>
+            <p class="text-xs text-gray-500 truncate">
+              <span v-if="detail.item?.itemIndentifyId">
+                {{ detail.item.itemIndentifyId }}
+              </span>
+            </p>
+          </div>
+
+          <span
+            class="px-2 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold shrink-0 whitespace-nowrap"
+          >
+            +{{ detail.quantity || 0 }} {{ detail.item?.unit || "" }}
+          </span>
+        </div>
+
+        <button
+          v-if="data.stockInDetails.length > 3"
+          type="button"
+          class="text-left text-xs font-semibold text-primary hover:underline max-w-fit"
+          @click.stop="viewDetail(data)"
+        >
+          +{{ data.stockInDetails.length - 3 }} sản phẩm khác
+        </button>
+      </div>
+
+      <span v-else class="text-sm text-gray-400">
+        -
+      </span>
+    </template>
+  </Column>
+
+  <Column header="Tổng SL" class="w-24 max-w-24">
+    <template #body="{ data }">
+      <span class="block max-w-20 truncate font-bold text-primary">
+        {{ getStockinTotalQuantity(data) || 0 }}
+      </span>
+    </template>
+  </Column>
+
+  <Column header="Ảnh" class="w-32 max-w-32">
+    <template #body="{ data }">
+      <div class="flex items-center gap-2 max-w-28">
+        <button
+          v-if="data.image?.length"
+          type="button"
+          class="relative w-11 h-11 rounded-xl overflow-hidden border border-gray-200 hover:ring-2 hover:ring-primary transition-all shrink-0"
+          @click.stop="openImagePreview(data, data.image[0])"
+        >
+          <img
+            :src="getImageUrl(data.image[0])"
+            class="w-full h-full object-cover"
+            alt=""
+          />
+          <span
+            v-if="data.image.length > 1"
+            class="absolute inset-0 bg-black/45 text-white text-xs font-bold flex items-center justify-center"
+          >
+            +{{ data.image.length - 1 }}
+          </span>
+        </button>
+
+        <div
+          v-else
+          class="w-11 h-11 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0"
+        >
+          <i class="pi pi-image text-gray-400"></i>
+        </div>
+
+        <button
+          type="button"
+          class="text-xs font-semibold text-gray-600 hover:text-primary truncate cursor-pointer"
+          @click.stop="viewImages(data)"
+        >
+        </button>
+      </div>
+    </template>
+  </Column>
+
+  <Column header="Thao tác" class="w-32 max-w-32">
+    <template #body="{ data }">
+      <div class="flex items-center gap-1" @click.stop>
+        <Button
+          icon="pi pi-eye"
+          text
+          rounded
+          severity="info"
+          @click="viewDetail(data)"
+        />
+        <Button
+          icon="pi pi-images"
+          text
+          rounded
+          severity="secondary"
+          @click="viewImages(data)"
+        />
+        <Button
+          icon="pi pi-trash"
+          text
+          rounded
+          severity="danger"
+          disabled
+          @click="confirmDelete(data)"
+        />
+      </div>
+    </template>
+  </Column>
+</DataTable>
+
+  <!-- MOBILE: GIỮ CARD CŨ -->
+  <div v-else class="stockin-card-list">
+    <div
+      v-for="stockin in paginatedStockins"
+      :key="stockin.id"
+      class="stockin-card"
+    >
+      <div class="stockin-card-header">
+        <span class="stockin-card-id">#{{ stockin.id }}</span>
+        <span class="stockin-card-date">
+          {{ formatDate(stockin.stockInDate) }}
+        </span>
+      </div>
+
+      <div class="stockin-card-body">
+        <div class="stockin-card-row">
+          <i class="pi pi-user text-gray-400"></i>
+          <span class="stockin-card-label">
+            {{ t("importManagement.card.createdBy") }}
+          </span>
+          <span class="stockin-card-value">
+            {{ stockin.account?.username || "-" }}
+          </span>
+        </div>
+
+        <div class="stockin-card-row">
+          <span class="stockin-card-label">Xưởng</span>
+          <span class="stockin-card-value">
+            {{ getStockinAreaPart(stockin) }}
+          </span>
+        </div>
+
+        <div class="stockin-card-row">
+          <i class="pi pi-box text-gray-400"></i>
+          <span class="stockin-card-label">
+            {{ t("importManagement.card.products") }}
+          </span>
+          <span class="stockin-card-value">
+            {{
+              t("importManagement.card.productCount", {
+                count: stockin.stockInDetails?.length || 0,
+              })
+            }}
+          </span>
+        </div>
+
+        <div class="stockin-card-row">
+          <i class="pi pi-images text-gray-400"></i>
+          <span class="stockin-card-label">
+            {{ t("importManagement.card.images") }}
+          </span>
+          <span class="stockin-card-value">
+            {{
+              t("importManagement.card.imageCount", {
+                count: stockin.image?.length || 0,
+              })
+            }}
+          </span>
+        </div>
+
+        <div v-if="stockin.note" class="stockin-card-row">
+          <i class="pi pi-file-edit text-gray-400"></i>
+          <span class="stockin-card-label">
+            {{ t("importManagement.card.note") }}
+          </span>
+          <span class="stockin-card-value truncate">
+            {{ stockin.note }}
+          </span>
+        </div>
+      </div>
+
+      <div class="stockin-card-footer" @click.stop>
+        <Button
+          icon="pi pi-eye"
+          :label="t('importManagement.card.detail')"
+          text
+          size="small"
+          severity="info"
+          @click="viewDetail(stockin)"
+        />
+        <Button
+          icon="pi pi-images"
+          :label="t('importManagement.card.images_btn')"
+          text
+          size="small"
+          severity="secondary"
+          @click="viewImages(stockin)"
+        />
+        <Button
+          icon="pi pi-trash"
+          :label="t('importManagement.card.delete')"
+          text
+          size="small"
+          severity="danger"
+          disabled
+          @click="confirmDelete(stockin)"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+
           </div>
         </template>
       </Card>
@@ -364,6 +453,41 @@
       :modal="true"
     >
       <div class="flex flex-col gap-4 mt-4">
+        <!-- Xưởng -->
+        <div>
+          <label class="block mb-2 text-sm font-semibold text-gray-700">
+            Xưởng <span class="text-red-500">*</span>
+          </label>
+
+          <Dropdown
+            v-model="createForm.areaPart"
+            :options="areaPartOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Chọn xưởng nhập kho"
+            class="w-full"
+            appendTo="body"
+          >
+            <template #value="slotProps">
+              <div v-if="slotProps.value" class="flex items-center gap-2">
+                <span class="font-semibold text-gray-900">
+                  {{ slotProps.value }}
+                </span>
+              </div>
+              <span v-else class="text-gray-400">
+                {{ slotProps.placeholder }}
+              </span>
+            </template>
+
+            <template #option="slotProps">
+              <div class="flex items-center gap-2 py-1">
+                <span class="font-medium">
+                  {{ slotProps.option.label }}
+                </span>
+              </div>
+            </template>
+          </Dropdown>
+        </div>
         <!-- Ghi chú -->
         <div>
           <label>{{ t("importManagement.createDialog.note") }}</label>
@@ -388,6 +512,7 @@
               :label="t('importManagement.createDialog.addProduct')"
               icon="pi pi-plus"
               size="small"
+              :disabled="!createForm.areaPart"
               @click="addItemRow"
             />
           </div>
@@ -404,6 +529,7 @@
               :label="t('importManagement.createDialog.addFirst')"
               icon="pi pi-plus"
               text
+              :disabled="!createForm.areaPart"
               @click="addItemRow"
             />
           </div>
@@ -446,10 +572,13 @@
                   optionLabel="label"
                   optionValue="value"
                   :placeholder="
-                    t('importManagement.createDialog.productPlaceholder')
+                    createForm.areaPart
+                      ? t('importManagement.createDialog.productPlaceholder')
+                      : 'Vui lòng chọn xưởng trước'
                   "
                   class="w-full"
                   :filter="true"
+                  :disabled="!createForm.areaPart"
                   appendTo="body"
                   panelClass="stockin-item-dropdown-panel"
                   :filterPlaceholder="
@@ -473,7 +602,9 @@
                           {{ getSelectedItemLabel(slotProps.value) }}
                         </div>
                         <div class="text-xs text-gray-500 truncate">
+                          {{ getSelectedItemAreaPart(slotProps.value) }} -
                           {{ getSelectedItemType(slotProps.value) }} -
+                          {{ getSelectedItemIdentifyId(slotProps.value) }} -
                           {{ t("importManagement.createDialog.stockLabel") }}:
                           {{ getSelectedItemStock(slotProps.value) }}
                           {{ getSelectedItemUnit(slotProps.value) }} -
@@ -481,10 +612,11 @@
                         </div>
                       </div>
                     </div>
-                    <span v-else class="text-gray-400">{{
-                      slotProps.placeholder
-                    }}</span>
+                    <span v-else class="text-gray-400">
+                      {{ slotProps.placeholder }}
+                    </span>
                   </template>
+
                   <template #option="slotProps">
                     <div class="flex items-center gap-3 py-1">
                       <img
@@ -504,7 +636,9 @@
                           {{ slotProps.option.label }}
                         </div>
                         <div class="text-xs text-gray-500">
+                          {{ slotProps.option.areaPart }} -
                           {{ slotProps.option.type }} -
+                          {{ slotProps.option.itemIndentifyId }} -
                           {{ t("importManagement.createDialog.stockLabel") }}:
                           {{ slotProps.option.stock }}
                           {{ slotProps.option.unit }} -
@@ -793,6 +927,14 @@
             }}</label>
             <p class="font-semibold text-gray-900">
               {{ selectedStockin.account?.username }}
+            </p>
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 mb-1">
+              Xưởng
+            </label>
+            <p class="font-semibold text-gray-900">
+              {{ getStockinAreaPart(selectedStockin) }}
             </p>
           </div>
           <div class="col-span-2">
@@ -1119,6 +1261,8 @@ import MainLayout from "@/components/MainLayout.vue";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import Chip from "primevue/chip";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
@@ -1126,6 +1270,8 @@ import Dropdown from "primevue/dropdown";
 import Calendar from "primevue/calendar";
 import ConfirmDialog from "primevue/confirmdialog";
 import type { Stockin, CreateStockinDetail } from "@/types/stockin.types";
+
+type AreaPart = "SMD" | "MAINLINE";
 import ImagePreviewDialog from "@/views/ImagePreviewDialog.vue";
 import { useImagePreview } from "@/composables/useImagePreview";
 import { usePagination } from "@/composables/usePagination";
@@ -1148,8 +1294,19 @@ const handleTableResize = () => {
 
 // ── Filter ────────────────────────────────────────────────
 const searchQuery = ref("");
-const fromDate = ref<Date>(new Date(new Date().getFullYear(), 0, 1, 0, 0, 0));
-const toDate = ref<Date>(new Date(new Date().setHours(23, 59, 59)));
+const selectedAreaFilter = ref<AreaPart | null>(null);
+
+const fromDate = ref<Date | null>(
+  new Date(new Date().getFullYear(), 0, 1, 0, 0, 0),
+);
+const toDate = ref<Date | null>(
+  new Date(new Date().setHours(23, 59, 59)),
+);
+
+const stockinAreaFilterOptions: { label: string; value: AreaPart }[] = [
+  { label: "SMD", value: "SMD" },
+  { label: "MAINLINE", value: "MAINLINE" },
+];
 
 const showCreateImageDialog = ref(false);
 const createPendingImages = ref<File[]>([]);
@@ -1238,13 +1395,6 @@ const openImagePreview = (stockin: Stockin, clickedImg: string) => {
 
 const handleDialogPaste = async (event: ClipboardEvent) => {
   if (stockinStore.uploadingImages) return;
-  console.log("=== PASTE FIRED ===");
-  console.log("items:", event.clipboardData?.items);
-  console.log(
-    "types:",
-    Array.from(event.clipboardData?.items || []).map((i) => i.type),
-  );
-
   const items = event.clipboardData?.items;
   if (!items) return;
 
@@ -1411,23 +1561,52 @@ const removeCreatePendingImage = (index: number) => {
 
 // Tạo phiếu + upload ảnh
 const confirmAndCreateStockin = async () => {
+  if (!createForm.value.areaPart) {
+    toast.add({
+      severity: "warn",
+      summary: t("importManagement.toast.warningTitle"),
+      detail: "Vui lòng chọn xưởng nhập kho",
+      life: 3000,
+    });
+    return;
+  }
+
+  const invalidAreaItems = createForm.value.items.filter((formItem) => {
+    const foundItem = itemStore.items.find((item) => item.id === formItem.itemId);
+    return !foundItem || getItemAreaPart(foundItem) !== createForm.value.areaPart;
+  });
+
+  if (invalidAreaItems.length > 0) {
+    toast.add({
+      severity: "warn",
+      summary: t("importManagement.toast.warningTitle"),
+      detail: "Có sản phẩm không thuộc xưởng đã chọn. Vui lòng chọn lại sản phẩm.",
+      life: 3000,
+    });
+    return;
+  }
+
   isSubmittingCreate.value = true;
+
   try {
     const newStockin = await stockinAPI.createStockin({
       note: createForm.value.note,
+      areaPart: createForm.value.areaPart,
       items: createForm.value.items,
     });
+
     await stockinAPI.uploadImagesSequentially(
       newStockin.id,
       createPendingImages.value,
     );
+
     toast.add({
       severity: "success",
       summary: t("importManagement.toast.successTitle"),
       detail: t("importManagement.toast.createSuccess", { id: newStockin.id }),
       life: 3000,
     });
-    // Reset
+
     createPendingImages.value = [];
     createPendingPreviews.value = [];
     createPendingTimestamps.value = [];
@@ -1445,17 +1624,80 @@ const confirmAndCreateStockin = async () => {
   }
 };
 
+const isDateInRange = (dateString: string) => {
+  if (!dateString) return false;
+
+  const time = new Date(dateString).getTime();
+
+  if (fromDate.value) {
+    const from = new Date(fromDate.value).getTime();
+    if (time < from) return false;
+  }
+
+  if (toDate.value) {
+    const to = new Date(toDate.value).getTime();
+    if (time > to) return false;
+  }
+
+  return true;
+};
+
+const getStockinTotalQuantity = (stockin: Stockin) =>
+  stockin.stockInDetails?.reduce(
+    (sum, detail) => sum + Number(detail.quantity || 0),
+    0,
+  ) || 0;
+
+const getStockinProductNames = (stockin: Stockin) =>
+  stockin.stockInDetails
+    ?.map((detail) => getDetailItemName(detail.item))
+    .filter(Boolean)
+    .join(", ") || "";
+
 const filteredStockins = computed(() => {
   if (!stockinStore.stockins?.length) return [];
-  if (!searchQuery.value) return stockinStore.stockins;
-  const term = searchQuery.value.toLowerCase();
-  return stockinStore.stockins.filter(
-    (s) =>
-      s.note?.toLowerCase().includes(term) ||
-      s.account?.username?.toLowerCase().includes(term) ||
-      s.id?.toString().includes(term),
+
+  let list = [...stockinStore.stockins];
+
+  // 1. Lọc theo xưởng trước
+  if (selectedAreaFilter.value) {
+    list = list.filter(
+      (stockin) => getStockinAreaPart(stockin) === selectedAreaFilter.value,
+    );
+  }
+
+  // 2. Sau đó lọc theo ngày
+  list = list.filter((stockin) => isDateInRange(stockin.stockInDate));
+
+  // 3. Cuối cùng search
+  if (searchQuery.value.trim()) {
+    const term = searchQuery.value.trim().toLowerCase();
+
+    list = list.filter((s) => {
+      const productNames = getStockinProductNames(s).toLowerCase();
+
+      return (
+        s.note?.toLowerCase().includes(term) ||
+        s.account?.username?.toLowerCase().includes(term) ||
+        getStockinAreaPart(s).toLowerCase().includes(term) ||
+        productNames.includes(term) ||
+        s.id?.toString().includes(term)
+      );
+    });
+  }
+
+  return list.sort(
+    (a, b) =>
+      new Date(b.stockInDate).getTime() - new Date(a.stockInDate).getTime(),
   );
 });
+
+const totalImportQuantity = computed(() =>
+  filteredStockins.value.reduce(
+    (sum, stockin) => sum + getStockinTotalQuantity(stockin),
+    0,
+  ),
+);
 const {
   currentPage,
   pageSize,
@@ -1472,26 +1714,45 @@ const {
 
 // ── Create Dialog ─────────────────────────────────────────
 const showCreateDialog = ref(false);
-const createForm = ref<{ note: string; items: CreateStockinDetail[] }>({
+const createForm = ref<{
+  note: string;
+  areaPart: AreaPart | null;
+  items: CreateStockinDetail[];
+}>({
   note: "",
+  areaPart: null,
   items: [],
 });
+const areaPartOptions: { label: string; value: AreaPart }[] = [
+  { label: "SMD", value: "SMD" },
+  { label: "MAINLINE", value: "MAINLINE" },
+];
 
 const availableItems = computed(() => {
   if (!itemStore.items?.length) return [];
-  return itemStore.items.map((item) => ({
-    value: item.id,
-    label: getItemName(item),
-    type: item.type,
-    stock: item.stockQty,
-    unit: item.unit,
-    image: item.picture?.length ? getItemImageUrl(item.picture[0]) : null,
-    specifications: item.eng?.description || item.com?.specifications || null,
-  }));
+
+  const selectedArea = createForm.value.areaPart;
+
+  if (!selectedArea) return [];
+
+  return itemStore.items
+    .filter((item) => getItemAreaPart(item) === selectedArea)
+    .map((item) => ({
+      value: item.id,
+      label: getItemName(item),
+      type: item.type,
+      stock: item.stockQty,
+      unit: item.unit,
+      areaPart: getItemAreaPart(item),
+      image: item.picture?.length ? getItemImageUrl(item.picture[0]) : null,
+      specifications: item.eng?.description || item.com?.specifications || null,
+      itemIndentifyId: item.itemIndentifyId || "",
+    }));
 });
 
 const isFormValid = computed(
   () =>
+    !!createForm.value.areaPart &&
     createForm.value.items.length > 0 &&
     createForm.value.items.every((item) => item.itemId && item.quantity > 0),
 );
@@ -1514,14 +1775,6 @@ const imageFileInput = ref<HTMLInputElement | null>(null);
 const cameraFileInput = ref<HTMLInputElement | null>(null);
 
 const handleGlobalPaste = async (event: ClipboardEvent) => {
-  console.log(
-    "=== GLOBAL PASTE ===",
-    "imageDialog:",
-    showImageDialog.value,
-    "createImageDialog:",
-    showCreateImageDialog.value,
-  );
-
   // Check cả 2 dialog
   const isImageDialogOpen =
     showImageDialog.value || showCreateImageDialog.value;
@@ -1577,41 +1830,19 @@ const handleGlobalPaste = async (event: ClipboardEvent) => {
 
     // Push vào đúng array tương ứng với dialog đang mở
     if (showCreateImageDialog.value) {
-      console.log(
-        "watermarked file:",
-        watermarked,
-        "size:",
-        watermarked.size,
-        "type:",
-        watermarked.type,
-      );
-
       createPendingImages.value.push(watermarked);
       createPendingTimestamps.value.push(timestamp);
 
       const reader = new FileReader();
       reader.onload = (e) => {
-        console.log(
-          "FileReader onload fired, result length:",
-          (e.target?.result as string)?.length,
-        );
         if (e.target?.result)
           createPendingPreviews.value.push(e.target.result as string);
-        console.log(
-          "preview pushed, total:",
-          createPendingPreviews.value.length,
-        );
       };
       reader.onerror = (e) => {
         console.error("FileReader error:", e);
       };
-      reader.onloadstart = () => console.log("FileReader loadstart");
       reader.readAsDataURL(watermarked);
 
-      console.log(
-        "after readAsDataURL, createPendingImages length:",
-        createPendingImages.value.length,
-      );
     } else {
       pendingImages.value.push(watermarked);
       pendingImageTimestamps.value.push(timestamp);
@@ -1684,8 +1915,11 @@ const fetchAllItems = async () => {
 };
 
 const clearDateFilter = async () => {
+  selectedAreaFilter.value = null;
+  searchQuery.value = "";
   fromDate.value = new Date(new Date().getFullYear(), 0, 1, 0, 0, 0);
   toDate.value = new Date(new Date().setHours(23, 59, 59));
+  currentPage.value = 1;
   await fetchAllStockins();
 };
 
@@ -1704,6 +1938,30 @@ const getItemImageUrl = (filename: string) => {
 
 const getItemName = (item: any) =>
   item?.eng?.partname || item?.com?.name || "Unknown";
+
+const getItemAreaPart = (item: any): "SMD" | "MAINLINE" | "" => {
+  const areaPart = item?.areaPart?.toUpperCase?.() || "";
+  const code = item?.itemIndentifyId?.toUpperCase?.() || "";
+
+  if (areaPart === "SMD" || code.startsWith("SMD-")) {
+    return "SMD";
+  }
+
+  if (areaPart === "MAINLINE" || code.startsWith("MAINLINE-")) {
+    return "MAINLINE";
+  }
+
+  return "";
+};
+
+const getStockinAreaPart = (stockin: any): string => {
+  const areaPart = stockin?.areaPart?.toUpperCase?.() || "";
+
+  if (areaPart === "SMD") return "SMD";
+  if (areaPart === "MAINLINE") return "MAINLINE";
+
+  return stockin?.areaPart || "-";
+};
 
 const getDetailItemName = (item: any) => {
   if (!item) return "Unknown";
@@ -1744,6 +2002,10 @@ const getSelectedItemStock = (id: number) =>
   availableItems.value.find((i) => i.value === id)?.stock || 0;
 const getSelectedItemSpecs = (id: number) =>
   availableItems.value.find((i) => i.value === id)?.specifications || null;
+const getSelectedItemAreaPart = (id: number) =>
+  availableItems.value.find((i) => i.value === id)?.areaPart || "";
+const getSelectedItemIdentifyId = (id: number) =>
+  availableItems.value.find((i) => i.value === id)?.itemIndentifyId || "";
 
 // ── Timestamp watermark ───────────────────────────────────
 const addTimestampToImage = (file: File, timestamp: string): Promise<File> =>
@@ -1788,19 +2050,29 @@ const addTimestampToImage = (file: File, timestamp: string): Promise<File> =>
 
 // ── Create Dialog functions ───────────────────────────────
 const openCreateDialog = () => {
-  createForm.value = { note: "", items: [] };
+  createForm.value = { note: "", areaPart: null, items: [] };
   showCreateDialog.value = true;
 };
 
 const closeCreateDialog = () => {
   showCreateDialog.value = false;
-  createForm.value = { note: "", items: [] };
+  createForm.value = { note: "", areaPart: null, items: [] };
   createPendingImages.value = [];
   createPendingPreviews.value = [];
   createPendingTimestamps.value = [];
 };
 
 const addItemRow = () => {
+  if (!createForm.value.areaPart) {
+    toast.add({
+      severity: "warn",
+      summary: t("importManagement.toast.warningTitle"),
+      detail: "Vui lòng chọn xưởng trước khi thêm sản phẩm",
+      life: 3000,
+    });
+    return;
+  }
+
   createForm.value.items.push({ itemId: 0, quantity: 1 });
 };
 
@@ -1808,9 +2080,7 @@ const removeItemRow = (index: number) => {
   createForm.value.items.splice(index, 1);
 };
 
-const onItemSelect = (event: any, index: number) => {
-  console.log("Item selected:", event.value, "at index:", index);
-};
+const onItemSelect = (_event: any, _index: number) => {};
 
 // ── Detail ────────────────────────────────────────────────
 const viewDetail = async (stockin: Stockin) => {
@@ -2084,15 +2354,22 @@ const viewImageFullscreen = (imageUrl: string) => {
 watch(showImageDialog, (val) => {
   if (val) {
     nextTick(() => {
-      console.log("pasteInput ref:", pasteInput.value); // null hay có element?
       pasteInput.value?.focus();
-      console.log("focused element:", document.activeElement); // có phải pasteInput không?
     });
   }
 });
 watch(isTableMobile, (mobile) => {
   pageSize.value = mobile ? 5 : 10;
 });
+
+watch(
+  () => createForm.value.areaPart,
+  (newArea, oldArea) => {
+    if (!oldArea || newArea === oldArea) return;
+
+    createForm.value.items = [];
+  },
+);
 </script>
 
 <style scoped>
@@ -2483,6 +2760,55 @@ watch(isTableMobile, (mobile) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.stockin-table {
+  width: 100%;
+}
+
+.stockin-table :deep(.p-datatable-wrapper) {
+  overflow-x: auto;
+}
+
+.stockin-table :deep(.p-datatable-table) {
+  table-layout: fixed;
+  min-width: 980px;
+}
+
+.stockin-table :deep(.p-datatable-thead > tr > th) {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.stockin-table :deep(.p-datatable-tbody > tr) {
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.stockin-table :deep(.p-datatable-tbody > tr:hover) {
+  background: #f8fafc;
+}
+
+.stockin-table :deep(.p-datatable-tbody > tr > td) {
+  vertical-align: top;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+  overflow: hidden;
+}
+
+.stockin-table :deep(.p-column-header-content) {
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ── Dropdown fix mobile ── */

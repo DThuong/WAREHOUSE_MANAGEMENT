@@ -77,3 +77,36 @@ export interface DailyMovement {
   date: string
   items: DailyMovementItem[]
 }
+
+export interface ItemOrderTransaction {
+  orderDetailId: number
+  orderId: number
+  orderDate: string
+  orderQty: number
+  status: string
+
+  lineName: string | null
+  machineName: string | null
+
+  detailTotal: number
+  orderTotal: number
+}
+
+export interface ItemStockInTransaction {
+  stockInDetailId: number
+  stockInId: number
+  stockInDate: string
+  quantity: number
+}
+
+export interface ItemTransactionResponse {
+  itemId: number
+  itemIndentifyId: string
+  orders: ItemOrderTransaction[]
+  stockIns: ItemStockInTransaction[]
+}
+
+export interface ItemTransactionQuery {
+  fromDate?: string
+  toDate?: string
+}

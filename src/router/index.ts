@@ -9,6 +9,12 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: 'Dashboard', requiresAuth: true, role: 'Admin' }
   },
   {
+    path: '/line-machine',
+    name: 'line-machine',
+    component: () => import('@/views/LineMachineView.vue' as string),
+    meta: { title: 'Quản lý line + machine', requiresAuth: true, role: 'Admin' }
+  },
+  {
     path: '/inventory',
     name: 'Inventory',
     component: () => import('@/views/InventoryView.vue' as string),

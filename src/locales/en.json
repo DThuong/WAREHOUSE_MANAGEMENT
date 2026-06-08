@@ -730,7 +730,7 @@
       "factoryOptions": {
         "all": "All Factories",
         "factoryA": "SMD",
-        "factoryB": "Mainline"
+        "factoryB": "MAINLINE"
       },
       "stockStatusOptions": {
         "all": "All",

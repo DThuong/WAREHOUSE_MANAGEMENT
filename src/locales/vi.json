@@ -732,7 +732,7 @@
       "factoryOptions": {
         "all": "Tất cả",
         "factoryA": "SMD",
-        "factoryB": "Mainline"
+        "factoryB": "MAINLINE"
       },
       "stockStatusOptions": {
         "all": "Tất cả",
@@ -852,7 +852,8 @@
       "addProduct": "Thêm tồn kho",
       "users": "Người dùng",
       "reports": "Báo cáo",
-      "settings": "Cấu hình"
+      "settings": "Cấu hình",
+      "lineMachine": "Line & Machine"
     },
     "menu": {
       "home": "Trang chủ",

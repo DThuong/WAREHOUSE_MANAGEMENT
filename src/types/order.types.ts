@@ -1,6 +1,6 @@
 import { Item } from "./item.types"
 import { User } from "./user.types"
-import { machine, line } from "./line_machine.types"
+import { machine } from "./line_machine.types"
 
 // Order Detail 
 export interface OrderDetail {

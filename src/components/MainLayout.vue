@@ -620,7 +620,6 @@ import Avatar from "primevue/avatar";
 import Button from "primevue/button";
 import Badge from "primevue/badge";
 import OverlayPanel from "primevue/overlaypanel";
-import Toast from "primevue/toast";
 import { useToast } from "primevue/usetoast";
 import logoImg from "../assets/images/newLogo.jpg";
 import type { Notification } from "@/types/notification.types";
@@ -886,36 +885,49 @@ const menuItems = computed(() => [
 ]);
 const mainLinks = computed(() => [
   { path: "/", label: t("mainLayout.nav.dashboard"), icon: "pi pi-home" },
+
   { path: "/orders", label: t("mainLayout.nav.orders"), icon: "pi pi-flag" },
+
   {
     path: "/inventory",
     label: t("mainLayout.nav.inventory"),
     icon: "pi pi-box",
   },
+
   {
     path: "/stockin",
     label: t("mainLayout.nav.stockin"),
     icon: "pi pi-cart-arrow-down",
   },
+
   {
     path: "/add-product",
     label: t("mainLayout.nav.addProduct"),
     icon: "pi pi-plus-circle",
   },
+
+  {
+    path: "/line-machine",
+    label: t("mainLayout.nav.lineMachine"),
+    icon: "pi pi-book",
+  },
+
   { path: "/users", label: t("mainLayout.nav.users"), icon: "pi pi-user" },
+
   {
     path: "/reports",
     label: t("mainLayout.nav.reports"),
     icon: "pi pi-chart-bar",
   },
+
   { path: "/settings", label: t("mainLayout.nav.settings"), icon: "pi pi-cog" },
 ]);
 
 const allRouteLabels = computed(() => [
   ...mainLinks.value,
-  { path: '/reports/stockin', label: t('reports.importReport.title') },
-  { path: '/reports/orders', label: t('reports.orderReport.title') },
-  { path: '/reports/inventory', label: t('reports.inventoryReport.title') },
+  { path: "/reports/stockin", label: t("reports.importReport.title") },
+  { path: "/reports/orders", label: t("reports.orderReport.title") },
+  { path: "/reports/inventory", label: t("reports.inventoryReport.title") },
 ])
 
 const accountLinks = computed(() => [

@@ -4,10 +4,37 @@ import type {
   CreateItemRequest, 
   UpdateItemRequest,
   UsedInRangeItem,
-  DailyMovement
+  DailyMovement,
+  ItemTransactionResponse,
+  ItemTransactionQuery
 } from '@/types/item.types'
 
 export const itemAPI = {
+  // order and stockin history for item
+  getTransactions: async (
+    itemId: number,
+    query?: ItemTransactionQuery,
+  ): Promise<ItemTransactionResponse> => {
+    try {
+      const params = new URLSearchParams()
+
+      if (query?.fromDate) {
+        params.append("fromDate", query.fromDate)
+      }
+
+      if (query?.toDate) {
+        params.append("toDate", query.toDate)
+      }
+
+      const queryString = params.toString()
+      const url = `/api/Item/${itemId}/transactions${queryString ? `?${queryString}` : ""}`
+
+      return await api.get<ItemTransactionResponse>(url)
+    } catch (error: any) {
+      console.error("Error loading item transactions:", error)
+      throw error
+    }
+  },
   // Get all items
   getAll: async (): Promise<Item[]> => {
     try {

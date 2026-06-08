@@ -27,7 +27,7 @@ export function useTranslationHelpers() {
 
   const factoryOptions = computed(() => [
     { label: t('reports.inventoryReport.factoryOptions.factoryA'), value: 'SMD' },
-    { label: t('reports.inventoryReport.factoryOptions.factoryB'), value: 'Mainline' },
+    { label: t('reports.inventoryReport.factoryOptions.factoryB'), value: 'MAINLINE' },
   ])
 
   const typeOptions = computed(() => [

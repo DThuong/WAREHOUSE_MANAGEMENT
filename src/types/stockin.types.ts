@@ -2,6 +2,8 @@
 import { User } from "./user.types"
 import { Item } from "./item.types"
 
+export type AreaPart = 'SMD' | 'MAINLINE'
+
 export interface StockinDetail {
     id: number
     stockInId: number
@@ -16,6 +18,7 @@ export interface Stockin {
     accountId: number
     stockInDate: string
     note: string
+    areaPart: string
     image: string[]
     account: User
     stockInDetails: StockinDetail[]
@@ -28,5 +31,6 @@ export interface CreateStockinDetail {
 
 export interface CreateStockin {
     note: string
+    areaPart: string
     items: CreateStockinDetail[]
 }

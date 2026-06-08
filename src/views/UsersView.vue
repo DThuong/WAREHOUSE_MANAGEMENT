@@ -1,5 +1,6 @@
 <template>
   <MainLayout>
+    <Toast />
     <div class="user-management">
       <!-- Header -->
       <div class="page-header">
@@ -119,6 +120,20 @@
               >
                 <template #body="slotProps">
                   <span class="department-text">{{ getDepartmentLabel(slotProps.data.department) }}</span>
+                </template>
+              </Column>
+
+              <Column
+                field="areaPart"
+                header="Xưởng"
+                sortable
+                style="min-width: 140px"
+              >
+                <template #body="slotProps">
+                  <Tag
+                    :value="getAreaPartLabel(slotProps.data.areaPart)"
+                    :severity="getAreaPartSeverity(slotProps.data.areaPart)"
+                  />
                 </template>
               </Column>
 
@@ -256,6 +271,13 @@
                       t("userManagement.mobile.department")
                     }}</span>
                     <span class="meta-value">{{ getDepartmentLabel(user.department) }}</span>
+                  </div>
+                  <div class="mobile-meta-item">
+                    <span class="meta-label">Xưởng</span>
+                    <Tag
+                      :value="getAreaPartLabel(user.areaPart)"
+                      :severity="getAreaPartSeverity(user.areaPart)"
+                    />
                   </div>
                   <div class="mobile-meta-item">
                     <span class="meta-label">{{
@@ -413,6 +435,23 @@
             class="w-full"
           />
         </div>
+
+        <!-- Area Part -->
+        <div class="field">
+          <label for="areaPart">
+            Xưởng
+            <span class="required">*</span>
+          </label>
+          <Dropdown
+            id="areaPart"
+            v-model="formData.areaPart"
+            :options="areaPartOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Chọn xưởng"
+            class="w-full"
+          />
+        </div>
       </div>
 
       <template #footer>
@@ -478,6 +517,14 @@
               t("userManagement.viewDialog.department")
             }}</span>
             <span class="value">{{ getDepartmentLabel(selectedUser.department) }}</span>
+          </div>
+
+          <div class="detail-item">
+            <span class="label">Xưởng</span>
+            <Tag
+              :value="getAreaPartLabel(selectedUser.areaPart)"
+              :severity="getAreaPartSeverity(selectedUser.areaPart)"
+            />
           </div>
 
           <div class="detail-item">
@@ -612,6 +659,7 @@ import Dropdown from "primevue/dropdown";
 import Tag from "primevue/tag";
 import Skeleton from "primevue/skeleton";
 import ConfirmDialog from "primevue/confirmdialog";
+import Toast from "primevue/toast";
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
@@ -650,6 +698,7 @@ const formData = ref<RegisterData>({
   phoneNumber: "",
   role: "",
   department: "",
+  areaPart: "",
 });
 
 const newPassword = ref("");
@@ -671,10 +720,30 @@ const departmentOptions = computed(() => [
   { label: t("userManagement.departments.sanXuatB"), value: "SẢN XUẤT CA B" },
 ]);
 
+const areaPartOptions = [
+  { label: "Admin", value: "ADMIN" },
+  { label: "SMD", value: "SMD" },
+  { label: "Mainline", value: "Mainline" },
+];
+
 // Helper: value từ API → label đã dịch
-const getDepartmentLabel = (value: string): string => {
-  return departmentOptions.value.find(d => d.value === value)?.label ?? value
-}
+const getDepartmentLabel = (value?: string | null): string => {
+  return departmentOptions.value.find((d) => d.value === value)?.label ?? value ?? "-";
+};
+
+const getAreaPartLabel = (value?: string | null): string => {
+  return areaPartOptions.find((area) => area.value === value)?.label ?? value ?? "-";
+};
+
+const getAreaPartSeverity = (value?: string | null): string => {
+  const normalized = String(value ?? "").toUpperCase();
+
+  if (normalized === "ADMIN") return "danger";
+  if (normalized === "SMD") return "info";
+  if (normalized === "MAINLINE") return "success";
+
+  return "secondary";
+};
 
 // ==================== COMPUTED ====================
 
@@ -687,7 +756,8 @@ const filteredUsers = computed(() => {
       u.username?.toLowerCase().includes(q) ||
       u.phoneNumber?.toLowerCase().includes(q) ||
       u.role?.toLowerCase().includes(q) ||
-      u.department?.toLowerCase().includes(q),
+      u.department?.toLowerCase().includes(q) ||
+      u.areaPart?.toLowerCase().includes(q),
   );
 });
 
@@ -723,6 +793,7 @@ const editUser = (user: User) => {
     phoneNumber: user.phoneNumber,
     role: user.role,
     department: user.department,
+    areaPart: user.areaPart || "",
   };
   showDialog.value = true;
 };
@@ -739,7 +810,8 @@ const saveUser = async () => {
     !formData.value.username ||
     !formData.value.phoneNumber ||
     !formData.value.role ||
-    !formData.value.department
+    !formData.value.department ||
+    !formData.value.areaPart
   ) {
     toast.add({
       severity: "warn",
@@ -767,11 +839,24 @@ const saveUser = async () => {
         phoneNumber: formData.value.phoneNumber,
         role: formData.value.role,
         department: formData.value.department,
+        areaPart: formData.value.areaPart,
       });
     } else {
       result = await userStore.addUser(formData.value);
     }
-    if (result.success) closeDialog();
+    if (result?.success !== false) {
+      toast.add({
+        severity: "success",
+        summary: "Thành công",
+        detail: isEditing.value
+          ? "Cập nhật người dùng thành công."
+          : "Thêm người dùng thành công.",
+        life: 3000,
+      });
+
+      closeDialog();
+      await userStore.fetchUsers();
+    }
   } catch (error) {
     console.error("❌ Save user error:", error);
     toast.add({
@@ -794,7 +879,30 @@ const confirmDelete = (user: User) => {
     rejectLabel: t("userManagement.confirmDelete.reject"),
     acceptClass: "p-button-danger",
     accept: async () => {
-      await userStore.deleteUser(user.id);
+      try {
+        const result = (await userStore.deleteUser(user.id)) as
+          | { success?: boolean }
+          | undefined;
+
+        if (result?.success !== false) {
+          toast.add({
+            severity: "success",
+            summary: "Thành công",
+            detail: "Xóa người dùng thành công.",
+            life: 3000,
+          });
+
+          await userStore.fetchUsers();
+        }
+      } catch (error) {
+        console.error("❌ Delete user error:", error);
+        toast.add({
+          severity: "error",
+          summary: t("userManagement.toast.errorTitle"),
+          detail: "Không thể xóa người dùng.",
+          life: 3000,
+        });
+      }
     },
     reject: () => {
       console.log("❌ Delete cancelled");
@@ -834,7 +942,15 @@ const savePassword = async () => {
       changingPasswordFor.value,
       newPassword.value,
     );
-    if (result.success) closePasswordDialog();
+    if (result?.success !== false) {
+      toast.add({
+        severity: "success",
+        summary: "Thành công",
+        detail: "Đổi mật khẩu thành công.",
+        life: 3000,
+      });
+      closePasswordDialog();
+    }
   }
 };
 
@@ -857,6 +973,7 @@ const resetForm = () => {
     phoneNumber: "",
     role: "",
     department: "",
+    areaPart: "",
   };
   editingUserId.value = null;
 };
@@ -1287,3 +1404,4 @@ const formatDate = (dateString: string): string => {
   }
 }
 </style>
+

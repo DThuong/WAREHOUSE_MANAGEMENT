@@ -26,6 +26,7 @@
           <p class="text-gray-600">{{ t("orderManagement.subtitle") }}</p>
         </div>
         <Button
+          v-if="canCreateOrder"
           :label="t('orderManagement.createOrder.title')"
           icon="pi pi-plus"
           class="btn-primary"
@@ -72,8 +73,8 @@
               </div>
             </div>
 
-            <!-- Status Filter -->
-            <div class="grid grid-cols-2 gap-3">
+            <!-- Status / Area / Search Filter -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div>
                 <label class="block mb-2 text-sm font-semibold text-gray-700">{{
                   t("common.filter.status")
@@ -84,6 +85,21 @@
                   optionLabel="label"
                   optionValue="value"
                   :placeholder="t('orderManagement.allStatus')"
+                  class="w-full"
+                  @change="fetchAllOrders"
+                />
+              </div>
+
+              <div>
+                <label class="block mb-2 text-sm font-semibold text-gray-700">
+                  Xưởng
+                </label>
+                <Dropdown
+                  v-model="selectedAreaPart"
+                  :options="areaPartFilterOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Tất cả xưởng"
                   class="w-full"
                   @change="fetchAllOrders"
                 />
@@ -218,6 +234,14 @@
                 <span>{{ getDepartmentLabel(data.account?.department) }}</span>
               </template>
             </Column>
+            <Column field="account.areaPart" header="Xưởng" sortable>
+              <template #body="{ data }">
+                <Chip
+                  :label="getAreaPartLabel(data.account?.areaPart)"
+                  :class="getAreaPartBadgeClass(data.account?.areaPart)"
+                />
+              </template>
+            </Column>
             <Column :header="t('common.product')">
               <template #body="{ data }">
                 <Chip
@@ -334,6 +358,13 @@
                     }}</span>
                   </div>
                   <div class="order-card-row">
+                    <i class="pi pi-sitemap text-gray-400"></i>
+                    <span class="order-card-label">Xưởng</span>
+                    <span class="order-card-value">{{
+                      getAreaPartLabel(order.account?.areaPart)
+                    }}</span>
+                  </div>
+                  <div class="order-card-row">
                     <i class="pi pi-box text-gray-400"></i>
                     <span class="order-card-label">{{
                       t("common.product")
@@ -417,7 +448,7 @@
     >
       <div v-if="selectedOrder" class="order-details">
         <!-- Order Info -->
-        <div class="grid grid-cols-2 gap-4 mb-4 p-4! bg-gray-50 rounded-lg">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4! bg-gray-50 rounded-lg">
           <div>
             <p class="text-sm text-gray-600">
               {{ t("orderManagement.orderDetail.orderedBy") }}
@@ -430,6 +461,12 @@
             </p>
             <p class="font-semibold">
               {{ getDepartmentLabel(selectedOrder.account?.department) }}
+            </p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600">Xưởng</p>
+            <p class="font-semibold">
+              {{ getAreaPartLabel(selectedOrder.account?.areaPart) }}
             </p>
           </div>
           <div>
@@ -492,6 +529,16 @@
                     :title="t('orderManagement.orderDetail.viewPurpose')"
                   />
                 </div>
+              </template>
+            </Column>
+            <Column header="Line">
+              <template #body="{ data }">
+                <span class="font-medium">{{ getOrderDetailLineName(data) }}</span>
+              </template>
+            </Column>
+            <Column header="Machine">
+              <template #body="{ data }">
+                <span class="font-medium">{{ getOrderDetailMachineName(data) }}</span>
               </template>
             </Column>
             <Column field="orderQty" :header="t('common.quantity')">
@@ -566,6 +613,18 @@
 
               <!-- Price Info Row -->
               <div class="dialog-item-card-bottom">
+                <div class="dialog-item-price-row">
+                  <span class="dialog-item-price-label">Line</span>
+                  <span class="dialog-item-price-value">
+                    {{ getOrderDetailLineName(data) }}
+                  </span>
+                </div>
+                <div class="dialog-item-price-row">
+                  <span class="dialog-item-price-label">Machine</span>
+                  <span class="dialog-item-price-value">
+                    {{ getOrderDetailMachineName(data) }}
+                  </span>
+                </div>
                 <div class="dialog-item-price-row">
                   <span class="dialog-item-price-label">{{
                     t("common.quantity")
@@ -1253,9 +1312,38 @@
                     :options="timeUnitOptions"
                     optionLabel="label"
                     optionValue="value"
-                    class="w-32"
+                    class="w-full md:w-32"
                   />
                 </div>
+              </div>
+
+              <!-- Machine -->
+              <div class="mt-3!">
+                <label class="text-sm font-medium text-gray-700 block mb-2">
+                  Line / Machine
+                  <span class="text-red-500">*</span>
+                </label>
+                <Dropdown
+                  v-model="item.machineId"
+                  :options="availableMachineOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Chọn line / machine"
+                  class="w-full"
+                  :filter="true"
+                  filterPlaceholder="Tìm line hoặc machine"
+                  appendTo="body"
+                  panelClass="order-item-dropdown-panel"
+                >
+                  <template #option="slotProps">
+                    <div class="flex flex-col gap-1 py-1">
+                      <span class="font-medium">{{ slotProps.option.machineName }}</span>
+                      <span class="text-xs text-gray-500">
+                        {{ slotProps.option.lineName }} - {{ slotProps.option.areaPart }}
+                      </span>
+                    </div>
+                  </template>
+                </Dropdown>
               </div>
             </div>
           </div>
@@ -1349,6 +1437,7 @@
 import { ref, onMounted, computed, watch, onUnmounted } from "vue";
 import { useOrderStore } from "@/stores/orderStore";
 import { useItemStore } from "@/stores/itemStore";
+import { useLineMachineStore } from "@/stores/line_machine";
 import { orderAPI } from "@/services/orderAPI";
 import { itemAPI } from "@/services/itemAPI";
 import { useConfirm } from "primevue/useconfirm";
@@ -1364,7 +1453,8 @@ import InputText from "primevue/inputtext";
 import Dropdown from "primevue/dropdown";
 import InputNumber from "primevue/inputnumber";
 import ConfirmDialog from "primevue/confirmdialog";
-import type { Order, OrderPendingRealtime } from "@/types/order.types";
+import type { Order, OrderDetail, OrderPendingRealtime } from "@/types/order.types";
+import type { User } from "@/types/user.types";
 import Calendar from "primevue/calendar";
 import { useRoute, useRouter } from "vue-router";
 import { signalRService } from "@/services/orderNotiService";
@@ -1382,16 +1472,18 @@ const confirm = useConfirm();
 const toast = useToast();
 const orderStore = useOrderStore();
 const itemStore = useItemStore();
+const lineMachineStore = useLineMachineStore();
 const route = useRoute();
 const router = useRouter();
 
 // Search & Filter
 const searchQuery = ref("");
 const selectedStatus = ref<string | null>(null);
+const selectedAreaPart = ref<string | null>(null);
 
 const fromDate = ref<Date>(new Date(new Date().getFullYear(), 0, 1, 0, 0, 0));
 const toDate = ref<Date>(new Date(new Date().setHours(23, 59, 59)));
-const selectedDepartment = ref<string | null>(null);
+const currentUser = ref<Partial<User> | null>(null);
 const isTableMobile = ref(window.innerWidth < 768);
 const cameraFileInput = ref<HTMLInputElement | null>(null);
 const pendingImageTimestamps = ref<string[]>([]);
@@ -1422,6 +1514,14 @@ const statusFilterOptions = [
   { label: t("orderManagement.rejected"), value: "Rejected" },
 ];
 
+const areaPartFilterOptions = [
+  { label: "Tất cả xưởng", value: null },
+  { label: "SMD", value: "SMD" },
+  { label: "Mainline", value: "Mainline" },
+];
+
+const canCreateOrder = computed(() => normalizeText(currentUser.value?.role) !== "admin");
+
 const departmentOptions = computed(() => [
   { label: t("userManagement.departments.qc"), value: "QC" },
   { label: t("userManagement.departments.kho"), value: "KHO" },
@@ -1438,8 +1538,75 @@ const timeUnitOptions = computed(() => [
 ]);
 
 // Helper: value từ API → label đã dịch
-const getDepartmentLabel = (value: string): string => {
+const getDepartmentLabel = (value?: string | null): string => {
+  if (!value) return "-";
   return departmentOptions.value.find((d) => d.value === value)?.label ?? value;
+};
+
+const normalizeText = (value?: string | number | null) =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase();
+
+const normalizeAreaPart = (value?: string | null) => {
+  const normalized = normalizeText(value);
+  if (normalized === "smd") return "SMD";
+  if (normalized === "mainline" || normalized === "main line") return "Mainline";
+  return value || "-";
+};
+
+const getAreaPartLabel = (value?: string | null): string => normalizeAreaPart(value);
+
+const getAreaPartBadgeClass = (value?: string | null) => {
+  const area = normalizeAreaPart(value);
+  if (area === "SMD") return "p-chip-info";
+  if (area === "Mainline") return "p-chip-success";
+  return "p-chip-secondary";
+};
+
+const getCurrentUserFromStorage = (): Partial<User> | null => {
+  if (typeof window === "undefined") return null;
+
+  const looksLikeUser = (value: any): Partial<User> | null => {
+    if (!value || typeof value !== "object") return null;
+    if (value.user && typeof value.user === "object") return looksLikeUser(value.user);
+    if (value.account && typeof value.account === "object") return looksLikeUser(value.account);
+    if (value.auth?.user && typeof value.auth.user === "object") return looksLikeUser(value.auth.user);
+
+    if (value.role || value.username || value.areaPart || value.department) {
+      return value as Partial<User>;
+    }
+
+    return null;
+  };
+
+  const directKeys = ["user", "authUser", "currentUser", "account", "auth"];
+  for (const key of directKeys) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      const user = looksLikeUser(parsed);
+      if (user) return user;
+    } catch {
+      // ignore invalid localStorage value
+    }
+  }
+
+  for (let i = 0; i < window.localStorage.length; i += 1) {
+    const key = window.localStorage.key(i);
+    if (!key) continue;
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw || !raw.trim().startsWith("{")) continue;
+      const user = looksLikeUser(JSON.parse(raw));
+      if (user) return user;
+    } catch {
+      // ignore invalid localStorage value
+    }
+  }
+
+  return null;
 };
 
 // paste hình ảnh từ window shift S
@@ -1645,9 +1812,20 @@ const filteredOrders = computed(() => {
     filtered = filtered.filter(
       (order) =>
         order.id?.toString().includes(term) ||
-        order.account?.username.toLowerCase().includes(term) ||
-        order.account?.department.toLowerCase().includes(term) ||
-        order.nameWorker.toLowerCase().includes(term),
+        order.account?.username?.toLowerCase().includes(term) ||
+        order.account?.department?.toLowerCase().includes(term) ||
+        order.account?.areaPart?.toLowerCase().includes(term) ||
+        order.nameWorker?.toLowerCase().includes(term) ||
+        order.orderDetails?.some((detail) =>
+          [
+            getOrderDetailLineName(detail),
+            getOrderDetailMachineName(detail),
+            detail.item?.itemIndentifyId,
+            getItemName(detail.item),
+          ]
+            .filter(Boolean)
+            .some((value) => String(value).toLowerCase().includes(term)),
+        ),
     );
   }
 
@@ -1687,6 +1865,7 @@ interface CreateOrderItem {
   note: string;
   timeUsed: string;
   timeUsedUnit: "day" | "week" | "month";
+  machineId: number;
 }
 
 const createOrderForm = ref({
@@ -1709,6 +1888,30 @@ const availableItems = computed(() => {
   }));
 });
 
+const availableMachineOptions = computed(() => {
+  const currentArea = normalizeAreaPart(currentUser.value?.areaPart || null);
+
+  return lineMachineStore.machines
+    .map((machine) => {
+      const line =
+        machine.line ||
+        lineMachineStore.lines.find((item) => item.id === machine.lineId) ||
+        null;
+
+      return {
+        value: machine.id,
+        label: `${line?.lineName || "-"} - ${machine.machineName}`,
+        machineName: machine.machineName,
+        lineName: line?.lineName || machine.lineName || "-",
+        areaPart: normalizeAreaPart(line?.areaPart || null),
+      };
+    })
+    .filter((option) => {
+      if (!currentArea || currentArea === "-" || !canCreateOrder.value) return true;
+      return option.areaPart === currentArea;
+    });
+});
+
 // Form validation
 const isFormValid = computed(() => {
   return (
@@ -1721,7 +1924,8 @@ const isFormValid = computed(() => {
         item.quantity <= getStockQty(item.itemId) &&
         item.note.trim() !== "" &&
         item.timeUsed !== "" &&
-        item.timeUsedUnit !== "",
+        item.timeUsedUnit !== "" &&
+        item.machineId > 0,
     )
   );
 });
@@ -1757,12 +1961,14 @@ const fetchAllOrders = async () => {
     const from = formatDateTimeForAPI(fromDate.value);
     const to = formatDateTimeForAPI(toDate.value);
 
-    const orders = await orderAPI.filterOrders({
+    const filterParams: any = {
       fromDate: from,
       toDate: to,
       status: selectedStatus.value || undefined,
-      department: selectedDepartment.value || undefined,
-    });
+      areaPart: selectedAreaPart.value || undefined,
+    };
+
+    const orders = await orderAPI.filterOrders(filterParams);
 
     orderStore.setOrders(orders);
   } catch (error: any) {
@@ -1840,7 +2046,7 @@ const resetFilter = () => {
   fromDate.value = new Date(new Date().getFullYear(), 0, 1, 0, 0, 0);
   toDate.value = new Date(new Date().setHours(23, 59, 59));
   selectedStatus.value = null;
-  selectedDepartment.value = null;
+  selectedAreaPart.value = null;
   searchQuery.value = "";
 
   // Clear URL query
@@ -1898,6 +2104,23 @@ const navigateToImageManagement = () => {
 
 const getTotalQuantity = (order: Order) => {
   return order.orderDetails.reduce((sum, detail) => sum + detail.orderQty, 0);
+};
+
+const getOrderDetailLine = (detail: OrderDetail) => {
+  return (
+    detail.machine?.line ||
+    lineMachineStore.lines.find((line) => line.id === detail.machine?.lineId) ||
+    null
+  );
+};
+
+const getOrderDetailLineName = (detail: OrderDetail) => {
+  const line = getOrderDetailLine(detail);
+  return line?.lineName || detail.machine?.lineName || "-";
+};
+
+const getOrderDetailMachineName = (detail: OrderDetail) => {
+  return detail.machine?.machineName || "-";
 };
 
 const getStatusClass = (status: string) => {
@@ -2094,6 +2317,16 @@ const confirmDelete = (order: Order) => {
 
 // Create Order Handlers
 const openCreateOrderDialog = () => {
+  if (!canCreateOrder.value) {
+    toast.add({
+      severity: "warn",
+      summary: t("orderManagement.common.warning"),
+      detail: "Tài khoản Admin không còn quyền tạo đơn vì đơn hàng đã phân quyền theo Xưởng từ JWT.",
+      life: 3000,
+    });
+    return;
+  }
+
   createOrderForm.value = {
     nameWorker: "",
     items: [],
@@ -2116,6 +2349,7 @@ const addItemRow = () => {
     note: "",
     timeUsed: "",
     timeUsedUnit: "day",
+    machineId: 0,
   });
 };
 
@@ -2124,6 +2358,16 @@ const removeItemRow = (index: number) => {
 };
 
 const submitCreate = async () => {
+  if (!canCreateOrder.value) {
+    toast.add({
+      severity: "warn",
+      summary: t("orderManagement.common.warning"),
+      detail: "Tài khoản Admin không còn quyền tạo đơn vì đơn hàng đã phân quyền theo Xưởng từ JWT.",
+      life: 3000,
+    });
+    return;
+  }
+
   if (!isFormValid.value) {
     toast.add({
       severity: "warn",
@@ -2144,6 +2388,7 @@ const submitCreate = async () => {
         orderQty: item.quantity,
         note: item.note.trim(),
         timeUsed: `${item.timeUsed} ${t(`common.form.timeUnit.${item.timeUsedUnit}`)}`,
+        machineId: item.machineId,
       })),
     };
 
@@ -2551,7 +2796,13 @@ onMounted(async () => {
     await signalRService.start();
   }
   signalRService.on("NewOrderCreated", handleNewOrderCreated);
-  await fetchAllItems();
+  currentUser.value = getCurrentUserFromStorage();
+  await Promise.all([
+    fetchAllItems(),
+    !lineMachineStore.lines.length && !lineMachineStore.machines.length
+      ? lineMachineStore.fetchInitialData()
+      : Promise.resolve(),
+  ]);
   if (route.query.status) {
     selectedStatus.value = route.query.status as string;
   }
@@ -3098,4 +3349,27 @@ onUnmounted(() => {
 :deep(.p-select-list-container) {
   overscroll-behavior: contain;
 }
+
+/* Area / machine responsive helpers */
+:deep(.p-chip-info),
+:deep(.p-chip-success),
+:deep(.p-chip-secondary) {
+  width: fit-content;
+}
+
+@media (max-width: 768px) {
+  :deep(.p-dialog) {
+    max-width: calc(100vw - 1rem) !important;
+  }
+
+  :deep(.p-dialog-content) {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .create-order-item-row {
+    padding: 0.875rem !important;
+  }
+}
+
 </style>
