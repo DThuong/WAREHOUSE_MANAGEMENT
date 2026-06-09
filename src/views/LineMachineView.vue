@@ -39,6 +39,15 @@
               >
                 + Thêm Machine
               </button>
+
+              <button
+                type="button"
+                class="col-span-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-1"
+                :disabled="store.loading || store.lines.length < 2"
+                @click="openCopyMachinesModal()"
+              >
+                Copy máy
+              </button>
             </div>
           </div>
 
@@ -203,48 +212,116 @@
 
         <!-- LINE LIST -->
         <section v-else class="space-y-4">
+          <div
+            class="lm-line-toolbar rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+          >
+            <div>
+              <p class="text-base font-bold text-slate-900">Danh sách Line</p>
+              <p class="mt-1 text-sm text-slate-500">
+                {{ filteredLines.length }} line phù hợp bộ lọc. Line có nhiều máy
+                sẽ được thu gọn để dễ theo dõi.
+              </p>
+            </div>
+
+            <div class="lm-line-toolbar-actions">
+              <button
+                type="button"
+                class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95"
+                @click="expandAllLines"
+              >
+                Mở tất cả
+              </button>
+
+              <button
+                type="button"
+                class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95"
+                @click="collapseAllLines"
+              >
+                Thu gọn
+              </button>
+            </div>
+          </div>
+
           <article
             v-for="line in filteredLines"
             :key="line.id"
             class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
           >
-            <!-- LINE HEADER -->
+            <!-- LINE HEADER / ACCORDION SUMMARY -->
             <div
-              class="flex flex-col gap-4 border-b border-slate-100 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between"
+              class="lm-line-toggle flex flex-col gap-4 border-b border-slate-100 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between"
+              role="button"
+              tabindex="0"
+              @click="toggleLine(line.id)"
+              @keydown.enter.prevent="toggleLine(line.id)"
+              @keydown.space.prevent="toggleLine(line.id)"
             >
-              <div class="min-w-0">
-                <div class="flex flex-wrap items-center gap-2">
-                  <h2 class="truncate text-lg font-bold text-slate-900">
-                    {{ line.lineName }}
-                  </h2>
+              <div class="flex items-start gap-3 min-w-0">
+                <span
+                  class="lm-line-chevron shrink-0"
+                  :class="{ 'is-open': isLineExpanded(line.id) }"
+                >
+                  ›
+                </span>
 
-                  <span
-                    class="rounded-full px-2.5 py-1 text-xs font-bold"
-                    :class="getAreaBadgeClass(line.areaPart)"
-                  >
-                    {{ line.areaPart || "N/A" }}
-                  </span>
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="truncate text-lg font-bold text-slate-900">
+                      {{ line.lineName }}
+                    </h2>
 
-                  <span
-                    class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
-                  >
-                    ID: {{ line.id }}
-                  </span>
+                    <span
+                      class="rounded-full px-2.5 py-1 text-xs font-bold"
+                      :class="getAreaBadgeClass(line.areaPart)"
+                    >
+                      {{ line.areaPart || "N/A" }}
+                    </span>
+
+                    <span
+                      class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
+                    >
+                      ID: {{ line.id }}
+                    </span>
+
+                    <span
+                      class="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700"
+                    >
+                      {{ getMachinesByLineId(line.id).length }} máy
+                    </span>
+                  </div>
+
+                  <p class="mt-1 text-sm text-slate-500">
+                    {{
+                      isLineExpanded(line.id)
+                        ? "Đang mở danh sách machine"
+                        : "Đang thu gọn danh sách machine"
+                    }}
+                    <span
+                      v-if="getMachinesByLineId(line.id).length >= 8"
+                      class="lm-line-hint"
+                    >
+                      · line này có nhiều máy
+                    </span>
+                  </p>
                 </div>
-
-                <p class="mt-1 text-sm text-slate-500">
-                  {{ getMachinesByLineId(line.id).length }} machine trong line
-                  này
-                </p>
               </div>
 
-              <div class="grid grid-cols-3 gap-2 sm:flex">
+              <div class="grid grid-cols-2 gap-2 sm:grid-cols-4" @click.stop>
                 <button
                   type="button"
                   class="rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 active:scale-95"
                   @click="openCreateMachineModal(line.id)"
                 >
                   + Máy
+                </button>
+
+                <button
+                  type="button"
+                  class="rounded-xl bg-purple-50 px-3 py-2 text-sm font-semibold text-purple-700 transition hover:bg-purple-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                  :disabled="store.lines.length < 2"
+                  @click="openCopyMachinesModal(line.id)"
+                >
+                  Copy
                 </button>
 
                 <button
@@ -265,138 +342,146 @@
               </div>
             </div>
 
-            <!-- DESKTOP MACHINE TABLE -->
-            <div class="hidden lg:block">
-              <table class="w-full table-fixed">
-                <thead class="bg-slate-50">
-                  <tr>
-                    <th
-                      class="w-22 px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
-                    >
-                      ID
-                    </th>
+            <Transition name="lm-accordion">
+              <div v-if="isLineExpanded(line.id)">
+                <!-- DESKTOP MACHINE TABLE - SCROLL RIÊNG TỪNG LINE -->
+                <div class="hidden lg:block">
+                  <div class="lm-machine-scroll">
+                    <table class="w-full table-fixed">
+                      <thead class="lm-sticky-head bg-slate-50">
+                        <tr>
+                          <th
+                            class="w-22 px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
+                          >
+                            ID
+                          </th>
 
-                    <th
-                      class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
-                    >
-                      Tên Machine
-                    </th>
+                          <th
+                            class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
+                          >
+                            Tên Machine
+                          </th>
 
-                    <th
-                      class="w-37.5 px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
-                    >
-                      Line ID
-                    </th>
+                          <th
+                            class="w-37.5 px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
+                          >
+                            Line ID
+                          </th>
 
-                    <th
-                      class="w-55 px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500"
-                    >
-                      Thao tác
-                    </th>
-                  </tr>
-                </thead>
+                          <th
+                            class="w-55 px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500"
+                          >
+                            Thao tác
+                          </th>
+                        </tr>
+                      </thead>
 
-                <tbody>
-                  <tr
-                    v-if="getMachinesByLineId(line.id).length === 0"
-                    class="border-t border-slate-100"
-                  >
-                    <td
-                      colspan="4"
-                      class="px-5 py-8 text-center text-sm text-slate-500"
+                      <tbody>
+                        <tr
+                          v-if="getMachinesByLineId(line.id).length === 0"
+                          class="border-t border-slate-100"
+                        >
+                          <td
+                            colspan="4"
+                            class="px-5 py-8 text-center text-sm text-slate-500"
+                          >
+                            Line này chưa có machine.
+                          </td>
+                        </tr>
+
+                        <tr
+                          v-for="machine in getMachinesByLineId(line.id)"
+                          :key="machine.id"
+                          class="border-t border-slate-100 transition hover:bg-slate-50"
+                        >
+                          <td class="px-5 py-3 text-sm font-semibold text-slate-700">
+                            #{{ machine.id }}
+                          </td>
+
+                          <td class="px-5 py-3">
+                            <p class="truncate text-sm font-semibold text-slate-900">
+                              {{ machine.machineName }}
+                            </p>
+                          </td>
+
+                          <td class="px-5 py-3 text-sm text-slate-600">
+                            {{ machine.lineId }}
+                          </td>
+
+                          <td class="px-5 py-3">
+                            <div class="flex justify-end gap-2">
+                              <button
+                                type="button"
+                                class="rounded-lg bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700 transition hover:bg-amber-100 active:scale-95"
+                                @click="openEditMachineModal(machine)"
+                              >
+                                Sửa
+                              </button>
+
+                              <button
+                                type="button"
+                                class="rounded-lg bg-red-50 px-3 py-2 text-xs font-bold text-red-700 transition hover:bg-red-100 active:scale-95"
+                                @click="askDeleteMachine(machine)"
+                              >
+                                Xóa
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- MOBILE/TABLET MACHINE CARDS - SCROLL RIÊNG TỪNG LINE -->
+                <div class="lg:hidden">
+                  <div class="lm-machine-mobile-scroll grid gap-3 p-4">
+                    <div
+                      v-if="getMachinesByLineId(line.id).length === 0"
+                      class="rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500"
                     >
                       Line này chưa có machine.
-                    </td>
-                  </tr>
+                    </div>
 
-                  <tr
-                    v-for="machine in getMachinesByLineId(line.id)"
-                    :key="machine.id"
-                    class="border-t border-slate-100 transition hover:bg-slate-50"
-                  >
-                    <td class="px-5 py-3 text-sm font-semibold text-slate-700">
-                      #{{ machine.id }}
-                    </td>
+                    <div
+                      v-for="machine in getMachinesByLineId(line.id)"
+                      :key="machine.id"
+                      class="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                    >
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                          <p class="truncate text-base font-bold text-slate-900">
+                            {{ machine.machineName }}
+                          </p>
 
-                    <td class="px-5 py-3">
-                      <p class="truncate text-sm font-semibold text-slate-900">
-                        {{ machine.machineName }}
-                      </p>
-                    </td>
+                          <p class="mt-1 text-xs font-medium text-slate-500">
+                            ID: {{ machine.id }} · Line ID: {{ machine.lineId }}
+                          </p>
+                        </div>
 
-                    <td class="px-5 py-3 text-sm text-slate-600">
-                      {{ machine.lineId }}
-                    </td>
+                        <div class="flex shrink-0 gap-2">
+                          <button
+                            type="button"
+                            class="rounded-lg bg-amber-100 px-3 py-2 text-xs font-bold text-amber-700 active:scale-95"
+                            @click="openEditMachineModal(machine)"
+                          >
+                            Sửa
+                          </button>
 
-                    <td class="px-5 py-3">
-                      <div class="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          class="rounded-lg bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700 transition hover:bg-amber-100 active:scale-95"
-                          @click="openEditMachineModal(machine)"
-                        >
-                          Sửa
-                        </button>
-
-                        <button
-                          type="button"
-                          class="rounded-lg bg-red-50 px-3 py-2 text-xs font-bold text-red-700 transition hover:bg-red-100 active:scale-95"
-                          @click="askDeleteMachine(machine)"
-                        >
-                          Xóa
-                        </button>
+                          <button
+                            type="button"
+                            class="rounded-lg bg-red-100 px-3 py-2 text-xs font-bold text-red-700 active:scale-95"
+                            @click="askDeleteMachine(machine)"
+                          >
+                            Xóa
+                          </button>
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- MOBILE/TABLET MACHINE CARDS -->
-            <div class="grid gap-3 p-4 lg:hidden">
-              <div
-                v-if="getMachinesByLineId(line.id).length === 0"
-                class="rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500"
-              >
-                Line này chưa có machine.
-              </div>
-
-              <div
-                v-for="machine in getMachinesByLineId(line.id)"
-                :key="machine.id"
-                class="rounded-xl border border-slate-200 bg-slate-50 p-4"
-              >
-                <div class="flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <p class="truncate text-base font-bold text-slate-900">
-                      {{ machine.machineName }}
-                    </p>
-
-                    <p class="mt-1 text-xs font-medium text-slate-500">
-                      ID: {{ machine.id }} · Line ID: {{ machine.lineId }}
-                    </p>
-                  </div>
-
-                  <div class="flex shrink-0 gap-2">
-                    <button
-                      type="button"
-                      class="rounded-lg bg-amber-100 px-3 py-2 text-xs font-bold text-amber-700 active:scale-95"
-                      @click="openEditMachineModal(machine)"
-                    >
-                      Sửa
-                    </button>
-
-                    <button
-                      type="button"
-                      class="rounded-lg bg-red-100 px-3 py-2 text-xs font-bold text-red-700 active:scale-95"
-                      @click="askDeleteMachine(machine)"
-                    >
-                      Xóa
-                    </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Transition>
           </article>
         </section>
       </div>
@@ -494,9 +579,7 @@
       class="lm-modal-overlay"
       @click.self="closeMachineModal"
     >
-      <div
-        class="lm-modal-card"
-      >
+      <div class="lm-modal-card">
         <div class="flex items-start justify-between gap-4">
           <div>
             <h3 class="text-lg font-bold text-slate-900">
@@ -575,6 +658,199 @@
     </div>
   </Teleport>
 
+  <!-- COPY MACHINES MODAL -->
+  <Teleport to="body">
+    <div
+      v-if="copyMachinesModal.visible"
+      class="lm-modal-overlay"
+      @click.self="closeCopyMachinesModal"
+    >
+      <div class="lm-modal-card lm-modal-card-wide">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">
+              Copy machine
+            </h3>
+
+            <p class="mt-1 text-sm text-slate-500">
+              Chọn line nguồn và line đích. Máy trùng tên trong line đích sẽ
+              được tự động bỏ qua.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="lm-modal-close"
+            aria-label="Đóng"
+            @click="closeCopyMachinesModal"
+          >
+            ✕
+          </button>
+        </div>
+
+        <form class="lm-copy-form" @submit.prevent="submitCopyMachines">
+          <div class="lm-copy-grid">
+            <section class="lm-copy-panel">
+              <div>
+                <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Line nguồn
+                </label>
+
+                <select
+                  v-model.number="copyMachinesForm.sourceLineId"
+                  class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-purple-500 focus:ring-4 focus:ring-purple-100"
+                  @change="handleCopySourceChange"
+                >
+                  <option
+                    v-for="line in store.lines"
+                    :key="line.id"
+                    :value="line.id"
+                  >
+                    {{ line.lineName }} - {{ line.areaPart }} ({{
+                      getMachinesByLineId(line.id).length
+                    }}
+                    máy)
+                  </option>
+                </select>
+
+                <p class="mt-2 text-xs font-medium text-slate-500">
+                  Đang chọn:
+                  <span class="font-bold text-slate-700">
+                    {{ selectedSourceLineLabel }}
+                  </span>
+                  · {{ selectedSourceMachines.length }} machine
+                </p>
+              </div>
+
+              <div
+                v-if="selectedSourceMachines.length"
+                class="lm-copy-box"
+              >
+                <div class="lm-copy-section-title">
+                  <p>Danh sách máy sẽ copy</p>
+                  <span>{{ selectedSourceMachines.length }} máy</span>
+                </div>
+
+                <div class="lm-copy-chip-scroll">
+                  <span
+                    v-for="machine in selectedSourceMachines"
+                    :key="machine.id"
+                    class="lm-machine-chip"
+                  >
+                    {{ machine.machineName }}
+                  </span>
+                </div>
+              </div>
+
+              <div
+                v-else
+                class="rounded-2xl border border-dashed border-slate-300 bg-amber-50 p-4 text-sm font-medium text-amber-700"
+              >
+                Line nguồn chưa có machine để copy.
+              </div>
+
+              <div class="lm-copy-summary">
+                <p class="font-bold">Tóm tắt</p>
+                <p class="mt-1">
+                  Copy từ
+                  <span class="font-bold">{{ selectedSourceLineLabel }}</span>
+                  sang
+                  <span class="font-bold">
+                    {{ copyMachinesForm.targetLineIds.length }}
+                  </span>
+                  line đích.
+                </p>
+                <p>
+                  Machine mới dự kiến tạo:
+                  <span class="font-bold">{{ totalCopyAddCount }}</span>.
+                </p>
+              </div>
+            </section>
+
+            <section class="lm-copy-panel">
+              <div class="lm-copy-target-head">
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700">
+                    Line đích
+                  </label>
+                  <p class="mt-1 text-xs font-medium text-slate-500">
+                    Chọn một hoặc nhiều line cần nhận danh sách máy.
+                  </p>
+                </div>
+
+                <div class="lm-copy-target-actions">
+                  <button
+                    type="button"
+                    class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-200 active:scale-95"
+                    @click="selectAllCopyTargets"
+                  >
+                    Chọn tất cả
+                  </button>
+
+                  <button
+                    type="button"
+                    class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-200 active:scale-95"
+                    @click="clearCopyTargets"
+                  >
+                    Bỏ chọn
+                  </button>
+                </div>
+              </div>
+
+              <div class="lm-copy-target-list">
+                <label
+                  v-for="line in copyTargetLines"
+                  :key="line.id"
+                  class="lm-copy-target-item"
+                >
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-bold text-slate-800">
+                      {{ line.lineName }}
+                    </p>
+                    <p class="mt-1 text-xs text-slate-500">
+                      {{ line.areaPart }} · hiện có
+                      {{ getMachinesByLineId(line.id).length }} máy · thêm
+                      {{ getCopyAddCount(line.id) }} máy mới
+                    </p>
+                  </div>
+
+                  <input
+                    v-model="copyMachinesForm.targetLineIds"
+                    type="checkbox"
+                    class="lm-copy-checkbox"
+                    :value="line.id"
+                  />
+                </label>
+              </div>
+            </section>
+          </div>
+
+          <div class="lm-copy-footer">
+            <button
+              type="button"
+              class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95"
+              @click="closeCopyMachinesModal"
+            >
+              Hủy
+            </button>
+
+            <button
+              type="submit"
+              class="rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="
+                submitting ||
+                selectedSourceMachines.length === 0 ||
+                copyMachinesForm.targetLineIds.length === 0
+              "
+            >
+              {{ submitting ? "Đang copy..." : "Copy machine" }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </Teleport>
+
   <!-- CONFIRM MODAL -->
   <Teleport to="body">
     <div
@@ -582,9 +858,7 @@
       class="lm-modal-overlay"
       @click.self="closeConfirmModal"
     >
-      <div
-        class="lm-modal-card"
-      >
+      <div class="lm-modal-card">
         <h3 class="text-lg font-bold text-slate-900">
           {{ confirmModal.title }}
         </h3>
@@ -635,6 +909,7 @@ const toast = useToast();
 const searchText = ref("");
 const areaFilter = ref<AreaFilter>("ALL");
 const submitting = ref(false);
+const expandedLineIds = ref<Set<number>>(new Set());
 
 const lineModal = reactive<{
   visible: boolean;
@@ -654,6 +929,12 @@ const machineModal = reactive<{
   visible: false,
   mode: "create",
   editingId: null,
+});
+
+const copyMachinesModal = reactive<{
+  visible: boolean;
+}>({
+  visible: false,
 });
 
 const confirmModal = reactive<{
@@ -678,6 +959,14 @@ const lineForm = reactive({
 const machineForm = reactive({
   machineName: "",
   lineId: 0,
+});
+
+const copyMachinesForm = reactive<{
+  sourceLineId: number;
+  targetLineIds: number[];
+}>({
+  sourceLineId: 0,
+  targetLineIds: [],
 });
 
 const smdLineCount = computed(() => {
@@ -733,6 +1022,30 @@ const filteredLines = computed(() => {
   });
 });
 
+const selectedSourceMachines = computed(() => {
+  return getMachinesByLineId(copyMachinesForm.sourceLineId);
+});
+
+const selectedSourceLine = computed(() => {
+  return store.lines.find((line) => line.id === copyMachinesForm.sourceLineId);
+});
+
+const selectedSourceLineLabel = computed(() => {
+  if (!selectedSourceLine.value) return "Chưa chọn line nguồn";
+
+  return `${selectedSourceLine.value.lineName} - ${selectedSourceLine.value.areaPart}`;
+});
+
+const copyTargetLines = computed(() => {
+  return store.lines.filter((line) => line.id !== copyMachinesForm.sourceLineId);
+});
+
+const totalCopyAddCount = computed(() => {
+  return copyMachinesForm.targetLineIds.reduce((total, lineId) => {
+    return total + getCopyAddCount(lineId);
+  }, 0);
+});
+
 onMounted(async () => {
   if (!store.lines.length && !store.machines.length) {
     await loadInitialData();
@@ -763,10 +1076,38 @@ async function refreshAfterMutation() {
   }
 }
 
+function isLineExpanded(lineId: number) {
+  return expandedLineIds.value.has(lineId);
+}
+
+function toggleLine(lineId: number) {
+  const next = new Set(expandedLineIds.value);
+
+  if (next.has(lineId)) {
+    next.delete(lineId);
+  } else {
+    next.add(lineId);
+  }
+
+  expandedLineIds.value = next;
+}
+
+function expandAllLines() {
+  expandedLineIds.value = new Set(filteredLines.value.map((line) => line.id));
+}
+
+function collapseAllLines() {
+  expandedLineIds.value = new Set();
+}
+
 function normalizeText(value?: string | number | null) {
   return String(value ?? "")
     .trim()
     .toLowerCase();
+}
+
+function normalizeMachineName(value?: string | number | null) {
+  return normalizeText(value).replace(/\s+/g, " ");
 }
 
 function getMachinesByLineId(lineId: number) {
@@ -1006,6 +1347,151 @@ async function submitMachineForm() {
       "error",
       isCreate ? "Thêm machine thất bại" : "Cập nhật machine thất bại",
       getErrorMessage(error, "Vui lòng kiểm tra lại thông tin và thử lại."),
+    );
+  } finally {
+    submitting.value = false;
+  }
+}
+
+function openCopyMachinesModal(sourceLineId?: number) {
+  if (submitting.value) return;
+
+  if (store.lines.length < 2) {
+    showToast(
+      "warn",
+      "Chưa đủ line",
+      "Cần ít nhất 2 line để copy machine từ line này sang line khác.",
+    );
+    return;
+  }
+
+  const defaultSourceLine =
+    (sourceLineId && store.lines.find((line) => line.id === sourceLineId)) ||
+    store.lines.find((line) => normalizeText(line.lineName) === "s11") ||
+    store.lines.find((line) => getMachinesByLineId(line.id).length > 0) ||
+    store.lines[0];
+
+  copyMachinesModal.visible = true;
+  copyMachinesForm.sourceLineId = defaultSourceLine?.id || 0;
+  copyMachinesForm.targetLineIds = copyTargetLines.value.map((line) => line.id);
+}
+
+function handleCopySourceChange() {
+  copyMachinesForm.targetLineIds = copyMachinesForm.targetLineIds.filter(
+    (lineId) => lineId !== copyMachinesForm.sourceLineId,
+  );
+}
+
+function resetCopyMachinesForm() {
+  copyMachinesForm.sourceLineId = 0;
+  copyMachinesForm.targetLineIds = [];
+}
+
+function closeCopyMachinesModal(force = false) {
+  if (submitting.value && !force) return;
+
+  copyMachinesModal.visible = false;
+  resetCopyMachinesForm();
+}
+
+function selectAllCopyTargets() {
+  copyMachinesForm.targetLineIds = copyTargetLines.value.map((line) => line.id);
+}
+
+function clearCopyTargets() {
+  copyMachinesForm.targetLineIds = [];
+}
+
+function getCopyAddCount(targetLineId: number) {
+  const targetMachineNames = new Set(
+    getMachinesByLineId(targetLineId).map((machine) =>
+      normalizeMachineName(machine.machineName),
+    ),
+  );
+
+  return selectedSourceMachines.value.filter((machine) => {
+    return !targetMachineNames.has(normalizeMachineName(machine.machineName));
+  }).length;
+}
+
+function getMachinesNeedCopyToLine(targetLineId: number) {
+  const targetMachineNames = new Set(
+    getMachinesByLineId(targetLineId).map((machine) =>
+      normalizeMachineName(machine.machineName),
+    ),
+  );
+
+  return selectedSourceMachines.value.filter((machine) => {
+    return !targetMachineNames.has(normalizeMachineName(machine.machineName));
+  });
+}
+
+async function submitCopyMachines() {
+  if (submitting.value) return;
+
+  if (!copyMachinesForm.sourceLineId) {
+    showToast("warn", "Thiếu line nguồn", "Vui lòng chọn line nguồn để copy.");
+    return;
+  }
+
+  if (!selectedSourceMachines.value.length) {
+    showToast(
+      "warn",
+      "Line nguồn chưa có máy",
+      "Line nguồn chưa có machine để copy.",
+    );
+    return;
+  }
+
+  if (!copyMachinesForm.targetLineIds.length) {
+    showToast("warn", "Thiếu line đích", "Vui lòng chọn ít nhất một line đích.");
+    return;
+  }
+
+  const copyJobs = copyMachinesForm.targetLineIds.flatMap((targetLineId) => {
+    return getMachinesNeedCopyToLine(targetLineId).map((machine) => ({
+      machineName: machine.machineName,
+      lineId: targetLineId,
+    }));
+  });
+
+  if (!copyJobs.length) {
+    showToast(
+      "info",
+      "Không có máy mới cần copy",
+      "Các line đích đã có đủ machine trùng tên với line nguồn.",
+    );
+    return;
+  }
+
+  submitting.value = true;
+
+  let successCount = 0;
+
+  try {
+    for (const job of copyJobs) {
+      await store.createMachine(job);
+      successCount += 1;
+    }
+
+    await refreshAfterMutation();
+
+    closeCopyMachinesModal(true);
+    showToast(
+      "success",
+      "Copy machine thành công",
+      `Đã tạo thêm ${successCount} machine từ ${selectedSourceLineLabel.value}.`,
+    );
+  } catch (error) {
+    await refreshAfterMutation();
+
+    showToast(
+      "error",
+      "Copy machine chưa hoàn tất",
+      `${successCount}/${copyJobs.length} machine đã được tạo. ${getErrorMessage(
+        error,
+        "Vui lòng thử lại với các machine còn thiếu.",
+      )}`,
     );
   } finally {
     submitting.value = false;
