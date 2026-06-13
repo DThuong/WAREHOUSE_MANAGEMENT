@@ -3,7 +3,7 @@
     <!-- Info + Page Size -->
     <div class="pagination-meta">
       <span class="pagination-info">
-        Hiển thị
+        {{ t('common.pagination.showing') }}
         <strong>{{ pageInfo.from }}–{{ pageInfo.to }}</strong>
         / {{ pageInfo.total }}
       </span>
@@ -29,7 +29,7 @@
       <button
         class="page-btn icon-btn btn-first"
         :disabled="currentPage === 1"
-        title="Trang đầu"
+        :title="t('common.pagination.firstPage')"
         @click="$emit('first')"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -39,7 +39,7 @@
       <button
         class="page-btn icon-btn"
         :disabled="currentPage === 1"
-        title="Trang trước"
+        :title="t('common.pagination.prevPage')"
         @click="$emit('prev')"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -64,7 +64,7 @@
       <button
         class="page-btn icon-btn"
         :disabled="currentPage === totalPages"
-        title="Trang sau"
+        :title="t('common.pagination.nextPage')"
         @click="$emit('next')"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -74,7 +74,7 @@
       <button
         class="page-btn icon-btn btn-last"
         :disabled="currentPage === totalPages"
-        title="Trang cuối"
+        :title="t('common.pagination.lastPage')"
         @click="$emit('last')"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -87,6 +87,9 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 interface PageInfo {
   from: number

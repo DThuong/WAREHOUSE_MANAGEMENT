@@ -1,5 +1,6 @@
 <template>
   <MainLayout>
+    <div class="page-gradient-bg">
     <div class="animate-fade-in">
       <div
         style="
@@ -31,6 +32,19 @@
           <div
             style="display: flex; gap: 1rem; align-items: end; flex-wrap: wrap"
           >
+            <div style="flex: 1; min-width: 200px">
+              <label
+                style="display: block; margin-bottom: 0.5rem; font-weight: 600"
+                >{{ t("reports.common.filterArea") }}</label
+              >
+              <Dropdown
+                v-model="selectedArea"
+                :options="areaOptions"
+                optionLabel="label"
+                optionValue="value"
+                style="width: 100%"
+              />
+            </div>
             <div style="flex: 1; min-width: 200px">
               <label
                 style="display: block; margin-bottom: 0.5rem; font-weight: 600"
@@ -118,6 +132,22 @@
               @click="resetFilter"
             />
           </div>
+        </template>
+      </Card>
+
+      <!-- Trend Chart -->
+      <Card style="margin-bottom: 1.5rem">
+        <template #content>
+          <AreaTrendChart
+            :title="t('reports.common.trendTitleInventory')"
+            :labels="trendLabels"
+            :smd-data="trendSmdData"
+            :mainline-data="trendMainlineData"
+            :value-label="t('reports.common.trendValueInventory')"
+            :loading="trendLoading"
+            v-model:period="trendPeriod"
+            @point-click="onTrendPointClick"
+          />
         </template>
       </Card>
 
@@ -660,6 +690,60 @@
           </div>
         </div>
       </div>
+
+      <!-- Date detail dialog -->
+      <Dialog
+        v-model:visible="dateDetailVisible"
+        modal
+        :header="t('reports.common.detailDialogTitle', { date: selectedTrendDate })"
+        style="width: 90vw; max-width: 900px"
+      >
+        <DataTable :value="selectedDateItems" responsiveLayout="scroll">
+          <Column :header="t('reports.inventoryReport.table.productName')">
+            <template #body="{ data }">
+              {{ data.item?.eng?.partname || data.item?.com?.name || data.itemName || "-" }}
+            </template>
+          </Column>
+          <Column field="area" :header="t('reports.common.colArea')" />
+          <Column :header="t('reports.common.colOrdered')">
+            <template #body="{ data }">{{ data.totalOrdered || 0 }}</template>
+          </Column>
+          <Column :header="t('reports.common.colStockIn')">
+            <template #body="{ data }">{{ data.totalStockIn || 0 }}</template>
+          </Column>
+          <Column :header="t('reports.common.colAction')" style="width: 80px; text-align: center">
+            <template #body="{ data }">
+              <Button icon="pi pi-eye" text rounded @click="openItemDetail(data)" />
+            </template>
+          </Column>
+        </DataTable>
+        <div v-if="!selectedDateItems.length" style="text-align: center; padding: 2rem; color: #999">
+          {{ t("reports.common.noData") }}
+        </div>
+      </Dialog>
+
+      <!-- Item detail dialog -->
+      <Dialog
+        v-model:visible="itemDetailVisible"
+        modal
+        :header="selectedMovementItem?.item?.eng?.partname || selectedMovementItem?.item?.com?.name || ''"
+        style="width: 90vw; max-width: 600px"
+      >
+        <div v-if="selectedMovementItem" style="display: flex; flex-direction: column; gap: 0.5rem">
+          <div><strong>{{ t("reports.inventoryReport.table.productCode") }}:</strong> {{ selectedMovementItem.item?.itemIndentifyId }}</div>
+          <div><strong>{{ t("reports.inventoryReport.table.type") }}:</strong> {{ selectedMovementItem.item?.eng ? "ENG" : "COM" }}</div>
+          <div><strong>{{ t("reports.common.colArea") }}:</strong> {{ selectedMovementItem.area }}</div>
+          <div><strong>{{ t("reports.common.colOrdered") }}:</strong> {{ selectedMovementItem.totalOrdered }}</div>
+          <div><strong>{{ t("reports.common.colStockIn") }}:</strong> {{ selectedMovementItem.totalStockIn }}</div>
+          <div><strong>Opening stock:</strong> {{ selectedMovementItem.openingStock }}</div>
+          <div><strong>Closing stock:</strong> {{ selectedMovementItem.closingStock }}</div>
+          <div>
+            <strong>{{ t("reports.inventoryReport.table.unitPrice") }}:</strong>
+            {{ formatCurrency(parseFloat(selectedMovementItem.item?.price || "0")) }}
+          </div>
+        </div>
+      </Dialog>
+    </div>
     </div>
   </MainLayout>
 </template>
@@ -670,13 +754,18 @@ import { useRouter } from "vue-router";
 import MainLayout from "@/components/MainLayout.vue";
 import Dropdown from "primevue/dropdown";
 import InputText from "primevue/inputtext";
+import Dialog from "primevue/dialog";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import AreaTrendChart from "@/components/charts/AreaTrendChart.vue";
 import { useDashboardStore } from "@/stores/dashboard";
 import { itemAPI } from "@/services/itemAPI";
-import type { UsedInRangeItem } from "@/types/item.types";
+import type { UsedInRangeItem, DailyMovement } from "@/types/item.types";
 import Calendar from "primevue/calendar";
 import { useI18n } from "vue-i18n";
 import { useTranslationHelpers } from "@/composables/useTranslationHelpers";
 import { useItemStore } from "@/stores/itemStore";
+import type { AreaKey } from "@/stores/dashboard";
 
 const router = useRouter();
 const dashboardStore = useDashboardStore();
@@ -709,18 +798,106 @@ const loadUsedInRangeData = async () => {
   } catch (error) {
     console.error("Error loading used in range:", error);
   }
+  await loadTrendData();
+};
+
+// ===== Trend chart (SMD vs MAINLINE) =====
+const trendPeriod = ref<"7" | "30" | "all">("30");
+const trendLoading = ref(false);
+const dailyMovements = ref<DailyMovement[]>([]);
+
+const loadTrendData = async () => {
+  trendLoading.value = true;
+  try {
+    dailyMovements.value = await itemAPI.getItemRange(
+      formatDateTimeForAPI(dateRange.value.fromDate),
+      formatDateTimeForAPI(dateRange.value.toDate),
+    );
+  } catch (error) {
+    console.error("Error loading item range:", error);
+  } finally {
+    trendLoading.value = false;
+  }
+};
+
+const formatLabel = (key: string) => {
+  const [, m, d] = key.split("-");
+  return `${d}/${m}`;
+};
+
+const trendMap = computed(() => {
+  const map = new Map<string, { SMD: number; MAINLINE: number; items: any[] }>();
+  for (const day of dailyMovements.value) {
+    const key = day.date.slice(0, 10);
+    if (!map.has(key)) map.set(key, { SMD: 0, MAINLINE: 0, items: [] });
+    const entry = map.get(key)!;
+    for (const it of day.items || []) {
+      const area = dashboardStore.getItemArea(it.item);
+      const qty = (it.totalOrdered || 0) + (it.totalStockIn || 0);
+      if (area === "SMD" || area === "MAINLINE") {
+        entry[area] += qty;
+      }
+      if (qty > 0) {
+        entry.items.push({ ...it, area });
+      }
+    }
+  }
+  return map;
+});
+
+const sortedTrendKeys = computed(() => {
+  let keys = Array.from(trendMap.value.keys()).sort();
+  if (trendPeriod.value !== "all") {
+    const n = Number(trendPeriod.value);
+    keys = keys.slice(-n);
+  }
+  return keys;
+});
+
+const trendLabels = computed(() => sortedTrendKeys.value.map(formatLabel));
+const trendSmdData = computed(() =>
+  sortedTrendKeys.value.map((k) => trendMap.value.get(k)?.SMD || 0),
+);
+const trendMainlineData = computed(() =>
+  sortedTrendKeys.value.map((k) => trendMap.value.get(k)?.MAINLINE || 0),
+);
+
+const dateDetailVisible = ref(false);
+const selectedTrendDate = ref("");
+const selectedDateItems = ref<any[]>([]);
+const itemDetailVisible = ref(false);
+const selectedMovementItem = ref<any>(null);
+
+const onTrendPointClick = (index: number) => {
+  const key = sortedTrendKeys.value[index];
+  if (!key) return;
+  selectedTrendDate.value = formatLabel(key);
+  selectedDateItems.value = trendMap.value.get(key)?.items || [];
+  dateDetailVisible.value = true;
+};
+
+const openItemDetail = (item: any) => {
+  selectedMovementItem.value = item;
+  itemDetailVisible.value = true;
 };
 
 // Filters
 const selectedType = ref<string | null>(null);
 const selectedStockStatus = ref<string | null>(null);
 const searchQuery = ref("");
+const selectedArea = ref<AreaKey>("ALL");
+const areaOptions = [
+  { label: t("reports.common.areaAll"), value: "ALL" as AreaKey },
+  { label: "SMD", value: "SMD" as AreaKey },
+  { label: "MAINLINE", value: "MAINLINE" as AreaKey },
+];
 
 // Reset filter
 const resetFilter = () => {
   selectedType.value = null;
   selectedStockStatus.value = null;
   searchQuery.value = "";
+  selectedArea.value = "ALL";
   dateRange.value = {
     fromDate: new Date(new Date().setDate(new Date().getDate() - 30)),
     toDate: new Date(new Date().setHours(23, 59, 59)),
@@ -802,6 +979,12 @@ const filteredItems = computed(() => {
 
 const baseItems = computed(() => {
   let items = [...itemStore.items]; // ← itemStore.items thay vì dashboardStore.items
+
+  if (selectedArea.value !== "ALL") {
+    items = items.filter(
+      (item) => dashboardStore.getItemArea(item) === selectedArea.value,
+    );
+  }
 
   if (selectedType.value === "ENG") {
     items = items.filter((item) => item.eng !== null);
@@ -942,10 +1125,17 @@ onMounted(async () => {
       itemStore.setLoading(false);
     }
   }
+  await loadTrendData();
 });
 </script>
 
 <style scoped>
+:deep(.content-area) {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
 .report-content {
   background: white;
 }

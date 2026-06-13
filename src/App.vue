@@ -10,15 +10,17 @@ import { watch, onMounted} from 'vue'
 import { useUserStore } from '@/stores/userStore'
 import Toast from 'primevue/toast'
 import { useToast } from 'primevue/usetoast'
+import { useI18n } from 'vue-i18n'
 import { useTokenMonitor } from '@/composables/useToken'
 import { signalRService } from './services/signalrService'
 import { isTokenExpired } from '@/utils/checkToken'
 
 const userStore = useUserStore()
 const toast = useToast()
+const { t } = useI18n()
 const { scheduleExactExpiry } = useTokenMonitor()
 
-// Helper: chỉ start SignalR nếu token chưa hết hạn
+// Helper: only start SignalR if the token hasn't expired
 const isTokenValid = () =>
   userStore.currentUser?.expiresAt && !isTokenExpired(userStore.currentUser.expiresAt)
 
@@ -48,8 +50,8 @@ onMounted(() => {
       if (val && userStore.currentUser) {
         if(userStore.currentUser.role === "Admin"){
           toast.add({
-            summary: 'Đăng nhập thành công',
-            detail: `Chào mừng ${userStore.currentUser.username}!`,
+            summary: t('common.toast.loginSuccess'),
+            detail: t('common.toast.welcomeUser', { username: userStore.currentUser.username }),
             life: 2000
           })
         }

@@ -16,6 +16,7 @@
     "
   />
   <MainLayout>
+    <div class="page-gradient-bg">
     <div class="animate-fade-in">
       <!-- Header -->
       <div
@@ -42,7 +43,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
                 <label class="block mb-2 text-sm font-semibold text-gray-700">
-                  Xưởng
+                  {{ t("inventoryManagement.filters.area") }}
                 </label>
 
                 <Dropdown
@@ -50,7 +51,7 @@
                   :options="factoryOptions"
                   optionLabel="label"
                   optionValue="value"
-                  placeholder="Chọn xưởng"
+                  :placeholder="t('inventoryManagement.filters.areaPlaceholder')"
                   class="w-full"
                   showClear
                 />
@@ -68,7 +69,7 @@
                   :placeholder="
                     selectedFactory
                       ? t('inventoryManagement.filters.allTypes')
-                      : 'Vui lòng chọn xưởng trước'
+                      : t('inventoryManagement.filters.selectAreaFirst')
                   "
                   class="w-full"
                   showClear
@@ -255,7 +256,7 @@
               sortable
             ></Column>
 
-            <Column header="Xưởng" sortable>
+            <Column :header="t('inventoryManagement.table.area')" sortable>
               <template #body="{ data }">
                 <Chip
                   :label="getFactoryName(data)"
@@ -319,7 +320,7 @@
                     rounded
                     severity="help"
                     @click.stop="openTransactionDialog(data)"
-                    title="Lịch sử đơn hàng / nhập kho"
+                    :title="t('inventoryManagement.actions.transactionHistory')"
                   />
 
                   <Button
@@ -419,7 +420,7 @@
                   </div>
 
                   <div class="flex items-center gap-2 mt-2">
-                    <span class="font-semibold">Xưởng:</span>
+                    <span class="font-semibold">{{ t("inventoryManagement.mobile.area") }}</span>
                     <Chip :label="getFactoryName(item)" />
                   </div>
                 </div>
@@ -439,7 +440,7 @@
                     rounded
                     severity="help"
                     @click.stop="openTransactionDialog(item)"
-                    title="Lịch sử đơn hàng / nhập kho"
+                    :title="t('inventoryManagement.actions.transactionHistory')"
                   />
                   <Button
                     icon="pi pi-pencil"
@@ -480,6 +481,7 @@
         </template>
       </Card>
     </div>
+    </div>
 
     <!-- Edit Dialog -->
     <Dialog
@@ -491,56 +493,41 @@
       <div class="flex flex-col gap-4 mt-4">
         <div>
           <label class="block mb-2 font-semibold"
-            >{{ t("inventoryManagement.editDialog.type") }}
-            <span class="text-red-500">*</span></label
-          >
-          <Dropdown
-            v-model="editForm.type"
-            :options="typeEditOptions"
-            optionLabel="label"
-            optionValue="value"
-            class="w-full"
-          />
-        </div>
-
-        <div>
-          <label class="block mb-2 font-semibold"
-            >{{ t("inventoryManagement.editDialog.unit") }}
-            <span class="text-red-500">*</span></label
-          >
-          <Dropdown
-            v-model="editForm.unit"
-            :options="unitOptions"
-            optionLabel="label"
-            optionValue="value"
-            class="w-full"
-          />
-        </div>
-
-        <div>
-          <label class="block mb-2 font-semibold"
-            >{{ t("inventoryManagement.editDialog.price") }}
-            <span class="text-red-500">*</span></label
+            >{{ t("inventoryManagement.editDialog.type") }}</label
           >
           <InputText
-            v-model="editForm.price"
-            class="w-full"
-            placeholder="0.00"
+            :model-value="editingItem?.eng ? 'Engineer (ENG)' : 'Consumer (COM)'"
+            class="w-full opacity-60"
+            disabled
           />
         </div>
 
-        <div>
-          <label class="block mb-2 font-semibold">
-            {{ t("inventoryManagement.editDialog.specification") }}
-            <span class="text-xs text-gray-400 ml-1">
-              ({{ editingItem?.eng ? "Description" : "Specifications" }})
-            </span>
-          </label>
-          <InputText
-            v-model="editForm.specification"
-            class="w-full"
-            :placeholder="editingItem?.eng ? 'Description' : 'Specifications'"
-          />
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block mb-2 font-semibold"
+              >{{ t("inventoryManagement.editDialog.unit") }}
+              <span class="text-red-500">*</span></label
+            >
+            <Dropdown
+              v-model="editForm.unit"
+              :options="unitOptions"
+              optionLabel="label"
+              optionValue="value"
+              class="w-full"
+            />
+          </div>
+
+          <div>
+            <label class="block mb-2 font-semibold"
+              >{{ t("inventoryManagement.editDialog.price") }}
+              <span class="text-red-500">*</span></label
+            >
+            <InputText
+              v-model="editForm.price"
+              class="w-full"
+              placeholder="0.00"
+            />
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -564,11 +551,81 @@
             <InputText
               v-model.number="editForm.stockQty"
               type="number"
-              class="w-full opacity-60"
+              class="w-full"
               placeholder="0"
             />
           </div>
         </div>
+
+        <!-- ENG fields -->
+        <template v-if="editingItem?.eng">
+          <div class="border-t pt-3! mt-1!">
+            <p class="text-sm font-bold text-gray-700 mb-2!">
+              {{ t("inventoryManagement.editDialog.engSection") }}
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block mb-2 font-semibold">{{
+                t("inventoryManagement.editDialog.partname")
+              }}</label>
+              <InputText v-model="editForm.eng.partname" class="w-full" />
+            </div>
+            <div>
+              <label class="block mb-2 font-semibold">{{
+                t("inventoryManagement.editDialog.location")
+              }}</label>
+              <InputText v-model="editForm.eng.location" class="w-full" />
+            </div>
+          </div>
+          <div>
+            <label class="block mb-2 font-semibold">{{
+              t("inventoryManagement.editDialog.description")
+            }}</label>
+            <InputText v-model="editForm.eng.description" class="w-full" />
+          </div>
+          <div>
+            <label class="block mb-2 font-semibold">{{
+              t("inventoryManagement.editDialog.vender")
+            }}</label>
+            <InputText v-model="editForm.eng.vender" class="w-full" />
+          </div>
+        </template>
+
+        <!-- COM fields -->
+        <template v-else-if="editingItem?.com">
+          <div class="border-t pt-3! mt-1!">
+            <p class="text-sm font-bold text-gray-700 mb-2!">
+              {{ t("inventoryManagement.editDialog.comSection") }}
+            </p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block mb-2 font-semibold">{{
+                t("inventoryManagement.editDialog.comName")
+              }}</label>
+              <InputText v-model="editForm.com.name" class="w-full" />
+            </div>
+            <div>
+              <label class="block mb-2 font-semibold">{{
+                t("inventoryManagement.editDialog.location")
+              }}</label>
+              <InputText v-model="editForm.com.location" class="w-full" />
+            </div>
+          </div>
+          <div>
+            <label class="block mb-2 font-semibold">{{
+              t("inventoryManagement.editDialog.specifications")
+            }}</label>
+            <InputText v-model="editForm.com.specifications" class="w-full" />
+          </div>
+          <div>
+            <label class="block mb-2 font-semibold">{{
+              t("inventoryManagement.editDialog.manufacturer")
+            }}</label>
+            <InputText v-model="editForm.com.manufacturer" class="w-full" />
+          </div>
+        </template>
       </div>
 
       <template #footer>
@@ -846,11 +903,11 @@
   <!-- Item Transaction History Dialog -->
   <Dialog
     v-model:visible="showTransactionDialog"
-    :header="`Lịch sử giao dịch của: ${
-      itemTransactions?.itemIndentifyId ||
-      selectedTransactionItem?.itemIndentifyId ||
-      ''
-    }`"
+    :header="t('inventoryManagement.transactionDialog.header', {
+      id: itemTransactions?.itemIndentifyId ||
+        selectedTransactionItem?.itemIndentifyId ||
+        ''
+    })"
     :style="{ width: '1120px' }"
     :breakpoints="{ '960px': 'calc(100vw - 2rem)' }"
     :modal="true"
@@ -862,7 +919,7 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
             <label class="block mb-2 text-sm font-semibold text-gray-700">
-              Lọc theo ID / máy
+              {{ t("inventoryManagement.transactionDialog.filterByIdMachine") }}
             </label>
             <InputText
               v-model="transactionIdFilter"
@@ -873,7 +930,7 @@
 
           <div>
             <label class="block mb-2 text-sm font-semibold text-gray-700">
-              Từ ngày
+              {{ t("inventoryManagement.transactionDialog.fromDate") }}
             </label>
             <InputText
               v-model="transactionFilterFromDate"
@@ -884,7 +941,7 @@
 
           <div>
             <label class="block mb-2 text-sm font-semibold text-gray-700">
-              Đến ngày
+              {{ t("inventoryManagement.transactionDialog.toDate") }}
             </label>
             <InputText
               v-model="transactionFilterToDate"
@@ -895,7 +952,7 @@
 
           <div class="flex items-end gap-2">
             <Button
-              label="Lọc"
+              :label="t('inventoryManagement.transactionDialog.filter')"
               icon="pi pi-search"
               class="flex-1"
               :loading="transactionLoading"
@@ -922,12 +979,12 @@
         <!-- Summary -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div class="transaction-summary-card">
-            <span class="text-sm text-gray-500">Mã item</span>
+            <span class="text-sm text-gray-500">{{ t("inventoryManagement.transactionDialog.itemCode") }}</span>
             <strong>{{ itemTransactions.itemIndentifyId }}</strong>
           </div>
 
           <div class="transaction-summary-card">
-            <span class="text-sm text-gray-500">Khoảng thời gian</span>
+            <span class="text-sm text-gray-500">{{ t("inventoryManagement.transactionDialog.dateRange") }}</span>
             <strong class="text-sm!">{{ transactionDateRangeLabel }}</strong>
           </div>
         </div>
@@ -935,10 +992,10 @@
         <!-- Orders History -->
         <div>
           <div class="flex items-center justify-between mb-3! gap-3">
-            <h3 class="text-lg font-bold text-gray-900">Lịch sử đặt đơn</h3>
+            <h3 class="text-lg font-bold text-gray-900">{{ t("inventoryManagement.transactionDialog.ordersHistory") }}</h3>
 
             <Chip
-              :label="`${filteredTransactionOrders.length} đơn`"
+              :label="t('inventoryManagement.transactionDialog.ordersCount', { count: filteredTransactionOrders.length })"
               class="chip-warning"
             />
           </div>
@@ -961,13 +1018,13 @@
               </template>
             </Column>
 
-            <Column field="orderDate" header="Ngày đặt">
+            <Column field="orderDate" :header="t('inventoryManagement.transactionDialog.colOrderDate')">
               <template #body="{ data }">
                 {{ formatDateTime(data.orderDate) }}
               </template>
             </Column>
 
-            <Column field="machineName" header="Máy">
+            <Column field="machineName" :header="t('inventoryManagement.transactionDialog.colMachine')">
               <template #body="{ data }">
                 <div class="flex flex-col">
                   <span class="font-semibold">
@@ -977,7 +1034,7 @@
               </template>
             </Column>
 
-            <Column field="lineName" header="Line SX">
+            <Column field="lineName" :header="t('inventoryManagement.transactionDialog.colLine')">
               <template #body="{ data }">
                 <div class="flex flex-col">
                   <span class="font-semibold">
@@ -987,7 +1044,7 @@
               </template>
             </Column>
 
-            <Column field="orderQty" header="Số lượng">
+            <Column field="orderQty" :header="t('inventoryManagement.transactionDialog.colQty')">
               <template #body="{ data }">
                 <span class="transaction-qty-text">
                   {{ data.orderQty }}
@@ -995,7 +1052,7 @@
               </template>
             </Column>
 
-            <Column field="detailTotal" header="Tiền item">
+            <Column field="detailTotal" :header="t('inventoryManagement.transactionDialog.colItemAmount')">
               <template #body="{ data }">
                 <span class="font-semibold">
                   {{ formatCurrency(data.detailTotal) }}
@@ -1003,7 +1060,7 @@
               </template>
             </Column>
 
-            <Column field="status" header="Trạng thái">
+            <Column field="status" :header="t('inventoryManagement.transactionDialog.colStatus')">
               <template #body="{ data }">
                 <Chip
                   :label="data.status"
@@ -1015,7 +1072,7 @@
 
           <div v-else class="transaction-empty">
             <i class="pi pi-shopping-cart text-3xl text-gray-400"></i>
-            <p>Chưa có lịch sử đặt đơn trong bộ lọc hiện tại</p>
+            <p>{{ t("inventoryManagement.transactionDialog.noOrdersHistory") }}</p>
           </div>
 
           <div
@@ -1053,10 +1110,10 @@
         <!-- StockIn History -->
         <div>
           <div class="flex items-center justify-between mb-3! gap-3">
-            <h3 class="text-lg font-bold text-gray-900">Lịch sử nhập kho</h3>
+            <h3 class="text-lg font-bold text-gray-900">{{ t("inventoryManagement.transactionDialog.stockinHistory") }}</h3>
 
             <Chip
-              :label="`${filteredTransactionStockIns.length} lần nhập`"
+              :label="t('inventoryManagement.transactionDialog.stockinCount', { count: filteredTransactionStockIns.length })"
               class="chip-normal"
             />
           </div>
@@ -1079,13 +1136,13 @@
               </template>
             </Column>
 
-            <Column field="stockInDate" header="Ngày nhập">
+            <Column field="stockInDate" :header="t('inventoryManagement.transactionDialog.colStockinDate')">
               <template #body="{ data }">
                 {{ formatDateTime(data.stockInDate) }}
               </template>
             </Column>
 
-            <Column field="quantity" header="Số lượng nhập">
+            <Column field="quantity" :header="t('inventoryManagement.transactionDialog.colStockinQty')">
               <template #body="{ data }">
                 <span class="transaction-qty-text">
                   {{ data.quantity }}
@@ -1096,7 +1153,7 @@
 
           <div v-else class="transaction-empty">
             <i class="pi pi-download text-3xl text-gray-400"></i>
-            <p>Chưa có lịch sử nhập kho trong bộ lọc hiện tại</p>
+            <p>{{ t("inventoryManagement.transactionDialog.noStockinHistory") }}</p>
           </div>
 
           <div
@@ -1135,7 +1192,7 @@
 
     <template #footer>
       <Button
-        label="Đóng"
+        :label="t('inventoryManagement.transactionDialog.close')"
         icon="pi pi-times"
         @click="showTransactionDialog = false"
       />
@@ -1240,8 +1297,8 @@ const transactionQuery = computed(() => {
 });
 
 const transactionDateRangeLabel = computed(() => {
-  if (!transactionQuery.value) return "Tất cả lịch sử";
-  return "Theo ngày đã chọn";
+  if (!transactionQuery.value) return t("inventoryManagement.transactionDialog.allHistory");
+  return t("inventoryManagement.transactionDialog.selectedDateRange");
 });
 
 const formatCurrency = (value?: number | null) => {
@@ -1409,11 +1466,6 @@ const addTimestampToImage = (file: File, timestamp: string): Promise<File> => {
     img.src = url;
   });
 };
-
-const typeEditOptions = [
-  { label: "Engineer", value: "ENG" },
-  { label: "Consumer", value: "COM" },
-];
 
 const typeOptions = [
   { label: t("inventoryManagement.filters.allTypes"), value: null },
@@ -1633,12 +1685,12 @@ const totalFilteredItems = computed(() => filteredItems.value.length);
 const showEditDialog = ref(false);
 const editingItem = ref<Item | null>(null);
 const editForm = ref({
-  type: "",
   unit: "",
   price: "",
   saveQuantity: 0,
   stockQty: 0,
-  specification: "",
+  eng: { partname: "", location: "", description: "", vender: "" },
+  com: { name: "", location: "", specifications: "", manufacturer: "" },
 });
 
 // Image Management
@@ -1690,12 +1742,22 @@ const getImageUrl = (filename: string) => {
 const openEditDialog = (item: Item) => {
   editingItem.value = item;
   editForm.value = {
-    type: item.type,
     unit: item.unit,
     price: item.price,
     saveQuantity: item.saveQuantity,
     stockQty: item.stockQty,
-    specification: item.eng?.description || item.com?.specifications || "",
+    eng: {
+      partname: item.eng?.partname || "",
+      location: item.eng?.location || "",
+      description: item.eng?.description || "",
+      vender: item.eng?.vender || "",
+    },
+    com: {
+      name: item.com?.name || "",
+      location: item.com?.location || "",
+      specifications: item.com?.specifications || "",
+      manufacturer: item.com?.manufacturer || "",
+    },
   };
   showEditDialog.value = true;
 };
@@ -1707,24 +1769,18 @@ const saveEdit = async () => {
 
   try {
     const payload: UpdateItemRequest = {
-      type: editForm.value.type,
+      type: editingItem.value.type,
       unit: editForm.value.unit,
       price: editForm.value.price,
       saveQuantity: editForm.value.saveQuantity,
       stockQty: editForm.value.stockQty,
     };
 
-    // Map specification về đúng nested field
+    // Map đúng nested field theo type sản phẩm (không cho đổi type)
     if (editingItem.value.eng) {
-      payload.eng = {
-        ...editingItem.value.eng,
-        description: editForm.value.specification,
-      };
+      payload.eng = { ...editForm.value.eng };
     } else if (editingItem.value.com) {
-      payload.com = {
-        ...editingItem.value.com,
-        specifications: editForm.value.specification,
-      };
+      payload.com = { ...editForm.value.com };
     }
 
     await itemAPI.update(editingItem.value.id, payload);
@@ -1834,8 +1890,8 @@ const loadItemTransactions = async () => {
   } catch (error: any) {
     toast.add({
       severity: "error",
-      summary: "Lỗi tải lịch sử",
-      detail: error.message || "Không thể tải lịch sử đơn hàng / nhập kho",
+      summary: t("inventoryManagement.toast.loadHistoryErrorTitle"),
+      detail: error.message || t("inventoryManagement.toast.loadHistoryErrorDetail"),
       life: 3000,
     });
   } finally {
@@ -1970,7 +2026,7 @@ const addClipboardImageToPending = async (file: File, mimeType: string) => {
   toast.add({
     severity: "success",
     summary: t("inventoryManagement.toast.uploadSuccessTitle"),
-    detail: "Đã dán ảnh từ clipboard",
+    detail: t("inventoryManagement.toast.pasteImageSuccess"),
     life: 2000,
   });
 };
@@ -2264,6 +2320,12 @@ watch(selectedFactory, () => {
 </script>
 
 <style scoped>
+:deep(.content-area) {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
 :deep(.p-datatable .p-datatable-tbody > tr) {
   cursor: pointer;
 }

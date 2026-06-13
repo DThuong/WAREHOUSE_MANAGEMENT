@@ -191,6 +191,53 @@
             </span>
           </div>
 
+          <!-- Language Switcher: desktop/tablet hiện đủ 3 nút -->
+          <div class="lang-switcher" v-if="!isMobile">
+            <button
+              v-for="lang in languageOptions"
+              :key="lang.code"
+              type="button"
+              class="lang-btn"
+              :class="{ active: locale === lang.code }"
+              :title="lang.label"
+              @click="setLanguage(lang.code)"
+            >
+              {{ lang.flag }}
+            </button>
+          </div>
+
+          <!-- Language Switcher: mobile chỉ hiện 1 nút + dropdown để đỡ chiếm chỗ -->
+          <div class="lang-switcher-mobile" v-else>
+            <button
+              type="button"
+              class="lang-btn-current"
+              @click="langMenuOpen = !langMenuOpen"
+            >
+              {{ locale.toUpperCase() }}
+            </button>
+            <div
+              v-if="langMenuOpen"
+              class="lang-dropdown-backdrop"
+              @click="langMenuOpen = false"
+            />
+            <div v-if="langMenuOpen" class="lang-dropdown">
+              <button
+                v-for="lang in languageOptions"
+                :key="lang.code"
+                type="button"
+                class="lang-dropdown-item"
+                :class="{ active: locale === lang.code }"
+                @click="
+                  setLanguage(lang.code);
+                  langMenuOpen = false;
+                "
+              >
+                <span>{{ lang.flag }}</span>
+                <span>{{ lang.label }}</span>
+              </button>
+            </div>
+          </div>
+
           <!-- User Menu -->
           <Avatar
             :label="userAvatar"
@@ -242,7 +289,7 @@
       </header>
 
       <!-- Page Content -->
-      <div class="content-area">
+      <div class="content-area" :class="{ 'content-area-dashboard': route.path === '/' }">
         <slot />
       </div>
     </div>
@@ -631,12 +678,25 @@ const route = useRoute();
 const router = useRouter();
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const toast = useToast();
+
+// Language switcher
+const languageOptions = [
+  { code: "vi", flag: "🇻🇳", label: "Tiếng Việt" },
+  { code: "en", flag: "🇺🇸", label: "English" },
+  { code: "ko", flag: "🇰🇷", label: "한국어" },
+];
+
+const setLanguage = (lang: string) => {
+  localStorage.setItem("dashboardLanguage", lang);
+  window.location.reload();
+};
 // useFaviconBadge()
 
 const sidebarOpen = ref(true);
 const mobileSidebarOpen = ref(false);
+const langMenuOpen = ref(false);
 const notificationPanel = ref(null);
 const menu = ref();
 const showConnectionStatus = ref(false);
@@ -705,8 +765,17 @@ const deleteAllNoti = async () => {
   await notificationStore.deleteAll();
 };
 
+// Đóng khung thông báo (và dropdown ngôn ngữ mobile) ngay khi user scroll trang,
+// tránh panel "trôi" theo / vỡ layout
+const handleGlobalScroll = () => {
+  notificationPanel.value?.hide();
+  mobileNotiVisible.value = false;
+  langMenuOpen.value = false;
+};
+
 onMounted(async () => {
   window.addEventListener("resize", handleResize);
+  window.addEventListener("scroll", handleGlobalScroll, true);
   await notificationStore.fetchNotifications();
   if (userStore.isAuthenticated) {
     await signalRService.start();
@@ -722,6 +791,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener("resize", handleResize);
+  window.removeEventListener("scroll", handleGlobalScroll, true);
   window.removeEventListener("signalr-notification", handleSignalRNotification);
 });
 
@@ -855,9 +925,12 @@ const toggleMenu = (event: Event) => {
 
 const handleLogout = async () => {
   try {
+    // Điều hướng sang trang đăng nhập TRƯỚC khi xoá thông tin user,
+    // tránh avatar bị đổi A -> U trong lúc MainLayout vẫn còn hiển thị
+    // (vì userStore.logout() reset currentUser khiến userAvatar fallback "U")
+    await router.push("/signin");
     await signalRService.stop();
     await userStore.logout();
-    router.push("/signin");
   } catch (error) {
     console.error("Logout error:", error);
     toast.add({
@@ -964,6 +1037,21 @@ const toggleNotifications = (event: Event) => {
 .content-area {
   overflow-x: hidden;
   min-width: 0;
+  width: 100%;
+}
+
+/* Chỉ riêng Dashboard mới bung full width */
+.content-area-dashboard {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+}
+
+/* Ép phần tử con của dashboard không bị giới hạn max-width */
+.content-area-dashboard :deep(.dashboard-page) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 .nav-link {
@@ -1000,8 +1088,202 @@ const toggleNotifications = (event: Event) => {
   backdrop-filter: blur(2px);
 }
 
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 0.75rem;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+}
+
+.lang-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 1.05rem;
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: all 0.15s ease;
+}
+
+.lang-btn:hover {
+  opacity: 1;
+  background: var(--gray-200);
+  border-color: var(--gray-300);
+}
+
+.lang-btn.active {
+  opacity: 1;
+  background: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 767px) {
+  .lang-switcher {
+    gap: 2px;
+    margin-right: 0.25rem;
+    padding: 3px;
+  }
+  .lang-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Mobile: 1 nút ngôn ngữ hiện tại + dropdown chọn ngôn ngữ khác */
+.lang-switcher-mobile {
+  position: relative;
+  margin-right: 0.25rem;
+}
+
+.lang-btn-current {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 28px;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--gray-700);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.lang-dropdown-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+}
+
+.lang-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 999;
+  min-width: 130px;
+  background: white;
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.lang-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.85rem;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--gray-700);
+}
+
+.lang-dropdown-item:hover {
+  background: var(--gray-100);
+}
+
+.lang-dropdown-item.active {
+  background: var(--gray-100);
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
 .notification-item:hover {
   background: rgba(159, 197, 241, 0.5) !important;
+}
+
+.main-content {
+  min-width: 0;
+  width: calc(100% - 260px);
+  margin-left: 260px;
+  transition: margin-left 0.2s ease, width 0.2s ease;
+}
+
+.main-content.expanded {
+  width: calc(100% - 72px);
+  margin-left: 72px;
+}
+
+/* === DESKTOP COLLAPSED SIDEBAR (icons-only) === */
+@media (min-width: 1024px) {
+  /* style.css có rule global ".sidebar-collapsed { transform: translateX(-100%) }"
+     khiến sidebar trượt hẳn ra ngoài màn hình (mất luôn icon). Override lại
+     để sidebar ở lại, chỉ thu nhỏ width còn icon. */
+  .sidebar.sidebar-collapsed {
+    width: 72px !important;
+    transform: translateX(0) !important;
+  }
+
+  .sidebar.sidebar-collapsed .sidebar-content {
+    padding: 1.5rem 0.5rem !important;
+  }
+
+  .sidebar.sidebar-collapsed .logo-container {
+    justify-content: center;
+  }
+
+  /* Không dùng display:none để ẩn/hiện chữ (gây "kéo chữ" xuống nhiều dòng
+     rồi co lại khi sidebar đang animate width). Thay vào đó luôn giữ text
+     trên 1 dòng (nowrap) và cắt bằng overflow: hidden theo width của sidebar
+     -> chữ chỉ co/giãn theo chiều ngang mượt mà, không bị xuống dòng. */
+  .logo-container,
+  .nav-link {
+    overflow: hidden;
+  }
+
+  .logo-container div:last-child,
+  .nav-link span,
+  nav > div > p {
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.2s ease, width 0.2s ease, margin 0.2s ease;
+  }
+
+  .sidebar.sidebar-collapsed .logo-container div:last-child,
+  .sidebar.sidebar-collapsed nav span,
+  .sidebar.sidebar-collapsed nav > div > p {
+    width: 0;
+    opacity: 0;
+    margin: 0;
+  }
+
+  /* Bỏ gap khi collapsed, nếu không phần gap (do span rỗng để lại) sẽ
+     đẩy lệch icon + làm khung nền (active/hover) bị dư padding bên phải */
+  .sidebar.sidebar-collapsed .logo-container,
+  .sidebar.sidebar-collapsed .nav-link {
+    gap: 0;
+  }
+
+  .sidebar.sidebar-collapsed .nav-link {
+    justify-content: center;
+    padding: 0.75rem;
+  }
+
+  .sidebar.sidebar-collapsed .nav-link i {
+    margin: 0;
+    font-size: 1.25rem;
+  }
 }
 
 /* === MOBILE === */
@@ -1056,8 +1338,16 @@ const toggleNotifications = (event: Event) => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 160px;
+    max-width: 120px;
     font-size: 1.1rem !important;
+  }
+
+  .navbar .flex.items-center.gap-2 {
+    gap: 0.35rem !important;
+  }
+
+  .navbar :deep(.p-avatar) {
+    margin-right: 0 !important;
   }
 }
 
@@ -1069,12 +1359,14 @@ const toggleNotifications = (event: Event) => {
 
   .sidebar.sidebar-collapsed {
     width: 64px !important;
+    transform: translateX(0) !important;
   }
 
   .sidebar.sidebar-collapsed .sidebar-content > a div:last-child,
   .sidebar.sidebar-collapsed nav span,
   .sidebar.sidebar-collapsed nav p {
-    display: none;
+    width: 0;
+    opacity: 0;
   }
 
   .sidebar.sidebar-collapsed .nav-link {

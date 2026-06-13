@@ -86,7 +86,7 @@ h1, h2, h3, h4, h5, h6 {
   bottom: 0;
   z-index: 100;
   overflow-y: auto;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease, width 0.2s ease;
 }
 
 .sidebar-collapsed {
@@ -117,9 +117,28 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .content-area {
-  padding: 2rem;
-  max-width: 1600px;
-  margin: 0 auto;
+  padding: 0;
+  max-width: none;
+  margin: 0;
+}
+
+/* Shared full-width gradient background for view pages (consistent with dashboard) */
+.page-gradient-bg {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  padding: 1.25rem 2rem;
+  background:
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.12), transparent 32rem),
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 30rem),
+    #f8fafc;
+  box-sizing: border-box;
+}
+
+@media (max-width: 767px) {
+  .page-gradient-bg {
+    padding: 1rem;
+  }
 }
 
 /* Stat Card */
@@ -340,10 +359,6 @@ h1, h2, h3, h4, h5, h6 {
   .grid-cols-3,
   .grid-cols-4 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-  
-  .content-area {
-    padding: 1rem;
   }
   
   .navbar {

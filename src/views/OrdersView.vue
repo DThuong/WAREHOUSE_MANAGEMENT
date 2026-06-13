@@ -16,6 +16,7 @@
     "
   />
   <MainLayout>
+    <div class="page-gradient-bg">
     <div class="animate-fade-in">
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
@@ -92,14 +93,14 @@
 
               <div>
                 <label class="block mb-2 text-sm font-semibold text-gray-700">
-                  Xưởng
+                  {{ t("orderManagement.common.factory") }}
                 </label>
                 <Dropdown
                   v-model="selectedAreaPart"
                   :options="areaPartFilterOptions"
                   optionLabel="label"
                   optionValue="value"
-                  placeholder="Tất cả xưởng"
+                  :placeholder="t('orderManagement.common.allFactory')"
                   class="w-full"
                   @change="fetchAllOrders"
                 />
@@ -234,7 +235,7 @@
                 <span>{{ getDepartmentLabel(data.account?.department) }}</span>
               </template>
             </Column>
-            <Column field="account.areaPart" header="Xưởng" sortable>
+            <Column field="account.areaPart" :header="t('orderManagement.common.factory')" sortable>
               <template #body="{ data }">
                 <Chip
                   :label="getAreaPartLabel(data.account?.areaPart)"
@@ -359,7 +360,7 @@
                   </div>
                   <div class="order-card-row">
                     <i class="pi pi-sitemap text-gray-400"></i>
-                    <span class="order-card-label">Xưởng</span>
+                    <span class="order-card-label">{{ t("orderManagement.common.factory") }}</span>
                     <span class="order-card-value">{{
                       getAreaPartLabel(order.account?.areaPart)
                     }}</span>
@@ -436,19 +437,21 @@
         </template>
       </Card>
     </div>
+    </div>
 
     <!-- Order Details Dialog -->
     <Dialog
       v-model:visible="showDetailsDialog"
       :header="`${t('orderManagement.orderDetail.title')} #${selectedOrder?.id || ''}`"
       :blockScroll="true"
-      :style="{ width: '900px' }"
-      :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
+      :style="{ width: '1200px' }"
+      :breakpoints="{ '1280px': '95vw', '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
+      class="order-detail-dialog"
     >
       <div v-if="selectedOrder" class="order-details">
         <!-- Order Info -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4! bg-gray-50 rounded-lg">
+        <div class="order-info-grid mb-4 p-4! bg-gray-50 rounded-lg">
           <div>
             <p class="text-sm text-gray-600">
               {{ t("orderManagement.orderDetail.orderedBy") }}
@@ -464,7 +467,7 @@
             </p>
           </div>
           <div>
-            <p class="text-sm text-gray-600">Xưởng</p>
+            <p class="text-sm text-gray-600">{{ t("orderManagement.common.factory") }}</p>
             <p class="font-semibold">
               {{ getAreaPartLabel(selectedOrder.account?.areaPart) }}
             </p>
@@ -821,6 +824,17 @@
       :modal="true"
     >
       <div class="mt-4">
+        <!-- Banner: luồng Duyệt -> Hoàn thành tự động -->
+        <div
+          v-if="completingOrder"
+          class="p-3! mb-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2"
+        >
+          <i class="pi pi-info-circle text-blue-600 mt-1"></i>
+          <p class="text-blue-800 text-sm">
+            {{ t("orderManagement.completingOrderHint") }}
+          </p>
+        </div>
+
         <!-- Upload Area -->
         <div class="mb-6">
           <label class="block mb-2 font-semibold">
@@ -1054,7 +1068,7 @@
       </div>
 
       <template #footer>
-        <Button label="Đóng" icon="pi pi-times" @click="closeImageDialog" />
+        <Button :label="t('orderManagement.common.close')" icon="pi pi-times" @click="closeImageDialog" />
         <Button
           v-if="
             selectedOrder?.status === 'Pending' ||
@@ -1328,10 +1342,10 @@
                   :options="availableMachineOptions"
                   optionLabel="label"
                   optionValue="value"
-                  placeholder="Chọn line / machine"
+                  :placeholder="t('orderManagement.common.selectLineMachine')"
                   class="w-full"
                   :filter="true"
-                  filterPlaceholder="Tìm line hoặc machine"
+                  :filterPlaceholder="t('orderManagement.common.searchLineMachine')"
                   appendTo="body"
                   panelClass="order-item-dropdown-panel"
                 >
@@ -1515,7 +1529,7 @@ const statusFilterOptions = [
 ];
 
 const areaPartFilterOptions = [
-  { label: "Tất cả xưởng", value: null },
+  { label: t("orderManagement.common.allFactory"), value: null },
   { label: "SMD", value: "SMD" },
   { label: "Mainline", value: "Mainline" },
 ];
@@ -1676,7 +1690,7 @@ const handleGlobalPaste = async (event: ClipboardEvent) => {
     toast.add({
       severity: "success",
       summary: t("orderManagement.common.success"),
-      detail: "Đã dán ảnh từ clipboard",
+      detail: t("orderManagement.common.pastedImage"),
       life: 2000,
     });
   }
@@ -1851,6 +1865,9 @@ const showUpdateStatusDialog = ref(false);
 const showImageDialog = ref(false);
 const showCreateOrderDialog = ref(false);
 const selectedOrder = ref<Order | null>(null);
+// Khi true: sau khi upload ảnh xong sẽ tự động chuyển đơn sang "Completed"
+// (luồng Duyệt -> Upload ảnh -> Hoàn thành liền mạch cho admin)
+const completingOrder = ref(false);
 
 // Update Form
 const updateForm = ref({
@@ -2242,6 +2259,16 @@ const saveUpdateStatus = async () => {
       note: updateForm.value.note || selectedOrder.value.note,
     };
 
+    // Luồng rút gọn: Duyệt đơn -> mở luôn modal upload ảnh -> tự động Hoàn thành
+    // sau khi upload xong (không hiện toast/đóng modal ở bước Duyệt này)
+    if (updateForm.value.status === "Approved") {
+      completingOrder.value = true;
+      showUpdateStatusDialog.value = false;
+      await viewOrderImages(selectedOrder.value);
+      await fetchAllOrders();
+      return;
+    }
+
     const statusMessages: Record<string, string> = {
       Approved: t("orderManagement.common.toast.approveSuccess"),
       Rejected: t("orderManagement.common.toast.rejectSuccess"),
@@ -2321,7 +2348,7 @@ const openCreateOrderDialog = () => {
     toast.add({
       severity: "warn",
       summary: t("orderManagement.common.warning"),
-      detail: "Tài khoản Admin không còn quyền tạo đơn vì đơn hàng đã phân quyền theo Xưởng từ JWT.",
+      detail: t("orderManagement.common.adminNoOrderPermission"),
       life: 3000,
     });
     return;
@@ -2362,7 +2389,7 @@ const submitCreate = async () => {
     toast.add({
       severity: "warn",
       summary: t("orderManagement.common.warning"),
-      detail: "Tài khoản Admin không còn quyền tạo đơn vì đơn hàng đã phân quyền theo Xưởng từ JWT.",
+      detail: t("orderManagement.common.adminNoOrderPermission"),
       life: 3000,
     });
     return;
@@ -2441,6 +2468,7 @@ const closeImageDialog = () => {
   currentImages.value = [];
   clearPendingImages();
   orderStore.setCurrentOrder(null);
+  completingOrder.value = false;
 };
 
 const handleImageUpload = async (event: Event) => {
@@ -2596,15 +2624,19 @@ const uploadPendingImages = async () => {
     );
 
     if (result.success > 0) {
-      toast.add({
-        severity: "success",
-        summary: t("orderManagement.common.success"),
-        detail: t("orderManagement.common.toast.uploadSuccess", {
-          success: result.success,
-          total: pendingImages.value.length,
-        }),
-        life: 3000,
-      });
+      // Trong luồng Duyệt -> Hoàn thành: không hiện toast upload riêng,
+      // toast chỉ hiện 1 lần ở bước cuối (sau khi cập nhật Completed)
+      if (!completingOrder.value) {
+        toast.add({
+          severity: "success",
+          summary: t("orderManagement.common.success"),
+          detail: t("orderManagement.common.toast.uploadSuccess", {
+            success: result.success,
+            total: pendingImages.value.length,
+          }),
+          life: 3000,
+        });
+      }
 
       clearPendingImages();
 
@@ -2616,6 +2648,39 @@ const uploadPendingImages = async () => {
       }
 
       await fetchAllOrders();
+
+      // Tự động chuyển trạng thái sang Hoàn thành ngay sau khi upload ảnh xong
+      if (completingOrder.value && selectedOrder.value?.id) {
+        try {
+          await orderAPI.updateStatus(selectedOrder.value.id, "Completed");
+
+          selectedOrder.value = {
+            ...selectedOrder.value,
+            status: "Completed",
+          };
+
+          toast.add({
+            severity: "success",
+            summary: t("orderManagement.common.success"),
+            detail: t("orderManagement.common.toast.completeSuccess"),
+            life: 3000,
+          });
+
+          showImageDialog.value = false;
+          await fetchAllOrders();
+        } catch (error: any) {
+          toast.add({
+            severity: "error",
+            summary: t("orderManagement.common.error"),
+            detail:
+              error.message ||
+              t("orderManagement.common.toast.cannotUpdateStatus"),
+            life: 3000,
+          });
+        } finally {
+          completingOrder.value = false;
+        }
+      }
     }
 
     if (result.failed > 0) {
@@ -2789,8 +2854,22 @@ const handleNewOrderCreated = async (orderData: OrderPendingRealtime) => {
   await fetchAllOrders();
 };
 
+const applyRouteQueryFilters = () => {
+  const statusFromQuery = route.query.status;
+  const areaPartFromQuery = route.query.areaPart;
+
+  if (typeof statusFromQuery === "string") {
+    selectedStatus.value = statusFromQuery;
+  }
+
+  if (typeof areaPartFromQuery === "string") {
+    selectedAreaPart.value = areaPartFromQuery;
+  }
+};
+
 onMounted(async () => {
   window.addEventListener("resize", handleTableResize);
+  applyRouteQueryFilters();
   window.addEventListener("paste", handleGlobalPaste);
   if (!signalRService.isConnected()) {
     await signalRService.start();
@@ -2851,6 +2930,44 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+:deep(.content-area) {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+/* Order Details Dialog - thông tin sắp 3 cột/hàng cho gọn */
+.order-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .order-info-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Bảng sản phẩm trong modal chi tiết - gọn gàng hơn */
+:deep(.order-detail-dialog .p-dialog-content) {
+  padding-top: 0.5rem;
+}
+
+:deep(.order-detail-dialog .p-datatable) {
+  font-size: 0.875rem;
+}
+
+:deep(.order-detail-dialog .p-datatable .p-datatable-thead > tr > th) {
+  padding: 0.6rem 0.75rem;
+  white-space: nowrap;
+}
+
+:deep(.order-detail-dialog .p-datatable .p-datatable-tbody > tr > td) {
+  padding: 0.5rem 0.75rem;
+  vertical-align: middle;
+}
+
 /* Statistics Cards */
 .stat-card {
   display: flex;

@@ -16,26 +16,26 @@
           </span>
 
           <div class="preview-actions">
-            <button class="preview-btn" title="Xoay trái" @click="rotate(-90)">
+            <button class="preview-btn" :title="t('imagePreview.rotateLeft')" @click="rotate(-90)">
               <i class="pi pi-replay"></i>
             </button>
-            <button class="preview-btn" title="Xoay phải" @click="rotate(90)">
+            <button class="preview-btn" :title="t('imagePreview.rotateRight')" @click="rotate(90)">
               <i class="pi pi-refresh"></i>
             </button>
-            <button class="preview-btn" title="Thu nhỏ" @click="zoom(-0.25)">
+            <button class="preview-btn" :title="t('imagePreview.zoomOut')" @click="zoom(-0.25)">
               <i class="pi pi-search-minus"></i>
             </button>
             <span class="preview-zoom-label">{{ Math.round(scale * 100) }}%</span>
-            <button class="preview-btn" title="Phóng to" @click="zoom(0.25)">
+            <button class="preview-btn" :title="t('imagePreview.zoomIn')" @click="zoom(0.25)">
               <i class="pi pi-search-plus"></i>
             </button>
-            <button class="preview-btn" title="Reset" @click="resetTransform">
+            <button class="preview-btn" :title="t('imagePreview.reset')" @click="resetTransform">
               <i class="pi pi-expand"></i>
             </button>
-            <button class="preview-btn" title="Tải xuống" @click="download">
+            <button class="preview-btn" :title="t('imagePreview.download')" @click="download">
               <i class="pi pi-download"></i>
             </button>
-            <button class="preview-btn preview-btn-close" title="Đóng" @click="emit('close')">
+            <button class="preview-btn preview-btn-close" :title="t('imagePreview.close')" @click="emit('close')">
               <i class="pi pi-times"></i>
             </button>
           </div>
@@ -101,6 +101,9 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   visible: boolean

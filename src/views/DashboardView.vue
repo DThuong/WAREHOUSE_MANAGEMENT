@@ -1,1588 +1,1793 @@
 <template>
   <MainLayout>
-    <!-- Loading Overlay -->
-    <div v-if="loading" class="loading-overlay">
-      <div class="loading-spinner">
-        <i
-          class="pi pi-spin pi-spinner"
-          style="font-size: 3rem; color: #8b7ab8"
-        ></i>
-        <p>{{ t("common.loadingData") }}</p>
-      </div>
-    </div>
-
-    <!-- Stats Cards Row -->
-    <div class="stats-grid">
-      <div
-        v-for="(stat, key, index) in dashboardStore.dashboardStats"
-        :key="key"
-        class="stat-card-compact"
-        :class="
-          (getStatCardClass(index),
-          { 'cursor-pointer': statRoutes[key as string] })
-        "
-        @click="navigateToStat(key as string)"
-      >
-        <div class="stat-icon" :class="getIconBgClass(index)">
-          <i :class="getIconClass(index)"></i>
-        </div>
-        <div class="stat-content">
-          <div class="stat-label-compact">{{ statLabels[key as string] }}</div>
-          <div class="stat-value-compact">
-            <article></article>
-            {{
-              key === "totalPurchase" ? formatCurrency(stat.value) : stat.value
-            }}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Order Status Summary Row -->
-    <div class="order-status-grid">
-      <div
-        class="status-card status-pending clickable-status-card"
-        :class="{
-          'pulse-animation': hasPendingOrders,
-          'has-update': hasPendingOrders,
-          'has-new-update': hasNewPending,
-        }"
-        @click="navigateToOrdersByStatus('Pending')"
-      >
-        <div class="status-icon">
-          <i class="pi pi-clock"></i>
-        </div>
-        <div class="status-content">
-          <div class="status-value">
-            {{ dashboardStore.orderStatusSummary.pending }}
-          </div>
-          <div class="status-label">{{ t("dashboard.pendingOrders") }}</div>
-        </div>
-        <i class="pi pi-chevron-right nav-arrow"></i>
-
-        <!-- Badge thông báo - hiển thị số lượng -->
-        <div v-if="hasPendingOrders" class="update-badge">
-          <span class="badge-count"
-            >{{ dashboardStore.orderStatusSummary.pending }}
-            {{ t("dashboard.orderToProcess") }}</span
-          >
+    <div class="dashboard-page">
+      <!-- Loading -->
+      <div v-if="loading" class="loading-overlay">
+        <div class="loading-card">
+          <i class="pi pi-spin pi-spinner"></i>
         </div>
       </div>
 
-      <div
-        class="status-card status-approved clickable-status-card"
-        :class="{
-          'pulse-animation': hasApprovedOrders,
-          'has-update': hasApprovedOrders,
-          'has-new-update': hasNewApproved,
-        }"
-        @click="navigateToOrdersByStatus('Approved')"
-      >
-        <div class="status-icon">
-          <i class="pi pi-check-circle"></i>
+      <!-- Header -->
+      <section class="dash-header">
+        <div class="dash-header-text">
+          <p class="hero-eyebrow">{{ t('dashboard.eyebrow') }}</p>
+          <h1>{{ t('dashboard.heading') }}</h1>
+          <p>{{ t('dashboard.subtitle') }}</p>
         </div>
-        <div class="status-content">
-          <div class="status-value">
-            {{ dashboardStore.orderStatusSummary.approved }}
-          </div>
-          <div class="status-label">{{ t("dashboard.approvedOrders") }}</div>
-        </div>
-        <i class="pi pi-chevron-right nav-arrow"></i>
 
-        <!-- Badge thông báo - hiển thị số lượng -->
-        <div v-if="hasApprovedOrders" class="update-badge approved-badge">
-          <span class="badge-count"
-            >{{ dashboardStore.orderStatusSummary.approved }}
-            {{ t("dashboard.orderToProcess") }}</span
-          >
-        </div>
-      </div>
-
-      <!-- Completed và Rejected cards giữ nguyên -->
-      <div
-        class="status-card status-completed clickable-status-card"
-        @click="navigateToOrdersByStatus('Completed')"
-      >
-        <div class="status-icon">
-          <i class="pi pi-check"></i>
-        </div>
-        <div class="status-content">
-          <div class="status-value">
-            {{ dashboardStore.orderStatusSummary.completed }}
-          </div>
-          <div class="status-label">{{ t("dashboard.completedOrders") }}</div>
-        </div>
-        <i class="pi pi-chevron-right nav-arrow"></i>
-      </div>
-
-      <div
-        class="status-card status-rejected clickable-status-card"
-        @click="navigateToOrdersByStatus('Rejected')"
-      >
-        <div class="status-icon">
-          <i class="pi pi-times-circle"></i>
-        </div>
-        <div class="status-content">
-          <div class="status-value">
-            {{ dashboardStore.orderStatusSummary.rejected }}
-          </div>
-          <div class="status-label">{{ t("dashboard.rejectedOrders") }}</div>
-        </div>
-        <i class="pi pi-chevron-right nav-arrow"></i>
-      </div>
-    </div>
-
-    <!-- Charts Row -->
-    <div class="charts-row">
-      <!-- Orders Status Chart -->
-      <div class="chart-container">
-        <div class="chart-header">
-          <h3 class="chart-title">{{ t("dashboard.orderStatusChart") }}</h3>
-        </div>
-        <div class="chart-wrapper">
-          <DoughnutChart
-            :chartData="dashboardStore.ordersByStatusChartData"
-            :height="300"
+        <div class="dash-header-actions">
+          <SelectButton
+            v-model="selectedAreaModel"
+            :options="areaOptions"
+            optionLabel="label"
+            optionValue="value"
+            :allowEmpty="false"
+          />
+          <Button
+            icon="pi pi-refresh"
+            :loading="loading"
+            class="refresh-btn"
+            @click="fetchDashboardData"
+            :aria-label="t('dashboard.refresh')"
           />
         </div>
-        <div class="chart-legend">
-          <div class="legend-item">
-            <span class="legend-color" style="background: #ffd6a5"></span>
-            <span>{{ t("dashboard.pending") }}</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #a0c4ff"></span>
-            <span>{{ t("dashboard.approved") }}</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #caffbf"></span>
-            <span>{{ t("dashboard.completed") }}</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #ffadad"></span>
-            <span>{{ t("dashboard.rejected") }}</span>
-          </div>
+      </section>
+
+      <!-- Alert banner -->
+      <section
+        v-if="alertTotal > 0"
+        class="alert-banner"
+        role="button"
+        tabindex="0"
+        @click="activeTab = 0"
+        @keyup.enter="activeTab = 0"
+      >
+        <span class="alert-icon"><i class="pi pi-exclamation-triangle"></i></span>
+        <div class="alert-text">
+          <strong>{{ t('dashboard.alertBanner.title', { count: alertTotal }) }}</strong>
+          <span>
+            {{ t('dashboard.alertBanner.subtitle', {
+              critical: current.stockStatus.critical,
+              out: current.stockStatus.outOfStock,
+            }) }}
+          </span>
         </div>
-      </div>
+        <span class="alert-action">
+          {{ t('dashboard.alertBanner.action') }}
+          <i class="pi pi-arrow-right"></i>
+        </span>
+      </section>
 
-      <!-- Stock Value Chart -->
-      <div class="chart-container">
-        <div class="chart-header">
-          <h3 class="chart-title">{{ t("dashboard.orderCategoryChart") }}</h3>
-        </div>
-        <div class="chart-wrapper">
-          <DoughnutChart
-            :chartData="dashboardStore.stockValueChartData"
-            :height="300"
-          />
-        </div>
-        <div class="chart-legend">
-          <div class="legend-item">
-            <span class="legend-color" style="background: #bdb2ff"></span>
-            <span>{{ t("inventoryManagement.category.engineering") }}</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #ffc6ff"></span>
-            <span>{{ t("inventoryManagement.category.consumer") }}</span>
-          </div>
-        </div>
-      </div>
+      <section v-else class="ok-banner">
+        <span class="ok-icon"><i class="pi pi-check-circle"></i></span>
+        <span>{{ t('dashboard.alertBanner.ok') }}</span>
+      </section>
 
-      <!-- Overview Stats -->
-      <div class="overview-container">
-        <div class="chart-header">
-          <h3 class="chart-title">{{ t("dashboard.systemOverview") }}</h3>
-        </div>
-        <div class="overview-grid">
-          <RouterLink to="/inventory" class="overview-item overview-purple">
-            <div class="overview-icon">
-              <i class="pi pi-box"></i>
-            </div>
-            <div class="overview-content">
-              <div class="overview-value">
-                {{ dashboardStore.overviewStats.totalItems }}
-              </div>
-              <div class="overview-label">{{ t("dashboard.stock") }}</div>
-            </div>
-          </RouterLink>
+      <!-- KPI grid -->
+      <section class="kpi-grid">
+        <button class="kpi-card" type="button" @click="goTo('/inventory')">
+          <span class="kpi-icon purple"><i class="pi pi-box"></i></span>
+          <span class="kpi-label">{{ t('dashboard.kpi.totalItems') }}</span>
+          <strong>{{ formatNumber(current.totalItems) }}</strong>
+          <small>{{ t('dashboard.kpi.totalItemsDetail', { eng: current.engineerItems, com: current.consumerItems }) }}</small>
+        </button>
 
-          <RouterLink to="/users" class="overview-item overview-green">
-            <div class="overview-icon">
-              <i class="pi pi-users"></i>
-            </div>
-            <div class="overview-content">
-              <div class="overview-value">
-                {{ dashboardStore.overviewStats.totalUsers }}
-              </div>
-              <div class="overview-label">{{ t("dashboard.users") }}</div>
-            </div>
-          </RouterLink>
+        <button class="kpi-card" type="button" @click="goTo('/inventory')">
+          <span class="kpi-icon green"><i class="pi pi-wallet"></i></span>
+          <span class="kpi-label">{{ t('dashboard.kpi.stockValue') }}</span>
+          <strong>{{ formatCurrency(current.totalStockValue) }}</strong>
+          <small>{{ t('dashboard.kpi.stockValueDetail', { qty: formatNumber(current.totalStockQty) }) }}</small>
+        </button>
 
-          <RouterLink to="/stockin" class="overview-item overview-yellow">
-            <div class="overview-icon">
-              <i class="pi pi-sign-in"></i>
-            </div>
-            <div class="overview-content">
-              <div class="overview-value">
-                {{ dashboardStore.overviewStats.totalStockins }}
-              </div>
-              <div class="overview-label">
-                {{ t("dashboard.importReceipts") }}
-              </div>
-            </div>
-          </RouterLink>
+        <button
+          class="kpi-card"
+          :class="{ danger: alertTotal > 0 }"
+          type="button"
+          @click="activeTab = 0"
+        >
+          <span class="kpi-icon red"><i class="pi pi-exclamation-triangle"></i></span>
+          <span class="kpi-label">{{ t('dashboard.kpi.alerts') }}</span>
+          <strong>{{ formatNumber(alertTotal) }}</strong>
+          <small>
+            {{ t('dashboard.kpi.alertsDetail', {
+              critical: current.stockStatus.critical,
+              out: current.stockStatus.outOfStock,
+            }) }}
+          </small>
+        </button>
 
-          <RouterLink to="/orders" class="overview-item overview-pink">
-            <div class="overview-icon">
-              <i class="pi pi-database" style="font-size: 1.5rem"></i>
-            </div>
-            <div class="overview-content">
-              <div class="overview-value">{{ totalOrders }}</div>
-              <div class="overview-label">{{ t("dashboard.orders") }}</div>
-            </div>
-          </RouterLink>
-
-          <div
-            class="overview-item overview-gray clickable-overview"
-            @click="scrollToSection('top-orders-section')"
+        <div class="kpi-card kpi-pending" :class="{ danger: current.pendingOrders > 0 }">
+          <span
+            v-if="current.pendingOrders > 0"
+            class="pending-badge"
+            :title="t('dashboard.kpi.pendingBadge', { count: current.pendingOrders })"
           >
-            <div class="overview-icon">
-              <i class="pi pi-cart-arrow-down" style="font-size: 1.5rem"></i>
-            </div>
-            <div class="overview-content">
-              <div class="overview-value">
-                {{ dashboardStore.topOrderedItems.length }}
-              </div>
-              <div class="overview-label">{{ t("dashboard.topOrders") }}</div>
-            </div>
-          </div>
+            {{ current.pendingOrders }}
+          </span>
+          <span class="kpi-icon orange"><i class="pi pi-shopping-cart"></i></span>
+          <span class="kpi-label">{{ t('dashboard.kpi.pendingOrders') }}</span>
+          <strong>{{ formatNumber(current.pendingOrders) }}</strong>
+          <small>{{ t('dashboard.kpi.pendingOrdersDetail', { total: formatNumber(current.totalOrders) }) }}</small>
 
-          <div
-            class="overview-item overview-critical clickable-overview"
-            :class="{
-              'has-critical-stock':
-                dashboardStore.lowStockCountByStatus.critical > 0,
-            }"
-            @click="scrollToSection('critical-stock-section')"
-          >
-            <div class="overview-icon">
-              <i
-                class="pi pi-exclamation-triangle"
-                style="font-size: 1.5rem"
-              ></i>
-            </div>
-            <div class="overview-content">
-              <div class="overview-value">
-                {{ dashboardStore.lowStockCountByStatus.critical }}
-              </div>
-              <div class="overview-label">{{ t("dashboard.critical") }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Products & Orders Row -->
-    <div class="lists-row">
-      <!-- Top Ordered Items -->
-      <div id="top-orders-section" class="list-container">
-        <div class="list-header">
-          <h3 class="list-title">
-            <i class="pi pi-chart-line"></i>
-            {{ t("dashboard.topOrderedMaterials") }}
-          </h3>
-        </div>
-        <div class="list-content">
-          <div
-            v-for="item in dashboardStore.topOrderedItems"
-            :key="item.id"
-            class="list-item"
-          >
-            <img :src="item.image" :alt="item.name" class="item-image" />
-            <div class="item-info">
-              <div class="item-name">{{ item.name }}</div>
-              <div class="item-code">{{ item.code }}</div>
-            </div>
-            <div class="item-stats">
-              <div class="item-qty">
-                {{ t("dashboard.orderCount") }}: {{ item.totalOrdered }}
-              </div>
-              <div class="progress-bar">
-                <div
-                  class="progress-fill"
-                  :style="{ width: item.percentage + '%' }"
-                ></div>
-              </div>
-            </div>
-          </div>
-          <div
-            v-if="dashboardStore.topOrderedItems.length === 0"
-            class="empty-state"
-          >
-            <i class="pi pi-cart-arrow-down"></i>
-            <p>{{ t("dashboard.noOrders") }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Low Stock Items -->
-      <div id="critical-stock-section" class="list-container">
-        <div class="list-header">
-          <h3 class="list-title">
-            <i class="pi pi-exclamation-triangle"></i>
-            {{ t("dashboard.criticalStock") }} ({{
-              dashboardStore.lowStockCountByStatus.critical
-            }})
-          </h3>
-        </div>
-        <div class="list-content">
-          <div
-            v-for="item in dashboardStore.criticalStockItems.slice(0, 50)"
-            :key="item.id"
-            class="list-item"
-          >
-            <img :src="item.image" :alt="item.name" class="item-image" />
-            <div class="item-info">
-              <div class="item-name">{{ item.name }}</div>
-              <div class="item-code">{{ item.code }}</div>
-            </div>
-            <div class="item-stock">
-              <div class="stock-badge" :class="'badge-' + item.status">
-                {{ item.stockQty }}/{{ item.safetyStock }}
-              </div>
-              <div class="stock-label">
-                {{ getStockStatusLabel(item.status) }}
-              </div>
-            </div>
-          </div>
-          <div
-            v-if="dashboardStore.criticalStockItems.length === 0"
-            class="empty-state"
-          >
-            <i class="pi pi-check-circle"></i>
-            <p>{{ t("dashboard.noLowStock") }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recent Orders -->
-      <div class="list-container">
-        <div class="list-header">
-          <h3 class="list-title">
-            <i class="pi pi-list"></i>
-            {{ t("dashboard.recentOrders") }}
-          </h3>
-        </div>
-        <div class="list-content">
-          <div
-            v-for="order in dashboardStore.recentOrderStatus.slice(0, 10)"
-            :key="order.id"
-            class="list-item"
-          >
-            <div
-              class="order-icon"
-              :class="'order-icon-' + order.status.toLowerCase()"
+          <div class="pending-area-links">
+            <button
+              type="button"
+              class="pending-area-link smd"
+              @click="goToPendingOrders('SMD')"
             >
-              <i :class="getOrderStatusIcon(order.status)"></i>
-            </div>
-            <div class="order-info">
-              <div class="order-number">Order ID: {{ order.id }}</div>
-              <div class="order-meta">
-                {{ order.workerName }} - Order: {{ order.totalItems }}
-                {{ t("common.product") }} - {{ t("common.quantity") }}:
-                {{ order.totalQty }}
-              </div>
-            </div>
-            <div class="order-status">
-              <span
-                class="status-badge"
-                :class="'status-' + order.status.toLowerCase()"
-              >
-                {{ getOrderStatusLabel(order.status) }}
-              </span>
-              <div class="order-date">{{ formatDate(order.orderDate) }}</div>
-            </div>
-          </div>
-          <div
-            v-if="dashboardStore.recentOrderStatus.length === 0"
-            class="empty-state"
-          >
-            <i class="pi pi-cart-arrow-down"></i>
-            <p>{{ t("dashboard.noOrders") }}</p>
+              SMD
+              <span class="pending-area-count">{{ formatNumber(dashboardStore.areaSummaries.SMD.pendingOrders) }}</span>
+            </button>
+            <button
+              type="button"
+              class="pending-area-link mainline"
+              @click="goToPendingOrders('MAINLINE')"
+            >
+              MAINLINE
+              <span class="pending-area-count">{{ formatNumber(dashboardStore.areaSummaries.MAINLINE.pendingOrders) }}</span>
+            </button>
           </div>
         </div>
-      </div>
+      </section>
+
+      <!-- Area comparison -->
+      <section class="area-grid">
+        <article
+          v-for="area in areaCards"
+          :key="area.key"
+          class="area-card"
+          :class="area.key.toLowerCase()"
+        >
+          <header class="area-card-header">
+            <span class="area-badge" :class="area.key.toLowerCase()">{{ area.key }}</span>
+            <button type="button" class="text-btn" @click="onSelectArea(area.key)">
+              {{ t('dashboard.areaCard.viewDetail') }}
+              <i class="pi pi-arrow-right"></i>
+            </button>
+          </header>
+
+          <div class="area-card-body">
+            <div class="area-stat">
+              <span class="area-stat-label">{{ t('dashboard.areaCard.stockValue') }}</span>
+              <strong>{{ formatCurrency(area.summary.totalStockValue) }}</strong>
+            </div>
+            <div class="area-stat">
+              <span class="area-stat-label">{{ t('dashboard.areaCard.stockQty') }}</span>
+              <strong>{{ formatNumber(area.summary.totalStockQty) }}</strong>
+            </div>
+            <div class="area-stat">
+              <span class="area-stat-label">{{ t('dashboard.areaCard.items') }}</span>
+              <strong>{{ formatNumber(area.summary.totalItems) }}</strong>
+            </div>
+            <div class="area-stat">
+              <span class="area-stat-label">{{ t('dashboard.areaCard.alerts') }}</span>
+              <strong :class="{ 'text-danger': areaAlertCount(area.summary) > 0 }">
+                {{ formatNumber(areaAlertCount(area.summary)) }}
+              </strong>
+            </div>
+          </div>
+
+          <div class="area-card-footer">
+            <span>
+              <i class="pi pi-sitemap"></i>
+              {{ t('dashboard.areaCard.lines', { count: area.summary.totalLines }) }}
+            </span>
+            <span>
+              <i class="pi pi-cog"></i>
+              {{ t('dashboard.areaCard.machines', { count: area.summary.totalMachines }) }}
+            </span>
+          </div>
+        </article>
+      </section>
+
+      <!-- Tabs -->
+      <section class="dash-tabs">
+        <TabView v-model:activeIndex="activeTab">
+          <!-- Alerts tab -->
+          <TabPanel :header="t('dashboard.tabs.alerts')">
+            <div class="tab-head">
+              <p>{{ t('dashboard.alertsTab.description') }}</p>
+              <button type="button" class="text-btn" @click="goTo('/inventory')">
+                {{ t('dashboard.alertsTab.viewAll') }}
+                <i class="pi pi-arrow-right"></i>
+              </button>
+            </div>
+
+            <DataTable
+              :value="dashboardStore.alertStockItems"
+              :rows="8"
+              paginator
+              responsiveLayout="scroll"
+              class="alert-table"
+            >
+              <template #empty>
+                <div class="empty-state">
+                  <i class="pi pi-check-circle"></i>
+                  <p>{{ t('dashboard.alertsTab.empty') }}</p>
+                </div>
+              </template>
+
+              <Column :header="t('dashboard.alertsTab.colItem')">
+                <template #body="{ data }">
+                  <div class="item-cell">
+                    <img :src="data.image" :alt="data.name" />
+                    <div>
+                      <strong>{{ data.name }}</strong>
+                      <span>{{ data.code }}</span>
+                    </div>
+                  </div>
+                </template>
+              </Column>
+
+              <Column :header="t('dashboard.alertsTab.colArea')">
+                <template #body="{ data }">
+                  <span class="area-badge" :class="data.areaPart.toLowerCase()">{{ data.areaPart }}</span>
+                </template>
+              </Column>
+
+              <Column :header="t('dashboard.alertsTab.colStock')">
+                <template #body="{ data }">
+                  {{ formatNumber(data.stockQty) }} {{ data.unit }}
+                </template>
+              </Column>
+
+              <Column :header="t('dashboard.alertsTab.colSafety')">
+                <template #body="{ data }">
+                  {{ formatNumber(data.safetyStock) }} {{ data.unit }}
+                </template>
+              </Column>
+
+              <Column :header="t('dashboard.alertsTab.colStatus')">
+                <template #body="{ data }">
+                  <span :class="['status-chip', data.status]">
+                    {{ getStockStatusLabel(data.status) }}
+                  </span>
+                </template>
+              </Column>
+            </DataTable>
+          </TabPanel>
+
+          <!-- Activity tab -->
+          <TabPanel :header="t('dashboard.tabs.activity')">
+            <div class="activity-grid">
+              <article class="panel list-panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>{{ t('dashboard.activity.recentOrders') }}</h3>
+                    <p>{{ t('dashboard.activity.recentOrdersDesc') }}</p>
+                  </div>
+                  <button type="button" class="text-btn" @click="goTo('/orders')">
+                    {{ t('dashboard.activity.viewAll') }}
+                  </button>
+                </div>
+
+                <div v-if="dashboardStore.recentOrderStatus.length === 0" class="empty-state">
+                  <i class="pi pi-list"></i>
+                  <p>{{ t('dashboard.activity.noOrders') }}</p>
+                </div>
+
+                <div v-else class="simple-list">
+                  <button
+                    v-for="order in dashboardStore.recentOrderStatus"
+                    :key="order.id"
+                    type="button"
+                    class="simple-row"
+                    @click="goTo(`/orders?orderId=${order.id}`)"
+                  >
+                    <div>
+                      <strong>#{{ order.id }} · <span class="area-badge" :class="order.areaPart.toLowerCase()">{{ order.areaPart }}</span></strong>
+                      <span>{{ order.workerName }} · {{ formatDate(order.orderDate) }}</span>
+                    </div>
+                    <span :class="['order-status', order.status.toLowerCase()]">
+                      {{ getOrderStatusLabel(order.status) }}
+                    </span>
+                  </button>
+                </div>
+              </article>
+
+              <article class="panel list-panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>{{ t('dashboard.activity.recentStockins') }}</h3>
+                    <p>{{ t('dashboard.activity.recentStockinsDesc') }}</p>
+                  </div>
+                  <button type="button" class="text-btn" @click="goTo('/stockin')">
+                    {{ t('dashboard.activity.viewAll') }}
+                  </button>
+                </div>
+
+                <div v-if="dashboardStore.recentStockins.length === 0" class="empty-state">
+                  <i class="pi pi-inbox"></i>
+                  <p>{{ t('dashboard.activity.noStockins') }}</p>
+                </div>
+
+                <div v-else class="simple-list">
+                  <button
+                    v-for="stockin in dashboardStore.recentStockins"
+                    :key="stockin.id"
+                    type="button"
+                    class="simple-row"
+                    @click="goTo('/stockin')"
+                  >
+                    <div>
+                      <strong>#{{ stockin.id }} · <span class="area-badge" :class="stockin.areaPart.toLowerCase()">{{ stockin.areaPart }}</span></strong>
+                      <span>{{ stockin.creatorName }} · {{ formatDate(stockin.stockInDate) }}</span>
+                    </div>
+                    <b>{{ formatNumber(stockin.totalQty) }}</b>
+                  </button>
+                </div>
+              </article>
+
+              <article class="panel list-panel wide">
+                <div class="panel-header">
+                  <div>
+                    <h3>{{ t('dashboard.activity.topOrdered') }}</h3>
+                    <p>{{ t('dashboard.activity.topOrderedDesc') }}</p>
+                  </div>
+                </div>
+
+                <div v-if="dashboardStore.topOrderedItems.length === 0" class="empty-state">
+                  <i class="pi pi-chart-bar"></i>
+                  <p>{{ t('dashboard.activity.noTopOrdered') }}</p>
+                </div>
+
+                <div v-else class="top-items">
+                  <div v-for="item in dashboardStore.topOrderedItems" :key="item.id" class="top-item">
+                    <img :src="item.image" :alt="item.name" />
+                    <div class="item-main">
+                      <strong>{{ item.name }}</strong>
+                      <span>{{ item.code }} · <span class="area-badge" :class="item.areaPart.toLowerCase()">{{ item.areaPart }}</span></span>
+                      <div class="progress">
+                        <span :style="{ width: item.percentage + '%' }"></span>
+                      </div>
+                    </div>
+                    <div class="item-side">
+                      <b>{{ formatNumber(item.totalOrdered) }}</b>
+                      <small>{{ t('dashboard.activity.ordered') }}</small>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </TabPanel>
+
+          <!-- Charts tab -->
+          <TabPanel :header="t('dashboard.tabs.charts')">
+            <div class="chart-grid single">
+              <article class="panel chart-panel wide">
+                <div class="chart-panel-header">
+                  <div>
+                    <h3>{{ t('dashboard.charts.dailyMovement') }}</h3>
+                    <p class="chart-panel-desc">{{ t('dashboard.charts.dailyMovementDesc') }}</p>
+                  </div>
+                  <SelectButton
+                    v-model="chartRange"
+                    :options="rangeOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    :allowEmpty="false"
+                  />
+                </div>
+                <div class="chart-box">
+                  <LineChart :chart-data="dailyChart.chartData" @point-click="onChartPointClick" />
+                </div>
+              </article>
+            </div>
+
+            <!-- Detail theo ngày được chọn -->
+            <div v-if="selectedDateKey" class="date-detail-grid">
+              <article class="panel list-panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>
+                      <span class="dot green"></span>
+                      {{ t('dashboard.charts.stockinOnDate', { date: formatDateLabel(selectedDateKey) }) }}
+                    </h3>
+                  </div>
+                </div>
+
+                <div v-if="stockinsForSelectedDate.length === 0" class="empty-state">
+                  <i class="pi pi-inbox"></i>
+                  <p>{{ t('dashboard.charts.noStockinOnDate') }}</p>
+                </div>
+
+                <div v-else class="simple-list">
+                  <button
+                    v-for="stockin in stockinsForSelectedDate"
+                    :key="stockin.id"
+                    type="button"
+                    class="simple-row"
+                    @click="goTo('/stockin')"
+                  >
+                    <div>
+                      <strong>#{{ stockin.id }} · <span class="area-badge" :class="stockin.areaPart.toLowerCase()">{{ stockin.areaPart }}</span></strong>
+                      <span>{{ stockin.account?.username || '-' }} · {{ formatDate(stockin.stockInDate) }}</span>
+                    </div>
+                    <b>{{ formatNumber(stockinTotalQty(stockin)) }}</b>
+                  </button>
+                </div>
+              </article>
+
+              <article class="panel list-panel">
+                <div class="panel-header">
+                  <div>
+                    <h3>
+                      <span class="dot orange"></span>
+                      {{ t('dashboard.charts.orderOnDate', { date: formatDateLabel(selectedDateKey) }) }}
+                    </h3>
+                  </div>
+                </div>
+
+                <div v-if="ordersForSelectedDate.length === 0" class="empty-state">
+                  <i class="pi pi-shopping-cart"></i>
+                  <p>{{ t('dashboard.charts.noOrderOnDate') }}</p>
+                </div>
+
+                <template v-else>
+                  <div class="simple-list">
+                    <div
+                      v-for="order in pagedOrders"
+                      :key="order.id"
+                      class="simple-row order-row"
+                    >
+                      <div>
+                        <strong>#{{ order.id }} · <span class="area-badge" :class="dashboardStore.getOrderArea(order).toLowerCase()">{{ dashboardStore.getOrderArea(order) }}</span></strong>
+                        <span>{{ order.account?.username || order.nameWorker || '-' }} · {{ formatDate(order.orderDate) }}</span>
+                      </div>
+                      <span :class="['order-status', order.status.toLowerCase()]">
+                        {{ getOrderStatusLabel(order.status) }}
+                      </span>
+                      <button
+                        type="button"
+                        class="icon-btn"
+                        :title="t('dashboard.charts.colAction')"
+                        @click="openOrderModal(order)"
+                      >
+                        <i class="pi pi-eye"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <Paginator
+                    v-if="ordersForSelectedDate.length > pageSize"
+                    :rows="pageSize"
+                    :totalRecords="ordersForSelectedDate.length"
+                    :first="(orderPage - 1) * pageSize"
+                    @page="onOrderPageChange"
+                  />
+                </template>
+              </article>
+            </div>
+
+            <div v-else class="select-date-hint">
+              <i class="pi pi-info-circle"></i>
+              <span>{{ t('dashboard.charts.selectDateHint') }}</span>
+            </div>
+          </TabPanel>
+        </TabView>
+      </section>
     </div>
+
+    <!-- Order Detail Modal -->
+    <Dialog
+      v-model:visible="orderModalVisible"
+      modal
+      :header="orderModalTitle"
+      :style="{ width: '720px', maxWidth: '95vw' }"
+    >
+      <div v-if="selectedOrder" class="order-modal-body">
+        <div class="order-modal-info">
+          <div>
+            <span class="order-modal-label">{{ t('dashboard.orderModal.orderDate') }}</span>
+            <strong>{{ formatDate(selectedOrder.orderDate) }}</strong>
+          </div>
+          <div>
+            <span class="order-modal-label">{{ t('dashboard.orderModal.worker') }}</span>
+            <strong>{{ selectedOrder.account?.username || selectedOrder.nameWorker || '-' }}</strong>
+          </div>
+          <div>
+            <span class="order-modal-label">{{ t('dashboard.orderModal.status') }}</span>
+            <span :class="['order-status', selectedOrder.status.toLowerCase()]">
+              {{ getOrderStatusLabel(selectedOrder.status) }}
+            </span>
+          </div>
+          <div class="order-modal-note" v-if="selectedOrder.note">
+            <span class="order-modal-label">{{ t('dashboard.orderModal.note') }}</span>
+            <p>{{ selectedOrder.note }}</p>
+          </div>
+        </div>
+
+        <h4>{{ t('dashboard.orderModal.items') }}</h4>
+        <DataTable :value="selectedOrder.orderDetails" responsiveLayout="scroll" class="order-modal-table">
+          <Column :header="t('dashboard.orderModal.colItem')">
+            <template #body="{ data }">
+              <div class="item-cell">
+                <img
+                  v-if="data.item?.picture?.length"
+                  :src="getItemImageUrl(data.item.picture[0])"
+                  :alt="getItemName(data.item)"
+                />
+                <div v-else class="item-cell-noimg">
+                  <i class="pi pi-image"></i>
+                </div>
+                <div>
+                  <strong>{{ getItemName(data.item) }}</strong>
+                  <span>{{ data.item?.itemIndentifyId || '-' }}</span>
+                </div>
+              </div>
+            </template>
+          </Column>
+          <Column :header="t('dashboard.orderModal.colMachine')">
+            <template #body="{ data }">
+              {{ data.machine?.machineName || '-' }}
+            </template>
+          </Column>
+          <Column :header="t('dashboard.orderModal.colQty')">
+            <template #body="{ data }">
+              {{ formatNumber(data.orderQty) }} {{ data.item?.unit || '' }}
+            </template>
+          </Column>
+          <Column :header="t('dashboard.orderModal.colNote')">
+            <template #body="{ data }">
+              {{ data.note || '-' }}
+            </template>
+          </Column>
+        </DataTable>
+
+        <h4>{{ t('dashboard.orderModal.images') }}</h4>
+        <div v-if="selectedOrder.image && selectedOrder.image.length > 0" class="order-modal-images">
+          <img
+            v-for="(img, idx) in selectedOrder.image"
+            :key="idx"
+            :src="getOrderImageUrl(img)"
+            :alt="`order-image-${idx}`"
+          />
+        </div>
+        <div v-else class="empty-state">
+          <i class="pi pi-image"></i>
+          <p>{{ t('dashboard.orderModal.noImages') }}</p>
+        </div>
+      </div>
+    </Dialog>
   </MainLayout>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, computed, onUnmounted } from "vue";
-import { useDashboardStore } from "@/stores/dashboard";
+import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import MainLayout from "@/components/MainLayout.vue";
+import SelectButton from "primevue/selectbutton";
+import Button from "primevue/button";
+import TabView from "primevue/tabview";
+import TabPanel from "primevue/tabpanel";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Dialog from "primevue/dialog";
+import Paginator from "primevue/paginator";
+import LineChart from "@/components/charts/LineChart.vue";
+
+import { useDashboardStore, type AreaKey, type AreaSummary } from "@/stores/dashboard";
 import { useItemStore } from "@/stores/itemStore";
 import { useOrderStore } from "@/stores/orderStore";
 import { useStockinStore } from "@/stores/stockinStore";
-import { useUserStore } from "@/stores/userStore";
+import { useLineMachineStore } from "@/stores/line_machine";
+
 import { itemAPI } from "@/services/itemAPI";
 import { orderAPI } from "@/services/orderAPI";
 import { stockinAPI } from "@/services/stockinAPI";
-import { userAPI } from "@/services/userAPI";
-import MainLayout from "@/components/MainLayout.vue";
-import DoughnutChart from "@/components/DoughnutChart.vue";
-import { useToast } from "primevue/usetoast";
-import { useRouter, useRoute } from "vue-router";
-import { signalRService } from "@/services/orderNotiService";
-import type { OrderPendingRealtime } from "@/types/order.types";
-import { useI18n } from "vue-i18n";
 
-const { t } = useI18n();
+const router = useRouter();
+const { t, locale } = useI18n();
 
 const dashboardStore = useDashboardStore();
 const itemStore = useItemStore();
 const orderStore = useOrderStore();
 const stockinStore = useStockinStore();
-const userStore = useUserStore();
-const toast = useToast();
-const router = useRouter();
-const route = useRoute();
+const lineMachineStore = useLineMachineStore();
 
 const loading = ref(false);
-const hasPendingOrders = computed(
-  () => dashboardStore.orderStatusSummary.pending > 0,
-);
-const hasApprovedOrders = computed(
-  () => dashboardStore.orderStatusSummary.approved > 0,
-);
+const activeTab = ref(0);
 
-const totalOrders = computed(() => orderStore.totalOrders);
+const areaOptions = computed<Array<{ label: string; value: AreaKey }>>(() => [
+  { label: t("reports.common.areaAll"), value: "ALL" },
+  { label: "SMD", value: "SMD" },
+  { label: "MAINLINE", value: "MAINLINE" },
+]);
 
-const statRoutes: Record<string, string> = {
-  totalOrders: "/orders",
-  totalStockins: "/stockin",
-  totalStock: "/inventory",
-  totalPurchase: "",
+const selectedAreaModel = computed<AreaKey>({
+  get: () => dashboardStore.selectedArea,
+  set: (value) => dashboardStore.setSelectedArea(value),
+});
+
+const onSelectArea = (area: AreaKey) => {
+  dashboardStore.setSelectedArea(area);
 };
 
-const statLabels: Record<string, string> = computed(() => ({
-  totalPurchase: t("dashboard.totalPurchaseValue"),
-  totalOrders: t("dashboard.totalOrders"),
-  totalStockins: t("dashboard.totalImports"),
-  totalStock: t("dashboard.totalStock"),
-}));
+const current = computed(() => dashboardStore.currentSummary);
 
-const scrollToSection = (sectionId: string) => {
-  const element = document.getElementById(sectionId);
-  if (element) {
-    element.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
+const areaCards = computed(() => [
+  { key: "SMD" as AreaKey, summary: dashboardStore.areaSummaries.SMD },
+  { key: "MAINLINE" as AreaKey, summary: dashboardStore.areaSummaries.MAINLINE },
+]);
 
-    // Highlight effect (optional)
-    element.classList.add("highlight-section");
-    setTimeout(() => {
-      element.classList.remove("highlight-section");
-    }, 2000);
-  }
+const areaAlertCount = (summary: AreaSummary) => {
+  const s = summary.stockStatus;
+  return s.critical + s.low + s.warning + s.outOfStock + s.notConfigured;
 };
 
-const navigateToStat = (key: string) => {
-  const route = statRoutes[key];
-  if (route) {
-    router.push(route);
-  }
+const alertTotal = computed(() => {
+  const s = current.value.stockStatus;
+  return s.critical + s.low + s.warning + s.outOfStock + s.notConfigured;
+});
+
+const localeMap: Record<string, string> = {
+  vi: "vi-VN",
+  en: "en-US",
+  ko: "ko-KR",
 };
 
-const navigateToOrdersByStatus = (status: string | null) => {
-  router.push({
-    path: "/orders",
-    query: status ? { status } : {},
+const formatNumber = (value: number) => {
+  return Number(value || 0).toLocaleString(localeMap[locale.value] || "vi-VN");
+};
+
+const formatCurrency = (value: number) => {
+  return Number(value || 0).toLocaleString(localeMap[locale.value] || "vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
   });
 };
 
-const fetchAllData = async () => {
+const formatDate = (date: string) => {
+  if (!date) return "-";
+
+  const parsed = new Date(date);
+
+  if (Number.isNaN(parsed.getTime())) return "-";
+
+  return parsed.toLocaleString(localeMap[locale.value] || "vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const stockStatusKeyMap: Record<string, string> = {
+  normal: "normal",
+  warning: "warning",
+  low: "low",
+  critical: "critical",
+  "out-of-stock": "outOfStock",
+  "not-configured": "notConfigured",
+};
+
+const getStockStatusLabel = (status: string) => {
+  const key = stockStatusKeyMap[status] || "normal";
+  return t(`reports.inventoryReport.stockStatus.${key}`);
+};
+
+const orderStatusKeyMap: Record<string, string> = {
+  Pending: "pending",
+  Approved: "approved",
+  Completed: "completed",
+  Rejected: "rejected",
+};
+
+const getOrderStatusLabel = (status: string) => {
+  const key = orderStatusKeyMap[status] || status.toLowerCase();
+  return t(`reports.orderReport.statusOptions.${key}`);
+};
+
+const goTo = (path: string) => {
+  router.push(path);
+};
+
+const goToPendingOrders = (area: "SMD" | "MAINLINE") => {
+  router.push({
+    path: "/orders",
+    query: {
+      status: "Pending",
+      areaPart: area === "SMD" ? "SMD" : "Mainline",
+    },
+  });
+};
+
+// ===== Daily movement chart (Vấn đề 1) =====
+const chartRange = ref<"7d" | "30d" | "all">("7d");
+
+const rangeOptions = computed(() => [
+  { label: t("dashboard.charts.range7d"), value: "7d" },
+  { label: t("dashboard.charts.range30d"), value: "30d" },
+  { label: t("dashboard.charts.rangeAll"), value: "all" },
+]);
+
+const dailyChart = computed(() => dashboardStore.getDailyMovementChartData(chartRange.value));
+
+const selectedDateKey = ref<string | null>(null);
+const orderPage = ref(1);
+const pageSize = 10;
+
+const onChartPointClick = (payload: { datasetIndex: number; index: number; label: string }) => {
+  const key = dailyChart.value.dates[payload.index];
+  if (!key) return;
+  selectedDateKey.value = key;
+  orderPage.value = 1;
+};
+
+const formatDateLabel = (dateKey: string) => {
+  const parsed = new Date(dateKey);
+  if (Number.isNaN(parsed.getTime())) return dateKey;
+  return parsed.toLocaleDateString(localeMap[locale.value] || "vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
+const stockinsForSelectedDate = computed(() => {
+  if (!selectedDateKey.value) return [];
+  return dashboardStore.getStockinsForDate(dashboardStore.selectedArea, selectedDateKey.value);
+});
+
+const ordersForSelectedDate = computed(() => {
+  if (!selectedDateKey.value) return [];
+  return dashboardStore.getOrdersForDate(dashboardStore.selectedArea, selectedDateKey.value);
+});
+
+const pagedOrders = computed(() => {
+  const start = (orderPage.value - 1) * pageSize;
+  return ordersForSelectedDate.value.slice(start, start + pageSize);
+});
+
+const onOrderPageChange = (event: { page: number }) => {
+  orderPage.value = event.page + 1;
+};
+
+const stockinTotalQty = (stockin: any) => {
+  return (
+    stockin.stockInDetails?.reduce((sum: number, d: any) => sum + Number(d.quantity || 0), 0) || 0
+  );
+};
+
+// ===== Order detail modal =====
+const orderModalVisible = ref(false);
+const selectedOrder = ref<any | null>(null);
+
+const orderModalTitle = computed(() =>
+  selectedOrder.value ? t("dashboard.orderModal.title", { id: selectedOrder.value.id }) : "",
+);
+
+const openOrderModal = (order: any) => {
+  selectedOrder.value = order;
+  orderModalVisible.value = true;
+};
+
+const getItemName = (item: any) => item?.eng?.partname || item?.com?.name || "Unknown";
+
+const getItemImageUrl = (filename: string) => {
+  if (!filename) return "";
+  if (filename.startsWith("http")) return filename;
+  return `${import.meta.env.WAREHOUSE_URL}/api/Item/image/${filename}`;
+};
+
+const getOrderImageUrl = (filename: string) => {
+  if (!filename) return "";
+  if (filename.startsWith("http")) return filename;
+  return `${import.meta.env.WAREHOUSE_URL}/api/Order/image/${filename}`;
+};
+
+const fetchDashboardData = async () => {
   loading.value = true;
 
   try {
-    const [items, orders, stockins, users] = await Promise.all([
+    const [items, orders, stockins] = await Promise.all([
       itemAPI.getAll(),
       orderAPI.getAll(),
       stockinAPI.getAllStockin(),
-      userAPI.getAllAccounts(),
+      lineMachineStore.fetchInitialData(),
     ]);
 
     itemStore.setItems(items);
     orderStore.setOrders(orders);
     stockinStore.setStockins(stockins);
-    userStore.users = users;
-  } catch (error: any) {
-    console.error("❌ Error loading dashboard data:", error);
-    toast.add({
-      severity: "error",
-      summary: "Lỗi tải dữ liệu",
-      detail: "Không thể tải dữ liệu dashboard",
-      life: 3000,
-    });
+  } catch (error) {
+    console.error("Error loading dashboard:", error);
   } finally {
     loading.value = false;
   }
 };
 
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(value);
-};
-
-const formatDate = (dateStr: string): string => {
-  const date = new Date(dateStr);
-  return new Intl.DateTimeFormat("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(date);
-};
-
-const getStatCardClass = (index: number): string => {
-  const classes = ["card-blue", "card-pink", "card-yellow", "card-purple"];
-  return classes[index] || "card-blue";
-};
-
-const getIconBgClass = (index: number): string => {
-  const classes = [
-    "icon-bg-blue",
-    "icon-bg-pink",
-    "icon-bg-yellow",
-    "icon-bg-purple",
-  ];
-  return classes[index] || "icon-bg-blue";
-};
-
-const getIconClass = (index: number): string => {
-  const icons = [
-    "pi pi-shopping-cart",
-    "pi pi-file",
-    "pi pi-sign-in",
-    "pi pi-database",
-  ];
-  return icons[index] || "pi pi-shopping-cart";
-};
-
-const getStockStatusLabel = (status: string): string => {
-  const labels: Record<string, string> = {
-    critical: t("dashboard.critical"),
-    low: t("dashboard.low"),
-    warning: t("dashboard.warning"),
-  };
-  return labels[status] || status;
-};
-
-const getOrderStatusIcon = (status: string): string => {
-  const icons: Record<string, string> = {
-    Pending: "pi pi-clock",
-    Approved: "pi pi-check-circle",
-    Completed: "pi pi-check",
-    Rejected: "pi pi-times-circle",
-  };
-  return icons[status] || "pi pi-file";
-};
-
-const getOrderStatusLabel = (status: string): string => {
-  const labels: Record<string, string> = {
-    Pending: t("dashboard.pending"),
-    Approved: t("dashboard.approved"),
-    Completed: t("dashboard.completed"),
-    Rejected: t("dashboard.rejected"),
-  };
-  return labels[status] || status;
-};
-
-const handleNewOrderCreated = async (orderData: OrderPendingRealtime) => {
-  // Reload data (animation sẽ tự động chạy vì computed)
-  await fetchAllData();
-};
-
-const handleOrderStatusUpdated = async (data: any) => {
-  // Reload data
-  await fetchAllData();
-};
-
 onMounted(async () => {
-  // Kết nối SignalR
-  if (!signalRService.isConnected()) {
-    await signalRService.start();
-  }
-
-  // Register event handlers
-  signalRService.on("NewOrderCreated", handleNewOrderCreated);
-  signalRService.on("OrderStatusUpdated", handleOrderStatusUpdated);
-
-  // Load data
-  await fetchAllData();
-  dashboardStore.refreshDashboard();
-});
-
-onUnmounted(() => {
-  signalRService.off("NewOrderCreated");
-  signalRService.off("OrderStatusUpdated");
+  await fetchDashboardData();
 });
 </script>
 
 <style scoped>
-/* Pastel Color Palette */
-:root {
-  --pastel-blue: #a0c4ff;
-  --pastel-pink: #ffc6ff;
-  --pastel-yellow: #ffd6a5;
-  --pastel-purple: #bdb2ff;
-  --pastel-green: #caffbf;
-  --pastel-red: #ffadad;
-  --pastel-orange: #fdffb6;
-  --pastel-mint: #9bf6ff;
+.dashboard-page {
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  padding: 1.25rem 2rem;
+  background:
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.12), transparent 32rem),
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 30rem),
+    #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-/* Loading Overlay */
 .loading-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  inset: 0;
   z-index: 9999;
-}
-
-.loading-spinner {
-  text-align: center;
-}
-
-.loading-spinner p {
-  margin-top: 1rem;
-  font-size: 1rem;
-  color: #8b7ab8;
-  font-weight: 500;
-}
-
-/* Stats Grid */
-.stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  place-items: center;
+  background: rgba(248, 250, 252, 0.75);
+  backdrop-filter: blur(6px);
 }
 
-/* Stat Cards - Pastel Colors */
-.stat-card-compact {
-  border-radius: 16px;
-  padding: 2rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.stat-card-compact:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-}
-
-.card-blue {
-  background: linear-gradient(135deg, #f0f7ff 0%, #e0efff 100%);
-}
-
-.card-pink {
-  background: linear-gradient(135deg, #fff0ff 0%, #ffe0ff 100%);
-}
-
-.card-yellow {
-  background: linear-gradient(135deg, #fff8e8 0%, #ffe8c8 100%);
-}
-
-.card-purple {
-  background: linear-gradient(135deg, #e0dbfa 0%, #e7e4f8 100%);
-}
-
-.stat-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-icon i {
-  font-size: 1.5rem;
-  color: white;
-}
-
-.icon-bg-blue {
-  background: linear-gradient(135deg, #1976d2, #1565c0);
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
-}
-
-.icon-bg-pink {
-  background: linear-gradient(135deg, #d81b60, #c2185b);
-  box-shadow: 0 4px 12px rgba(216, 27, 96, 0.3);
-}
-
-.icon-bg-yellow {
-  background: linear-gradient(135deg, #f57c00, #ef6c00);
-  box-shadow: 0 4px 12px rgba(245, 124, 0, 0.3);
-}
-
-.icon-bg-purple {
-  background: linear-gradient(135deg, #7b1fa2, #6a1b9a);
-  box-shadow: 0 4px 12px rgba(123, 31, 162, 0.3);
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-label-compact {
-  font-size: 0.875rem;
-  color: #5a4a7a;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-}
-
-.stat-value-compact {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #2d2d2d;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
-}
-
-/* Order Status Grid - Pastel */
-.order-status-grid {
+.loading-card {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.status-card {
-  border-radius: 16px;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.status-card:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-  transform: translateY(-2px);
-}
-
-.status-pending {
-  background-color: #ffecb3;
-  /* border-color: var(--pastel-yellow); */
-}
-
-.status-approved {
-  background-color: #bbdefb;
-  /* border-color: var(--pastel-blue); */
-}
-
-.status-completed {
-  background-color: #c8e6c9;
-  /* border-color: var(--pastel-green); */
-}
-
-.status-rejected {
-  background-color: #ffcdd2;
-  /* border-color: var(--pastel-red); */
-}
-
-.status-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.status-pending .status-icon {
-  background: linear-gradient(135deg, #f57c00, #ef6c00);
-  color: white;
-}
-
-.status-approved .status-icon {
-  background: linear-gradient(135deg, #1976d2, #1565c0);
-  color: white;
-}
-
-.status-completed .status-icon {
-  background: linear-gradient(135deg, #388e3c, #2e7d32);
-  color: white;
-}
-
-.status-rejected .status-icon {
-  background: linear-gradient(135deg, #d32f2f, #c62828);
-  color: white;
-}
-
-.status-icon i {
-  font-size: 1.75rem;
-}
-
-.status-value {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #2d2d2d;
-  margin-bottom: 0.25rem;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
-}
-
-.status-label {
-  font-size: 0.875rem;
-  color: #5a4a7a;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-
-/* Charts Row */
-.charts-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.chart-container,
-.overview-container {
+  place-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 2rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.25rem;
   background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  border: 2px solid #f0f0f0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.chart-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #f5f3ff;
-}
-
-.chart-title,
-.list-title {
-  font-size: 1.125rem;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
   font-weight: 700;
-  color: #000;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  color: #334155;
 }
 
-.chart-title i,
-.list-title i {
-  color: #000;
+.loading-card i {
+  font-size: 2rem;
+  color: #4f46e5;
 }
 
-.chart-wrapper {
+/* Header */
+.dash-header {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem 0;
-}
-
-.chart-legend {
-  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
   flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #6b6b6b;
-  font-weight: 500;
-}
-
-.legend-color {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Overview Grid - Pastel */
-.overview-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-}
-
-.overview-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   padding: 1.25rem;
-  border-radius: 12px;
-  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.06);
 }
 
-.overview-item:hover {
-  transform: scale(1.02);
+.hero-eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--primary-color);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.overview-blue {
-  background: linear-gradient(135deg, #f0f7ff 0%, #e0efff 100%);
+.dash-header-text h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(1.45rem, 3vw, 2.25rem);
+  font-weight: 900;
 }
 
-.overview-pink {
-  background: linear-gradient(135deg, #fff0ff 0%, #ffe0ff 100%);
+.dash-header-text p {
+  max-width: 680px;
+  margin: 0.5rem 0 0;
+  color: #64748b;
+  line-height: 1.6;
 }
 
-.overview-green {
-  background: linear-gradient(135deg, #f0fff0 0%, #e0ffe0 100%);
-}
-
-.overview-yellow {
-  background: linear-gradient(135deg, #fff8e8 0%, #ffe8c8 100%);
-}
-
-.overview-purple {
-  background: linear-gradient(135deg, #e0dbfa 0%, #e7e4f8 100%);
-}
-.overview-gray {
-  background: linear-gradient(135deg, #e0e0e0 0%, #e0e0e0 100%);
-}
-
-/* Critical stock - màu đỏ nhạt với animation */
-.overview-critical {
-  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-}
-
-.overview-critical .overview-icon {
-  background: white;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-}
-
-.overview-critical .overview-icon i {
-  color: #ef4444;
-  font-size: 1.5rem;
-}
-
-/* Animation pulse khi có stock nguy cấp */
-.overview-critical.has-critical-stock {
-  animation: criticalPulse 3s ease-in-out infinite;
-  border: 2px solid #ef4444;
-}
-
-@keyframes criticalPulse {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
-  }
-  50% {
-    transform: scale(1.03);
-    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
-  }
-}
-
-.overview-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
+.dash-header-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  gap: 0.75rem;
 }
 
-.overview-blue .overview-icon i {
-  color: var(--pastel-blue);
-  font-size: 1.5rem;
-}
-
-.overview-pink .overview-icon i {
-  color: var(--pastel-pink);
-  font-size: 1.5rem;
-}
-
-.overview-green .overview-icon i {
-  color: var(--pastel-green);
-  font-size: 1.5rem;
-}
-
-.overview-yellow .overview-icon i {
-  color: var(--pastel-yellow);
-  font-size: 1.5rem;
-}
-
-.overview-value {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #4a4a4a;
-  margin-bottom: 0.25rem;
-}
-
-.overview-label {
-  font-size: 0.8125rem;
-  color: #8b7ab8;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stats-grid > *,
-.order-status-grid > *,
-.charts-row > *,
-.lists-row > * {
-  min-width: 0;
-}
-
-/* Lists Row */
-.lists-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-}
-
-.list-container {
-  background: white;
-  border-radius: 16px;
-  border: 2px solid #f0f0f0;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.list-header {
-  padding: 1rem 2rem;
-  background: linear-gradient(135deg, #fff1e6 0%, #ffe5d9 100%);
-}
-
-.list-title {
-  color: #000 !important;
-  /* text-shadow: 0 1px 2px rgba(0,0,0,0.1); */
-  font-weight: 700;
-}
-
-.list-title i {
-  color: #000 !important;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
-  font-size: 1.3rem;
-}
-
-.list-content {
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.list-item {
+/* Alert banners */
+.alert-banner {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #f5f3ff;
-  transition: background 0.2s;
+  padding: 1rem 1.25rem;
+  border: 1px solid #fecaca;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, #fff1f2, #fff);
+  box-shadow: 0 12px 30px rgba(220, 38, 38, 0.08);
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.list-item:hover {
-  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+.alert-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px rgba(220, 38, 38, 0.12);
 }
 
-.list-item:last-child {
-  border-bottom: none;
+.alert-icon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 1rem;
+  font-size: 1.2rem;
+  color: #dc2626;
+  background: #fee2e2;
 }
 
-.item-image {
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  object-fit: cover;
-  border: 2px solid var(--pastel-purple);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.item-info {
+.alert-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
   flex: 1;
-  min-width: 0;
 }
 
-.item-name {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: #4a4a4a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 0.25rem;
+.alert-text strong {
+  color: #991b1b;
+  font-size: 1.05rem;
+  font-weight: 800;
 }
 
-.item-code {
-  font-size: 0.8125rem;
-  color: #8b7ab8;
-  font-weight: 500;
+.alert-text span {
+  color: #b91c1c;
+  font-size: 0.85rem;
 }
 
-.item-stats {
-  text-align: right;
-}
-
-.item-qty {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--pastel-purple);
-  margin-bottom: 0.5rem;
-}
-
-.progress-bar {
-  width: 90px;
-  height: 8px;
-  background: #f0f0f0;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: #1a1ee6;
-  border-radius: 4px;
-  transition: width 0.3s;
-}
-
-.item-stock {
-  text-align: right;
-}
-
-.stock-badge {
-  font-size: 0.875rem;
-  font-weight: 700;
-  padding: 0.5rem 0.875rem;
-  border-radius: 8px;
-  margin-bottom: 0.25rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-.badge-critical {
-  background: var(--pastel-red);
-  color: #b84a4a;
-}
-
-.badge-low {
-  background: var(--pastel-yellow);
-  color: #b8860b;
-}
-
-.badge-warning {
-  background: var(--pastel-orange);
-  color: #b89f0b;
-}
-
-.stock-label {
-  font-size: 0.75rem;
-  color: #8b7ab8;
-  font-weight: 500;
-}
-
-.order-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+.alert-action {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  gap: 0.4rem;
+  color: #dc2626;
+  font-weight: 800;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
-.order-icon i {
-  font-size: 1.25rem;
-}
-
-.order-icon-pending {
-  background: var(--pastel-yellow);
-  color: #b8860b;
-}
-
-.order-icon-approved {
-  background: var(--pastel-blue);
-  color: #4a80c0;
-}
-
-.order-icon-completed {
-  background: var(--pastel-green);
-  color: #5fa85f;
-}
-
-.order-icon-rejected {
-  background: var(--pastel-red);
-  color: #d66b6b;
-}
-
-.order-info {
-  flex: 1;
-}
-
-.order-number {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: #4a4a4a;
-  margin-bottom: 0.25rem;
-}
-
-.order-meta {
-  font-size: 0.8125rem;
-  color: #8b7ab8;
-  font-weight: 500;
-}
-
-.order-status {
-  text-align: right;
-}
-
-.status-badge {
-  font-size: 0.8125rem;
+.ok-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  border: 1px solid #bbf7d0;
+  border-radius: 1.25rem;
+  background: linear-gradient(135deg, #f0fdf4, #fff);
+  color: #15803d;
   font-weight: 700;
-  padding: 0.375rem 0.875rem;
-  border-radius: 8px;
-  display: inline-block;
-  margin-bottom: 0.25rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-.status-pending {
-  background: var(--pastel-yellow);
-  color: #b8860b;
+.ok-icon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 1rem;
+  font-size: 1rem;
+  color: #16a34a;
+  background: #dcfce7;
 }
 
-.status-approved {
-  background: var(--pastel-blue);
-  color: #4a80c0;
+/* KPI grid */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
 }
 
-.status-completed {
-  background: var(--pastel-green);
-  color: #5fa85f;
+.kpi-card {
+  position: relative;
+  display: flex;
+  min-height: 140px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 1.1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.25rem;
+  background: white;
+  text-align: left;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.status-rejected {
-  background: var(--pastel-red);
-  color: #d66b6b;
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.09);
 }
 
-.order-date {
+.kpi-card.danger {
+  border-color: #fecaca;
+  background: linear-gradient(135deg, #fff, #fff1f2);
+}
+
+.kpi-icon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 1rem;
+  font-size: 1.15rem;
+}
+
+.kpi-icon.purple {
+  color: #6d28d9;
+  background: #ede9fe;
+}
+
+.kpi-icon.green {
+  color: #16a34a;
+  background: #dcfce7;
+}
+
+.kpi-icon.red {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+.kpi-icon.orange {
+  color: #ea580c;
+  background: #ffedd5;
+}
+
+.kpi-label {
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.kpi-card strong {
+  color: #0f172a;
+  font-size: 1.55rem;
+  font-weight: 900;
+}
+
+.kpi-card small {
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+/* Area comparison */
+.area-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.area-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 1.25rem;
+  background: white;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+}
+
+.area-card.smd {
+  border-top: 4px solid #3b82f6;
+}
+
+.area-card.mainline {
+  border-top: 4px solid #10b981;
+}
+
+.area-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.area-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.area-badge.smd {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.area-badge.mainline {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.area-card-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.area-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.area-stat-label {
+  color: #94a3b8;
   font-size: 0.75rem;
-  color: #8b7ab8;
-  font-weight: 500;
+  font-weight: 700;
+}
+
+.area-stat strong {
+  color: #0f172a;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.area-stat strong.text-danger {
+  color: #dc2626;
+}
+
+.area-card-footer {
+  display: flex;
+  gap: 1rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid #f1f5f9;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.area-card-footer span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.text-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 0;
+  background: transparent;
+  color: var(--primary-color);
+  font-weight: 800;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+/* Tabs */
+.dash-tabs {
+  border: 1px solid #e2e8f0;
+  border-radius: 1.25rem;
+  background: white;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+  padding: 0.5rem 1rem 1.25rem;
+}
+
+.tab-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.25rem 1rem;
+  color: #64748b;
+}
+
+.tab-head p {
+  margin: 0;
+  font-size: 0.88rem;
 }
 
 .empty-state {
-  padding: 3rem 1.5rem;
+  display: grid;
+  place-items: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1rem;
+  color: #94a3b8;
   text-align: center;
-  color: var(--pastel-purple);
 }
 
 .empty-state i {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
+  font-size: 1.75rem;
 }
 
 .empty-state p {
-  font-size: 0.875rem;
   margin: 0;
-  font-weight: 500;
+  font-weight: 700;
 }
 
-/* Responsive */
-@media (max-width: 1280px) {
-  .stats-grid,
-  .order-status-grid,
-  .charts-row,
-  .lists-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .stats-grid,
-  .order-status-grid,
-  .charts-row,
-  .lists-row {
-    grid-template-columns: 1fr !important;
-  }
-
-  .stat-card-compact {
-    padding: 1.25rem !important;
-  }
-  .status-card {
-    padding: 1rem !important;
-  }
-  .stat-value-compact {
-    font-size: 1.5rem !important;
-  }
-  .status-value {
-    font-size: 1.75rem !important;
-  }
-
-  .chart-container,
-  .overview-container,
-  .list-container {
-    min-width: 0 !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-  /* Overview grid: mobile 1 cột */
-  .overview-grid {
-    grid-template-columns: 1fr !important;
-    gap: 0.75rem !important;
-  }
-
-  .overview-item {
-    padding: 1rem !important;
-  }
-}
-
-/* Thêm vào <style scoped> */
-.stat-card-compact.cursor-pointer {
-  cursor: pointer;
-}
-
-.stat-card-compact.cursor-pointer:hover {
-  transform: translateY(-6px); /* Tăng hiệu ứng hover */
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-.stat-card-compact.cursor-pointer:active {
-  transform: translateY(-2px);
-}
-
-/* DashboardView.vue - Style */
-.clickable-status-card {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.clickable-status-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-.clickable-status-card:active {
-  transform: translateY(-2px) scale(1.01);
-}
-
-/* Nav arrow indicator */
-.nav-arrow {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: rgba(0, 0, 0, 0.3);
-  font-size: 1.25rem;
-  transition: all 0.3s ease;
-}
-
-.clickable-status-card:hover .nav-arrow {
-  color: rgba(0, 0, 0, 0.6);
-  transform: translateY(-50%) translateX(4px);
-}
-
-/* Subtle shine effect on hover */
-.clickable-status-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  background: linear-gradient(
-    45deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.2) 100%
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.clickable-status-card:hover::before {
-  opacity: 1;
-}
-
-/* Badge thông báo - FIX */
-.update-badge {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  min-width: auto;
-  height: auto;
-  padding: 6px 12px;
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  border-radius: 12px;
+/* Alert table */
+.item-cell {
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
-  animation: badgeBounce 1.5s ease-in-out infinite;
-  z-index: 10;
+  gap: 0.6rem;
+}
+
+.item-cell img {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.65rem;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.item-cell div {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-cell strong {
+  color: #0f172a;
+  font-size: 0.88rem;
+}
+
+.item-cell span {
+  color: #94a3b8;
+  font-size: 0.76rem;
+}
+
+.status-chip {
+  display: inline-flex;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.status-chip.normal {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.status-chip.warning {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.status-chip.low {
+  color: #c2410c;
+  background: #ffedd5;
+}
+
+.status-chip.critical {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.status-chip.out-of-stock {
+  color: #fff;
+  background: #ef4444;
+}
+
+.status-chip.not-configured {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+/* Activity tab */
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #f1f5f9;
+  border-radius: 1rem;
+}
+
+.panel.wide {
+  grid-column: span 2;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.panel-header h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.panel-header p {
+  margin: 0.2rem 0 0;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.simple-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.simple-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #f1f5f9;
+  border-radius: 0.85rem;
+  background: #f8fafc;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.simple-row:hover {
+  border-color: #cbd5e1;
+  background: #fff;
+}
+
+.simple-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.simple-row strong {
+  color: #0f172a;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.simple-row span {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.order-status {
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
   white-space: nowrap;
 }
 
-.update-badge.approved-badge {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+.order-status.pending {
+  color: #b45309;
+  background: #fef3c7;
 }
 
-.badge-count {
-  color: white;
+.order-status.approved {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.order-status.completed {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.order-status.rejected {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.top-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.top-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #f1f5f9;
+  border-radius: 0.85rem;
+  background: #f8fafc;
+}
+
+.top-item img {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.65rem;
+  object-fit: cover;
+  background: #fff;
+}
+
+.item-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.item-main strong {
+  color: #0f172a;
+  font-size: 0.85rem;
+}
+
+.item-main span {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.progress {
+  height: 0.35rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--primary-color);
+}
+
+.item-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  white-space: nowrap;
+}
+
+.item-side b {
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.item-side small {
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+
+/* Charts tab */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.chart-panel {
+  border: 1px solid #f1f5f9;
+  border-radius: 1rem;
+  padding: 1rem;
+}
+
+.chart-panel.wide {
+  grid-column: span 2;
+}
+
+.chart-panel h3 {
+  margin: 0 0 0.75rem;
+  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.chart-box {
+  height: 260px;
+  position: relative;
+}
+
+.chart-box.small {
+  height: 220px;
+}
+
+.chart-grid.single {
+  grid-template-columns: 1fr;
+}
+
+.chart-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.chart-panel-header h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.chart-panel-desc {
+  margin: 0.2rem 0 0;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.chart-grid.single .chart-box {
+  height: 320px;
+}
+
+/* Date detail grid */
+.date-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  margin-right: 0.3rem;
+}
+
+.dot.green {
+  background: #16a34a;
+}
+
+.dot.orange {
+  background: #f97316;
+}
+
+.order-row {
+  cursor: default;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: white;
+  color: #475569;
+  cursor: pointer;
+  transition: 0.2s ease;
+  flex-shrink: 0;
+}
+
+.icon-btn:hover {
+  border-color: #cbd5e1;
+  color: var(--primary-color);
+  background: #f8fafc;
+}
+
+.select-date-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px dashed #e2e8f0;
+  border-radius: 0.85rem;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+/* Order detail modal */
+.order-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.order-modal-info {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.order-modal-info > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.order-modal-label {
+  color: #94a3b8;
   font-size: 0.75rem;
   font-weight: 700;
-  line-height: 1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-/* Animation cho Pending/Approved cards */
-.pulse-animation {
+.order-modal-note {
+  grid-column: 1 / -1;
+}
+
+.order-modal-note p {
+  margin: 0;
+  color: #334155;
+}
+
+.order-modal-body h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.item-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.item-cell img,
+.item-cell-noimg {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.6rem;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.item-cell-noimg {
+  display: grid;
+  place-items: center;
+  color: #94a3b8;
+}
+
+.item-cell div {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-cell strong {
+  color: #0f172a;
+  font-size: 0.85rem;
+}
+
+.item-cell span {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.order-modal-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.order-modal-images img {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 0.65rem;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+}
+
+/* KPI pending card */
+.kpi-pending {
   position: relative;
-  overflow: visible;
 }
 
-/* Animation nhẹ - luôn chạy khi có đơn */
-.pulse-animation.has-update {
-  animation: cardPulseSoft 3s ease-in-out infinite;
+.pending-badge {
+  position: absolute;
+  top: -0.6rem;
+  right: -0.6rem;
+  display: grid;
+  place-items: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--danger-color);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 900;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
 }
 
-@keyframes cardPulseSoft {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-  50% {
-    transform: scale(1.01);
-    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.2);
-  }
+.pending-area-links {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: auto;
 }
 
-/* Animation mạnh - chỉ chạy khi có đơn MỚI */
-.pulse-animation.has-new-update {
-  animation: cardPulseStrong 0.8s ease-in-out infinite !important;
-}
-
-@keyframes cardPulseStrong {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 12px 32px rgba(245, 158, 11, 0.5);
-  }
-}
-
-.status-approved.has-update {
-  animation: cardPulseSoftBlue 3s ease-in-out infinite;
-}
-
-@keyframes cardPulseSoftBlue {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-  50% {
-    transform: scale(1.01);
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.2);
-  }
-}
-
-.status-approved.has-new-update {
-  animation: cardPulseStrongBlue 0.8s ease-in-out infinite !important;
-}
-
-@keyframes cardPulseStrongBlue {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.5);
-  }
-}
-
-/* Clickable overview items */
-.clickable-overview {
+.pending-area-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  gap: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.65rem;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 800;
   cursor: pointer;
-  text-decoration: none;
+  transition: 0.2s ease;
 }
 
-.clickable-overview:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.pending-area-link:hover {
+  border-color: #cbd5e1;
+  background: white;
 }
 
-/* Highlight animation khi scroll đến */
-.highlight-section {
-  animation: highlightPulse 2s ease-in-out;
+.pending-area-link.smd:hover {
+  border-color: #93c5fd;
+  color: #1d4ed8;
 }
 
-@keyframes highlightPulse {
-  0% {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    transform: scale(1);
+.pending-area-link.mainline:hover {
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.pending-area-count {
+  display: grid;
+  place-items: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #0f172a;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+/* Responsive */
+@media (max-width: 1180px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  50% {
-    box-shadow: 0 8px 24px rgba(139, 122, 184, 0.4);
-    transform: scale(1.01);
+
+  .area-grid {
+    grid-template-columns: 1fr;
   }
-  100% {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    transform: scale(1);
+
+  .activity-grid,
+  .chart-grid,
+  .date-detail-grid,
+  .order-modal-info {
+    grid-template-columns: 1fr;
+  }
+
+  .panel.wide,
+  .chart-panel.wide {
+    grid-column: span 1;
   }
 }
 
-/* Thêm vào cuối <style scoped> */
-@media (max-width: 480px) {
-  .stats-grid,
-  .order-status-grid,
-  .charts-row,
-  .lists-row {
-    grid-template-columns: 1fr !important;
-  }
-
-  .stat-card-compact {
-    padding: 1.25rem;
-  }
-
-  .status-card {
+@media (max-width: 640px) {
+  .dashboard-page {
     padding: 1rem;
   }
 
-  .status-value {
-    font-size: 1.75rem;
+  .kpi-grid {
+    grid-template-columns: 1fr;
   }
 
-  .stat-value-compact {
-    font-size: 1.5rem;
+  .dash-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dash-header-actions {
+    justify-content: space-between;
   }
 }
 </style>

@@ -1,12 +1,13 @@
 import api from './api'
-import type { 
+import type {
   Item,
-  CreateItemRequest, 
+  CreateItemRequest,
   UpdateItemRequest,
   UsedInRangeItem,
   DailyMovement,
   ItemTransactionResponse,
-  ItemTransactionQuery
+  ItemTransactionQuery,
+  MachineUsageItem
 } from '@/types/item.types'
 
 export const itemAPI = {
@@ -162,13 +163,33 @@ export const itemAPI = {
   },
 
   getItemRange: async (fromDate: string, toDate: string): Promise<DailyMovement[]> => {
-  try {
-    return await api.get<DailyMovement[]>(`/api/Item/range`, {
-      params: { fromDate, toDate }
-    })
-  } catch (error: any) {
-    console.error('Error loading item range:', error)
-    return []
-  }
-}
+    try {
+      return await api.get<DailyMovement[]>(`/api/Item/range`, {
+        params: { fromDate, toDate }
+      })
+    } catch (error: any) {
+      console.error('Error loading item range:', error)
+      return []
+    }
+  },
+
+  // Item usage stats for a machine - GET /api/Item/by-machine/{machineId}
+  getByMachine: async (
+    machineId: number,
+    fromDate?: string,
+    toDate?: string,
+  ): Promise<MachineUsageItem[]> => {
+    try {
+      const params: Record<string, string> = {}
+      if (fromDate) params.fromDate = fromDate
+      if (toDate) params.toDate = toDate
+
+      return await api.get<MachineUsageItem[]>(`/api/Item/by-machine/${machineId}`, {
+        params,
+      })
+    } catch (error: any) {
+      console.error('Error loading item usage by machine:', error)
+      throw error
+    }
+  },
 }

@@ -1,5 +1,6 @@
 <template>
   <MainLayout>
+    <div class="page-gradient-bg">
     <div class="animate-fade-in">
       <!-- 3 report cards -->
       <div class="grid grid-cols-3 gap-4 mb-6">
@@ -47,11 +48,16 @@
                 {{ t('reports.chart.title') }}
               </h3>
               <div class="header-controls">
+                <Dropdown
+                  v-model="selectedArea" :options="areaOptions" optionLabel="label" optionValue="value"
+                  class="area-dropdown" @change="onAreaChange"
+                />
+                <div class="divider-v"></div>
                 <SelectButton v-model="selectedTrend" :options="trendOptions" @change="onTrendChange" :allowEmpty="false" class="trend-select" />
                 <template v-if="selectedTrend === 'Items trend'">
                   <div class="divider-v"></div>
                   <Dropdown
-                    v-model="selectedItem" :options="allItems" filter
+                    v-model="selectedItem" :options="itemsByArea" filter
                     :filterFields="['eng.partname', 'com.name', 'id', 'itemIndentifyId']"
                     @change="onItemChange" class="item-dropdown"
                   >
@@ -202,7 +208,7 @@
                   <Column :header="t('reports.chart.col.product')" style="width: 35%">
                     <template #body="{ data }">
                       <span class="font-semibold text-slate-800 uppercase text-sm">
-                        {{ data.itemName || data.item?.eng?.partname || data.item?.com?.name || `Mã: ${data.itemId}` }}
+                        {{ data.itemName || data.item?.eng?.partname || data.item?.com?.name || `${t('reports.chart.codePrefix')}: ${data.itemId}` }}
                       </span>
                     </template>
                   </Column>
@@ -237,6 +243,7 @@
           </div>
         </template>
       </Card>
+    </div>
     </div>
 
     <!-- Mobile dialog -->
@@ -385,7 +392,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import MainLayout from "@/components/MainLayout.vue";
 import Chart from "primevue/chart";
@@ -403,9 +410,17 @@ import { itemAPI } from "@/services/itemAPI";
 import { stockinAPI } from "@/services/stockinAPI";
 import { orderAPI } from "@/services/orderAPI";
 import type { Item, DailyMovement, DailyMovementItem } from "@/types/item.types";
+import { useDashboardStore, type AreaKey } from "@/stores/dashboard";
 
 const router = useRouter();
+const dashboardStore = useDashboardStore();
 const { t } = useI18n();
+const selectedArea = ref<AreaKey>("ALL");
+const areaOptions = [
+  { label: t("reports.common.areaAll"), value: "ALL" as AreaKey },
+  { label: "SMD", value: "SMD" as AreaKey },
+  { label: "MAINLINE", value: "MAINLINE" as AreaKey },
+];
 const showStockinDetail = ref(false);
 const showOrderDetail = ref(false);
 const detailStockin = ref<any>(null);
@@ -499,6 +514,10 @@ const timeOptions = ["Day", "Week", "Month"];
 const selectedTime = ref("Week");
 
 const allItems = ref<Item[]>([]);
+const itemsByArea = computed(() => {
+  if (selectedArea.value === "ALL") return allItems.value;
+  return allItems.value.filter((i) => dashboardStore.getItemArea(i) === selectedArea.value);
+});
 const selectedItem = ref<Item | null>(null);
 const rawData = ref<DailyMovement[]>([]);
 
@@ -635,6 +654,11 @@ const loadTotalTrend = async () => {
     ]);
     allStockins = Array.isArray(stockinsRes) ? stockinsRes : [];
     allOrders = Array.isArray(ordersRes) ? ordersRes : [];
+
+    if (selectedArea.value !== "ALL") {
+      allStockins = allStockins.filter((s: any) => dashboardStore.getStockinArea(s) === selectedArea.value);
+      allOrders = allOrders.filter((o: any) => dashboardStore.getOrderArea(o) === selectedArea.value);
+    }
   }
 
   const results = chunks.map(chunk => {
@@ -846,6 +870,18 @@ const onTrendChange = () => {
   loadReportData();
 };
 
+const onAreaChange = () => {
+  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
+  if (selectedTrend.value === "Items trend") {
+    if (!itemsByArea.value.find((i) => i.id === selectedItem.value?.id)) {
+      selectedItem.value = itemsByArea.value[0] ?? null;
+    }
+    buildItemsChart();
+  } else {
+    loadReportData();
+  }
+};
+
 const onItemChange = () => {
   selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
   buildItemsChart();
@@ -929,6 +965,12 @@ onUnmounted(() => { window.removeEventListener("resize", handleResize); });
 </script>
 
 <style scoped>
+:deep(.content-area) {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
 /* ── Card wrapper ─────────────────────────────────────── */
 .chart-card {
   border-radius: 14px;
@@ -1075,6 +1117,11 @@ onUnmounted(() => { window.removeEventListener("resize", handleResize); });
 
 .reset-btn .pi {
   font-size: 0.75rem;
+}
+
+/* ── Area dropdown ────────────────────────────────────── */
+.area-dropdown {
+  width: 9rem;
 }
 
 /* ── Item dropdown ────────────────────────────────────── */

@@ -15,6 +15,7 @@
     "
   />
   <MainLayout>
+    <div class="page-gradient-bg">
     <div class="animate-fade-in">
       <!-- Header -->
       <div class="flex justify-between items-center mb-4">
@@ -39,14 +40,14 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         <div>
           <label class="block mb-2 text-sm font-semibold text-gray-700">
-            Xưởng
+            {{ t("importManagement.filters.area") }}
           </label>
           <Dropdown
             v-model="selectedAreaFilter"
             :options="stockinAreaFilterOptions"
             optionLabel="label"
             optionValue="value"
-            placeholder="Chọn xưởng"
+            :placeholder="t('importManagement.filters.areaPlaceholder')"
             class="w-full"
             showClear
             @change="currentPage = 1"
@@ -85,12 +86,12 @@
 
         <div>
           <label class="block mb-2 text-sm font-semibold text-gray-700">
-            {{ t("inventoryManagement.filters.search") || "Tìm kiếm" }}
+            {{ t("importManagement.filters.search") }}
           </label>
           <span class="p-input-icon-left w-full">
             <InputText
               v-model="searchQuery"
-              placeholder="Tìm mã phiếu, người tạo, sản phẩm..."
+              :placeholder="t('importManagement.filters.searchTablePlaceholder')"
               class="w-full"
               @input="currentPage = 1"
             />
@@ -103,16 +104,16 @@
       >
         <div class="flex flex-wrap items-center gap-2">
           <Chip
-            :label="`Tổng phiếu: ${totalItems}`"
+            :label="t('importManagement.summary.totalReceipts', { count: totalItems })"
             class="chip-normal"
           />
           <Chip
-            :label="`Tổng SL nhập: ${totalImportQuantity}`"
+            :label="t('importManagement.summary.totalQuantity', { count: totalImportQuantity })"
             class="chip-warning"
           />
           <Chip
             v-if="selectedAreaFilter"
-            :label="`Xưởng: ${selectedAreaFilter}`"
+            :label="t('importManagement.summary.areaLabel', { area: selectedAreaFilter })"
             class="chip-not-configured"
           />
         </div>
@@ -154,7 +155,7 @@
   class="stockin-table"
   @row-click="(event) => viewDetail(event.data)"
 >
-  <Column header="Phiếu" class="w-28 max-w-28">
+  <Column :header="t('importManagement.table.receipt')" class="w-28 max-w-28">
     <template #body="{ data }">
       <div class="max-w-24">
         <p class="font-bold text-gray-900 truncate">
@@ -167,7 +168,7 @@
     </template>
   </Column>
 
-  <Column header="Xưởng" class="w-28 max-w-28">
+  <Column :header="t('importManagement.table.area')" class="w-28 max-w-28">
     <template #body="{ data }">
       <Chip
         :label="getStockinAreaPart(data) || '-'"
@@ -180,7 +181,7 @@
     </template>
   </Column>
 
-  <Column header="Người tạo" class="w-36 max-w-36">
+  <Column :header="t('importManagement.table.createdBy')" class="w-36 max-w-36">
     <template #body="{ data }">
       <span class="block max-w-32 truncate font-medium text-gray-800">
         {{ data.account?.username || "-" }}
@@ -188,7 +189,7 @@
     </template>
   </Column>
 
-  <Column header="Sản phẩm nhập" class="min-w-96 max-w-96">
+  <Column :header="t('importManagement.table.importedProducts')" class="min-w-96 max-w-96">
     <template #body="{ data }">
       <div
         v-if="data.stockInDetails?.length"
@@ -236,7 +237,7 @@
           class="text-left text-xs font-semibold text-primary hover:underline max-w-fit"
           @click.stop="viewDetail(data)"
         >
-          +{{ data.stockInDetails.length - 3 }} sản phẩm khác
+          {{ t("importManagement.table.moreProducts", { count: data.stockInDetails.length - 3 }) }}
         </button>
       </div>
 
@@ -246,7 +247,7 @@
     </template>
   </Column>
 
-  <Column header="Tổng SL" class="w-24 max-w-24">
+  <Column :header="t('importManagement.table.totalQty')" class="w-24 max-w-24">
     <template #body="{ data }">
       <span class="block max-w-20 truncate font-bold text-primary">
         {{ getStockinTotalQuantity(data) || 0 }}
@@ -254,7 +255,7 @@
     </template>
   </Column>
 
-  <Column header="Ảnh" class="w-32 max-w-32">
+  <Column :header="t('importManagement.table.images')" class="w-32 max-w-32">
     <template #body="{ data }">
       <div class="flex items-center gap-2 max-w-28">
         <button
@@ -293,7 +294,7 @@
     </template>
   </Column>
 
-  <Column header="Thao tác" class="w-32 max-w-32">
+  <Column :header="t('importManagement.table.actions')" class="w-32 max-w-32">
     <template #body="{ data }">
       <div class="flex items-center gap-1" @click.stop>
         <Button
@@ -349,7 +350,7 @@
         </div>
 
         <div class="stockin-card-row">
-          <span class="stockin-card-label">Xưởng</span>
+          <span class="stockin-card-label">{{ t("importManagement.card.area") }}</span>
           <span class="stockin-card-value">
             {{ getStockinAreaPart(stockin) }}
           </span>
@@ -443,6 +444,7 @@
         @goto="goToPage"
       />
     </div>
+    </div>
 
     <!-- ==================== CREATE STOCKIN DIALOG ==================== -->
     <Dialog
@@ -456,7 +458,7 @@
         <!-- Xưởng -->
         <div>
           <label class="block mb-2 text-sm font-semibold text-gray-700">
-            Xưởng <span class="text-red-500">*</span>
+            {{ t("importManagement.createDialog.area") }} <span class="text-red-500">*</span>
           </label>
 
           <Dropdown
@@ -464,7 +466,7 @@
             :options="areaPartOptions"
             optionLabel="label"
             optionValue="value"
-            placeholder="Chọn xưởng nhập kho"
+            :placeholder="t('importManagement.createDialog.areaPlaceholder')"
             class="w-full"
             appendTo="body"
           >
@@ -574,7 +576,7 @@
                   :placeholder="
                     createForm.areaPart
                       ? t('importManagement.createDialog.productPlaceholder')
-                      : 'Vui lòng chọn xưởng trước'
+                      : t('importManagement.createDialog.selectAreaFirst')
                   "
                   class="w-full"
                   :filter="true"
@@ -931,7 +933,7 @@
           </div>
           <div>
             <label class="block text-sm text-gray-600 mb-1">
-              Xưởng
+              {{ t("importManagement.detailDialog.area") }}
             </label>
             <p class="font-semibold text-gray-900">
               {{ getStockinAreaPart(selectedStockin) }}
@@ -1447,7 +1449,7 @@ const handleDialogPaste = async (event: ClipboardEvent) => {
     toast.add({
       severity: "success",
       summary: t("importManagement.toast.successTitle"),
-      detail: "Đã dán ảnh từ clipboard",
+      detail: t("importManagement.toast.pastedImage"),
       life: 2000,
     });
   }
@@ -1565,7 +1567,7 @@ const confirmAndCreateStockin = async () => {
     toast.add({
       severity: "warn",
       summary: t("importManagement.toast.warningTitle"),
-      detail: "Vui lòng chọn xưởng nhập kho",
+      detail: t("importManagement.toast.selectAreaRequired"),
       life: 3000,
     });
     return;
@@ -1580,7 +1582,7 @@ const confirmAndCreateStockin = async () => {
     toast.add({
       severity: "warn",
       summary: t("importManagement.toast.warningTitle"),
-      detail: "Có sản phẩm không thuộc xưởng đã chọn. Vui lòng chọn lại sản phẩm.",
+      detail: t("importManagement.toast.productAreaMismatch"),
       life: 3000,
     });
     return;
@@ -1862,7 +1864,7 @@ const handleGlobalPaste = async (event: ClipboardEvent) => {
     toast.add({
       severity: "success",
       summary: t("importManagement.toast.successTitle"),
-      detail: "Đã dán ảnh từ clipboard",
+      detail: t("importManagement.toast.pastedImage"),
       life: 2000,
     });
   }
@@ -2067,7 +2069,7 @@ const addItemRow = () => {
     toast.add({
       severity: "warn",
       summary: t("importManagement.toast.warningTitle"),
-      detail: "Vui lòng chọn xưởng trước khi thêm sản phẩm",
+      detail: t("importManagement.toast.selectAreaBeforeAddProduct"),
       life: 3000,
     });
     return;
@@ -2373,6 +2375,12 @@ watch(
 </script>
 
 <style scoped>
+:deep(.content-area) {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
 /* ── Image container ── */
 .image-container {
   position: relative;

@@ -1,5 +1,6 @@
 <template>
   <MainLayout>
+    <div class="page-gradient-bg">
     <div class="animate-fade-in">
       <!-- Header - KHÔNG nằm trong reportContent -->
       <div
@@ -63,6 +64,19 @@
               />
             </div>
 
+            <!-- Area -->
+            <div class="field">
+              <label>{{ t("reports.common.filterArea") }}</label>
+              <Dropdown
+                v-model="selectedArea"
+                :options="areaOptions"
+                optionLabel="label"
+                optionValue="value"
+                class="w-full"
+                style="width: 100%"
+              />
+            </div>
+
             <!-- Buttons -->
             <div class="actions">
               <Button
@@ -73,6 +87,21 @@
               />
             </div>
           </div>
+        </template>
+      </Card>
+
+      <!-- Trend Chart -->
+      <Card style="margin-bottom: 1.5rem">
+        <template #content>
+          <AreaTrendChart
+            :title="t('reports.common.trendTitleStockin')"
+            :labels="trendLabels"
+            :smd-data="trendSmdData"
+            :mainline-data="trendMainlineData"
+            :value-label="t('reports.common.trendValueStockin')"
+            v-model:period="trendPeriod"
+            @point-click="onTrendPointClick"
+          />
         </template>
       </Card>
 
@@ -442,6 +471,63 @@
           </div>
         </div>
       </div>
+
+      <!-- Date detail dialog -->
+      <Dialog
+        v-model:visible="dateDetailVisible"
+        modal
+        :header="t('reports.common.detailDialogTitle', { date: selectedTrendDate })"
+        style="width: 90vw; max-width: 900px"
+      >
+        <DataTable :value="selectedDateStockins" responsiveLayout="scroll">
+          <Column :header="t('reports.importReport.table.receiptCode')">
+            <template #body="{ data }">#{{ data.id }}</template>
+          </Column>
+          <Column field="area" :header="t('reports.common.colArea')" />
+          <Column :header="t('reports.importReport.table.importer')">
+            <template #body="{ data }">{{ data.account?.username || "-" }}</template>
+          </Column>
+          <Column :header="t('reports.common.colQty')">
+            <template #body="{ data }">{{ calculateStockinQty(data) }}</template>
+          </Column>
+          <Column :header="t('reports.common.colAction')" style="width: 80px; text-align: center">
+            <template #body="{ data }">
+              <Button icon="pi pi-eye" text rounded @click="openStockinDetail(data)" />
+            </template>
+          </Column>
+        </DataTable>
+        <div v-if="!selectedDateStockins.length" style="text-align: center; padding: 2rem; color: #999">
+          {{ t("reports.common.noData") }}
+        </div>
+      </Dialog>
+
+      <!-- Stockin detail dialog -->
+      <Dialog
+        v-model:visible="stockinDetailVisible"
+        modal
+        :header="selectedStockin ? `#${selectedStockin.id}` : ''"
+        style="width: 90vw; max-width: 800px"
+      >
+        <DataTable :value="selectedStockin?.stockInDetails || []" responsiveLayout="scroll">
+          <Column :header="t('reports.importReport.table.product')">
+            <template #body="{ data }">
+              {{ data.item?.eng?.partname || data.item?.com?.name || "-" }}
+            </template>
+          </Column>
+          <Column :header="t('reports.importReport.table.unitPrice')">
+            <template #body="{ data }">
+              {{ formatCurrency(parseFloat(data.item?.price || "0")) }}
+            </template>
+          </Column>
+          <Column field="quantity" :header="t('reports.importReport.table.quantity')" />
+          <Column :header="t('reports.importReport.table.subtotal')">
+            <template #body="{ data }">
+              {{ formatCurrency(data.quantity * parseFloat(data.item?.price || "0")) }}
+            </template>
+          </Column>
+        </DataTable>
+      </Dialog>
+    </div>
     </div>
   </MainLayout>
 </template>
@@ -451,14 +537,21 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import MainLayout from "@/components/MainLayout.vue";
 import Calendar from "primevue/calendar";
+import Dropdown from "primevue/dropdown";
 import ProgressSpinner from "primevue/progressspinner";
+import Dialog from "primevue/dialog";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import AreaTrendChart from "@/components/charts/AreaTrendChart.vue";
 import { useStockinStore } from "@/stores/stockinStore";
 import { stockinAPI } from "@/services/stockinAPI";
 import { useI18n } from "vue-i18n";
 import { useTranslationHelpers } from "@/composables/useTranslationHelpers";
+import { useDashboardStore, type AreaKey } from "@/stores/dashboard";
 
 const router = useRouter();
 const stockinStore = useStockinStore();
+const dashboardStore = useDashboardStore();
 const { t } = useI18n();
 const { getUnitLabel } = useTranslationHelpers();
 const loading = ref(false);
@@ -466,6 +559,12 @@ const loading = ref(false);
 // Date filters
 const fromDate = ref<Date>(new Date(new Date().getFullYear(), 0, 1, 0, 0, 0));
 const toDate = ref<Date>(new Date(new Date().setHours(23, 59, 59)));
+const selectedArea = ref<AreaKey>("ALL");
+const areaOptions = [
+  { label: t("reports.common.areaAll"), value: "ALL" as AreaKey },
+  { label: "SMD", value: "SMD" as AreaKey },
+  { label: "MAINLINE", value: "MAINLINE" as AreaKey },
+];
 
 // Format date to ISO string with time
 const formatDateTimeForAPI = (date: Date): string => {
@@ -498,11 +597,17 @@ const loadData = async () => {
 const resetFilter = () => {
   fromDate.value = new Date(new Date().getFullYear(), 0, 1, 0, 0, 0);
   toDate.value = new Date(new Date().setHours(23, 59, 59));
+  selectedArea.value = "ALL";
   loadData();
 };
 
 // Computed values
-const filteredStockins = computed(() => stockinStore.stockins);
+const filteredStockins = computed(() => {
+  if (selectedArea.value === "ALL") return stockinStore.stockins;
+  return stockinStore.stockins.filter(
+    (stockin) => dashboardStore.getStockinArea(stockin) === selectedArea.value,
+  );
+});
 
 const totalItems = computed(() => {
   if (!Array.isArray(filteredStockins.value)) return 0;
@@ -559,12 +664,90 @@ const printReport = () => {
   window.print();
 };
 
+// ===== Trend chart (SMD vs MAINLINE) =====
+const trendPeriod = ref<"7" | "30" | "all">("30");
+
+const formatDateKey = (date: Date | string) => {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate(),
+  ).padStart(2, "0")}`;
+};
+
+const formatLabel = (key: string) => {
+  const [, m, d] = key.split("-");
+  return `${d}/${m}`;
+};
+
+const calculateStockinQty = (stockin: any) =>
+  (stockin.stockInDetails || []).reduce(
+    (sum: number, detail: any) => sum + (detail.quantity || 0),
+    0,
+  );
+
+const stockinsTrendMap = computed(() => {
+  const map = new Map<string, { SMD: number; MAINLINE: number; stockins: any[] }>();
+  for (const stockin of stockinStore.stockins) {
+    const key = formatDateKey(stockin.stockInDate);
+    const area = dashboardStore.getStockinArea(stockin);
+    if (!map.has(key)) map.set(key, { SMD: 0, MAINLINE: 0, stockins: [] });
+    const entry = map.get(key)!;
+    if (area === "SMD" || area === "MAINLINE") {
+      entry[area] += calculateStockinQty(stockin);
+    }
+    entry.stockins.push({ ...stockin, area });
+  }
+  return map;
+});
+
+const sortedTrendKeys = computed(() => {
+  let keys = Array.from(stockinsTrendMap.value.keys()).sort();
+  if (trendPeriod.value !== "all") {
+    const n = Number(trendPeriod.value);
+    keys = keys.slice(-n);
+  }
+  return keys;
+});
+
+const trendLabels = computed(() => sortedTrendKeys.value.map(formatLabel));
+const trendSmdData = computed(() =>
+  sortedTrendKeys.value.map((k) => stockinsTrendMap.value.get(k)?.SMD || 0),
+);
+const trendMainlineData = computed(() =>
+  sortedTrendKeys.value.map((k) => stockinsTrendMap.value.get(k)?.MAINLINE || 0),
+);
+
+const dateDetailVisible = ref(false);
+const selectedTrendDate = ref("");
+const selectedDateStockins = ref<any[]>([]);
+const stockinDetailVisible = ref(false);
+const selectedStockin = ref<any>(null);
+
+const onTrendPointClick = (index: number) => {
+  const key = sortedTrendKeys.value[index];
+  if (!key) return;
+  selectedTrendDate.value = formatLabel(key);
+  selectedDateStockins.value = stockinsTrendMap.value.get(key)?.stockins || [];
+  dateDetailVisible.value = true;
+};
+
+const openStockinDetail = (stockin: any) => {
+  selectedStockin.value = stockin;
+  stockinDetailVisible.value = true;
+};
+
 onMounted(() => {
   loadData();
 });
 </script>
 
 <style scoped>
+:deep(.content-area) {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
 .report-content {
   background: white;
 }
@@ -631,7 +814,7 @@ onMounted(() => {
 
 .filter-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr auto;
   gap: 1rem;
   align-items: end;
 }

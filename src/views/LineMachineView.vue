@@ -2,7 +2,7 @@
   <Toast position="top-right" />
 
   <MainLayout>
-    <div class="min-h-screen bg-slate-50 p-3 sm:p-4 lg:p-6">
+    <div class="page-gradient-bg">
       <div class="mx-auto max-w-7xl space-y-5">
         <!-- HEADER -->
         <section
@@ -13,11 +13,11 @@
           >
             <div>
               <h1 class="text-xl font-bold text-slate-900 sm:text-2xl">
-                Quản lý Line & Machine
+                {{ t("lineMachine.title") }}
               </h1>
 
               <p class="mt-1 text-sm text-slate-500">
-                Quản lý danh sách line sản xuất, xưởng và máy theo từng line.
+                {{ t("lineMachine.subtitle") }}
               </p>
             </div>
 
@@ -28,7 +28,7 @@
                 :disabled="store.loading"
                 @click="openCreateLineModal"
               >
-                + Thêm Line
+                {{ t("lineMachine.addLine") }}
               </button>
 
               <button
@@ -37,7 +37,7 @@
                 :disabled="store.loading || store.lines.length === 0"
                 @click="openCreateMachineModal()"
               >
-                + Thêm Machine
+                {{ t("lineMachine.addMachine") }}
               </button>
 
               <button
@@ -46,7 +46,7 @@
                 :disabled="store.loading || store.lines.length < 2"
                 @click="openCopyMachinesModal()"
               >
-                Copy máy
+                {{ t("lineMachine.copyMachine") }}
               </button>
             </div>
           </div>
@@ -57,7 +57,7 @@
               <p
                 class="text-xs font-medium uppercase tracking-wide text-slate-500"
               >
-                Tổng Line
+                {{ t("lineMachine.totalLine") }}
               </p>
               <p class="mt-1 text-2xl font-bold text-slate-900">
                 {{ store.lines.length }}
@@ -68,7 +68,7 @@
               <p
                 class="text-xs font-medium uppercase tracking-wide text-slate-500"
               >
-                Tổng Machine
+                {{ t("lineMachine.totalMachine") }}
               </p>
               <p class="mt-1 text-2xl font-bold text-slate-900">
                 {{ store.machines.length }}
@@ -106,20 +106,20 @@
           <div class="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
               <label class="mb-1.5 block text-sm font-semibold text-slate-700">
-                Tìm kiếm
+                {{ t("lineMachine.search") }}
               </label>
 
               <input
                 v-model.trim="searchText"
                 type="text"
-                placeholder="Tìm theo tên line hoặc machine..."
+                :placeholder="t('lineMachine.searchPlaceholder')"
                 class="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
               />
             </div>
 
             <div>
               <label class="mb-1.5 block text-sm font-semibold text-slate-700">
-                Xưởng
+                {{ t("lineMachine.area") }}
               </label>
 
               <div class="grid grid-cols-3 gap-2 sm:flex">
@@ -133,7 +133,7 @@
                   "
                   @click="areaFilter = 'ALL'"
                 >
-                  Tất cả
+                  {{ t("lineMachine.all") }}
                 </button>
 
                 <button
@@ -184,7 +184,7 @@
           ></div>
 
           <p class="mt-3 text-sm font-medium text-slate-500">
-            Đang tải dữ liệu...
+            {{ t("lineMachine.loading") }}
           </p>
         </div>
 
@@ -194,11 +194,11 @@
           class="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm"
         >
           <p class="text-base font-semibold text-slate-800">
-            Không có dữ liệu phù hợp
+            {{ t("lineMachine.noData") }}
           </p>
 
           <p class="mt-1 text-sm text-slate-500">
-            Hãy thử đổi bộ lọc hoặc thêm line mới.
+            {{ t("lineMachine.noDataHint") }}
           </p>
 
           <button
@@ -206,7 +206,7 @@
             class="mt-4 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-95"
             @click="openCreateLineModal"
           >
-            + Thêm Line
+            {{ t("lineMachine.addLine") }}
           </button>
         </div>
 
@@ -216,10 +216,9 @@
             class="lm-line-toolbar rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
           >
             <div>
-              <p class="text-base font-bold text-slate-900">Danh sách Line</p>
+              <p class="text-base font-bold text-slate-900">{{ t("lineMachine.lineListTitle") }}</p>
               <p class="mt-1 text-sm text-slate-500">
-                {{ filteredLines.length }} line phù hợp bộ lọc. Line có nhiều máy
-                sẽ được thu gọn để dễ theo dõi.
+                {{ t("lineMachine.lineListHint", { count: filteredLines.length }) }}
               </p>
             </div>
 
@@ -229,7 +228,7 @@
                 class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95"
                 @click="expandAllLines"
               >
-                Mở tất cả
+                {{ t("lineMachine.expandAll") }}
               </button>
 
               <button
@@ -237,7 +236,7 @@
                 class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95"
                 @click="collapseAllLines"
               >
-                Thu gọn
+                {{ t("lineMachine.collapseAll") }}
               </button>
             </div>
           </div>
@@ -286,23 +285,9 @@
                     <span
                       class="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700"
                     >
-                      {{ getMachinesByLineId(line.id).length }} máy
+                      {{ t("lineMachine.machineCount", { count: getMachinesByLineId(line.id).length }) }}
                     </span>
                   </div>
-
-                  <p class="mt-1 text-sm text-slate-500">
-                    {{
-                      isLineExpanded(line.id)
-                        ? "Đang mở danh sách machine"
-                        : "Đang thu gọn danh sách machine"
-                    }}
-                    <span
-                      v-if="getMachinesByLineId(line.id).length >= 8"
-                      class="lm-line-hint"
-                    >
-                      · line này có nhiều máy
-                    </span>
-                  </p>
                 </div>
               </div>
 
@@ -312,7 +297,7 @@
                   class="rounded-xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 active:scale-95"
                   @click="openCreateMachineModal(line.id)"
                 >
-                  + Máy
+                  {{ t("lineMachine.addMachineShort") }}
                 </button>
 
                 <button
@@ -321,7 +306,7 @@
                   :disabled="store.lines.length < 2"
                   @click="openCopyMachinesModal(line.id)"
                 >
-                  Copy
+                  {{ t("lineMachine.copy") }}
                 </button>
 
                 <button
@@ -329,7 +314,7 @@
                   class="rounded-xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100 active:scale-95"
                   @click="openEditLineModal(line)"
                 >
-                  Sửa
+                  {{ t("lineMachine.edit") }}
                 </button>
 
                 <button
@@ -337,7 +322,7 @@
                   class="rounded-xl bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 active:scale-95"
                   @click="askDeleteLine(line)"
                 >
-                  Xóa
+                  {{ t("lineMachine.delete") }}
                 </button>
               </div>
             </div>
@@ -359,7 +344,7 @@
                           <th
                             class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
                           >
-                            Tên Machine
+                            {{ t("lineMachine.table.machineName") }}
                           </th>
 
                           <th
@@ -371,7 +356,7 @@
                           <th
                             class="w-55 px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500"
                           >
-                            Thao tác
+                            {{ t("lineMachine.table.actions") }}
                           </th>
                         </tr>
                       </thead>
@@ -385,7 +370,7 @@
                             colspan="4"
                             class="px-5 py-8 text-center text-sm text-slate-500"
                           >
-                            Line này chưa có machine.
+                            {{ t("lineMachine.table.noMachines") }}
                           </td>
                         </tr>
 
@@ -412,10 +397,34 @@
                             <div class="flex justify-end gap-2">
                               <button
                                 type="button"
+                                class="inline-flex items-center justify-center rounded-lg bg-blue-50 px-2.5 py-2 text-blue-700 transition hover:bg-blue-100 active:scale-95"
+                                :title="t('lineMachine.analytics.button')"
+                                :aria-label="t('lineMachine.analytics.button')"
+                                @click="openAnalyticsModal(machine)"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  class="h-4 w-4"
+                                >
+                                  <path d="M3 3v18h18" />
+                                  <path d="M7 16v-4" />
+                                  <path d="M12 16V8" />
+                                  <path d="M17 16v-7" />
+                                </svg>
+                              </button>
+
+                              <button
+                                type="button"
                                 class="rounded-lg bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700 transition hover:bg-amber-100 active:scale-95"
                                 @click="openEditMachineModal(machine)"
                               >
-                                Sửa
+                                {{ t("lineMachine.edit") }}
                               </button>
 
                               <button
@@ -423,7 +432,7 @@
                                 class="rounded-lg bg-red-50 px-3 py-2 text-xs font-bold text-red-700 transition hover:bg-red-100 active:scale-95"
                                 @click="askDeleteMachine(machine)"
                               >
-                                Xóa
+                                {{ t("lineMachine.delete") }}
                               </button>
                             </div>
                           </td>
@@ -440,7 +449,7 @@
                       v-if="getMachinesByLineId(line.id).length === 0"
                       class="rounded-xl border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500"
                     >
-                      Line này chưa có machine.
+                      {{ t("lineMachine.table.noMachines") }}
                     </div>
 
                     <div
@@ -462,10 +471,34 @@
                         <div class="flex shrink-0 gap-2">
                           <button
                             type="button"
+                            class="inline-flex items-center justify-center rounded-lg bg-blue-100 px-2.5 py-2 text-blue-700 active:scale-95"
+                            :title="t('lineMachine.analytics.button')"
+                            :aria-label="t('lineMachine.analytics.button')"
+                            @click="openAnalyticsModal(machine)"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="h-4 w-4"
+                            >
+                              <path d="M3 3v18h18" />
+                              <path d="M7 16v-4" />
+                              <path d="M12 16V8" />
+                              <path d="M17 16v-7" />
+                            </svg>
+                          </button>
+
+                          <button
+                            type="button"
                             class="rounded-lg bg-amber-100 px-3 py-2 text-xs font-bold text-amber-700 active:scale-95"
                             @click="openEditMachineModal(machine)"
                           >
-                            Sửa
+                            {{ t("lineMachine.edit") }}
                           </button>
 
                           <button
@@ -473,7 +506,7 @@
                             class="rounded-lg bg-red-100 px-3 py-2 text-xs font-bold text-red-700 active:scale-95"
                             @click="askDeleteMachine(machine)"
                           >
-                            Xóa
+                            {{ t("lineMachine.delete") }}
                           </button>
                         </div>
                       </div>
@@ -499,14 +532,14 @@
         <div class="flex items-start justify-between gap-4">
           <div>
             <h3 class="text-lg font-bold text-slate-900">
-              {{ lineModal.mode === "create" ? "Thêm Line" : "Sửa Line" }}
+              {{ lineModal.mode === "create" ? t("lineMachine.modal.addLine") : t("lineMachine.modal.editLine") }}
             </h3>
 
             <p class="mt-1 text-sm text-slate-500">
               {{
                 lineModal.mode === "create"
-                  ? "Tạo line mới theo xưởng."
-                  : "Chỉ hỗ trợ sửa tên line"
+                  ? t("lineMachine.modal.addLineHint")
+                  : t("lineMachine.modal.editLineHint")
               }}
             </p>
           </div>
@@ -514,7 +547,7 @@
           <button
             type="button"
             class="lm-modal-close"
-            aria-label="Đóng"
+            :aria-label="t('lineMachine.modal.close')"
             @click="closeLineModal"
           >
             ✕
@@ -524,20 +557,20 @@
         <form class="mt-5 space-y-4" @submit.prevent="submitLineForm">
           <div>
             <label class="mb-1.5 block text-sm font-semibold text-slate-700">
-              Tên Line
+              {{ t("lineMachine.modal.lineName") }}
             </label>
 
             <input
               v-model.trim="lineForm.lineName"
               type="text"
-              placeholder="Ví dụ: SA6, S12..."
+              :placeholder="t('lineMachine.modal.lineNamePlaceholder')"
               class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             />
           </div>
 
           <div>
             <label class="mb-1.5 block text-sm font-semibold text-slate-700">
-              Xưởng
+              {{ t("lineMachine.modal.area") }}
             </label>
 
             <select
@@ -556,7 +589,7 @@
               class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95"
               @click="closeLineModal"
             >
-              Hủy
+              {{ t("lineMachine.modal.cancel") }}
             </button>
 
             <button
@@ -564,7 +597,7 @@
               class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
               :disabled="submitting"
             >
-              {{ submitting ? "Đang lưu..." : "Lưu" }}
+              {{ submitting ? t("lineMachine.modal.saving") : t("lineMachine.modal.save") }}
             </button>
           </div>
         </form>
@@ -584,19 +617,19 @@
           <div>
             <h3 class="text-lg font-bold text-slate-900">
               {{
-                machineModal.mode === "create" ? "Thêm Machine" : "Sửa Machine"
+                machineModal.mode === "create" ? t("lineMachine.modal.addMachine") : t("lineMachine.modal.editMachine")
               }}
             </h3>
 
             <p class="mt-1 text-sm text-slate-500">
-              Chọn line chứa machine. Có thể chuyển machine sang line khác.
+              {{ t("lineMachine.modal.machineHint") }}
             </p>
           </div>
 
           <button
             type="button"
             class="lm-modal-close"
-            aria-label="Đóng"
+            :aria-label="t('lineMachine.modal.close')"
             @click="closeMachineModal"
           >
             ✕
@@ -606,20 +639,20 @@
         <form class="mt-5 space-y-4" @submit.prevent="submitMachineForm">
           <div>
             <label class="mb-1.5 block text-sm font-semibold text-slate-700">
-              Tên Machine
+              {{ t("lineMachine.modal.machineName") }}
             </label>
 
             <input
               v-model.trim="machineForm.machineName"
               type="text"
-              placeholder="Ví dụ: SPI, AOI, Reflow..."
+              :placeholder="t('lineMachine.modal.machineNamePlaceholder')"
               class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
             />
           </div>
 
           <div>
             <label class="mb-1.5 block text-sm font-semibold text-slate-700">
-              Thuộc Line
+              {{ t("lineMachine.modal.belongsToLine") }}
             </label>
 
             <select
@@ -642,7 +675,7 @@
               class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95"
               @click="closeMachineModal"
             >
-              Hủy
+              {{ t("lineMachine.modal.cancel") }}
             </button>
 
             <button
@@ -650,7 +683,7 @@
               class="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
               :disabled="submitting"
             >
-              {{ submitting ? "Đang lưu..." : "Lưu" }}
+              {{ submitting ? t("lineMachine.modal.saving") : t("lineMachine.modal.save") }}
             </button>
           </div>
         </form>
@@ -669,19 +702,18 @@
         <div class="flex items-start justify-between gap-4">
           <div>
             <h3 class="text-lg font-bold text-slate-900">
-              Copy machine
+              {{ t("lineMachine.copyModal.title") }}
             </h3>
 
             <p class="mt-1 text-sm text-slate-500">
-              Chọn line nguồn và line đích. Máy trùng tên trong line đích sẽ
-              được tự động bỏ qua.
+              {{ t("lineMachine.copyModal.hint") }}
             </p>
           </div>
 
           <button
             type="button"
             class="lm-modal-close"
-            aria-label="Đóng"
+            :aria-label="t('lineMachine.modal.close')"
             @click="closeCopyMachinesModal"
           >
             ✕
@@ -693,7 +725,7 @@
             <section class="lm-copy-panel">
               <div>
                 <label class="mb-1.5 block text-sm font-semibold text-slate-700">
-                  Line nguồn
+                  {{ t("lineMachine.copyModal.sourceLine") }}
                 </label>
 
                 <select
@@ -709,16 +741,16 @@
                     {{ line.lineName }} - {{ line.areaPart }} ({{
                       getMachinesByLineId(line.id).length
                     }}
-                    máy)
+                    {{ t("lineMachine.copyModal.machinesSuffix") }}
                   </option>
                 </select>
 
                 <p class="mt-2 text-xs font-medium text-slate-500">
-                  Đang chọn:
+                  {{ t("lineMachine.copyModal.selecting") }}
                   <span class="font-bold text-slate-700">
                     {{ selectedSourceLineLabel }}
                   </span>
-                  · {{ selectedSourceMachines.length }} machine
+                  · {{ selectedSourceMachines.length }} {{ t("lineMachine.copyModal.machineUnit") }}
                 </p>
               </div>
 
@@ -727,8 +759,8 @@
                 class="lm-copy-box"
               >
                 <div class="lm-copy-section-title">
-                  <p>Danh sách máy sẽ copy</p>
-                  <span>{{ selectedSourceMachines.length }} máy</span>
+                  <p>{{ t("lineMachine.copyModal.copyListTitle") }}</p>
+                  <span>{{ t("lineMachine.machineCount", { count: selectedSourceMachines.length }) }}</span>
                 </div>
 
                 <div class="lm-copy-chip-scroll">
@@ -746,22 +778,22 @@
                 v-else
                 class="rounded-2xl border border-dashed border-slate-300 bg-amber-50 p-4 text-sm font-medium text-amber-700"
               >
-                Line nguồn chưa có machine để copy.
+                {{ t("lineMachine.copyModal.noSourceMachines") }}
               </div>
 
               <div class="lm-copy-summary">
-                <p class="font-bold">Tóm tắt</p>
+                <p class="font-bold">{{ t("lineMachine.copyModal.summary") }}</p>
                 <p class="mt-1">
-                  Copy từ
+                  {{ t("lineMachine.copyModal.copyFrom") }}
                   <span class="font-bold">{{ selectedSourceLineLabel }}</span>
-                  sang
+                  {{ t("lineMachine.copyModal.to") }}
                   <span class="font-bold">
                     {{ copyMachinesForm.targetLineIds.length }}
                   </span>
-                  line đích.
+                  {{ t("lineMachine.copyModal.targetLinesSuffix") }}
                 </p>
                 <p>
-                  Machine mới dự kiến tạo:
+                  {{ t("lineMachine.copyModal.newMachinesEstimate") }}
                   <span class="font-bold">{{ totalCopyAddCount }}</span>.
                 </p>
               </div>
@@ -771,10 +803,10 @@
               <div class="lm-copy-target-head">
                 <div>
                   <label class="block text-sm font-semibold text-slate-700">
-                    Line đích
+                    {{ t("lineMachine.copyModal.targetLine") }}
                   </label>
                   <p class="mt-1 text-xs font-medium text-slate-500">
-                    Chọn một hoặc nhiều line cần nhận danh sách máy.
+                    {{ t("lineMachine.copyModal.targetLineHint") }}
                   </p>
                 </div>
 
@@ -784,7 +816,7 @@
                     class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-200 active:scale-95"
                     @click="selectAllCopyTargets"
                   >
-                    Chọn tất cả
+                    {{ t("lineMachine.copyModal.selectAll") }}
                   </button>
 
                   <button
@@ -792,7 +824,7 @@
                     class="rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-200 active:scale-95"
                     @click="clearCopyTargets"
                   >
-                    Bỏ chọn
+                    {{ t("lineMachine.copyModal.clearSelection") }}
                   </button>
                 </div>
               </div>
@@ -808,9 +840,11 @@
                       {{ line.lineName }}
                     </p>
                     <p class="mt-1 text-xs text-slate-500">
-                      {{ line.areaPart }} · hiện có
-                      {{ getMachinesByLineId(line.id).length }} máy · thêm
-                      {{ getCopyAddCount(line.id) }} máy mới
+                      {{ t("lineMachine.copyModal.targetLineInfo", {
+                        area: line.areaPart,
+                        current: getMachinesByLineId(line.id).length,
+                        add: getCopyAddCount(line.id)
+                      }) }}
                     </p>
                   </div>
 
@@ -831,7 +865,7 @@
               class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95"
               @click="closeCopyMachinesModal"
             >
-              Hủy
+              {{ t("lineMachine.modal.cancel") }}
             </button>
 
             <button
@@ -843,7 +877,7 @@
                 copyMachinesForm.targetLineIds.length === 0
               "
             >
-              {{ submitting ? "Đang copy..." : "Copy machine" }}
+              {{ submitting ? t("lineMachine.copyModal.copying") : t("lineMachine.copyModal.copyAction") }}
             </button>
           </div>
         </form>
@@ -873,7 +907,7 @@
             class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95"
             @click="closeConfirmModal"
           >
-            Hủy
+            {{ t("lineMachine.confirmModal.cancel") }}
           </button>
 
           <button
@@ -882,8 +916,177 @@
             :disabled="submitting"
             @click="submitConfirmDelete"
           >
-            {{ submitting ? "Đang xóa..." : "Xóa" }}
+            {{ submitting ? t("lineMachine.confirmModal.deleting") : t("lineMachine.confirmModal.delete") }}
           </button>
+        </div>
+      </div>
+    </div>
+  </Teleport>
+
+  <!-- ANALYTICS MODAL -->
+  <Teleport to="body">
+    <div
+      v-if="analyticsModal.visible"
+      class="lm-modal-overlay"
+      @click.self="closeAnalyticsModal"
+    >
+      <div class="lm-modal-card lm-modal-card-wide lm-modal-card-xwide flex flex-col">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">
+              {{ t("lineMachine.analytics.title") }}
+            </h3>
+
+            <p class="mt-1 text-sm text-slate-500">
+              {{
+                t("lineMachine.analytics.subtitle", {
+                  name: analyticsModal.machine?.machineName ?? "",
+                })
+              }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="lm-modal-close"
+            :aria-label="t('lineMachine.modal.close')"
+            @click="closeAnalyticsModal"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- DATE FILTER -->
+        <div class="mt-4 grid grid-cols-2 gap-3 sm:flex sm:items-end sm:gap-3">
+          <div class="sm:w-44">
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              {{ t("lineMachine.analytics.fromDate") }}
+            </label>
+            <input
+              v-model="analyticsFilter.fromDate"
+              type="date"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </div>
+
+          <div class="sm:w-44">
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              {{ t("lineMachine.analytics.toDate") }}
+            </label>
+            <input
+              v-model="analyticsFilter.toDate"
+              type="date"
+              class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </div>
+
+          <div class="col-span-2 flex gap-2 sm:col-span-1">
+            <button
+              type="button"
+              class="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="analyticsModal.loading"
+              @click="fetchMachineUsage"
+            >
+              {{ t("lineMachine.analytics.apply") }}
+            </button>
+
+            <button
+              type="button"
+              class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+              :disabled="analyticsModal.loading"
+              @click="resetAnalyticsFilter"
+            >
+              {{ t("lineMachine.analytics.reset") }}
+            </button>
+          </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div
+          v-if="!analyticsModal.loading && analyticsModal.data.length > 0"
+          class="mt-3 flex flex-wrap gap-2"
+        >
+          <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+            {{ t("lineMachine.analytics.totalItems", { count: analyticsModal.data.length }) }}
+          </span>
+          <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+            {{ t("lineMachine.analytics.totalUsed", { count: analyticsUsageTotal }) }}
+          </span>
+        </div>
+
+        <!-- TABLE -->
+        <div class="lm-machine-scroll mt-3 flex-1 rounded-xl border border-slate-200">
+          <table class="w-full table-fixed">
+            <thead class="lm-sticky-head bg-slate-50">
+              <tr>
+                <th class="w-28 px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                  {{ t("lineMachine.analytics.colCode") }}
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                  {{ t("lineMachine.analytics.colName") }}
+                </th>
+                <th class="w-24 px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                  {{ t("lineMachine.analytics.colArea") }}
+                </th>
+                <th class="w-24 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                  {{ t("lineMachine.analytics.colStock") }}
+                </th>
+                <th class="w-28 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                  {{ t("lineMachine.analytics.colUsed") }}
+                </th>
+                <th class="w-28 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                  {{ t("lineMachine.analytics.colOrderCount") }}
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr v-if="analyticsModal.loading">
+                <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">
+                  {{ t("lineMachine.analytics.loading") }}
+                </td>
+              </tr>
+
+              <tr v-else-if="analyticsModal.error">
+                <td colspan="6" class="px-4 py-10 text-center text-sm text-red-600">
+                  {{ analyticsModal.error }}
+                </td>
+              </tr>
+
+              <tr v-else-if="analyticsModal.data.length === 0">
+                <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">
+                  {{ t("lineMachine.analytics.empty") }}
+                </td>
+              </tr>
+
+              <tr
+                v-for="row in analyticsModal.data"
+                v-else
+                :key="row.itemId"
+                class="border-t border-slate-100 transition hover:bg-slate-50"
+              >
+                <td class="px-4 py-3 text-sm font-semibold text-slate-700">
+                  {{ row.itemIndentifyId }}
+                </td>
+                <td class="px-4 py-3 text-sm text-slate-900">
+                  <p class="truncate">{{ getUsageItemName(row) }}</p>
+                  <p class="text-xs text-slate-500">{{ row.unit }}</p>
+                </td>
+                <td class="px-4 py-3 text-sm text-slate-600">
+                  {{ row.areaPart }}
+                </td>
+                <td class="px-4 py-3 text-right text-sm text-slate-600">
+                  {{ row.item?.stockQty?.toLocaleString("vi-VN") ?? "-" }}
+                </td>
+                <td class="px-4 py-3 text-right text-sm font-bold text-blue-700">
+                  {{ row.totalOrdered.toLocaleString("vi-VN") }}
+                </td>
+                <td class="px-4 py-3 text-right text-sm text-slate-600">
+                  {{ row.orderCount.toLocaleString("vi-VN") }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -895,8 +1098,13 @@ import MainLayout from "@/components/MainLayout.vue";
 import Toast from "primevue/toast";
 import { useToast } from "primevue/usetoast";
 import { computed, onMounted, reactive, ref } from "vue";
+import { useI18n } from "vue-i18n";
 import { useLineMachineStore } from "@/stores/line_machine";
 import type { Line, Machine } from "@/types/line_machine.types";
+import { itemAPI } from "@/services/itemAPI";
+import type { MachineUsageItem } from "@/types/item.types";
+
+const { t } = useI18n();
 
 type AreaFilter = "ALL" | "SMD" | "Mainline";
 type ModalMode = "create" | "edit";
@@ -935,6 +1143,28 @@ const copyMachinesModal = reactive<{
   visible: boolean;
 }>({
   visible: false,
+});
+
+const analyticsModal = reactive<{
+  visible: boolean;
+  machine: Machine | null;
+  loading: boolean;
+  error: string;
+  data: MachineUsageItem[];
+}>({
+  visible: false,
+  machine: null,
+  loading: false,
+  error: "",
+  data: [],
+});
+
+const analyticsFilter = reactive<{
+  fromDate: string;
+  toDate: string;
+}>({
+  fromDate: "",
+  toDate: "",
 });
 
 const confirmModal = reactive<{
@@ -1031,7 +1261,7 @@ const selectedSourceLine = computed(() => {
 });
 
 const selectedSourceLineLabel = computed(() => {
-  if (!selectedSourceLine.value) return "Chưa chọn line nguồn";
+  if (!selectedSourceLine.value) return t("lineMachine.deleteConfirm.noSourceLine");
 
   return `${selectedSourceLine.value.lineName} - ${selectedSourceLine.value.areaPart}`;
 });
@@ -1058,8 +1288,8 @@ async function loadInitialData() {
   } catch (error) {
     showToast(
       "error",
-      "Lỗi tải dữ liệu",
-      getErrorMessage(error, "Không thể tải danh sách line / machine."),
+      t("lineMachine.toast.loadErrorTitle"),
+      getErrorMessage(error, t("lineMachine.toast.loadErrorDetail")),
     );
   }
 }
@@ -1070,8 +1300,8 @@ async function refreshAfterMutation() {
   } catch (error) {
     showToast(
       "warn",
-      "Đã thực hiện nhưng chưa tải lại dữ liệu",
-      getErrorMessage(error, "Vui lòng tải lại trang để cập nhật danh sách."),
+      t("lineMachine.toast.notRefreshedTitle"),
+      getErrorMessage(error, t("lineMachine.toast.notRefreshedDetail")),
     );
   }
 }
@@ -1166,6 +1396,58 @@ function getErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+const analyticsUsageTotal = computed(() => {
+  return analyticsModal.data.reduce((sum, row) => sum + (row.totalOrdered || 0), 0);
+});
+
+function getUsageItemName(row: MachineUsageItem) {
+  return row.item?.eng?.partname || row.item?.com?.name || row.itemIndentifyId;
+}
+
+function openAnalyticsModal(machine: Machine) {
+  analyticsModal.visible = true;
+  analyticsModal.machine = machine;
+  analyticsModal.data = [];
+  analyticsModal.error = "";
+  analyticsFilter.fromDate = "";
+  analyticsFilter.toDate = "";
+
+  void fetchMachineUsage();
+}
+
+function closeAnalyticsModal() {
+  analyticsModal.visible = false;
+  analyticsModal.machine = null;
+  analyticsModal.data = [];
+  analyticsModal.error = "";
+}
+
+function resetAnalyticsFilter() {
+  analyticsFilter.fromDate = "";
+  analyticsFilter.toDate = "";
+  void fetchMachineUsage();
+}
+
+async function fetchMachineUsage() {
+  if (!analyticsModal.machine?.id) return;
+
+  analyticsModal.loading = true;
+  analyticsModal.error = "";
+
+  try {
+    analyticsModal.data = await itemAPI.getByMachine(
+      analyticsModal.machine.id,
+      analyticsFilter.fromDate || undefined,
+      analyticsFilter.toDate || undefined,
+    );
+  } catch (error) {
+    analyticsModal.data = [];
+    analyticsModal.error = getErrorMessage(error, t("lineMachine.analytics.loadError"));
+  } finally {
+    analyticsModal.loading = false;
+  }
+}
+
 function openCreateLineModal() {
   if (submitting.value) return;
 
@@ -1205,7 +1487,7 @@ async function submitLineForm() {
   const lineName = lineForm.lineName.trim();
 
   if (!lineName) {
-    showToast("warn", "Thiếu thông tin", "Vui lòng nhập tên line.");
+    showToast("warn", t("lineMachine.toast.missingInfoTitle"), t("lineMachine.toast.missingLineName"));
     return;
   }
 
@@ -1222,7 +1504,7 @@ async function submitLineForm() {
       });
     } else {
       if (!lineModal.editingId) {
-        showToast("error", "Thiếu ID line", "Không tìm thấy line cần cập nhật.");
+        showToast("error", t("lineMachine.toast.missingLineIdTitle"), t("lineMachine.toast.missingLineIdDetail"));
         return;
       }
 
@@ -1236,16 +1518,16 @@ async function submitLineForm() {
     closeLineModal(true);
     showToast(
       "success",
-      isCreate ? "Thêm line thành công" : "Cập nhật line thành công",
+      isCreate ? t("lineMachine.toast.addLineSuccessTitle") : t("lineMachine.toast.updateLineSuccessTitle"),
       isCreate
-        ? `Đã thêm line ${lineName}.`
-        : `Đã cập nhật line ${lineName}.`,
+        ? t("lineMachine.toast.addLineSuccessDetail", { name: lineName })
+        : t("lineMachine.toast.updateLineSuccessDetail", { name: lineName }),
     );
   } catch (error) {
     showToast(
       "error",
-      isCreate ? "Thêm line thất bại" : "Cập nhật line thất bại",
-      getErrorMessage(error, "Vui lòng kiểm tra lại thông tin và thử lại."),
+      isCreate ? t("lineMachine.toast.addLineFailTitle") : t("lineMachine.toast.updateLineFailTitle"),
+      getErrorMessage(error, t("lineMachine.toast.checkInfoRetry")),
     );
   } finally {
     submitting.value = false;
@@ -1256,7 +1538,7 @@ function openCreateMachineModal(defaultLineId?: number) {
   if (submitting.value) return;
 
   if (!store.lines.length) {
-    showToast("warn", "Chưa có line", "Vui lòng tạo Line trước khi thêm Machine.");
+    showToast("warn", t("lineMachine.toast.noLineTitle"), t("lineMachine.toast.noLineDetail"));
     return;
   }
 
@@ -1296,12 +1578,12 @@ async function submitMachineForm() {
   const machineName = machineForm.machineName.trim();
 
   if (!machineName) {
-    showToast("warn", "Thiếu thông tin", "Vui lòng nhập tên machine.");
+    showToast("warn", t("lineMachine.toast.missingInfoTitle"), t("lineMachine.toast.missingMachineName"));
     return;
   }
 
   if (!machineForm.lineId) {
-    showToast("warn", "Thiếu thông tin", "Vui lòng chọn line.");
+    showToast("warn", t("lineMachine.toast.missingInfoTitle"), t("lineMachine.toast.missingLineSelect"));
     return;
   }
 
@@ -1320,8 +1602,8 @@ async function submitMachineForm() {
       if (!machineModal.editingId) {
         showToast(
           "error",
-          "Thiếu ID machine",
-          "Không tìm thấy machine cần cập nhật.",
+          t("lineMachine.toast.missingMachineIdTitle"),
+          t("lineMachine.toast.missingMachineIdDetail"),
         );
         return;
       }
@@ -1337,16 +1619,16 @@ async function submitMachineForm() {
     closeMachineModal(true);
     showToast(
       "success",
-      isCreate ? "Thêm machine thành công" : "Cập nhật machine thành công",
+      isCreate ? t("lineMachine.toast.addMachineSuccessTitle") : t("lineMachine.toast.updateMachineSuccessTitle"),
       isCreate
-        ? `Đã thêm machine ${machineName}.`
-        : `Đã cập nhật machine ${machineName}.`,
+        ? t("lineMachine.toast.addMachineSuccessDetail", { name: machineName })
+        : t("lineMachine.toast.updateMachineSuccessDetail", { name: machineName }),
     );
   } catch (error) {
     showToast(
       "error",
-      isCreate ? "Thêm machine thất bại" : "Cập nhật machine thất bại",
-      getErrorMessage(error, "Vui lòng kiểm tra lại thông tin và thử lại."),
+      isCreate ? t("lineMachine.toast.addMachineFailTitle") : t("lineMachine.toast.updateMachineFailTitle"),
+      getErrorMessage(error, t("lineMachine.toast.checkInfoRetry")),
     );
   } finally {
     submitting.value = false;
@@ -1359,8 +1641,8 @@ function openCopyMachinesModal(sourceLineId?: number) {
   if (store.lines.length < 2) {
     showToast(
       "warn",
-      "Chưa đủ line",
-      "Cần ít nhất 2 line để copy machine từ line này sang line khác.",
+      t("lineMachine.toast.notEnoughLinesTitle"),
+      t("lineMachine.toast.notEnoughLinesDetail"),
     );
     return;
   }
@@ -1430,21 +1712,21 @@ async function submitCopyMachines() {
   if (submitting.value) return;
 
   if (!copyMachinesForm.sourceLineId) {
-    showToast("warn", "Thiếu line nguồn", "Vui lòng chọn line nguồn để copy.");
+    showToast("warn", t("lineMachine.toast.noSourceLineTitle"), t("lineMachine.toast.noSourceLineDetail"));
     return;
   }
 
   if (!selectedSourceMachines.value.length) {
     showToast(
       "warn",
-      "Line nguồn chưa có máy",
-      "Line nguồn chưa có machine để copy.",
+      t("lineMachine.toast.sourceNoMachinesTitle"),
+      t("lineMachine.toast.sourceNoMachinesDetail"),
     );
     return;
   }
 
   if (!copyMachinesForm.targetLineIds.length) {
-    showToast("warn", "Thiếu line đích", "Vui lòng chọn ít nhất một line đích.");
+    showToast("warn", t("lineMachine.toast.noTargetLineTitle"), t("lineMachine.toast.noTargetLineDetail"));
     return;
   }
 
@@ -1458,8 +1740,8 @@ async function submitCopyMachines() {
   if (!copyJobs.length) {
     showToast(
       "info",
-      "Không có máy mới cần copy",
-      "Các line đích đã có đủ machine trùng tên với line nguồn.",
+      t("lineMachine.toast.noNewMachinesTitle"),
+      t("lineMachine.toast.noNewMachinesDetail"),
     );
     return;
   }
@@ -1479,19 +1761,20 @@ async function submitCopyMachines() {
     closeCopyMachinesModal(true);
     showToast(
       "success",
-      "Copy machine thành công",
-      `Đã tạo thêm ${successCount} machine từ ${selectedSourceLineLabel.value}.`,
+      t("lineMachine.toast.copySuccessTitle"),
+      t("lineMachine.toast.copySuccessDetail", { count: successCount, line: selectedSourceLineLabel.value }),
     );
   } catch (error) {
     await refreshAfterMutation();
 
     showToast(
       "error",
-      "Copy machine chưa hoàn tất",
-      `${successCount}/${copyJobs.length} machine đã được tạo. ${getErrorMessage(
-        error,
-        "Vui lòng thử lại với các machine còn thiếu.",
-      )}`,
+      t("lineMachine.toast.copyIncompleteTitle"),
+      t("lineMachine.toast.copyIncompleteDetail", {
+        success: successCount,
+        total: copyJobs.length,
+        error: getErrorMessage(error, t("lineMachine.toast.checkInfoRetry")),
+      }),
     );
   } finally {
     submitting.value = false;
@@ -1506,11 +1789,11 @@ function askDeleteLine(line: Line) {
   confirmModal.visible = true;
   confirmModal.target = "line";
   confirmModal.id = line.id;
-  confirmModal.title = `Xóa line ${line.lineName}?`;
+  confirmModal.title = t("lineMachine.deleteConfirm.confirmLineTitle", { name: line.lineName });
   confirmModal.message =
     machineCount > 0
-      ? `Line này đang có ${machineCount} machine. Nếu backend không cho xóa line đang có machine, bạn cần xóa hoặc chuyển machine sang line khác trước.`
-      : "Bạn có chắc chắn muốn xóa line này không?";
+      ? t("lineMachine.deleteConfirm.confirmLineWithMachines", { count: machineCount })
+      : t("lineMachine.deleteConfirm.confirmLineNoMachines");
 }
 
 function askDeleteMachine(machine: Machine) {
@@ -1519,8 +1802,8 @@ function askDeleteMachine(machine: Machine) {
   confirmModal.visible = true;
   confirmModal.target = "machine";
   confirmModal.id = machine.id;
-  confirmModal.title = `Xóa machine ${machine.machineName}?`;
-  confirmModal.message = "Bạn có chắc chắn muốn xóa machine này không?";
+  confirmModal.title = t("lineMachine.deleteConfirm.confirmMachineTitle", { name: machine.machineName });
+  confirmModal.message = t("lineMachine.deleteConfirm.confirmMachineMessage");
 }
 
 function resetConfirmModal() {
@@ -1559,16 +1842,16 @@ async function submitConfirmDelete() {
     closeConfirmModal(true);
     showToast(
       "success",
-      target === "line" ? "Xóa line thành công" : "Xóa machine thành công",
+      target === "line" ? t("lineMachine.toast.deleteLineSuccessTitle") : t("lineMachine.toast.deleteMachineSuccessTitle"),
       target === "line"
-        ? `Đã xóa line ID ${id}.`
-        : `Đã xóa machine ID ${id}.`,
+        ? t("lineMachine.toast.deleteLineSuccessDetail", { id })
+        : t("lineMachine.toast.deleteMachineSuccessDetail", { id }),
     );
   } catch (error) {
     showToast(
       "error",
-      target === "line" ? "Xóa line thất bại" : "Xóa machine thất bại",
-      getErrorMessage(error, "Không thể xóa dữ liệu. Vui lòng thử lại."),
+      target === "line" ? t("lineMachine.toast.deleteLineFailTitle") : t("lineMachine.toast.deleteMachineFailTitle"),
+      getErrorMessage(error, t("lineMachine.toast.deleteFailDetail")),
     );
   } finally {
     submitting.value = false;

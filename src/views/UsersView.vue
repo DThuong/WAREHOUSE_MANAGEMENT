@@ -1,6 +1,7 @@
 <template>
   <MainLayout>
     <Toast />
+    <div class="page-gradient-bg">
     <div class="user-management">
       <!-- Header -->
       <div class="page-header">
@@ -125,7 +126,7 @@
 
               <Column
                 field="areaPart"
-                header="Xưởng"
+                :header="t('userManagement.table.area')"
                 sortable
                 style="min-width: 140px"
               >
@@ -273,7 +274,7 @@
                     <span class="meta-value">{{ getDepartmentLabel(user.department) }}</span>
                   </div>
                   <div class="mobile-meta-item">
-                    <span class="meta-label">Xưởng</span>
+                    <span class="meta-label">{{ t('userManagement.mobile.area') }}</span>
                     <Tag
                       :value="getAreaPartLabel(user.areaPart)"
                       :severity="getAreaPartSeverity(user.areaPart)"
@@ -342,6 +343,7 @@
           </template>
         </template>
       </Card>
+    </div>
     </div>
 
     <!-- Add/Edit Dialog -->
@@ -439,7 +441,7 @@
         <!-- Area Part -->
         <div class="field">
           <label for="areaPart">
-            Xưởng
+            {{ t('userManagement.addDialog.area') }}
             <span class="required">*</span>
           </label>
           <Dropdown
@@ -448,7 +450,7 @@
             :options="areaPartOptions"
             optionLabel="label"
             optionValue="value"
-            placeholder="Chọn xưởng"
+            :placeholder="t('userManagement.addDialog.areaPlaceholder')"
             class="w-full"
           />
         </div>
@@ -520,7 +522,7 @@
           </div>
 
           <div class="detail-item">
-            <span class="label">Xưởng</span>
+            <span class="label">{{ t('userManagement.viewDialog.area') }}</span>
             <Tag
               :value="getAreaPartLabel(selectedUser.areaPart)"
               :severity="getAreaPartSeverity(selectedUser.areaPart)"
@@ -847,10 +849,10 @@ const saveUser = async () => {
     if (result?.success !== false) {
       toast.add({
         severity: "success",
-        summary: "Thành công",
+        summary: t("userManagement.toast.successTitle"),
         detail: isEditing.value
-          ? "Cập nhật người dùng thành công."
-          : "Thêm người dùng thành công.",
+          ? t("userManagement.toast.updateSuccess")
+          : t("userManagement.toast.addSuccess"),
         life: 3000,
       });
 
@@ -887,8 +889,8 @@ const confirmDelete = (user: User) => {
         if (result?.success !== false) {
           toast.add({
             severity: "success",
-            summary: "Thành công",
-            detail: "Xóa người dùng thành công.",
+            summary: t("userManagement.toast.successTitle"),
+            detail: t("userManagement.toast.deleteSuccess"),
             life: 3000,
           });
 
@@ -899,7 +901,7 @@ const confirmDelete = (user: User) => {
         toast.add({
           severity: "error",
           summary: t("userManagement.toast.errorTitle"),
-          detail: "Không thể xóa người dùng.",
+          detail: t("userManagement.toast.deleteError"),
           life: 3000,
         });
       }
@@ -945,8 +947,8 @@ const savePassword = async () => {
     if (result?.success !== false) {
       toast.add({
         severity: "success",
-        summary: "Thành công",
-        detail: "Đổi mật khẩu thành công.",
+        summary: t("userManagement.toast.successTitle"),
+        detail: t("userManagement.toast.changePasswordSuccess"),
         life: 3000,
       });
       closePasswordDialog();
@@ -998,6 +1000,12 @@ const formatDate = (dateString: string): string => {
 };
 </script>
 <style scoped>
+:deep(.content-area) {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
 .user-management {
   animation: fadeIn 0.3s ease-in;
 }

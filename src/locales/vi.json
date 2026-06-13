@@ -1,4 +1,160 @@
 {
+  "lineMachine": {
+    "title": "Quản lý Line & Machine",
+    "subtitle": "Quản lý danh sách line sản xuất, xưởng và máy theo từng line.",
+    "addLine": "+ Thêm Line",
+    "addMachine": "+ Thêm Machine",
+    "copyMachine": "Copy máy",
+    "totalLine": "Tổng Line",
+    "totalMachine": "Tổng Machine",
+    "search": "Tìm kiếm",
+    "searchPlaceholder": "Tìm theo tên line hoặc machine...",
+    "area": "Xưởng",
+    "all": "Tất cả",
+    "loading": "Đang tải dữ liệu...",
+    "noData": "Không có dữ liệu phù hợp",
+    "noDataHint": "Hãy thử đổi bộ lọc hoặc thêm line mới.",
+    "lineListTitle": "Danh sách Line",
+    "lineListHint": "{count} line phù hợp bộ lọc. Line có nhiều máy sẽ được thu gọn để dễ theo dõi.",
+    "expandAll": "Mở tất cả",
+    "collapseAll": "Thu gọn",
+    "machineCount": "{count} máy",
+    "addMachineShort": "+ Máy",
+    "copy": "Copy",
+    "edit": "Sửa",
+    "delete": "Xóa",
+    "table": {
+      "id": "ID",
+      "machineName": "Tên Machine",
+      "lineId": "Line ID",
+      "actions": "Thao tác",
+      "noMachines": "Line này chưa có machine."
+    },
+    "modal": {
+      "addLine": "Thêm Line",
+      "editLine": "Sửa Line",
+      "addLineHint": "Tạo line mới theo xưởng.",
+      "editLineHint": "Chỉ hỗ trợ sửa tên line",
+      "close": "Đóng",
+      "lineName": "Tên Line",
+      "lineNamePlaceholder": "Ví dụ: SA6, S12...",
+      "area": "Xưởng",
+      "cancel": "Hủy",
+      "saving": "Đang lưu...",
+      "save": "Lưu",
+      "addMachine": "Thêm Machine",
+      "editMachine": "Sửa Machine",
+      "machineHint": "Chọn line chứa machine. Có thể chuyển machine sang line khác.",
+      "machineName": "Tên Machine",
+      "machineNamePlaceholder": "Ví dụ: SPI, AOI, Reflow...",
+      "belongsToLine": "Thuộc Line"
+    },
+    "copyModal": {
+      "title": "Copy machine",
+      "hint": "Chọn line nguồn và line đích. Máy trùng tên trong line đích sẽ được tự động bỏ qua.",
+      "sourceLine": "Line nguồn",
+      "machinesSuffix": "máy)",
+      "selecting": "Đang chọn:",
+      "machineUnit": "machine",
+      "copyListTitle": "Danh sách máy sẽ copy",
+      "noSourceMachines": "Line nguồn chưa có machine để copy.",
+      "summary": "Tóm tắt",
+      "copyFrom": "Copy từ",
+      "to": "sang",
+      "targetLinesSuffix": "line đích.",
+      "newMachinesEstimate": "Machine mới dự kiến tạo:",
+      "targetLine": "Line đích",
+      "targetLineHint": "Chọn một hoặc nhiều line cần nhận danh sách máy.",
+      "selectAll": "Chọn tất cả",
+      "clearSelection": "Bỏ chọn",
+      "targetLineInfo": "{area} · hiện có {current} máy · thêm {add} máy mới",
+      "copying": "Đang copy...",
+      "copyAction": "Copy machine"
+    },
+    "confirmModal": {
+      "cancel": "Hủy",
+      "deleting": "Đang xóa...",
+      "delete": "Xóa"
+    },
+    "toast": {
+      "loadErrorTitle": "Lỗi tải dữ liệu",
+      "loadErrorDetail": "Không thể tải danh sách line / machine.",
+      "notRefreshedTitle": "Đã thực hiện nhưng chưa tải lại dữ liệu",
+      "notRefreshedDetail": "Vui lòng tải lại trang để cập nhật danh sách.",
+      "missingInfoTitle": "Thiếu thông tin",
+      "missingLineName": "Vui lòng nhập tên line.",
+      "missingLineIdTitle": "Thiếu ID line",
+      "missingLineIdDetail": "Không tìm thấy line cần cập nhật.",
+      "addLineSuccessTitle": "Thêm line thành công",
+      "updateLineSuccessTitle": "Cập nhật line thành công",
+      "addLineSuccessDetail": "Đã thêm line {name}.",
+      "updateLineSuccessDetail": "Đã cập nhật line {name}.",
+      "addLineFailTitle": "Thêm line thất bại",
+      "updateLineFailTitle": "Cập nhật line thất bại",
+      "checkInfoRetry": "Vui lòng kiểm tra lại thông tin và thử lại.",
+      "noLineTitle": "Chưa có line",
+      "noLineDetail": "Vui lòng tạo Line trước khi thêm Machine.",
+      "missingMachineName": "Vui lòng nhập tên machine.",
+      "missingLineSelect": "Vui lòng chọn line.",
+      "missingMachineIdTitle": "Thiếu ID machine",
+      "missingMachineIdDetail": "Không tìm thấy machine cần cập nhật.",
+      "addMachineSuccessTitle": "Thêm machine thành công",
+      "updateMachineSuccessTitle": "Cập nhật machine thành công",
+      "addMachineSuccessDetail": "Đã thêm machine {name}.",
+      "updateMachineSuccessDetail": "Đã cập nhật machine {name}.",
+      "addMachineFailTitle": "Thêm machine thất bại",
+      "updateMachineFailTitle": "Cập nhật machine thất bại",
+      "notEnoughLinesTitle": "Chưa đủ line",
+      "notEnoughLinesDetail": "Cần ít nhất 2 line để copy machine từ line này sang line khác.",
+      "noSourceLineTitle": "Thiếu line nguồn",
+      "noSourceLineDetail": "Vui lòng chọn line nguồn để copy.",
+      "sourceNoMachinesTitle": "Line nguồn chưa có máy",
+      "sourceNoMachinesDetail": "Line nguồn chưa có machine để copy.",
+      "noTargetLineTitle": "Thiếu line đích",
+      "noTargetLineDetail": "Vui lòng chọn ít nhất một line đích.",
+      "noNewMachinesTitle": "Không có máy mới cần copy",
+      "noNewMachinesDetail": "Các line đích đã có đủ machine trùng tên với line nguồn.",
+      "copySuccessTitle": "Copy machine thành công",
+      "copySuccessDetail": "Đã tạo thêm {count} machine từ {line}.",
+      "copyIncompleteTitle": "Copy machine chưa hoàn tất",
+      "copyIncompleteDetail": "{success}/{total} machine đã được tạo. {error}",
+      "deleteLineSuccessTitle": "Xóa line thành công",
+      "deleteMachineSuccessTitle": "Xóa machine thành công",
+      "deleteLineSuccessDetail": "Đã xóa line ID {id}.",
+      "deleteMachineSuccessDetail": "Đã xóa machine ID {id}.",
+      "deleteLineFailTitle": "Xóa line thất bại",
+      "deleteMachineFailTitle": "Xóa machine thất bại",
+      "deleteFailDetail": "Không thể xóa dữ liệu. Vui lòng thử lại."
+    },
+    "deleteConfirm": {
+      "noSourceLine": "Chưa chọn line nguồn",
+      "confirmLineTitle": "Xóa line {name}?",
+      "confirmLineWithMachines": "Line này đang có {count} machine. Nếu backend không cho xóa line đang có machine, bạn cần xóa hoặc chuyển machine sang line khác trước.",
+      "confirmLineNoMachines": "Bạn có chắc chắn muốn xóa line này không?",
+      "confirmMachineTitle": "Xóa machine {name}?",
+      "confirmMachineMessage": "Bạn có chắc chắn muốn xóa machine này không?"
+    },
+    "analytics": {
+      "button": "Xem thống kê sử dụng vật tư",
+      "title": "Thống kê vật tư theo Machine",
+      "subtitle": "Danh sách vật tư đã sử dụng tại machine {name}",
+      "fromDate": "Từ ngày",
+      "toDate": "Đến ngày",
+      "apply": "Lọc",
+      "reset": "Xóa lọc",
+      "totalItems": "{count} loại vật tư",
+      "totalUsed": "{count} lượt sử dụng",
+      "colCode": "Mã vật tư",
+      "colName": "Tên vật tư",
+      "colArea": "Xưởng",
+      "colStock": "Tồn kho",
+      "colUsed": "Đã sử dụng",
+      "colOrderCount": "Số lần order",
+      "loading": "Đang tải dữ liệu...",
+      "empty": "Machine này chưa sử dụng vật tư nào.",
+      "loadError": "Không thể tải dữ liệu thống kê vật tư của machine này."
+    }
+  },
   "common": {
     "upload": {
       "addImage": "Thêm ảnh",
@@ -15,7 +171,7 @@
       "purposeNote": "Mục đích sử dụng",
       "purposeNotePlaceholder": "Nhập mục đích sử dụng...",
       "timeUsed": "Thời gian sử dụng",
-      "timeUsedPlaceholder": "Số lượng",
+      "timeUsedPlaceholder": "SL",
       "timeUnit": {
         "day": "Ngày",
         "week": "Tuần",
@@ -25,12 +181,12 @@
       "searchProduct": "Tìm sản phẩm...",
       "stockLabel": "Tồn",
       "stockRemaining": "Tồn kho: {n}",
-      "exceedStock": "Vượt quá số lượng tồn kho!",
-      "quantity": "Số lượng",
+      "exceedStock": "Vượt quá SL tồn kho!",
+      "quantity": "SL",
       "subtotal": "Thành tiền",
       "totalItems": "Tổng số mặt hàng",
       "itemUnit": "mặt hàng",
-      "totalQuantityOrdered": "Tổng số lượng đặt",
+      "totalQuantityOrdered": "Tổng SL đặt",
       "productUnit": "sản phẩm",
       "totalOrderValue": "Tổng giá trị đơn hàng",
       "noProducts": "Chưa có sản phẩm nào",
@@ -70,7 +226,7 @@
     "status": "Trạng thái",
     "image": "Hình ảnh",
     "product": "Sản phẩm",
-    "quantity": "Số lượng",
+    "quantity": "SL",
     "price": "Đơn giá",
     "total": "Thành tiền",
     "note": "Ghi chú",
@@ -84,7 +240,47 @@
     },
     "confirmDelete": "Xác nhận xóa",
     "confirmDeleteMsg": "Bạn có chắc muốn xóa",
-    "print": "In báo cáo"
+    "print": "In báo cáo",
+    "toast": {
+      "loginSuccess": "Đăng nhập thành công",
+      "welcomeUser": "Chào mừng {username}!"
+    },
+    "pagination": {
+      "showing": "Hiển thị",
+      "firstPage": "Trang đầu",
+      "prevPage": "Trang trước",
+      "nextPage": "Trang sau",
+      "lastPage": "Trang cuối"
+    }
+  },
+  "areaTrendChart": {
+    "noData": "Không có dữ liệu",
+    "hint": "Nhấp vào một điểm trên biểu đồ để xem chi tiết theo ngày",
+    "valueLabel": "SL",
+    "period7": "7 ngày",
+    "period30": "30 ngày",
+    "periodAll": "Tất cả"
+  },
+  "signin": {
+    "signInButton": "Đăng Nhập",
+    "toast": {
+      "errorTitle": "Lỗi",
+      "userInfoError": "Không thể lấy thông tin user",
+      "noPermissionTitle": "Không có quyền",
+      "noPermissionDetail": "Tài khoản của bạn không có quyền truy cập hệ thống",
+      "loginFailedTitle": "Đăng nhập thất bại",
+      "checkInfoAgain": "Vui lòng kiểm tra lại thông tin",
+      "genericError": "Đã xảy ra lỗi. Vui lòng thử lại."
+    }
+  },
+  "imagePreview": {
+    "rotateLeft": "Xoay trái",
+    "rotateRight": "Xoay phải",
+    "zoomOut": "Thu nhỏ",
+    "zoomIn": "Phóng to",
+    "reset": "Đặt lại",
+    "download": "Tải xuống",
+    "close": "Đóng"
   },
   "language": {
     "title": "Ngôn ngữ",
@@ -122,7 +318,101 @@
     "rejected": "Từ chối",
     "topOrderedMaterials": "Top vật tư được order nhiều nhất",
     "criticalStock": "Vật tư tồn kho nguy cấp",
-    "recentOrders": "Đơn hàng gần đây"
+    "recentOrders": "Đơn hàng gần đây",
+    "eyebrow": "Phân tích kho",
+    "heading": "Tổng quan tồn kho SMD & MAINLINE",
+    "subtitle": "Theo dõi tồn kho, cảnh báo thiếu hàng và hoạt động xuất - nhập theo từng xưởng sản xuất.",
+    "refresh": "Làm mới dữ liệu",
+    "alertBanner": {
+      "title": "{count} vật tư cần chú ý",
+      "subtitle": "Bao gồm {critical} mặt hàng nguy cấp và {out} mặt hàng đã hết.",
+      "action": "Xem chi tiết",
+      "ok": "Tồn kho ổn định, không có cảnh báo nào."
+    },
+    "kpi": {
+      "totalItems": "Tổng số vật tư",
+      "totalItemsDetail": "{eng} Engineer / {com} Consumer",
+      "stockValue": "Giá trị tồn kho",
+      "stockValueDetail": "Tổng SL tồn: {qty}",
+      "alerts": "Cảnh báo tồn kho",
+      "alertsDetail": "{critical} nguy cấp / {out} hết hàng",
+      "pendingOrders": "Đơn chờ xử lý",
+      "pendingOrdersDetail": "Trên tổng {total} đơn",
+      "pendingBadge": "{count} đơn cần duyệt",
+      "pendingByArea": "SMD: {smd} · MAINLINE: {mainline}"
+    },
+    "areaCard": {
+      "viewDetail": "Xem chi tiết",
+      "stockValue": "Giá trị tồn",
+      "stockQty": "SL tồn",
+      "items": "Số mặt hàng",
+      "alerts": "Cảnh báo",
+      "lines": "{count} line",
+      "machines": "{count} máy"
+    },
+    "tabs": {
+      "alerts": "Cảnh báo tồn kho",
+      "activity": "Hoạt động gần đây",
+      "charts": "Biểu đồ phân tích"
+    },
+    "alertsTab": {
+      "description": "Danh sách vật tư cần bổ sung, sắp xếp theo mức độ ưu tiên.",
+      "viewAll": "Xem toàn bộ kho",
+      "empty": "Không có vật tư cảnh báo.",
+      "colItem": "Vật tư",
+      "colArea": "Khu vực",
+      "colStock": "Tồn hiện tại",
+      "colSafety": "Tồn an toàn",
+      "colStatus": "Trạng thái"
+    },
+    "activity": {
+      "recentOrders": "Đơn xuất gần đây",
+      "recentOrdersDesc": "Các đơn xuất vật tư mới nhất.",
+      "recentStockins": "Phiếu nhập gần đây",
+      "recentStockinsDesc": "Các phiếu nhập mới nhất theo xưởng.",
+      "topOrdered": "Top vật tư được order nhiều nhất",
+      "topOrderedDesc": "Theo khu vực đang chọn.",
+      "viewAll": "Xem tất cả",
+      "noOrders": "Chưa có đơn hàng.",
+      "noStockins": "Chưa có phiếu nhập.",
+      "noTopOrdered": "Chưa có dữ liệu order.",
+      "ordered": "đã xuất"
+    },
+    "charts": {
+      "dailyMovement": "Biểu đồ nhập kho & order theo ngày",
+      "dailyMovementDesc": "Nhấp vào điểm trên biểu đồ để xem chi tiết phiếu nhập / đơn hàng của ngày đó.",
+      "range7d": "7 ngày",
+      "range30d": "30 ngày",
+      "rangeAll": "Tất cả",
+      "stockinOnDate": "Phiếu nhập ngày {date}",
+      "orderOnDate": "Đơn hàng ngày {date}",
+      "noStockinOnDate": "Không có phiếu nhập trong ngày này (0)",
+      "noOrderOnDate": "Không có đơn hàng trong ngày này (0)",
+      "selectDateHint": "Chọn một điểm trên biểu đồ để xem chi tiết theo ngày.",
+      "colStockinId": "Mã phiếu",
+      "colCreator": "Người tạo",
+      "colArea": "Khu vực",
+      "colQty": "Tổng SL",
+      "colOrderId": "Mã đơn",
+      "colWorker": "Người đặt",
+      "colStatus": "Trạng thái",
+      "colAction": "Hành động"
+    },
+    "orderModal": {
+      "title": "Chi tiết đơn hàng #{id}",
+      "orderDate": "Ngày đặt",
+      "worker": "Người đặt",
+      "status": "Trạng thái",
+      "note": "Ghi chú",
+      "images": "Hình ảnh xác nhận",
+      "items": "Sản phẩm",
+      "colItem": "Vật tư",
+      "colMachine": "Máy",
+      "colQty": "SL order",
+      "colNote": "Ghi chú",
+      "noImages": "Chưa có hình ảnh",
+      "close": "Đóng"
+    }
   },
   "orderManagement": {
     "common": {
@@ -140,6 +430,13 @@
       "notFound": "Không tìm thấy",
       "missingInfo": "Thiếu thông tin",
       "missingImage": "Thiếu hình ảnh minh chứng",
+      "factory": "Xưởng",
+      "allFactory": "Tất cả xưởng",
+      "close": "Đóng",
+      "selectLineMachine": "Chọn line / machine",
+      "searchLineMachine": "Tìm line hoặc machine",
+      "pastedImage": "Đã dán ảnh từ clipboard",
+      "adminNoOrderPermission": "Tài khoản Admin không còn quyền tạo đơn vì đơn hàng đã phân quyền theo Xưởng từ JWT.",
       "createOrderAction": {
         "approveOrder": "Duyệt đơn hàng",
         "rejectOrder": "Từ chối đơn hàng",
@@ -184,6 +481,7 @@
     "rejectReasonPlaceholder": "Nhập lý do từ chối đơn hàng...",
     "chooseStatus": "Chọn trạng thái",
     "updateStatusOrder": "Cập nhật trạng thái đơn hàng",
+    "completingOrderHint": "Đơn hàng đã được duyệt. Hãy tải ảnh xác nhận lên — sau khi tải lên, đơn sẽ tự động chuyển sang trạng thái Hoàn thành.",
     "viewDetail": "Xem chi tiết",
     "manageImages": "Quản lý hình ảnh",
     "updateStatus": "Cập nhật trạng thái",
@@ -222,7 +520,7 @@
       "ordererPlaceholder": "Nhập tên người đặt hàng...",
       "productList": "Danh sách sản phẩm đặt hàng",
       "totalItems": "Tổng số mặt hàng",
-      "totalQuantity": "Tổng số lượng đặt",
+      "totalQuantity": "Tổng SL đặt",
       "totalValue": "Tổng giá trị đơn hàng",
       "submit": "Tạo đơn hàng",
       "items": "mặt hàng"
@@ -241,6 +539,9 @@
     "subtitle": "Quản lý tồn kho sản phẩm",
     "addProduct": "Thêm sản phẩm mới",
     "filters": {
+      "area": "Xưởng",
+      "areaPlaceholder": "Chọn xưởng",
+      "selectAreaFirst": "Vui lòng chọn xưởng trước",
       "productType": "Loại sản phẩm",
       "stockStatus": "Trạng thái tồn kho",
       "search": "Tìm kiếm",
@@ -274,12 +575,16 @@
       "id": "ID",
       "product": "Sản phẩm",
       "type": "Loại",
+      "area": "Xưởng",
       "price": "Giá",
       "stockQty": "Tồn kho",
       "safeQty": "Tồn an toàn",
       "actions": "Hành động",
       "empty": "Chưa có sản phẩm nào",
       "serialPrefix": "STT: "
+    },
+    "mobile": {
+      "area": "Xưởng:"
     },
     "category": {
       "engineering": "Hàng kỹ thuật",
@@ -290,6 +595,7 @@
     "currency": "VND",
     "actions": {
       "manageImages": "Quản lý ảnh",
+      "transactionHistory": "Lịch sử đơn hàng / nhập kho",
       "edit": "Sửa",
       "delete": "Xóa"
     },
@@ -303,10 +609,19 @@
       "price": "Giá",
       "pricePlaceholder": "0.00",
       "safeQty": "Tồn an toàn",
-      "stockQty": "Số lượng tồn",
+      "stockQty": "SL tồn",
       "required": "*",
       "cancel": "Hủy",
-      "save": "Cập nhật"
+      "save": "Cập nhật",
+      "engSection": "Thông tin kỹ thuật (ENG)",
+      "comSection": "Thông tin tiêu dùng (COM)",
+      "partname": "Tên linh kiện",
+      "location": "Vị trí",
+      "description": "Mô tả",
+      "vender": "Nhà cung cấp",
+      "comName": "Tên sản phẩm",
+      "specifications": "Thông số",
+      "manufacturer": "Hãng sản xuất"
     },
     "imageDialog": {
       "header": "Quản lý hình ảnh - {name}",
@@ -354,7 +669,36 @@
       "deleteImageSuccessTitle": "Thành công",
       "deleteImageError": "Không thể xóa hình ảnh",
       "warningTitle": "Cảnh báo",
-      "errorTitle": "Lỗi"
+      "errorTitle": "Lỗi",
+      "pasteImageSuccess": "Đã dán ảnh từ clipboard",
+      "loadHistoryErrorTitle": "Lỗi tải lịch sử",
+      "loadHistoryErrorDetail": "Không thể tải lịch sử đơn hàng / nhập kho"
+    },
+    "transactionDialog": {
+      "header": "Lịch sử giao dịch của: {id}",
+      "filterByIdMachine": "Lọc theo ID / máy",
+      "fromDate": "Từ ngày",
+      "toDate": "Đến ngày",
+      "filter": "Lọc",
+      "itemCode": "Mã item",
+      "dateRange": "Khoảng thời gian",
+      "allHistory": "Tất cả lịch sử",
+      "selectedDateRange": "Theo ngày đã chọn",
+      "ordersHistory": "Lịch sử đặt đơn",
+      "ordersCount": "{count} đơn",
+      "colOrderDate": "Ngày đặt",
+      "colMachine": "Máy",
+      "colLine": "Line SX",
+      "colQty": "SL",
+      "colItemAmount": "Tiền item",
+      "colStatus": "Trạng thái",
+      "noOrdersHistory": "Chưa có lịch sử đặt đơn trong bộ lọc hiện tại",
+      "stockinHistory": "Lịch sử nhập kho",
+      "stockinCount": "{count} lần nhập",
+      "colStockinDate": "Ngày nhập",
+      "colStockinQty": "SL nhập",
+      "noStockinHistory": "Chưa có lịch sử nhập kho trong bộ lọc hiện tại",
+      "close": "Đóng"
     }
   },
   "addInventory": {
@@ -429,7 +773,8 @@
       "requiredEngineer": "Vui lòng điền đầy đủ thông tin Engineer",
       "requiredConsumer": "Vui lòng điền đầy đủ thông tin hàng tiêu dùng",
       "createSuccess": "Sản phẩm đã được tạo. Bạn có thể tiếp tục thêm hình ảnh hoặc quay lại danh sách.",
-      "createError": "Không thể tạo sản phẩm"
+      "createError": "Không thể tạo sản phẩm",
+      "pasteImageSuccess": "Đã dán ảnh từ clipboard"
     }
   },
   "importManagement": {
@@ -440,12 +785,29 @@
       "fromDate": "Từ ngày",
       "toDate": "Đến ngày",
       "searchPlaceholder": "Tìm kiếm theo ghi chú, người tạo...",
-      "reset": "Reset"
+      "reset": "Reset",
+      "area": "Xưởng",
+      "areaPlaceholder": "Chọn xưởng",
+      "search": "Tìm kiếm",
+      "searchTablePlaceholder": "Tìm mã phiếu, người tạo, sản phẩm..."
     },
     "summary": {
-      "total": "Tổng: {count} phiếu nhập"
+      "total": "Tổng: {count} phiếu nhập",
+      "totalReceipts": "Tổng phiếu: {count}",
+      "totalQuantity": "Tổng SL nhập: {count}",
+      "areaLabel": "Xưởng: {area}"
     },
     "empty": "Chưa có phiếu nhập nào",
+    "table": {
+      "receipt": "Phiếu",
+      "area": "Xưởng",
+      "createdBy": "Người tạo",
+      "importedProducts": "Sản phẩm nhập",
+      "moreProducts": "+{count} sản phẩm khác",
+      "totalQty": "Tổng SL",
+      "images": "Ảnh",
+      "actions": "Thao tác"
+    },
     "card": {
       "createdBy": "Người tạo",
       "products": "Sản phẩm",
@@ -455,10 +817,14 @@
       "imageCount": "{count} ảnh",
       "detail": "Chi tiết",
       "images_btn": "Ảnh",
-      "delete": "Xóa"
+      "delete": "Xóa",
+      "area": "Xưởng"
     },
     "createDialog": {
       "header": "Tạo phiếu nhập mới",
+      "area": "Xưởng",
+      "areaPlaceholder": "Chọn xưởng nhập kho",
+      "selectAreaFirst": "Vui lòng chọn xưởng trước",
       "note": "Ghi chú",
       "notePlaceholder": "Nhập ghi chú cho phiếu nhập...",
       "productList": "Danh sách sản phẩm nhập",
@@ -471,10 +837,10 @@
       "productFilter": "Tìm sản phẩm...",
       "stockLabel": "Tồn kho",
       "stockDisplay": "Tồn: {qty} {unit}",
-      "quantityLabel": "Số lượng",
+      "quantityLabel": "SL",
       "summaryItems": "Tổng số mặt hàng:",
       "summaryItemsValue": "{count} mặt hàng",
-      "summaryQty": "Tổng số lượng nhập:",
+      "summaryQty": "Tổng SL nhập:",
       "summaryQtyValue": "{count} sản phẩm",
       "cancel": "Hủy",
       "uploadImages": "Upload hình ảnh",
@@ -487,7 +853,7 @@
       "selectImages": "Chọn ảnh",
       "takePhoto": "Chụp ảnh",
       "dropzone": "Kéo thả hoặc click để chọn",
-      "dropzoneHint": "PNG, JPG, WEBP (Max. 5MB) · Timestamp tự động",
+      "dropzoneHint": "PNG, JPG, WEBP (Max. 5MB) - Timestamp tự động",
       "selectedCount": "Đã chọn {count} hình:",
       "addMore": "Thêm",
       "noImages": "Chưa có hình nào được chọn",
@@ -497,6 +863,7 @@
     "detailDialog": {
       "header": "Chi tiết phiếu nhập #{id}",
       "stockInDate": "Ngày nhập",
+      "area": "Xưởng",
       "createdBy": "Người tạo",
       "note": "Ghi chú",
       "productList": "Danh sách sản phẩm ({count})",
@@ -542,7 +909,11 @@
       "noFileSelected": "Không có file nào được chọn",
       "uploadSuccessDetail": "Đã tải lên {success}/{total} ảnh",
       "uploadFailDetail": "{count} ảnh tải lên thất bại",
-      "uploadError": "Không thể tải lên hình ảnh"
+      "uploadError": "Không thể tải lên hình ảnh",
+      "pastedImage": "Đã dán ảnh từ clipboard",
+      "selectAreaRequired": "Vui lòng chọn xưởng nhập kho",
+      "productAreaMismatch": "Có sản phẩm không thuộc xưởng đã chọn. Vui lòng chọn lại sản phẩm.",
+      "selectAreaBeforeAddProduct": "Vui lòng chọn xưởng trước khi thêm sản phẩm"
     }
   },
   "userManagement": {
@@ -566,6 +937,7 @@
       "info": "Thông tin",
       "role": "Vai trò",
       "department": "Phòng ban",
+      "area": "Xưởng",
       "status": "Trạng thái",
       "createdAt": "Ngày tạo",
       "actions": "Hành động"
@@ -577,6 +949,7 @@
     "mobile": {
       "role": "Vai trò",
       "department": "Phòng ban",
+      "area": "Xưởng",
       "createdAt": "Ngày tạo"
     },
     "tooltip": {
@@ -598,6 +971,8 @@
       "rolePlaceholder": "Chọn vai trò",
       "department": "Phòng ban",
       "departmentPlaceholder": "Chọn phòng ban",
+      "area": "Xưởng",
+      "areaPlaceholder": "Chọn xưởng",
       "cancel": "Hủy",
       "add": "Thêm",
       "update": "Cập nhật"
@@ -607,6 +982,7 @@
       "id": "ID",
       "role": "Vai trò",
       "department": "Phòng ban",
+      "area": "Xưởng",
       "status": "Trạng thái",
       "createdAt": "Ngày tạo",
       "close": "Đóng",
@@ -629,13 +1005,19 @@
       "reject": "Hủy"
     },
     "toast": {
+      "successTitle": "Thành công",
       "warningTitle": "Cảnh báo",
       "errorTitle": "Lỗi",
       "requiredFields": "Vui lòng điền đầy đủ thông tin",
       "requiredPassword": "Vui lòng nhập mật khẩu",
       "saveError": "Không thể lưu tài khoản",
       "requiredPasswordFields": "Vui lòng nhập đầy đủ thông tin",
-      "passwordMismatch": "Mật khẩu không khớp"
+      "passwordMismatch": "Mật khẩu không khớp",
+      "updateSuccess": "Cập nhật người dùng thành công.",
+      "addSuccess": "Thêm người dùng thành công.",
+      "deleteSuccess": "Xóa người dùng thành công.",
+      "deleteError": "Không thể xóa người dùng.",
+      "changePasswordSuccess": "Đổi mật khẩu thành công."
     }
   },
   "reports": {
@@ -647,6 +1029,7 @@
       "loading": "Đang tải dữ liệu...",
       "reset": "Reset",
       "detailTitle": "Dữ liệu chi tiết",
+      "codePrefix": "Mã",
       "badge": {
         "stockin": "Phiếu nhập",
         "order": "Đơn hoàn thành",
@@ -714,7 +1097,24 @@
       "printDate": "Ngày in",
       "dateRange": "Từ {from} đến {to}",
       "noImage": "Không có ảnh",
-      "status": "Trạng thái"
+      "status": "Trạng thái",
+      "filterArea": "Khu vực",
+      "areaAll": "Tất cả",
+      "trendTitleOrders": "Xu hướng đơn hàng theo khu vực",
+      "trendTitleStockin": "Xu hướng nhập kho theo khu vực",
+      "trendTitleInventory": "Xu hướng biến động tồn kho theo khu vực",
+      "trendValueOrders": "SL đặt",
+      "trendValueStockin": "SL nhập",
+      "trendValueInventory": "SL biến động",
+      "detailDialogTitle": "Chi tiết ngày {date}",
+      "viewDetail": "Xem chi tiết",
+      "colArea": "Khu vực",
+      "colQty": "SL",
+      "colDate": "Ngày",
+      "colOrdered": "Đã đặt",
+      "colStockIn": "Đã nhập",
+      "colAction": "Thao tác",
+      "noData": "Không có dữ liệu"
     },
     "inventoryReport": {
       "title": "Báo cáo tồn kho",
@@ -762,8 +1162,8 @@
         "status": "Trạng thái",
         "unitPrice": "Đơn giá",
         "inventoryValue": "Giá trị tồn",
-        "orderCount": "Số lượng order",
-        "stockInCount": "Số lượng nhập"
+        "orderCount": "SL order",
+        "stockInCount": "SL nhập"
       },
       "stockStatus": {
         "normal": "Còn hàng",
@@ -819,7 +1219,7 @@
       "summary": {
         "totalImports": "Tổng số lần nhập",
         "totalProducts": "Tổng số sản phẩm",
-        "totalQuantity": "Tổng số lượng nhập"
+        "totalQuantity": "Tổng SL nhập"
       },
       "table": {
         "receiptCode": "Mã phiếu",
@@ -828,7 +1228,7 @@
         "product": "Sản phẩm",
         "image": "Hình ảnh",
         "unitPrice": "Đơn giá",
-        "quantity": "Số lượng",
+        "quantity": "SL",
         "subtotal": "Thành tiền",
         "note": "Ghi chú"
       },

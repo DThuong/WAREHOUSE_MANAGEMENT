@@ -1,4 +1,160 @@
 {
+  "lineMachine": {
+    "title": "라인 & 설비 관리",
+    "subtitle": "생산 라인, 공장 및 라인별 설비 목록을 관리합니다.",
+    "addLine": "+ 라인 추가",
+    "addMachine": "+ 설비 추가",
+    "copyMachine": "설비 복사",
+    "totalLine": "총 라인",
+    "totalMachine": "총 설비",
+    "search": "검색",
+    "searchPlaceholder": "라인 또는 설비 이름으로 검색...",
+    "area": "공장",
+    "all": "전체",
+    "loading": "데이터 로딩 중...",
+    "noData": "일치하는 데이터가 없습니다",
+    "noDataHint": "필터를 변경하거나 새 라인을 추가해 보세요.",
+    "lineListTitle": "라인 목록",
+    "lineListHint": "필터에 맞는 라인 {count}개. 설비가 많은 라인은 보기 편하도록 접혀 있습니다.",
+    "expandAll": "전체 펼치기",
+    "collapseAll": "접기",
+    "machineCount": "설비 {count}개",
+    "addMachineShort": "+ 설비",
+    "copy": "복사",
+    "edit": "수정",
+    "delete": "삭제",
+    "table": {
+      "id": "ID",
+      "machineName": "설비명",
+      "lineId": "라인 ID",
+      "actions": "작업",
+      "noMachines": "이 라인에는 설비가 없습니다."
+    },
+    "modal": {
+      "addLine": "라인 추가",
+      "editLine": "라인 수정",
+      "addLineHint": "공장별로 새 라인을 생성합니다.",
+      "editLineHint": "라인 이름만 수정할 수 있습니다",
+      "close": "닫기",
+      "lineName": "라인 이름",
+      "lineNamePlaceholder": "예: SA6, S12...",
+      "area": "공장",
+      "cancel": "취소",
+      "saving": "저장 중...",
+      "save": "저장",
+      "addMachine": "설비 추가",
+      "editMachine": "설비 수정",
+      "machineHint": "설비가 속할 라인을 선택하세요. 다른 라인으로 이동할 수 있습니다.",
+      "machineName": "설비명",
+      "machineNamePlaceholder": "예: SPI, AOI, Reflow...",
+      "belongsToLine": "소속 라인"
+    },
+    "copyModal": {
+      "title": "설비 복사",
+      "hint": "원본 라인과 대상 라인을 선택하세요. 대상 라인에 이름이 같은 설비는 자동으로 제외됩니다.",
+      "sourceLine": "원본 라인",
+      "machinesSuffix": "개)",
+      "selecting": "선택됨:",
+      "machineUnit": "개 설비",
+      "copyListTitle": "복사할 설비 목록",
+      "noSourceMachines": "원본 라인에 복사할 설비가 없습니다.",
+      "summary": "요약",
+      "copyFrom": "복사 원본",
+      "to": "대상",
+      "targetLinesSuffix": "개 라인.",
+      "newMachinesEstimate": "새로 생성될 설비 수:",
+      "targetLine": "대상 라인",
+      "targetLineHint": "설비 목록을 받을 라인을 하나 이상 선택하세요.",
+      "selectAll": "전체 선택",
+      "clearSelection": "선택 해제",
+      "targetLineInfo": "{area} · 현재 {current}개 보유 · {add}개 신규 추가",
+      "copying": "복사 중...",
+      "copyAction": "설비 복사"
+    },
+    "confirmModal": {
+      "cancel": "취소",
+      "deleting": "삭제 중...",
+      "delete": "삭제"
+    },
+    "toast": {
+      "loadErrorTitle": "데이터 로드 오류",
+      "loadErrorDetail": "라인 / 설비 목록을 불러올 수 없습니다.",
+      "notRefreshedTitle": "처리되었지만 데이터가 새로고침되지 않았습니다",
+      "notRefreshedDetail": "목록을 업데이트하려면 페이지를 다시 불러오세요.",
+      "missingInfoTitle": "정보 누락",
+      "missingLineName": "라인 이름을 입력해 주세요.",
+      "missingLineIdTitle": "라인 ID 누락",
+      "missingLineIdDetail": "업데이트할 라인을 찾을 수 없습니다.",
+      "addLineSuccessTitle": "라인 추가 성공",
+      "updateLineSuccessTitle": "라인 업데이트 성공",
+      "addLineSuccessDetail": "{name} 라인이 추가되었습니다.",
+      "updateLineSuccessDetail": "{name} 라인이 업데이트되었습니다.",
+      "addLineFailTitle": "라인 추가 실패",
+      "updateLineFailTitle": "라인 업데이트 실패",
+      "checkInfoRetry": "정보를 확인하고 다시 시도해 주세요.",
+      "noLineTitle": "라인 없음",
+      "noLineDetail": "설비를 추가하기 전에 라인을 먼저 생성해 주세요.",
+      "missingMachineName": "설비 이름을 입력해 주세요.",
+      "missingLineSelect": "라인을 선택해 주세요.",
+      "missingMachineIdTitle": "설비 ID 누락",
+      "missingMachineIdDetail": "업데이트할 설비를 찾을 수 없습니다.",
+      "addMachineSuccessTitle": "설비 추가 성공",
+      "updateMachineSuccessTitle": "설비 업데이트 성공",
+      "addMachineSuccessDetail": "{name} 설비가 추가되었습니다.",
+      "updateMachineSuccessDetail": "{name} 설비가 업데이트되었습니다.",
+      "addMachineFailTitle": "설비 추가 실패",
+      "updateMachineFailTitle": "설비 업데이트 실패",
+      "notEnoughLinesTitle": "라인 부족",
+      "notEnoughLinesDetail": "설비를 다른 라인으로 복사하려면 최소 2개의 라인이 필요합니다.",
+      "noSourceLineTitle": "원본 라인 누락",
+      "noSourceLineDetail": "복사할 원본 라인을 선택해 주세요.",
+      "sourceNoMachinesTitle": "원본 라인에 설비 없음",
+      "sourceNoMachinesDetail": "원본 라인에 복사할 설비가 없습니다.",
+      "noTargetLineTitle": "대상 라인 누락",
+      "noTargetLineDetail": "대상 라인을 하나 이상 선택해 주세요.",
+      "noNewMachinesTitle": "새로 복사할 설비 없음",
+      "noNewMachinesDetail": "대상 라인에 이미 원본 라인과 동일한 이름의 설비가 있습니다.",
+      "copySuccessTitle": "설비 복사 성공",
+      "copySuccessDetail": "{line}에서 설비 {count}개가 생성되었습니다.",
+      "copyIncompleteTitle": "설비 복사 미완료",
+      "copyIncompleteDetail": "{success}/{total}개 설비가 생성되었습니다. {error}",
+      "deleteLineSuccessTitle": "라인 삭제 성공",
+      "deleteMachineSuccessTitle": "설비 삭제 성공",
+      "deleteLineSuccessDetail": "라인 ID {id}가 삭제되었습니다.",
+      "deleteMachineSuccessDetail": "설비 ID {id}가 삭제되었습니다.",
+      "deleteLineFailTitle": "라인 삭제 실패",
+      "deleteMachineFailTitle": "설비 삭제 실패",
+      "deleteFailDetail": "데이터를 삭제할 수 없습니다. 다시 시도해 주세요."
+    },
+    "deleteConfirm": {
+      "noSourceLine": "원본 라인이 선택되지 않았습니다",
+      "confirmLineTitle": "{name} 라인을 삭제하시겠습니까?",
+      "confirmLineWithMachines": "이 라인에는 현재 {count}개의 설비가 있습니다. 백엔드에서 설비가 있는 라인의 삭제를 허용하지 않는 경우, 먼저 설비를 삭제하거나 다른 라인으로 이동하세요.",
+      "confirmLineNoMachines": "이 라인을 삭제하시겠습니까?",
+      "confirmMachineTitle": "{name} 설비를 삭제하시겠습니까?",
+      "confirmMachineMessage": "이 설비를 삭제하시겠습니까?"
+    },
+    "analytics": {
+      "button": "자재 사용 현황 보기",
+      "title": "설비별 자재 사용 현황",
+      "subtitle": "{name} 설비에서 사용된 자재 목록",
+      "fromDate": "시작일",
+      "toDate": "종료일",
+      "apply": "필터 적용",
+      "reset": "필터 초기화",
+      "totalItems": "자재 {count}종",
+      "totalUsed": "사용 {count}회",
+      "colCode": "자재 코드",
+      "colName": "자재명",
+      "colArea": "구역",
+      "colStock": "재고",
+      "colUsed": "사용량",
+      "colOrderCount": "주문 횟수",
+      "loading": "데이터를 불러오는 중...",
+      "empty": "이 설비에서 사용된 자재가 없습니다.",
+      "loadError": "이 설비의 자재 사용 데이터를 불러올 수 없습니다."
+    }
+  },
   "common": {
     "upload": {
       "addImage": "이미지 추가",
@@ -84,7 +240,47 @@
     },
     "confirmDelete": "삭제 확인",
     "confirmDeleteMsg": "정말로 삭제하시겠습니까",
-    "print": "보고서 출력"
+    "print": "보고서 출력",
+    "toast": {
+      "loginSuccess": "로그인 성공",
+      "welcomeUser": "{username}님, 환영합니다!"
+    },
+    "pagination": {
+      "showing": "표시",
+      "firstPage": "첫 페이지",
+      "prevPage": "이전 페이지",
+      "nextPage": "다음 페이지",
+      "lastPage": "마지막 페이지"
+    }
+  },
+  "areaTrendChart": {
+    "noData": "데이터가 없습니다",
+    "hint": "차트의 한 지점을 클릭하면 일별 상세 정보를 볼 수 있습니다",
+    "valueLabel": "수량",
+    "period7": "7일",
+    "period30": "30일",
+    "periodAll": "전체"
+  },
+  "signin": {
+    "signInButton": "로그인",
+    "toast": {
+      "errorTitle": "오류",
+      "userInfoError": "사용자 정보를 가져올 수 없습니다",
+      "noPermissionTitle": "권한 없음",
+      "noPermissionDetail": "이 계정은 시스템에 접근할 권한이 없습니다",
+      "loginFailedTitle": "로그인 실패",
+      "checkInfoAgain": "입력하신 정보를 다시 확인해 주세요",
+      "genericError": "오류가 발생했습니다. 다시 시도해 주세요."
+    }
+  },
+  "imagePreview": {
+    "rotateLeft": "왼쪽으로 회전",
+    "rotateRight": "오른쪽으로 회전",
+    "zoomOut": "축소",
+    "zoomIn": "확대",
+    "reset": "초기화",
+    "download": "다운로드",
+    "close": "닫기"
   },
   "language": {
     "title": "언어",
@@ -122,7 +318,101 @@
     "rejected": "거절",
     "topOrderedMaterials": "최다 주문 자재 TOP",
     "criticalStock": "위험 재고 자재 (재고 부족, 위험 경보 수준)",
-    "recentOrders": "최근 주문"
+    "recentOrders": "최근 주문",
+    "eyebrow": "창고 분석",
+    "heading": "SMD & MAINLINE 재고 현황",
+    "subtitle": "공장별 재고 수준, 부족 재고 경보, 입출고 활동을 확인하세요.",
+    "refresh": "데이터 새로고침",
+    "alertBanner": {
+      "title": "{count}개 자재에 주의가 필요합니다",
+      "subtitle": "위험 품목 {critical}개, 품절 품목 {out}개 포함.",
+      "action": "자세히 보기",
+      "ok": "재고 상태가 양호하며 경보가 없습니다."
+    },
+    "kpi": {
+      "totalItems": "총 자재 수",
+      "totalItemsDetail": "Engineer {eng} / Consumer {com}",
+      "stockValue": "재고 가치",
+      "stockValueDetail": "총 재고 수량: {qty}",
+      "alerts": "재고 경보",
+      "alertsDetail": "위험 {critical} / 품절 {out}",
+      "pendingOrders": "처리 대기 주문",
+      "pendingOrdersDetail": "전체 {total}건 중",
+      "pendingBadge": "승인 대기 {count}건",
+      "pendingByArea": "SMD: {smd} · MAINLINE: {mainline}"
+    },
+    "areaCard": {
+      "viewDetail": "자세히 보기",
+      "stockValue": "재고 가치",
+      "stockQty": "재고 수량",
+      "items": "품목 수",
+      "alerts": "경보",
+      "lines": "라인 {count}개",
+      "machines": "설비 {count}개"
+    },
+    "tabs": {
+      "alerts": "재고 경보",
+      "activity": "최근 활동",
+      "charts": "분석 차트"
+    },
+    "alertsTab": {
+      "description": "재입고가 필요한 자재를 우선순위별로 표시합니다.",
+      "viewAll": "전체 재고 보기",
+      "empty": "경보 대상 자재가 없습니다.",
+      "colItem": "자재",
+      "colArea": "구역",
+      "colStock": "현재 재고",
+      "colSafety": "안전 재고",
+      "colStatus": "상태"
+    },
+    "activity": {
+      "recentOrders": "최근 주문",
+      "recentOrdersDesc": "최신 자재 주문 요청입니다.",
+      "recentStockins": "최근 입고",
+      "recentStockinsDesc": "구역별 최신 입고 내역입니다.",
+      "topOrdered": "최다 주문 자재 TOP",
+      "topOrderedDesc": "선택한 구역 기준입니다.",
+      "viewAll": "전체 보기",
+      "noOrders": "주문 내역이 없습니다.",
+      "noStockins": "입고 내역이 없습니다.",
+      "noTopOrdered": "주문 데이터가 없습니다.",
+      "ordered": "주문됨"
+    },
+    "charts": {
+      "dailyMovement": "일별 입고 & 주문 차트",
+      "dailyMovementDesc": "차트의 점을 클릭하면 해당 날짜의 입고/주문 내역을 볼 수 있습니다.",
+      "range7d": "7일",
+      "range30d": "30일",
+      "rangeAll": "전체",
+      "stockinOnDate": "{date} 입고 내역",
+      "orderOnDate": "{date} 주문 내역",
+      "noStockinOnDate": "해당 날짜에 입고 내역이 없습니다 (0)",
+      "noOrderOnDate": "해당 날짜에 주문 내역이 없습니다 (0)",
+      "selectDateHint": "차트의 점을 선택하면 해당 날짜의 상세 내역을 볼 수 있습니다.",
+      "colStockinId": "입고 번호",
+      "colCreator": "작성자",
+      "colArea": "구역",
+      "colQty": "총 수량",
+      "colOrderId": "주문 번호",
+      "colWorker": "작업자",
+      "colStatus": "상태",
+      "colAction": "동작"
+    },
+    "orderModal": {
+      "title": "주문 상세 #{id}",
+      "orderDate": "주문일",
+      "worker": "작업자",
+      "status": "상태",
+      "note": "비고",
+      "images": "증빙 이미지",
+      "items": "품목",
+      "colItem": "자재",
+      "colMachine": "설비",
+      "colQty": "주문 수량",
+      "colNote": "비고",
+      "noImages": "이미지가 없습니다",
+      "close": "닫기"
+    }
   },
   "orderManagement": {
     "common": {
@@ -140,6 +430,13 @@
       "notFound": "찾을 수 없음",
       "missingInfo": "정보 누락",
       "missingImage": "증빙 이미지 누락",
+      "factory": "공장",
+      "allFactory": "전체 공장",
+      "close": "닫기",
+      "selectLineMachine": "라인 / 설비 선택",
+      "searchLineMachine": "라인 또는 설비 검색",
+      "pastedImage": "클립보드에서 이미지를 붙여넣었습니다",
+      "adminNoOrderPermission": "JWT 기준으로 주문이 공장별로 권한 분리되어 Admin 계정은 더 이상 주문을 생성할 권한이 없습니다.",
       "createOrderAction": {
         "approveOrder": "주문 승인",
         "rejectOrder": "주문 거절",
@@ -184,6 +481,7 @@
     "rejectReasonPlaceholder": "주문 거절 사유를 입력하세요...",
     "chooseStatus": "상태 선택",
     "updateStatusOrder": "주문 상태 업데이트",
+    "completingOrderHint": "주문이 승인되었습니다. 증빙 이미지를 업로드하면 주문 상태가 자동으로 완료로 변경됩니다.",
     "viewDetail": "상세 보기",
     "manageImages": "이미지 관리",
     "updateStatus": "상태 업데이트",
@@ -241,6 +539,9 @@
     "subtitle": "제품 재고 관리",
     "addProduct": "새 제품 추가",
     "filters": {
+      "area": "공장",
+      "areaPlaceholder": "공장 선택",
+      "selectAreaFirst": "먼저 공장을 선택해 주세요",
       "productType": "제품 유형",
       "stockStatus": "재고 상태",
       "search": "검색",
@@ -274,12 +575,16 @@
       "id": "ID",
       "product": "제품",
       "type": "유형",
+      "area": "공장",
       "price": "가격",
       "stockQty": "재고 수량",
       "safeQty": "안전 재고",
       "actions": "작업",
       "empty": "제품이 없습니다",
       "serialPrefix": "번호: "
+    },
+    "mobile": {
+      "area": "공장:"
     },
     "category": {
       "engineering": "기술 제품",
@@ -290,6 +595,7 @@
     "currency": "VND",
     "actions": {
       "manageImages": "이미지 관리",
+      "transactionHistory": "주문 / 입고 내역",
       "edit": "수정",
       "delete": "삭제"
     },
@@ -306,7 +612,16 @@
       "stockQty": "재고 수량",
       "required": "*",
       "cancel": "취소",
-      "save": "업데이트"
+      "save": "업데이트",
+      "engSection": "엔지니어링 정보",
+      "comSection": "소비재 정보",
+      "partname": "부품명",
+      "location": "위치",
+      "description": "설명",
+      "vender": "공급업체",
+      "comName": "제품명",
+      "specifications": "사양",
+      "manufacturer": "제조사"
     },
     "imageDialog": {
       "header": "이미지 관리 - {name}",
@@ -354,7 +669,36 @@
       "deleteImageSuccessTitle": "성공",
       "deleteImageError": "이미지를 삭제할 수 없습니다",
       "warningTitle": "경고",
-      "errorTitle": "오류"
+      "errorTitle": "오류",
+      "pasteImageSuccess": "클립보드에서 이미지를 붙여넣었습니다",
+      "loadHistoryErrorTitle": "내역 로드 오류",
+      "loadHistoryErrorDetail": "주문 / 입고 내역을 불러올 수 없습니다"
+    },
+    "transactionDialog": {
+      "header": "거래 내역: {id}",
+      "filterByIdMachine": "ID / 설비로 필터",
+      "fromDate": "시작일",
+      "toDate": "종료일",
+      "filter": "필터",
+      "itemCode": "품목 코드",
+      "dateRange": "기간",
+      "allHistory": "전체 내역",
+      "selectedDateRange": "선택한 기간",
+      "ordersHistory": "주문 내역",
+      "ordersCount": "{count}건 주문",
+      "colOrderDate": "주문일",
+      "colMachine": "설비",
+      "colLine": "생산 라인",
+      "colQty": "수량",
+      "colItemAmount": "품목 금액",
+      "colStatus": "상태",
+      "noOrdersHistory": "현재 필터에 해당하는 주문 내역이 없습니다",
+      "stockinHistory": "입고 내역",
+      "stockinCount": "{count}건 입고",
+      "colStockinDate": "입고일",
+      "colStockinQty": "입고 수량",
+      "noStockinHistory": "현재 필터에 해당하는 입고 내역이 없습니다",
+      "close": "닫기"
     }
   },
   "importManagement": {
@@ -365,12 +709,29 @@
       "fromDate": "시작일",
       "toDate": "종료일",
       "searchPlaceholder": "메모, 작성자로 검색...",
-      "reset": "초기화"
+      "reset": "초기화",
+      "area": "공장",
+      "areaPlaceholder": "공장 선택",
+      "search": "검색",
+      "searchTablePlaceholder": "전표 코드, 작성자, 제품으로 검색..."
     },
     "summary": {
-      "total": "총계: {count}개 전표"
+      "total": "총계: {count}개 전표",
+      "totalReceipts": "총 전표: {count}",
+      "totalQuantity": "총 입고 수량: {count}",
+      "areaLabel": "공장: {area}"
     },
     "empty": "입고 전표가 없습니다",
+    "table": {
+      "receipt": "전표",
+      "area": "공장",
+      "createdBy": "작성자",
+      "importedProducts": "입고 제품",
+      "moreProducts": "+{count}개 제품 더보기",
+      "totalQty": "총 수량",
+      "images": "이미지",
+      "actions": "작업"
+    },
     "card": {
       "createdBy": "작성자",
       "products": "제품",
@@ -380,10 +741,14 @@
       "imageCount": "{count}장",
       "detail": "상세",
       "images_btn": "이미지",
-      "delete": "삭제"
+      "delete": "삭제",
+      "area": "공장"
     },
     "createDialog": {
       "header": "새 입고 전표 생성",
+      "area": "공장",
+      "areaPlaceholder": "입고 공장 선택",
+      "selectAreaFirst": "먼저 공장을 선택해 주세요",
       "note": "메모",
       "notePlaceholder": "입고 전표 메모를 입력하세요...",
       "productList": "입고 제품 목록",
@@ -422,6 +787,7 @@
     "detailDialog": {
       "header": "입고 전표 상세 #{id}",
       "stockInDate": "입고일",
+      "area": "공장",
       "createdBy": "작성자",
       "note": "메모",
       "productList": "제품 목록 ({count})",
@@ -467,7 +833,11 @@
       "noFileSelected": "선택된 파일이 없습니다",
       "uploadSuccessDetail": "{success}/{total}장 업로드 완료",
       "uploadFailDetail": "{count}장 업로드 실패",
-      "uploadError": "이미지를 업로드할 수 없습니다"
+      "uploadError": "이미지를 업로드할 수 없습니다",
+      "pastedImage": "클립보드에서 이미지를 붙여넣었습니다",
+      "selectAreaRequired": "입고 공장을 선택해 주세요",
+      "productAreaMismatch": "선택한 공장에 속하지 않는 제품이 있습니다. 제품을 다시 선택해 주세요.",
+      "selectAreaBeforeAddProduct": "제품을 추가하기 전에 공장을 선택해 주세요"
     }
   },
   "addInventory": {
@@ -542,7 +912,8 @@
       "requiredEngineer": "기술 제품 정보를 모두 입력해 주세요",
       "requiredConsumer": "소비재 정보를 모두 입력해 주세요",
       "createSuccess": "제품이 생성되었습니다. 이미지를 계속 추가하거나 목록으로 돌아갈 수 있습니다.",
-      "createError": "제품을 생성할 수 없습니다"
+      "createError": "제품을 생성할 수 없습니다",
+      "pasteImageSuccess": "클립보드에서 이미지를 붙여넣었습니다"
     }
   },
   "userManagement": {
@@ -566,6 +937,7 @@
       "info": "정보",
       "role": "역할",
       "department": "부서",
+      "area": "공장",
       "status": "상태",
       "createdAt": "생성일",
       "actions": "작업"
@@ -577,6 +949,7 @@
     "mobile": {
       "role": "역할",
       "department": "부서",
+      "area": "공장",
       "createdAt": "생성일"
     },
     "tooltip": {
@@ -598,6 +971,8 @@
       "rolePlaceholder": "역할 선택",
       "department": "부서",
       "departmentPlaceholder": "부서 선택",
+      "area": "공장",
+      "areaPlaceholder": "공장 선택",
       "cancel": "취소",
       "add": "추가",
       "update": "업데이트"
@@ -607,6 +982,7 @@
       "id": "ID",
       "role": "역할",
       "department": "부서",
+      "area": "공장",
       "status": "상태",
       "createdAt": "생성일",
       "close": "닫기",
@@ -629,13 +1005,19 @@
       "reject": "취소"
     },
     "toast": {
+      "successTitle": "성공",
       "warningTitle": "경고",
       "errorTitle": "오류",
       "requiredFields": "모든 필수 항목을 입력해 주세요",
       "requiredPassword": "비밀번호를 입력해 주세요",
       "saveError": "계정을 저장할 수 없습니다",
       "requiredPasswordFields": "모든 항목을 입력해 주세요",
-      "passwordMismatch": "비밀번호가 일치하지 않습니다"
+      "passwordMismatch": "비밀번호가 일치하지 않습니다",
+      "updateSuccess": "사용자 정보가 수정되었습니다.",
+      "addSuccess": "사용자가 추가되었습니다.",
+      "deleteSuccess": "사용자가 삭제되었습니다.",
+      "deleteError": "사용자를 삭제할 수 없습니다.",
+      "changePasswordSuccess": "비밀번호가 변경되었습니다."
     }
   },
   "reports": {
@@ -647,6 +1029,7 @@
       "loading": "데이터 로딩 중...",
       "reset": "초기화",
       "detailTitle": "상세 데이터",
+      "codePrefix": "코드",
       "badge": {
         "stockin": "입고 전표",
         "order": "완료 주문",
@@ -714,7 +1097,24 @@
       "printDate": "인쇄일",
       "dateRange": "{from}부터 {to}까지",
       "noImage": "이미지 없음",
-      "status": "상태"
+      "status": "상태",
+      "filterArea": "구역",
+      "areaAll": "전체",
+      "trendTitleOrders": "구역별 주문 추세",
+      "trendTitleStockin": "구역별 입고 추세",
+      "trendTitleInventory": "구역별 재고 변동 추세",
+      "trendValueOrders": "주문 수량",
+      "trendValueStockin": "입고 수량",
+      "trendValueInventory": "변동 수량",
+      "detailDialogTitle": "{date} 상세 정보",
+      "viewDetail": "상세 보기",
+      "colArea": "구역",
+      "colQty": "수량",
+      "colDate": "날짜",
+      "colOrdered": "주문됨",
+      "colStockIn": "입고됨",
+      "colAction": "작업",
+      "noData": "데이터 없음"
     },
     "inventoryReport": {
       "title": "재고 보고서",

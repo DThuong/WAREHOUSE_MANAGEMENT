@@ -1,5 +1,6 @@
 <template>
   <MainLayout>
+    <div class="page-gradient-bg">
       <div style="text-align: center; padding: 2rem;">
         <i class="pi pi-globe" style="font-size: 3rem; color: #fa8072; margin-bottom: 1rem;"></i>
         <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">{{ t('language.title') }}</h3>
@@ -23,6 +24,7 @@
           </span>
         </Button>
       </div>
+    </div>
   </MainLayout>
 </template>
 
@@ -39,6 +41,12 @@ const setLanguage = (lang: string) => {
 }
 </script>
 <style scoped>
+:deep(.content-area) {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
 @media (max-width: 768px) {
   .btn-mobile {
     width: 100%;

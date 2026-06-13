@@ -1,4 +1,160 @@
 {
+  "lineMachine": {
+    "title": "Line & Machine Management",
+    "subtitle": "Manage production lines, areas, and machines for each line.",
+    "addLine": "+ Add Line",
+    "addMachine": "+ Add Machine",
+    "copyMachine": "Copy machines",
+    "totalLine": "Total Lines",
+    "totalMachine": "Total Machines",
+    "search": "Search",
+    "searchPlaceholder": "Search by line or machine name...",
+    "area": "Area",
+    "all": "All",
+    "loading": "Loading data...",
+    "noData": "No matching data",
+    "noDataHint": "Try changing the filter or add a new line.",
+    "lineListTitle": "Line List",
+    "lineListHint": "{count} lines match the filter. Lines with many machines are collapsed for easier viewing.",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse",
+    "machineCount": "{count} machines",
+    "addMachineShort": "+ Machine",
+    "copy": "Copy",
+    "edit": "Edit",
+    "delete": "Delete",
+    "table": {
+      "id": "ID",
+      "machineName": "Machine name",
+      "lineId": "Line ID",
+      "actions": "Actions",
+      "noMachines": "This line has no machines yet."
+    },
+    "modal": {
+      "addLine": "Add Line",
+      "editLine": "Edit Line",
+      "addLineHint": "Create a new line for an area.",
+      "editLineHint": "Only the line name can be edited",
+      "close": "Close",
+      "lineName": "Line name",
+      "lineNamePlaceholder": "E.g.: SA6, S12...",
+      "area": "Area",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "save": "Save",
+      "addMachine": "Add Machine",
+      "editMachine": "Edit Machine",
+      "machineHint": "Select the line for this machine. You can move it to another line.",
+      "machineName": "Machine name",
+      "machineNamePlaceholder": "E.g.: SPI, AOI, Reflow...",
+      "belongsToLine": "Belongs to line"
+    },
+    "copyModal": {
+      "title": "Copy machines",
+      "hint": "Select a source line and target lines. Machines with the same name in the target line will be skipped automatically.",
+      "sourceLine": "Source line",
+      "machinesSuffix": "machines)",
+      "selecting": "Selected:",
+      "machineUnit": "machines",
+      "copyListTitle": "Machines to copy",
+      "noSourceMachines": "The source line has no machines to copy.",
+      "summary": "Summary",
+      "copyFrom": "Copy from",
+      "to": "to",
+      "targetLinesSuffix": "target line(s).",
+      "newMachinesEstimate": "Machines expected to be created:",
+      "targetLine": "Target lines",
+      "targetLineHint": "Select one or more lines to receive the machines.",
+      "selectAll": "Select all",
+      "clearSelection": "Clear selection",
+      "targetLineInfo": "{area} · currently has {current} machines · adding {add} new machines",
+      "copying": "Copying...",
+      "copyAction": "Copy machines"
+    },
+    "confirmModal": {
+      "cancel": "Cancel",
+      "deleting": "Deleting...",
+      "delete": "Delete"
+    },
+    "toast": {
+      "loadErrorTitle": "Error loading data",
+      "loadErrorDetail": "Unable to load the line / machine list.",
+      "notRefreshedTitle": "Action completed but data not reloaded",
+      "notRefreshedDetail": "Please reload the page to update the list.",
+      "missingInfoTitle": "Missing information",
+      "missingLineName": "Please enter a line name.",
+      "missingLineIdTitle": "Missing line ID",
+      "missingLineIdDetail": "The line to update was not found.",
+      "addLineSuccessTitle": "Line added successfully",
+      "updateLineSuccessTitle": "Line updated successfully",
+      "addLineSuccessDetail": "Line {name} added.",
+      "updateLineSuccessDetail": "Line {name} updated.",
+      "addLineFailTitle": "Failed to add line",
+      "updateLineFailTitle": "Failed to update line",
+      "checkInfoRetry": "Please check the information and try again.",
+      "noLineTitle": "No lines yet",
+      "noLineDetail": "Please create a Line before adding a Machine.",
+      "missingMachineName": "Please enter a machine name.",
+      "missingLineSelect": "Please select a line.",
+      "missingMachineIdTitle": "Missing machine ID",
+      "missingMachineIdDetail": "The machine to update was not found.",
+      "addMachineSuccessTitle": "Machine added successfully",
+      "updateMachineSuccessTitle": "Machine updated successfully",
+      "addMachineSuccessDetail": "Machine {name} added.",
+      "updateMachineSuccessDetail": "Machine {name} updated.",
+      "addMachineFailTitle": "Failed to add machine",
+      "updateMachineFailTitle": "Failed to update machine",
+      "notEnoughLinesTitle": "Not enough lines",
+      "notEnoughLinesDetail": "At least 2 lines are required to copy machines from one line to another.",
+      "noSourceLineTitle": "Missing source line",
+      "noSourceLineDetail": "Please select a source line to copy.",
+      "sourceNoMachinesTitle": "Source line has no machines",
+      "sourceNoMachinesDetail": "The source line has no machines to copy.",
+      "noTargetLineTitle": "Missing target line",
+      "noTargetLineDetail": "Please select at least one target line.",
+      "noNewMachinesTitle": "No new machines to copy",
+      "noNewMachinesDetail": "The target lines already have machines with the same names as the source line.",
+      "copySuccessTitle": "Machines copied successfully",
+      "copySuccessDetail": "{count} machine(s) created from {line}.",
+      "copyIncompleteTitle": "Machine copy incomplete",
+      "copyIncompleteDetail": "{success}/{total} machines created. {error}",
+      "deleteLineSuccessTitle": "Line deleted successfully",
+      "deleteMachineSuccessTitle": "Machine deleted successfully",
+      "deleteLineSuccessDetail": "Line ID {id} deleted.",
+      "deleteMachineSuccessDetail": "Machine ID {id} deleted.",
+      "deleteLineFailTitle": "Failed to delete line",
+      "deleteMachineFailTitle": "Failed to delete machine",
+      "deleteFailDetail": "Unable to delete data. Please try again."
+    },
+    "deleteConfirm": {
+      "noSourceLine": "No source line selected",
+      "confirmLineTitle": "Delete line {name}?",
+      "confirmLineWithMachines": "This line currently has {count} machine(s). If the backend doesn't allow deleting a line with machines, move or delete the machines first.",
+      "confirmLineNoMachines": "Are you sure you want to delete this line?",
+      "confirmMachineTitle": "Delete machine {name}?",
+      "confirmMachineMessage": "Are you sure you want to delete this machine?"
+    },
+    "analytics": {
+      "button": "View item usage analytics",
+      "title": "Item Usage by Machine",
+      "subtitle": "List of items used at machine {name}",
+      "fromDate": "From date",
+      "toDate": "To date",
+      "apply": "Filter",
+      "reset": "Clear filter",
+      "totalItems": "{count} item types",
+      "totalUsed": "{count} times used",
+      "colCode": "Item code",
+      "colName": "Item name",
+      "colArea": "Area",
+      "colStock": "Stock",
+      "colUsed": "Used",
+      "colOrderCount": "Order count",
+      "loading": "Loading data...",
+      "empty": "No items have been used on this machine yet.",
+      "loadError": "Unable to load item usage data for this machine."
+    }
+  },
   "common": {
     "upload": {
       "addImage": "Add image",
@@ -84,7 +240,47 @@
     },
     "confirmDelete": "Confirm Delete",
     "confirmDeleteMsg": "Are you sure you want to delete",
-    "print": "Print Report"
+    "print": "Print Report",
+    "toast": {
+      "loginSuccess": "Login successful",
+      "welcomeUser": "Welcome {username}!"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "firstPage": "First page",
+      "prevPage": "Previous page",
+      "nextPage": "Next page",
+      "lastPage": "Last page"
+    }
+  },
+  "areaTrendChart": {
+    "noData": "No data available",
+    "hint": "Click a point on the chart to view daily details",
+    "valueLabel": "Quantity",
+    "period7": "7 days",
+    "period30": "30 days",
+    "periodAll": "All"
+  },
+  "signin": {
+    "signInButton": "Sign In",
+    "toast": {
+      "errorTitle": "Error",
+      "userInfoError": "Unable to retrieve user information",
+      "noPermissionTitle": "No permission",
+      "noPermissionDetail": "Your account does not have access to the system",
+      "loginFailedTitle": "Sign in failed",
+      "checkInfoAgain": "Please check your information again",
+      "genericError": "An error occurred. Please try again."
+    }
+  },
+  "imagePreview": {
+    "rotateLeft": "Rotate left",
+    "rotateRight": "Rotate right",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in",
+    "reset": "Reset",
+    "download": "Download",
+    "close": "Close"
   },
   "language": {
     "title": "Language",
@@ -122,7 +318,101 @@
     "rejected": "Rejected",
     "topOrderedMaterials": "Top Most Ordered Materials",
     "criticalStock": "Critical Stock Materials (low stock at critical alert level)",
-    "recentOrders": "Recent Orders"
+    "recentOrders": "Recent Orders",
+    "eyebrow": "Warehouse Analytics",
+    "heading": "SMD & MAINLINE Stock Overview",
+    "subtitle": "Track stock levels, low-stock alerts, and inbound/outbound activity for each factory area.",
+    "refresh": "Refresh data",
+    "alertBanner": {
+      "title": "{count} items need attention",
+      "subtitle": "Including {critical} critical items and {out} out-of-stock items.",
+      "action": "View details",
+      "ok": "Stock levels are healthy, no alerts."
+    },
+    "kpi": {
+      "totalItems": "Total Items",
+      "totalItemsDetail": "{eng} Engineer / {com} Consumer",
+      "stockValue": "Stock Value",
+      "stockValueDetail": "Total stock quantity: {qty}",
+      "alerts": "Stock Alerts",
+      "alertsDetail": "{critical} critical / {out} out of stock",
+      "pendingOrders": "Pending Orders",
+      "pendingOrdersDetail": "Out of {total} total orders",
+      "pendingBadge": "{count} orders need approval",
+      "pendingByArea": "SMD: {smd} · MAINLINE: {mainline}"
+    },
+    "areaCard": {
+      "viewDetail": "View details",
+      "stockValue": "Stock value",
+      "stockQty": "Stock quantity",
+      "items": "Items",
+      "alerts": "Alerts",
+      "lines": "{count} lines",
+      "machines": "{count} machines"
+    },
+    "tabs": {
+      "alerts": "Stock Alerts",
+      "activity": "Recent Activity",
+      "charts": "Analytics Charts"
+    },
+    "alertsTab": {
+      "description": "Items that need restocking, sorted by priority.",
+      "viewAll": "View all inventory",
+      "empty": "No items need attention.",
+      "colItem": "Item",
+      "colArea": "Area",
+      "colStock": "Current Stock",
+      "colSafety": "Safety Stock",
+      "colStatus": "Status"
+    },
+    "activity": {
+      "recentOrders": "Recent Orders",
+      "recentOrdersDesc": "Latest material order requests.",
+      "recentStockins": "Recent Stock-ins",
+      "recentStockinsDesc": "Latest stock-in receipts by area.",
+      "topOrdered": "Top Most Ordered Materials",
+      "topOrderedDesc": "For the selected area.",
+      "viewAll": "View all",
+      "noOrders": "No orders yet.",
+      "noStockins": "No stock-in receipts yet.",
+      "noTopOrdered": "No order data yet.",
+      "ordered": "ordered"
+    },
+    "charts": {
+      "dailyMovement": "Daily Stock-in & Order Chart",
+      "dailyMovementDesc": "Click a point on the chart to see that day's stock-in receipts / orders.",
+      "range7d": "7 days",
+      "range30d": "30 days",
+      "rangeAll": "All",
+      "stockinOnDate": "Stock-in receipts on {date}",
+      "orderOnDate": "Orders on {date}",
+      "noStockinOnDate": "No stock-in receipts on this date (0)",
+      "noOrderOnDate": "No orders on this date (0)",
+      "selectDateHint": "Select a point on the chart to see details for that day.",
+      "colStockinId": "Receipt #",
+      "colCreator": "Created by",
+      "colArea": "Area",
+      "colQty": "Total Qty",
+      "colOrderId": "Order #",
+      "colWorker": "Worker",
+      "colStatus": "Status",
+      "colAction": "Action"
+    },
+    "orderModal": {
+      "title": "Order Details #{id}",
+      "orderDate": "Order Date",
+      "worker": "Worker",
+      "status": "Status",
+      "note": "Note",
+      "images": "Proof Images",
+      "items": "Items",
+      "colItem": "Item",
+      "colMachine": "Machine",
+      "colQty": "Order Qty",
+      "colNote": "Note",
+      "noImages": "No images yet",
+      "close": "Close"
+    }
   },
   "orderManagement": {
     "common": {
@@ -140,6 +430,13 @@
       "notFound": "Not Found",
       "missingInfo": "Missing Information",
       "missingImage": "Missing proof image",
+      "factory": "Area",
+      "allFactory": "All areas",
+      "close": "Close",
+      "selectLineMachine": "Select line / machine",
+      "searchLineMachine": "Search line or machine",
+      "pastedImage": "Image pasted from clipboard",
+      "adminNoOrderPermission": "Admin account no longer has permission to create orders because orders are now scoped by Area from JWT.",
       "createOrderAction": {
         "approveOrder": "Approve Order",
         "rejectOrder": "Reject Order",
@@ -182,6 +479,7 @@
     "rejectReasonPlaceholder": "Enter reason for rejecting order...",
     "chooseStatus": "Choose status",
     "updateStatusOrder": "Update Order Status",
+    "completingOrderHint": "Order approved. Upload proof images — once uploaded, the order will automatically be marked as Completed.",
     "viewDetail": "View Detail",
     "manageImages": "Manage Images",
     "updateStatus": "Update Status",
@@ -239,6 +537,9 @@
     "subtitle": "Manage product inventory",
     "addProduct": "Add new product",
     "filters": {
+      "area": "Area",
+      "areaPlaceholder": "Select area",
+      "selectAreaFirst": "Please select an area first",
       "productType": "Product type",
       "stockStatus": "Stock status",
       "search": "Search",
@@ -272,12 +573,16 @@
       "id": "ID",
       "product": "Product",
       "type": "Type",
+      "area": "Area",
       "price": "Price",
       "stockQty": "Stock qty",
       "safeQty": "Safety stock",
       "actions": "Actions",
       "empty": "No products found",
       "serialPrefix": "No: "
+    },
+    "mobile": {
+      "area": "Area:"
     },
     "category": {
       "engineering": "Engineering goods",
@@ -288,6 +593,7 @@
     "currency": "VND",
     "actions": {
       "manageImages": "Manage images",
+      "transactionHistory": "Order / stock-in history",
       "edit": "Edit",
       "delete": "Delete"
     },
@@ -304,7 +610,16 @@
       "stockQty": "Stock quantity",
       "required": "*",
       "cancel": "Cancel",
-      "save": "Update"
+      "save": "Update",
+      "engSection": "Engineering info",
+      "comSection": "Consumer info",
+      "partname": "Part name",
+      "location": "Location",
+      "description": "Description",
+      "vender": "Vendor",
+      "comName": "Product name",
+      "specifications": "Specifications",
+      "manufacturer": "Manufacturer"
     },
     "imageDialog": {
       "header": "Manage images - {name}",
@@ -352,7 +667,36 @@
       "deleteImageSuccessTitle": "Success",
       "deleteImageError": "Unable to delete image",
       "warningTitle": "Warning",
-      "errorTitle": "Error"
+      "errorTitle": "Error",
+      "pasteImageSuccess": "Image pasted from clipboard",
+      "loadHistoryErrorTitle": "Error loading history",
+      "loadHistoryErrorDetail": "Unable to load order / stock-in history"
+    },
+    "transactionDialog": {
+      "header": "Transaction history for: {id}",
+      "filterByIdMachine": "Filter by ID / machine",
+      "fromDate": "From date",
+      "toDate": "To date",
+      "filter": "Filter",
+      "itemCode": "Item code",
+      "dateRange": "Date range",
+      "allHistory": "All history",
+      "selectedDateRange": "Selected date range",
+      "ordersHistory": "Order history",
+      "ordersCount": "{count} orders",
+      "colOrderDate": "Order date",
+      "colMachine": "Machine",
+      "colLine": "Production line",
+      "colQty": "Quantity",
+      "colItemAmount": "Item amount",
+      "colStatus": "Status",
+      "noOrdersHistory": "No order history found for the current filter",
+      "stockinHistory": "Stock-in history",
+      "stockinCount": "{count} stock-ins",
+      "colStockinDate": "Stock-in date",
+      "colStockinQty": "Stock-in quantity",
+      "noStockinHistory": "No stock-in history found for the current filter",
+      "close": "Close"
     }
   },
   "importManagement": {
@@ -363,12 +707,29 @@
       "fromDate": "From date",
       "toDate": "To date",
       "searchPlaceholder": "Search by note, creator...",
-      "reset": "Reset"
+      "reset": "Reset",
+      "area": "Area",
+      "areaPlaceholder": "Select area",
+      "search": "Search",
+      "searchTablePlaceholder": "Search by receipt code, creator, product..."
     },
     "summary": {
-      "total": "Total: {count} receipts"
+      "total": "Total: {count} receipts",
+      "totalReceipts": "Total receipts: {count}",
+      "totalQuantity": "Total import qty: {count}",
+      "areaLabel": "Area: {area}"
     },
     "empty": "No receipts found",
+    "table": {
+      "receipt": "Receipt",
+      "area": "Area",
+      "createdBy": "Created by",
+      "importedProducts": "Imported products",
+      "moreProducts": "+{count} more products",
+      "totalQty": "Total qty",
+      "images": "Images",
+      "actions": "Actions"
+    },
     "card": {
       "createdBy": "Created by",
       "products": "Products",
@@ -378,10 +739,14 @@
       "imageCount": "{count} photos",
       "detail": "Detail",
       "images_btn": "Images",
-      "delete": "Delete"
+      "delete": "Delete",
+      "area": "Area"
     },
     "createDialog": {
       "header": "Create new receipt",
+      "area": "Area",
+      "areaPlaceholder": "Select import area",
+      "selectAreaFirst": "Please select an area first",
       "note": "Note",
       "notePlaceholder": "Enter note for this receipt...",
       "productList": "Product import list",
@@ -420,6 +785,7 @@
     "detailDialog": {
       "header": "Receipt detail #{id}",
       "stockInDate": "Import date",
+      "area": "Area",
       "createdBy": "Created by",
       "note": "Note",
       "productList": "Product list ({count})",
@@ -465,7 +831,11 @@
       "noFileSelected": "No file selected",
       "uploadSuccessDetail": "Uploaded {success}/{total} images",
       "uploadFailDetail": "{count} image(s) failed to upload",
-      "uploadError": "Unable to upload images"
+      "uploadError": "Unable to upload images",
+      "pastedImage": "Image pasted from clipboard",
+      "selectAreaRequired": "Please select an import area",
+      "productAreaMismatch": "Some products do not belong to the selected area. Please reselect the products.",
+      "selectAreaBeforeAddProduct": "Please select an area before adding products"
     }
   },
   "addInventory": {
@@ -540,7 +910,8 @@
       "requiredEngineer": "Please fill in all Engineer fields",
       "requiredConsumer": "Please fill in all Consumer fields",
       "createSuccess": "Product created. You can continue adding images or go back to the list.",
-      "createError": "Unable to create product"
+      "createError": "Unable to create product",
+      "pasteImageSuccess": "Image pasted from clipboard"
     }
   },
   "userManagement": {
@@ -564,6 +935,7 @@
       "info": "Info",
       "role": "Role",
       "department": "Department",
+      "area": "Area",
       "status": "Status",
       "createdAt": "Created At",
       "actions": "Actions"
@@ -575,6 +947,7 @@
     "mobile": {
       "role": "Role",
       "department": "Department",
+      "area": "Area",
       "createdAt": "Created At"
     },
     "tooltip": {
@@ -596,6 +969,8 @@
       "rolePlaceholder": "Select role",
       "department": "Department",
       "departmentPlaceholder": "Select department",
+      "area": "Area",
+      "areaPlaceholder": "Select area",
       "cancel": "Cancel",
       "add": "Add",
       "update": "Update"
@@ -605,6 +980,7 @@
       "id": "ID",
       "role": "Role",
       "department": "Department",
+      "area": "Area",
       "status": "Status",
       "createdAt": "Created At",
       "close": "Close",
@@ -627,13 +1003,19 @@
       "reject": "Cancel"
     },
     "toast": {
+      "successTitle": "Success",
       "warningTitle": "Warning",
       "errorTitle": "Error",
       "requiredFields": "Please fill in all required fields",
       "requiredPassword": "Please enter a password",
       "saveError": "Unable to save account",
       "requiredPasswordFields": "Please fill in all fields",
-      "passwordMismatch": "Passwords do not match"
+      "passwordMismatch": "Passwords do not match",
+      "updateSuccess": "User updated successfully.",
+      "addSuccess": "User added successfully.",
+      "deleteSuccess": "User deleted successfully.",
+      "deleteError": "Unable to delete user.",
+      "changePasswordSuccess": "Password changed successfully."
     }
   },
   "reports": {
@@ -645,6 +1027,7 @@
       "loading": "Loading data...",
       "reset": "Reset",
       "detailTitle": "Detailed Data",
+      "codePrefix": "Code",
       "badge": {
         "stockin": "Import Receipt",
         "order": "Completed Order",
@@ -712,7 +1095,24 @@
       "printDate": "Print Date",
       "dateRange": "From {from} to {to}",
       "noImage": "No image",
-      "status": "Status"
+      "status": "Status",
+      "filterArea": "Area",
+      "areaAll": "All",
+      "trendTitleOrders": "Order trend by area",
+      "trendTitleStockin": "Stock-in trend by area",
+      "trendTitleInventory": "Inventory movement trend by area",
+      "trendValueOrders": "Ordered qty",
+      "trendValueStockin": "Stock-in qty",
+      "trendValueInventory": "Movement qty",
+      "detailDialogTitle": "Details for {date}",
+      "viewDetail": "View detail",
+      "colArea": "Area",
+      "colQty": "Quantity",
+      "colDate": "Date",
+      "colOrdered": "Ordered",
+      "colStockIn": "Stocked in",
+      "colAction": "Action",
+      "noData": "No data"
     },
     "inventoryReport": {
       "title": "Inventory Report",

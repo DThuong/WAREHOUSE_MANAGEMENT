@@ -110,3 +110,16 @@ export interface ItemTransactionQuery {
   fromDate?: string
   toDate?: string
 }
+
+// Item usage stats for a specific machine - GET /api/Item/by-machine/{machineId}
+export interface MachineUsageItem {
+  itemId: number
+  itemIndentifyId: string
+  type: string
+  areaPart: string
+  unit: string
+  price: string
+  totalOrdered: number
+  orderCount: number
+  item: Item
+}

@@ -1,5 +1,6 @@
 <template>
   <MainLayout>
+    <div class="page-gradient-bg">
     <div class="animate-fade-in" style="max-width: 900px; margin: 0 auto;">
       <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">{{ t('addInventory.title') }}</h2>
 
@@ -495,6 +496,7 @@
         </template>
       </Card>
     </div>
+    </div>
   </MainLayout>
 </template>
 
@@ -636,7 +638,7 @@ const handleGlobalPaste = async (event: ClipboardEvent) => {
         reader.readAsDataURL(renamedFile)
       })
 
-      toast.add({ severity: 'success', summary: t('addInventory.toast.successTitle'), detail: 'Đã dán ảnh từ clipboard', life: 2000 })
+      toast.add({ severity: 'success', summary: t('addInventory.toast.successTitle'), detail: t('addInventory.toast.pasteImageSuccess'), life: 2000 })
     }
   } catch (error) {
     console.error(error)
@@ -930,6 +932,12 @@ watch(activeTab, (tab) => {
 </script>
 
 <style scoped>
+:deep(.content-area) {
+  padding: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
 .animate-fade-in {
   animation: fadeIn 0.3s ease-in;
 }

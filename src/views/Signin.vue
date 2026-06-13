@@ -64,7 +64,7 @@
         <!-- Sign In Button -->
         <Button 
           type="submit"
-          label="Đăng Nhập"
+          :label="t('signin.signInButton')"
           class="btn-signin"
           :loading="userStore.authLoading"
           :disabled="userStore.authLoading"
@@ -83,6 +83,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import InputText from 'primevue/inputtext'
 import Password from 'primevue/password' 
@@ -92,10 +93,11 @@ import { useToast } from 'primevue/usetoast'
 import logoImg from '@/assets/images/newLogo.jpg'
 import { useUserStore } from '@/stores/userStore'
 
-//  Khởi tạo
+// Init
 const router = useRouter()
 const toast = useToast()
-const userStore = useUserStore()  //  Gọi trực tiếp store
+const { t } = useI18n()
+const userStore = useUserStore()  // Use the store directly
 
 //  Form state
 const username = ref<string>('')
@@ -176,8 +178,8 @@ const handleSignIn = async (): Promise<void> => {
       if (!user) {
         toast.add({
           severity: 'error',
-          summary: 'Lỗi',
-          detail: 'Không thể lấy thông tin user',
+          summary: t('signin.toast.errorTitle'),
+          detail: t('signin.toast.userInfoError'),
           life: 3000
         })
         return
@@ -187,8 +189,8 @@ const handleSignIn = async (): Promise<void> => {
       if (user.role !== 'Admin') {
         toast.add({
           severity: 'warn',
-          summary: 'Không có quyền',
-          detail: 'Tài khoản của bạn không có quyền truy cập hệ thống',
+          summary: t('signin.toast.noPermissionTitle'),
+          detail: t('signin.toast.noPermissionDetail'),
           life: 3000
         })
 
@@ -222,8 +224,8 @@ const handleSignIn = async (): Promise<void> => {
         // Lỗi chung
         toast.add({
           severity: 'error',
-          summary: 'Đăng nhập thất bại',
-          detail: result.error || 'Vui lòng kiểm tra lại thông tin',
+          summary: t('signin.toast.loginFailedTitle'),
+          detail: result.error || t('signin.toast.checkInfoAgain'),
           life: 3000
         })
       }
@@ -232,8 +234,8 @@ const handleSignIn = async (): Promise<void> => {
     console.error('❌ Sign in error:', error)
     toast.add({
       severity: 'error',
-      summary: 'Lỗi',
-      detail: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+      summary: t('signin.toast.errorTitle'),
+      detail: t('signin.toast.genericError'),
       life: 3000
     })
   }
