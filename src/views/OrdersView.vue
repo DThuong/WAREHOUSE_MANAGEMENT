@@ -554,7 +554,7 @@
             <Column :header="t('common.price')">
               <template #body="{ data }">
                 <span v-if="data.item?.price">
-                  {{ Number(data.item.price).toLocaleString("vi-VN") }} VND
+                  {{ Number(data.item.price).toLocaleString("vi-VN") }}
                 </span>
                 <span v-else class="text-gray-400">{{
                   t("common.noPrice")
@@ -572,7 +572,7 @@
                       "vi-VN",
                     )
                   }}
-                  VND
+                  
                 </span>
                 <span v-else class="text-gray-400">---</span>
               </template>
@@ -643,8 +643,7 @@
                   <span class="dialog-item-price-value">
                     {{
                       data.item?.price
-                        ? Number(data.item.price).toLocaleString("vi-VN") +
-                          " VND"
+                        ? Number(data.item.price).toLocaleString("vi-VN")
                         : t("common.noPrice")
                     }}
                   </span>
@@ -658,7 +657,7 @@
                       data.item?.price
                         ? (
                             Number(data.item.price) * data.orderQty
-                          ).toLocaleString("vi-VN") + " VND"
+                          ).toLocaleString("vi-VN")
                         : "---"
                     }}
                   </span>
@@ -1285,7 +1284,7 @@
                   <div class="h-10 flex items-center">
                     <Chip
                       v-if="item.itemId && item.quantity > 0"
-                      :label="`${getItemSubtotal(item.itemId, item.quantity).toLocaleString('vi-VN')} VND`"
+                      :label="`${getItemSubtotal(item.itemId, item.quantity).toLocaleString('vi-VN')}`"
                       class="bg-green-100 text-green-700 font-bold text-xs"
                     />
                     <span v-else class="text-gray-400 text-sm">---</span>
@@ -1393,7 +1392,7 @@
               >{{ t("common.form.totalOrderValue") }}:</span
             >
             <span class="text-2xl font-bold text-indigo-600"
-              >{{ totalAmount.toLocaleString("vi-VN") }} VND</span
+              >{{ totalAmount.toLocaleString("vi-VN") }}</span
             >
           </div>
         </div>

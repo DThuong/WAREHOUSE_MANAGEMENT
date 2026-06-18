@@ -4,7 +4,7 @@
       <!-- Logo -->
       <div class="logo-section">
         <img :src="logoImg" alt="InApp Logo" class="logo-image" />
-        <h2 class="logo-text">Dongyang</h2>
+        <h2 class="logo-text">Dongyang Spare Parts</h2>
       </div>
 
       <!-- Error Message -->
