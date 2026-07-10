@@ -1059,8 +1059,17 @@
         "type": "Type",
         "import": "Import",
         "usage": "Usage",
-        "stock": "Stock"
+        "stock": "Stock",
+        "totalQty": "Total Qty",
+        "totalValue": "Total Value",
+        "unitPrice": "Unit Price",
+        "totalAmount": "Amount"
       },
+      "totalStockinValue": "Total stock-in value:",
+      "totalOrderValue": "Total order value:",
+      "totalSum": "Total:",
+      "receiptCount": "{count} receipt(s)",
+      "orderCount": "{count} order(s)",
       "empty": {
         "stockin": "No import receipts in this period",
         "order": "No completed orders in this period",

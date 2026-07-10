@@ -1058,11 +1058,20 @@
         "orderer": "주문자",
         "department": "부서",
         "product": "제품",
-        "type": "유형",
+        "type": "종류",
         "import": "입고",
         "usage": "사용",
-        "stock": "재고"
+        "stock": "재고",
+        "totalQty": "총 수량",
+        "totalValue": "총 금액",
+        "unitPrice": "단가",
+        "totalAmount": "금액"
       },
+      "totalStockinValue": "총 입고 가치:",
+      "totalOrderValue": "총 주문 가치:",
+      "totalSum": "총계:",
+      "receiptCount": "{count} 전표",
+      "orderCount": "{count} 주문",
       "empty": {
         "stockin": "해당 기간 내 입고 전표가 없습니다",
         "order": "해당 기간 내 완료 주문이 없습니다",

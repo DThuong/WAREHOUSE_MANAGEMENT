@@ -6,7 +6,7 @@
       <div class="grid grid-cols-3 gap-4 mb-6">
         <Card>
           <template #content>
-            <div style="text-align: center; padding: 2rem">
+            <div style="text-align: left; padding: 2rem">
               <i class="pi pi-cart-arrow-down" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem"></i>
               <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem">{{ t("reports.import.title") }}</h3>
               <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem">{{ t("reports.import.description") }}</p>
@@ -16,7 +16,7 @@
         </Card>
         <Card>
           <template #content>
-            <div style="text-align: center; padding: 2rem">
+            <div style="text-align: left; padding: 2rem">
               <i class="pi pi-shopping-cart" style="font-size: 3rem; color: #10b981; margin-bottom: 1rem"></i>
               <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem">{{ t("reports.order.title") }}</h3>
               <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem">{{ t("reports.order.description") }}</p>
@@ -26,7 +26,7 @@
         </Card>
         <Card>
           <template #content>
-            <div style="text-align: center; padding: 2rem">
+            <div style="text-align: left; padding: 2rem">
               <i class="pi pi-box" style="font-size: 3rem; color: #f59e0b; margin-bottom: 1rem"></i>
               <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem">{{ t("reports.inventory.title") }}</h3>
               <p style="color: var(--gray-600); font-size: 0.875rem; margin-bottom: 1.5rem">{{ t("reports.inventory.description") }}</p>
@@ -175,13 +175,13 @@
                   </Column>
                   <Column :header="t('reports.chart.col.importDate')"><template #body="{ data }">{{ formatDate(data.stockInDate) }}</template></Column>
                   <Column :header="t('reports.chart.col.creator')"><template #body="{ data }">{{ data.account?.username || "-" }}</template></Column>
-                  <Column :header="t('reports.chart.col.productTypeCount')" headerStyle="text-align: center" bodyStyle="text-align: center">
+                  <Column :header="t('reports.chart.col.productTypeCount')">
                     <template #body="{ data }"><div class="font-semibold text-slate-700">{{ data.stockInDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
                   </Column>
-                  <Column header="Tổng SL" headerStyle="text-align: center" bodyStyle="text-align: center">
+                  <Column :header="t('reports.chart.col.totalQty')">
                     <template #body="{ data }"><div class="font-semibold text-slate-700">{{ calcStockinTotalQty(data) }}</div></template>
                   </Column>
-                  <Column header="Tổng tiền" headerStyle="text-align: right" bodyStyle="text-align: right">
+                  <Column :header="t('reports.chart.col.totalValue')">
                     <template #body="{ data }">
                       <div class="font-bold text-emerald-600">{{ formatCurrency(calcStockinTotalValue(data)) }}</div>
                     </template>
@@ -198,8 +198,8 @@
                   <!-- Footer with chunk totals -->
                   <template #footer>
                     <div class="detail-footer">
-                      <span class="detail-footer-label">Tổng cộng:</span>
-                      <span class="detail-footer-count">{{ selectedChartData.length }} phiếu</span>
+                      <span class="detail-footer-label">{{ t('reports.chart.totalSum') }}</span>
+                      <span class="detail-footer-count">{{ t('reports.chart.receiptCount', { count: selectedChartData.length }) }}</span>
                       <span class="detail-footer-value">{{ formatCurrency(selectedChartData.reduce((s: number, d: any) => s + calcStockinTotalValue(d), 0)) }}</span>
                     </div>
                   </template>
@@ -217,13 +217,13 @@
                   <Column :header="t('reports.chart.col.orderDate')"><template #body="{ data }">{{ formatDate(data.orderDate) }}</template></Column>
                   <Column :header="t('reports.chart.col.orderer')"><template #body="{ data }">{{ data.nameWorker || data.account?.username || "-" }}</template></Column>
                   <Column :header="t('reports.chart.col.department')"><template #body="{ data }">{{ data.account?.department || "-" }}</template></Column>
-                  <Column :header="t('reports.chart.col.productTypeCount')" headerStyle="text-align: center" bodyStyle="text-align: center">
+                  <Column :header="t('reports.chart.col.productTypeCount')">
                     <template #body="{ data }"><div class="font-semibold text-slate-700">{{ data.orderDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
                   </Column>
-                  <Column header="Tổng SL" headerStyle="text-align: center" bodyStyle="text-align: center">
+                  <Column :header="t('reports.chart.col.totalQty')">
                     <template #body="{ data }"><div class="font-semibold text-slate-700">{{ calcOrderTotalQty(data) }}</div></template>
                   </Column>
-                  <Column header="Tổng tiền" headerStyle="text-align: right" bodyStyle="text-align: right">
+                  <Column :header="t('reports.chart.col.totalValue')">
                     <template #body="{ data }">
                       <div class="font-bold text-emerald-600">{{ formatCurrency(calcOrderTotalValue(data)) }}</div>
                     </template>
@@ -239,8 +239,8 @@
                   </Column>
                   <template #footer>
                     <div class="detail-footer">
-                      <span class="detail-footer-label">Tổng cộng:</span>
-                      <span class="detail-footer-count">{{ selectedChartData.length }} đơn</span>
+                      <span class="detail-footer-label">{{ t('reports.chart.totalSum') }}</span>
+                      <span class="detail-footer-count">{{ t('reports.chart.orderCount', { count: selectedChartData.length }) }}</span>
                       <span class="detail-footer-value">{{ formatCurrency(selectedChartData.reduce((s: number, d: any) => s + calcOrderTotalValue(d), 0)) }}</span>
                     </div>
                   </template>
@@ -255,7 +255,7 @@
 
     <!-- Mobile dialog -->
     <Dialog v-model:visible="showUnsupportedDialog" :modal="true" :draggable="false" :style="{ width: '85vw', maxWidth: '320px' }" :showHeader="false" :closable="false">
-      <div style="text-align: center; padding: 1.5rem 1rem">
+      <div style="text-align: left; padding: 1.5rem 1rem">
         <i class="pi pi-mobile" style="font-size: 2.5rem; color: #f59e0b; margin-bottom: 1rem; display: block"></i>
         <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; color: #1e293b">{{ t("reports.mobileNotSupported.title") }}</h3>
         <p style="font-size: 0.875rem; color: #64748b; margin-bottom: 1.5rem; line-height: 1.5">{{ t("reports.mobileNotSupported.description") }}</p>
@@ -293,41 +293,46 @@
         <h4 class="font-semibold mb-3">
           {{ t('importManagement.detailDialog.productList', { count: detailStockin.stockInDetails?.length || 0 }) }}
         </h4>
-        <div class="flex flex-col gap-2">
-          <div
-            v-for="(detail, idx) in detailStockin.stockInDetails"
-            :key="idx"
-            class="flex items-center gap-3 p-3! mt-3! rounded-xl border border-gray-200 bg-gray-50"
-          >
-            <img
-              v-if="detail.item?.picture?.length"
-              :src="getItemImageUrl(detail.item.picture[0])"
-              class="w-11 h-11 rounded-lg object-cover shrink-0 border border-gray-200"
-            />
-            <div v-else class="w-11 h-11 rounded-lg bg-gray-200 flex items-center justify-center shrink-0">
-              <i class="pi pi-image text-gray-400"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="font-semibold text-sm truncate">{{ getItemName(detail.item) }}</p>
-              <p class="text-xs text-gray-500">{{ detail.item?.type || "-" }}</p>
-            </div>
-            <div class="text-right mr-2">
-              <p class="text-xs text-gray-500">Đơn giá</p>
-              <p class="text-sm font-semibold text-slate-700">{{ formatCurrency(parseFloat(detail.price || detail.item?.price || "0")) }}</p>
-            </div>
-            <Chip
-              :label="`+${detail.quantity} ${detail.item?.unit || ''}`"
-              style="background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; font-weight: 600"
-            />
-            <div class="text-right min-w-[100px]">
-              <p class="text-xs text-gray-500">Thành tiền</p>
-              <p class="text-sm font-bold text-emerald-600">{{ formatCurrency(detail.quantity * parseFloat(detail.price || detail.item?.price || "0")) }}</p>
-            </div>
-          </div>
-        </div>
+        
+        <DataTable :value="detailStockin.stockInDetails" class="p-datatable-sm" responsiveLayout="scroll">
+          <Column :header="t('common.product')">
+            <template #body="{ data }">
+              <div class="flex items-center gap-2">
+                <img
+                  v-if="data.item?.picture?.length"
+                  :src="getItemImageUrl(data.item.picture[0])"
+                  class="w-10 h-10 rounded object-cover"
+                />
+                <div v-else class="w-10 h-10 rounded bg-gray-200 flex items-center justify-center">
+                  <i class="pi pi-image text-gray-400"></i>
+                </div>
+                <div>
+                  <p class="font-semibold text-sm">{{ getItemName(data.item) }}</p>
+                  <p class="text-xs text-gray-500">{{ data.item?.type || "-" }}</p>
+                </div>
+              </div>
+            </template>
+          </Column>
+          <Column :header="t('reports.chart.col.unitPrice')">
+            <template #body="{ data }">
+              <span class="font-medium">{{ formatCurrency(parseFloat(data.price || data.item?.price || "0")) }}</span>
+            </template>
+          </Column>
+          <Column field="quantity" :header="t('common.quantity')">
+            <template #body="{ data }">
+              <span class="font-medium text-emerald-600">+{{ data.quantity }} {{ data.item?.unit || "" }}</span>
+            </template>
+          </Column>
+          <Column :header="t('reports.chart.col.totalAmount')">
+            <template #body="{ data }">
+              <div class="font-bold text-emerald-600">{{ formatCurrency(data.quantity * parseFloat(data.price || data.item?.price || "0")) }}</div>
+            </template>
+          </Column>
+        </DataTable>
+
         <!-- Total -->
-        <div class="mt-4 p-3! bg-blue-50 rounded-lg border border-blue-200 flex justify-between items-center">
-          <span class="font-semibold text-slate-700">Tổng giá trị phiếu nhập:</span>
+        <div class="mt-4! p-3! bg-blue-50 rounded-lg border border-blue-200 flex justify-between items-center">
+          <span class="font-semibold text-slate-700">{{ t('reports.chart.totalStockinValue') }}</span>
           <span class="text-lg font-bold text-blue-700">{{ formatCurrency(calcStockinTotalValue(detailStockin)) }}</span>
         </div>
       </div>
@@ -373,6 +378,7 @@
         <h4 class="font-semibold mb-3">
           {{ t('orderManagement.orderDetail.productList') }} ({{ detailOrder.orderDetails?.length || 0 }})
         </h4>
+
         <DataTable :value="detailOrder.orderDetails" class="p-datatable-sm" responsiveLayout="scroll">
           <Column :header="t('common.product')">
             <template #body="{ data }">
@@ -392,9 +398,9 @@
               </div>
             </template>
           </Column>
-          <Column header="Đơn giá" alignHeader="right">
+          <Column :header="t('reports.chart.col.unitPrice')">
             <template #body="{ data }">
-              <div class="text-right text-sm font-medium">{{ formatCurrency(parseFloat(data.item?.price || "0")) }}</div>
+              <span class="font-medium">{{ formatCurrency(parseFloat(data.item?.price || "0")) }}</span>
             </template>
           </Column>
           <Column field="orderQty" :header="t('common.quantity')">
@@ -402,9 +408,9 @@
               <span class="font-medium">{{ data.orderQty }} {{ data.item?.unit || "" }}</span>
             </template>
           </Column>
-          <Column header="Thành tiền" alignHeader="right">
+          <Column :header="t('reports.chart.col.totalAmount')">
             <template #body="{ data }">
-              <div class="text-right font-bold text-emerald-600">{{ formatCurrency(data.orderQty * parseFloat(data.item?.price || "0")) }}</div>
+              <div class="font-bold text-emerald-600">{{ formatCurrency(data.orderQty * parseFloat(data.item?.price || "0")) }}</div>
             </template>
           </Column>
           <Column :header="t('common.form.purposeNote')">
@@ -415,7 +421,7 @@
         </DataTable>
         <!-- Total -->
         <div class="mt-4 p-3! bg-yellow-50 rounded-lg border border-yellow-200 flex justify-between items-center">
-          <span class="font-semibold text-slate-700">Tổng giá trị đơn hàng:</span>
+          <span class="font-semibold text-slate-700">{{ t('reports.chart.totalOrderValue') }}</span>
           <span class="text-lg font-bold text-yellow-700">{{ formatCurrency(calcOrderTotalValue(detailOrder)) }}</span>
         </div>
       </div>
@@ -784,22 +790,14 @@ const loadTotalTrend = async () => {
     };
   });
 
-  let finalResults = results;
-  const firstIdx = results.findIndex(r => r.totalInValue > 0 || r.totalOutValue > 0);
-  
-  // Use a simple reverse loop to find lastIndex for older browsers/TS targets
-  let lastIdx = -1;
-  for (let i = results.length - 1; i >= 0; i--) {
-    if (results[i].totalInValue > 0 || results[i].totalOutValue > 0) {
-      lastIdx = i;
-      break;
-    }
-  }
+  let finalResults = results.filter(r => r.totalInValue > 0 || r.totalOutValue > 0);
 
-  if (firstIdx > -1 && lastIdx > -1) {
-    finalResults = results.slice(firstIdx, lastIdx + 1);
-  } else if (selectedTime.value === "Tất cả") {
-    finalResults = results.slice(-12);
+  if (finalResults.length === 0) {
+    if (selectedTime.value === "Tất cả") {
+      finalResults = results.slice(-12);
+    } else {
+      finalResults = results;
+    }
   }
 
   fullReportData.value = finalResults;
@@ -807,8 +805,8 @@ const loadTotalTrend = async () => {
   chartData.value = {
     labels: finalResults.map(r => r.label),
     datasets: [
-      { label: "Tiền nhập kho (VND)", backgroundColor: "#3b82f6", ...DS, data: finalResults.map(r => r.totalInValue) },
-      { label: "Tiền đơn hàng (VND)", backgroundColor: "#eab308", ...DS, data: finalResults.map(r => r.totalOutValue) },
+      { label: "Tiền nhập kho (VND)", backgroundColor: "#3b82f6", ...DS, data: finalResults.map(r => r.totalInValue > 0 ? r.totalInValue : null) },
+      { label: "Tiền đơn hàng (VND)", backgroundColor: "#eab308", ...DS, data: finalResults.map(r => r.totalOutValue > 0 ? r.totalOutValue : null) },
     ],
   };
 };
@@ -1345,7 +1343,7 @@ onUnmounted(() => { window.removeEventListener("resize", handleResize); });
 }
 
 .table-empty {
-  text-align: center;
+  text-align: left;
   padding: 1.5rem;
   color: #94a3b8;
   font-size: 0.875rem;
