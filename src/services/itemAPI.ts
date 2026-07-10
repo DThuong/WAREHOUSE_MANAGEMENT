@@ -192,4 +192,28 @@ export const itemAPI = {
       throw error
     }
   },
+
+  // Export Excel - GET /api/Item/export-excel
+  exportExcel: async (params: {
+    areapart?: string
+  }): Promise<void> => {
+    try {
+      const queryParams = new URLSearchParams()
+      if (params.areapart) queryParams.append('areapart', params.areapart)
+
+      const queryString = queryParams.toString()
+      const url = `/api/Item/export-excel${queryString ? `?${queryString}` : ''}`
+
+      const response = await api.get(url, { responseType: 'blob' }) as any
+      const blob = response instanceof Blob ? response : new Blob([response])
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `inventory_report_${new Date().toISOString().slice(0, 10)}.xlsx`
+      link.click()
+      URL.revokeObjectURL(link.href)
+    } catch (error: any) {
+      console.error('Error exporting item excel:', error)
+      throw error
+    }
+  },
 }

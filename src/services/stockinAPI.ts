@@ -120,5 +120,33 @@ export const stockinAPI = {
             console.error('Error deleting image:', error)
             throw error
         }
+    },
+
+    // Export Excel - GET /api/StockIn/export-excel
+    exportExcel: async (params: {
+        fromDate?: string
+        toDate?: string
+        areapart?: string
+    }): Promise<void> => {
+        try {
+            const queryParams = new URLSearchParams()
+            if (params.fromDate) queryParams.append('fromDate', params.fromDate)
+            if (params.toDate) queryParams.append('toDate', params.toDate)
+            if (params.areapart) queryParams.append('areapart', params.areapart)
+
+            const queryString = queryParams.toString()
+            const url = `/api/StockIn/export-excel${queryString ? `?${queryString}` : ''}`
+
+            const response = await api.get(url, { responseType: 'blob' }) as any
+            const blob = response instanceof Blob ? response : new Blob([response])
+            const link = document.createElement('a')
+            link.href = URL.createObjectURL(blob)
+            link.download = `stockin_report_${new Date().toISOString().slice(0, 10)}.xlsx`
+            link.click()
+            URL.revokeObjectURL(link.href)
+        } catch (error: any) {
+            console.error('Error exporting stockin excel:', error)
+            throw error
+        }
     }
 }

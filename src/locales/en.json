@@ -760,6 +760,7 @@
       "stockLabel": "Stock",
       "stockDisplay": "Stock: {qty} {unit}",
       "quantityLabel": "Quantity",
+      "priceLabel": "Price",
       "summaryItems": "Total items:",
       "summaryItemsValue": "{count} items",
       "summaryQty": "Total import quantity:",
@@ -1026,6 +1027,10 @@
       "searchProduct": "Search product",
       "loading": "Loading data...",
       "reset": "Reset",
+      "period1": "1 day",
+      "period7": "7 days",
+      "period30": "30 days",
+      "periodAll": "All",
       "detailTitle": "Detailed Data",
       "codePrefix": "Code",
       "badge": {

@@ -652,8 +652,8 @@
                 </Dropdown>
               </div>
 
-              <!-- Số lượng + Tồn kho -->
-              <div class="grid grid-cols-2 gap-3">
+              <!-- SL + Giá + Tồn kho -->
+              <div class="grid grid-cols-3 gap-3">
                 <div>
                   <label
                     class="block mb-1.5 text-sm font-medium text-gray-700"
@@ -665,6 +665,20 @@
                     type="number"
                     v-model="item.quantity"
                     min="1"
+                    class="w-full px-3! py-2! border border-gray-300 rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block mb-1.5 text-sm font-medium text-gray-700"
+                    >{{ t("importManagement.createDialog.priceLabel") || 'Đơn giá' }}</label
+                  >
+                  <input
+                    type="number"
+                    v-model="item.price"
+                    min="0"
+                    step="1000"
+                    :placeholder="'0'"
                     class="w-full px-3! py-2! border border-gray-300 rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                   />
                 </div>
@@ -2075,14 +2089,22 @@ const addItemRow = () => {
     return;
   }
 
-  createForm.value.items.push({ itemId: 0, quantity: 1 });
+  createForm.value.items.push({ itemId: 0, quantity: 1, price: "0" });
 };
 
 const removeItemRow = (index: number) => {
   createForm.value.items.splice(index, 1);
 };
 
-const onItemSelect = (_event: any, _index: number) => {};
+const onItemSelect = (_event: any, index: number) => {
+  const selectedItemId = createForm.value.items[index]?.itemId;
+  if (selectedItemId) {
+    const foundItem = itemStore.items.find((i) => i.id === selectedItemId);
+    if (foundItem?.price) {
+      createForm.value.items[index].price = foundItem.price;
+    }
+  }
+};
 
 // ── Detail ────────────────────────────────────────────────
 const viewDetail = async (stockin: Stockin) => {

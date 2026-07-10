@@ -20,6 +20,14 @@
 
         <div style="display: flex; gap: 0.5rem">
           <Button
+            label="Excel"
+            icon="pi pi-file-excel"
+            severity="success"
+            outlined
+            :loading="exporting"
+            @click="onExportExcel"
+          />
+          <Button
             :label="t('reports.common.printReport')"
             icon="pi pi-print"
             severity="secondary"
@@ -672,6 +680,25 @@ const getStatusLabel = (status: string) => {
 // Print report
 const printReport = () => {
   window.print();
+};
+
+// Export Excel
+const exporting = ref(false);
+const onExportExcel = async () => {
+  exporting.value = true;
+  try {
+    const area = selectedArea.value === "ALL" ? undefined : selectedArea.value;
+    await orderAPI.exportExcel({
+      fromDate: formatDateTimeForAPI(fromDate.value),
+      toDate: formatDateTimeForAPI(toDate.value),
+      status: selectedStatus.value || undefined,
+      areapart: area,
+    });
+  } catch (err) {
+    console.error("Export failed:", err);
+  } finally {
+    exporting.value = false;
+  }
 };
 
 // ===== Trend chart (SMD vs MAINLINE) =====

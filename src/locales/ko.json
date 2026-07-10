@@ -762,6 +762,7 @@
       "stockLabel": "재고",
       "stockDisplay": "재고: {qty} {unit}",
       "quantityLabel": "수량",
+      "priceLabel": "단가",
       "summaryItems": "총 품목 수:",
       "summaryItemsValue": "{count}개 품목",
       "summaryQty": "총 입고 수량:",
@@ -1028,6 +1029,10 @@
       "searchProduct": "제품 검색",
       "loading": "데이터 로딩 중...",
       "reset": "초기화",
+      "period1": "1 일",
+      "period7": "7 일",
+      "period30": "30 일",
+      "periodAll": "전체",
       "detailTitle": "상세 데이터",
       "codePrefix": "코드",
       "badge": {

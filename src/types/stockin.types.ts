@@ -9,6 +9,7 @@ export interface StockinDetail {
     stockInId: number
     itemId: number
     quantity: number
+    price?: string
     stockIn: Stockin | null
     item: Item
 }
@@ -27,10 +28,11 @@ export interface Stockin {
 export interface CreateStockinDetail {
     itemId: number
     quantity: number
+    price: string
 }
 
 export interface CreateStockin {
     note: string
     areaPart: string
     items: CreateStockinDetail[]
-}
+}

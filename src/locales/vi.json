@@ -838,6 +838,7 @@
       "stockLabel": "Tồn kho",
       "stockDisplay": "Tồn: {qty} {unit}",
       "quantityLabel": "SL",
+      "priceLabel": "Đơn giá",
       "summaryItems": "Tổng số mặt hàng:",
       "summaryItemsValue": "{count} mặt hàng",
       "summaryQty": "Tổng SL nhập:",
@@ -1028,6 +1029,10 @@
       "searchProduct": "Tìm kiếm SP",
       "loading": "Đang tải dữ liệu...",
       "reset": "Reset",
+      "period1": "1 ngày",
+      "period7": "7 ngày",
+      "period30": "30 ngày",
+      "periodAll": "Tất cả",
       "detailTitle": "Dữ liệu chi tiết",
       "codePrefix": "Mã",
       "badge": {

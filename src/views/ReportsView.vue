@@ -36,81 +36,97 @@
         </Card>
       </div>
 
+      <!-- FILTER BAR (TOP) -->
+      <Card v-if="!isMobile" class="mb-6">
+        <template #content>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="flex items-center gap-2">
+                <i class="pi pi-filter text-slate-500"></i>
+                <span class="font-semibold text-slate-700">Bộ lọc:</span>
+              </div>
+              <Dropdown
+                v-model="selectedArea" :options="areaOptions" optionLabel="label" optionValue="value"
+                class="w-40" style="height: 40px; display: flex; align-items: center;" @change="onAreaChange"
+              />
+              
+              <div class="divider-v" style="width: 1px; height: 24px; background: #e2e8f0;"></div>
+              
+              <div class="flex items-center bg-slate-100 rounded-lg p-1! gap-1" style="height: 40px;">
+                <button
+                  v-for="opt in timeOptions" :key="opt"
+                  :class="['w-24 h-full text-sm font-medium rounded-md transition-colors flex items-center justify-center', selectedTime === opt ? 'bg-white shadow text-primary' : 'text-slate-600 hover:bg-slate-200']"
+                  @click="onTimeTabClick(opt)"
+                >{{ opt === '1 ngày' ? t('reports.chart.period1') : opt === '7 ngày' ? t('reports.chart.period7') : opt === '30 ngày' ? t('reports.chart.period30') : t('reports.chart.periodAll') }}</button>
+              </div>
+
+              <div class="divider-v" style="width: 1px; height: 24px; background: #e2e8f0;"></div>
+
+              <div class="flex items-center gap-2" style="height: 40px;">
+                <Button icon="pi pi-chevron-left" text rounded severity="secondary" @click="prevPeriod" :disabled="selectedTime === 'Tất cả'" style="width: 40px; height: 40px;" />
+                <span class="font-bold text-slate-700 min-w-[150px] text-center" v-html="periodLabel"></span>
+                <Button icon="pi pi-chevron-right" text rounded severity="secondary" @click="nextPeriod" :disabled="isNextDisabled" style="width: 40px; height: 40px;" />
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <Button outlined severity="secondary" icon="pi pi-refresh" :label="t('reports.chart.reset')" @click="onResetRange" style="height: 40px;" />
+              <Button
+                icon="pi pi-file-excel"
+                :label="'Excel'"
+                severity="success"
+                outlined
+                :loading="exporting"
+                @click="onExportExcel"
+                style="height: 40px;"
+              />
+            </div>
+          </div>
+        </template>
+      </Card>
+
+      <!-- Summary Cards -->
+      <div v-if="!isMobile && !loading" class="summary-cards mb-6">
+        <div class="summary-card summary-card-blue">
+          <div class="summary-icon"><i class="pi pi-cart-arrow-down"></i></div>
+          <div class="summary-info">
+            <div class="summary-value">{{ summaryData.stockinCount }} <span class="summary-unit">phiếu</span></div>
+            <div class="summary-money">{{ formatCurrency(summaryData.stockinValue) }}</div>
+            <div class="summary-label">Tổng nhập kho</div>
+          </div>
+        </div>
+        <div class="summary-card summary-card-yellow">
+          <div class="summary-icon"><i class="pi pi-shopping-cart"></i></div>
+          <div class="summary-info">
+            <div class="summary-value">{{ summaryData.orderCount }} <span class="summary-unit">đơn</span></div>
+            <div class="summary-money">{{ formatCurrency(summaryData.orderValue) }}</div>
+            <div class="summary-label">Tổng đơn hàng</div>
+          </div>
+        </div>
+        <div class="summary-card summary-card-green">
+          <div class="summary-icon"><i class="pi pi-box"></i></div>
+          <div class="summary-info">
+            <div class="summary-value">{{ summaryData.totalItems }} <span class="summary-unit">loại</span></div>
+            <div class="summary-money">{{ formatNumber(summaryData.totalQty) }} sản phẩm</div>
+            <div class="summary-label">Tổng SP nhập</div>
+          </div>
+        </div>
+      </div>
+
       <!-- BAR CHART -->
       <Card v-if="!isMobile" class="mb-6 chart-card">
         <template #content>
           <div class="chart-wrapper">
-
-            <!-- Row 1: Title + Trend toggle + Item selector -->
+            <!-- Row 1: Title -->
             <div class="chart-header">
               <h3 class="chart-title">
                 <i class="pi pi-chart-bar"></i>
-                {{ t('reports.chart.title') }}
+                Phân tích Tồn kho
               </h3>
-              <div class="header-controls">
-                <Dropdown
-                  v-model="selectedArea" :options="areaOptions" optionLabel="label" optionValue="value"
-                  class="area-dropdown" @change="onAreaChange"
-                />
-                <div class="divider-v"></div>
-                <SelectButton v-model="selectedTrend" :options="trendOptions" @change="onTrendChange" :allowEmpty="false" class="trend-select" />
-                <template v-if="selectedTrend === 'Items trend'">
-                  <div class="divider-v"></div>
-                  <Dropdown
-                    v-model="selectedItem" :options="itemsByArea" filter
-                    :filterFields="['eng.partname', 'com.name', 'id', 'itemIndentifyId']"
-                    @change="onItemChange" class="item-dropdown"
-                  >
-                    <template #value="slotProps">
-                      <div v-if="slotProps.value" class="dropdown-value">
-                        <i class="pi pi-box"></i>
-                        <span class="truncate">{{ slotProps.value.eng?.partname || slotProps.value.com?.name || "SP" }}</span>
-                      </div>
-                      <span v-else class="text-slate-400">{{ slotProps.placeholder }}</span>
-                    </template>
-                    <template #option="slotProps">
-                      <div class="dropdown-option">
-                        <span class="option-name">{{ slotProps.option.eng?.partname || slotProps.option.com?.name || "Unknown" }}</span>
-                        <span class="option-meta">{{ slotProps.option.type || "N/A" }} · {{ t('common.form.stockLabel') }}: {{ slotProps.option.stockQty }}</span>
-                      </div>
-                    </template>
-                  </Dropdown>
-                </template>
-              </div>
-            </div>
-
-            <!-- Row 2: Filter bar -->
-            <div class="filter-bar">
-              <div class="filter-group">
-                <span class="filter-label">{{ t('reports.chart.from') }}</span>
-                <Calendar v-model="fromDate" dateFormat="dd/mm/yy" showIcon :manualInput="false" class="report-calendar" @date-select="onRangeChange" />
-              </div>
-              <i class="pi pi-arrow-right filter-arrow"></i>
-              <div class="filter-group">
-                <span class="filter-label">{{ t('reports.chart.to') }}</span>
-                <Calendar v-model="toDate" dateFormat="dd/mm/yy" showIcon :manualInput="false" class="report-calendar" @date-select="onRangeChange" />
-              </div>
-
-              <div class="filter-separator"></div>
-
-              <div class="time-tabs">
-                <button
-                  v-for="opt in timeOptions" :key="opt"
-                  :class="['time-tab', { active: selectedTime === opt }]"
-                  @click="onTimeTabClick(opt)"
-                >{{ opt }}</button>
-              </div>
-
-              <div class="filter-separator"></div>
-
-              <button class="reset-btn" @click="onResetRange">
-                <i class="pi pi-refresh"></i>
-                {{ t('reports.chart.reset') }}
-              </button>
             </div>
 
             <!-- Loading -->
-            <div v-if="loading" class="loading-state">
+            <div v-if="loading" class="loading-state" style="min-height: 400px">
               <ProgressSpinner style="width: 48px; height: 48px" strokeWidth="4" />
               <span class="loading-text">{{ t('reports.chart.loading') }}</span>
             </div>
@@ -118,7 +134,7 @@
             <div v-else>
               <!-- Chart -->
               <div class="chart-area">
-                <Chart type="bar" :data="chartData" :options="chartOptions" style="height: 100%; width: 100%" />
+                <Chart type="bar" :data="chartData" :options="chartOptions" :plugins="[centerLoneBarsPlugin]" style="height: 100%; width: 100%" @click="onChartClick" />
               </div>
 
               <!-- Detail table -->
@@ -148,21 +164,29 @@
                   <ProgressSpinner style="width: 30px; height: 30px" strokeWidth="4" />
                 </div>
 
-                <!-- Total trend: Phiếu nhập -->
-                <DataTable v-else-if="selectedTrend === 'Total trend' && detailClickedCol === 'stockin'"
+                <!-- Total trend: Phiếu nhập — CÓ GIÁ TIỀN -->
+                <DataTable v-if="detailClickedCol === 'stockin'"
                   :value="selectedChartData"
                   class="p-datatable-sm detail-table"
                   responsiveLayout="scroll" stripedRows :paginator="selectedChartData.length > 10" :rows="10" :rowsPerPageOptions="[10, 25, 50]">
                   <template #empty><div class="table-empty">{{ t('reports.chart.empty.stockin') }}</div></template>
-                  <Column :header="t('reports.chart.col.receiptCode')" style="width: 100px">
+                  <Column :header="t('reports.chart.col.receiptCode')" style="width: 90px">
                     <template #body="{ data }"><span class="font-bold text-blue-600">#{{ data.id }}</span></template>
                   </Column>
                   <Column :header="t('reports.chart.col.importDate')"><template #body="{ data }">{{ formatDate(data.stockInDate) }}</template></Column>
                   <Column :header="t('reports.chart.col.creator')"><template #body="{ data }">{{ data.account?.username || "-" }}</template></Column>
-                  <Column :header="t('reports.chart.col.productTypeCount')" alignHeader="right">
-                    <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.stockInDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
+                  <Column :header="t('reports.chart.col.productTypeCount')" headerStyle="text-align: center" bodyStyle="text-align: center">
+                    <template #body="{ data }"><div class="font-semibold text-slate-700">{{ data.stockInDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
                   </Column>
-                  <Column :header="t('common.action')">
+                  <Column header="Tổng SL" headerStyle="text-align: center" bodyStyle="text-align: center">
+                    <template #body="{ data }"><div class="font-semibold text-slate-700">{{ calcStockinTotalQty(data) }}</div></template>
+                  </Column>
+                  <Column header="Tổng tiền" headerStyle="text-align: right" bodyStyle="text-align: right">
+                    <template #body="{ data }">
+                      <div class="font-bold text-emerald-600">{{ formatCurrency(calcStockinTotalValue(data)) }}</div>
+                    </template>
+                  </Column>
+                  <Column :header="t('common.action')" style="width: 70px">
                     <template #body="{ data }">
                       <Button
                         icon="pi pi-eye"
@@ -171,72 +195,55 @@
                       />
                     </template>
                   </Column>
+                  <!-- Footer with chunk totals -->
+                  <template #footer>
+                    <div class="detail-footer">
+                      <span class="detail-footer-label">Tổng cộng:</span>
+                      <span class="detail-footer-count">{{ selectedChartData.length }} phiếu</span>
+                      <span class="detail-footer-value">{{ formatCurrency(selectedChartData.reduce((s: number, d: any) => s + calcStockinTotalValue(d), 0)) }}</span>
+                    </div>
+                  </template>
                 </DataTable>
 
-                <!-- Total trend: Đơn hoàn thành -->
-                <DataTable v-else-if="selectedTrend === 'Total trend' && detailClickedCol === 'order'"
+                <!-- Total trend: Đơn hoàn thành — CÓ GIÁ TIỀN -->
+                <DataTable v-else-if="detailClickedCol === 'order'"
                   :value="selectedChartData"
                   class="p-datatable-sm detail-table"
                   responsiveLayout="scroll" stripedRows :paginator="selectedChartData.length > 10" :rows="10" :rowsPerPageOptions="[10, 25, 50]">
                   <template #empty><div class="table-empty">{{ t('reports.chart.empty.order') }}</div></template>
-                  <Column :header="t('reports.chart.col.orderCode')" style="width: 100px">
+                  <Column :header="t('reports.chart.col.orderCode')" style="width: 90px">
                     <template #body="{ data }"><span class="font-bold text-yellow-600">#{{ data.id }}</span></template>
                   </Column>
                   <Column :header="t('reports.chart.col.orderDate')"><template #body="{ data }">{{ formatDate(data.orderDate) }}</template></Column>
                   <Column :header="t('reports.chart.col.orderer')"><template #body="{ data }">{{ data.nameWorker || data.account?.username || "-" }}</template></Column>
                   <Column :header="t('reports.chart.col.department')"><template #body="{ data }">{{ data.account?.department || "-" }}</template></Column>
-                  <Column :header="t('reports.chart.col.productTypeCount')" alignHeader="right">
-                    <template #body="{ data }"><div class="text-left font-semibold text-slate-700">{{ data.orderDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
+                  <Column :header="t('reports.chart.col.productTypeCount')" headerStyle="text-align: center" bodyStyle="text-align: center">
+                    <template #body="{ data }"><div class="font-semibold text-slate-700">{{ data.orderDetails?.length || 0 }} {{ t('common.categoryItemCount') }}</div></template>
                   </Column>
-                  <Column :header="t('common.action')">
-                  <template #body="{ data }">
-                    <Button
-                      icon="pi pi-eye"
-                      text rounded severity="info" size="small"
-                      @click="openOrderDetail(data)"
-                    />
+                  <Column header="Tổng SL" headerStyle="text-align: center" bodyStyle="text-align: center">
+                    <template #body="{ data }"><div class="font-semibold text-slate-700">{{ calcOrderTotalQty(data) }}</div></template>
+                  </Column>
+                  <Column header="Tổng tiền" headerStyle="text-align: right" bodyStyle="text-align: right">
+                    <template #body="{ data }">
+                      <div class="font-bold text-emerald-600">{{ formatCurrency(calcOrderTotalValue(data)) }}</div>
+                    </template>
+                  </Column>
+                  <Column :header="t('common.action')" style="width: 70px">
+                    <template #body="{ data }">
+                      <Button
+                        icon="pi pi-eye"
+                        text rounded severity="info" size="small"
+                        @click="openOrderDetail(data)"
+                      />
+                    </template>
+                  </Column>
+                  <template #footer>
+                    <div class="detail-footer">
+                      <span class="detail-footer-label">Tổng cộng:</span>
+                      <span class="detail-footer-count">{{ selectedChartData.length }} đơn</span>
+                      <span class="detail-footer-value">{{ formatCurrency(selectedChartData.reduce((s: number, d: any) => s + calcOrderTotalValue(d), 0)) }}</span>
+                    </div>
                   </template>
-                </Column>
-                </DataTable>
-
-                <!-- Items trend -->
-                <DataTable v-else-if="selectedTrend === 'Items trend' && detailClickedCol === 'items'"
-                  :value="selectedChartData"
-                  class="p-datatable-sm detail-table"
-                  responsiveLayout="scroll" stripedRows :paginator="selectedChartData.length > 10" :rows="10" :rowsPerPageOptions="[10, 25, 50]">
-                  <template #empty><div class="table-empty">{{ t('reports.chart.empty.items') }}</div></template>
-                  <Column :header="t('reports.chart.col.product')" style="width: 35%">
-                    <template #body="{ data }">
-                      <span class="font-semibold text-slate-800 uppercase text-sm">
-                        {{ data.itemName || data.item?.eng?.partname || data.item?.com?.name || `${t('reports.chart.codePrefix')}: ${data.itemId}` }}
-                      </span>
-                    </template>
-                  </Column>
-                  <Column :header="t('reports.chart.col.type')" style="width: 80px">
-                    <template #body="{ data }">
-                      <span :class="['px-2 py-0.5 rounded text-xs font-medium border', data.item?.eng ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200']">
-                        {{ data.item?.eng ? "ENG" : "COM" }}
-                      </span>
-                    </template>
-                  </Column>
-                  <Column alignHeader="right">
-                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-blue-500"></div> {{ t('reports.chart.col.import') }}</div></template>
-                    <template #body="{ data }">
-                      <div class="text-right font-bold text-blue-600">{{ formatNumber(data.totalStockIn) }} <span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
-                    </template>
-                  </Column>
-                  <Column alignHeader="right">
-                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-yellow-500"></div> {{ t('reports.chart.col.usage') }}</div></template>
-                    <template #body="{ data }">
-                      <div class="text-right font-bold text-yellow-600">{{ formatNumber(data.totalOrdered) }} <span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
-                    </template>
-                  </Column>
-                  <Column alignHeader="right">
-                    <template #header><div class="flex items-center gap-1 justify-end w-full"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> {{ t('reports.chart.col.stock') }}</div></template>
-                    <template #body="{ data }">
-                      <div class="text-right font-bold text-emerald-600">{{ formatNumber(data.stockQty) }} <span class="text-xs font-normal text-slate-400 ml-0.5">{{ data.item?.unit }}</span></div>
-                    </template>
-                  </Column>
                 </DataTable>
               </div>
             </div>
@@ -260,7 +267,7 @@
     <Dialog
       v-model:visible="showStockinDetail"
       :header="detailStockin ? t('importManagement.detailDialog.header', { id: detailStockin.id }) : t('importManagement.title')"
-      :style="{ width: '700px' }"
+      :style="{ width: '800px' }"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
     >
@@ -304,11 +311,24 @@
               <p class="font-semibold text-sm truncate">{{ getItemName(detail.item) }}</p>
               <p class="text-xs text-gray-500">{{ detail.item?.type || "-" }}</p>
             </div>
+            <div class="text-right mr-2">
+              <p class="text-xs text-gray-500">Đơn giá</p>
+              <p class="text-sm font-semibold text-slate-700">{{ formatCurrency(parseFloat(detail.price || detail.item?.price || "0")) }}</p>
+            </div>
             <Chip
               :label="`+${detail.quantity} ${detail.item?.unit || ''}`"
               style="background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; font-weight: 600"
             />
+            <div class="text-right min-w-[100px]">
+              <p class="text-xs text-gray-500">Thành tiền</p>
+              <p class="text-sm font-bold text-emerald-600">{{ formatCurrency(detail.quantity * parseFloat(detail.price || detail.item?.price || "0")) }}</p>
+            </div>
           </div>
+        </div>
+        <!-- Total -->
+        <div class="mt-4 p-3! bg-blue-50 rounded-lg border border-blue-200 flex justify-between items-center">
+          <span class="font-semibold text-slate-700">Tổng giá trị phiếu nhập:</span>
+          <span class="text-lg font-bold text-blue-700">{{ formatCurrency(calcStockinTotalValue(detailStockin)) }}</span>
         </div>
       </div>
       <template #footer>
@@ -372,9 +392,19 @@
               </div>
             </template>
           </Column>
+          <Column header="Đơn giá" alignHeader="right">
+            <template #body="{ data }">
+              <div class="text-right text-sm font-medium">{{ formatCurrency(parseFloat(data.item?.price || "0")) }}</div>
+            </template>
+          </Column>
           <Column field="orderQty" :header="t('common.quantity')">
             <template #body="{ data }">
               <span class="font-medium">{{ data.orderQty }} {{ data.item?.unit || "" }}</span>
+            </template>
+          </Column>
+          <Column header="Thành tiền" alignHeader="right">
+            <template #body="{ data }">
+              <div class="text-right font-bold text-emerald-600">{{ formatCurrency(data.orderQty * parseFloat(data.item?.price || "0")) }}</div>
             </template>
           </Column>
           <Column :header="t('common.form.purposeNote')">
@@ -383,6 +413,11 @@
             </template>
           </Column>
         </DataTable>
+        <!-- Total -->
+        <div class="mt-4 p-3! bg-yellow-50 rounded-lg border border-yellow-200 flex justify-between items-center">
+          <span class="font-semibold text-slate-700">Tổng giá trị đơn hàng:</span>
+          <span class="text-lg font-bold text-yellow-700">{{ formatCurrency(calcOrderTotalValue(detailOrder)) }}</span>
+        </div>
       </div>
       <template #footer>
         <Button :label="t('common.close')" icon="pi pi-times" text @click="showOrderDetail = false" />
@@ -405,6 +440,7 @@ import Dropdown from "primevue/dropdown";
 import Calendar from "primevue/calendar";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
+import Chip from "primevue/chip";
 import { useI18n } from "vue-i18n";
 import { itemAPI } from "@/services/itemAPI";
 import { stockinAPI } from "@/services/stockinAPI";
@@ -426,6 +462,7 @@ const showOrderDetail = ref(false);
 const detailStockin = ref<any>(null);
 const detailOrder = ref<any>(null);
 const detailDialogLoading = ref(false);
+const exporting = ref(false);
 
 // ── Mobile ────────────────────────────────────────────────
 const isMobile = ref(window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
@@ -440,6 +477,8 @@ const navigateToReport = (type: string) => {
 const formatNumber = (num: number) => new Intl.NumberFormat("vi-VN").format(num || 0);
 const formatDate = (str: string) =>
   new Date(str).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value || 0);
 const fmtDate = (d: Date) =>
   `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
 const fmtAPI = (date: Date) => {
@@ -449,6 +488,26 @@ const fmtAPI = (date: Date) => {
   const h = String(date.getHours()).padStart(2, "0");
   const mi = String(date.getMinutes()).padStart(2, "0");
   return `${y}-${mo}-${d} ${h}:${mi}`;
+};
+
+// ── Price calculators ─────────────────────────────────────
+const calcStockinTotalQty = (stockin: any): number => {
+  return (stockin.stockInDetails || []).reduce((sum: number, d: any) => sum + (d.quantity || 0), 0);
+};
+const calcStockinTotalValue = (stockin: any): number => {
+  return (stockin.stockInDetails || []).reduce((sum: number, d: any) => {
+    const price = parseFloat(d.price || d.item?.price || "0");
+    return sum + (d.quantity || 0) * price;
+  }, 0);
+};
+const calcOrderTotalQty = (order: any): number => {
+  return (order.orderDetails || []).reduce((sum: number, d: any) => sum + (d.orderQty || 0), 0);
+};
+const calcOrderTotalValue = (order: any): number => {
+  return (order.orderDetails || []).reduce((sum: number, d: any) => {
+    const price = parseFloat(d.item?.price || "0");
+    return sum + (d.orderQty || 0) * price;
+  }, 0);
 };
 
 const openStockinDetail = async (stockin: any) => {
@@ -493,8 +552,6 @@ const getTodayEnd = () => {
 };
 
 // ── Dataset config ────────────────────────────────────────
-// barPercentage: 1.0 → 2 cột sát nhau hoàn toàn trong nhóm (không gap)
-// categoryPercentage: 0.85 → nhóm chiếm 85% slot → còn 15% gap giữa các tuần
 const DS = {
   barPercentage: 1.0,
   categoryPercentage: 0.85,
@@ -508,18 +565,8 @@ const loading = ref(false);
 const detailLoading = ref(false);
 const detailClickedCol = ref("");
 
-const trendOptions = ["Total trend", "Items trend"];
-const selectedTrend = ref("Total trend");
-const timeOptions = ["Day", "Week", "Month"];
-const selectedTime = ref("Week");
-
-const allItems = ref<Item[]>([]);
-const itemsByArea = computed(() => {
-  if (selectedArea.value === "ALL") return allItems.value;
-  return allItems.value.filter((i) => dashboardStore.getItemArea(i) === selectedArea.value);
-});
-const selectedItem = ref<Item | null>(null);
-const rawData = ref<DailyMovement[]>([]);
+const timeOptions = ["1 ngày", "7 ngày", "30 ngày", "Tất cả"];
+const selectedTime = ref("1 ngày");
 
 const fullReportData = ref<any[]>([]);
 const chartData = ref<any>(null);
@@ -528,29 +575,120 @@ const selectedChunkLabel = ref("");
 const fromDate = ref<Date>(new Date());
 const toDate = ref<Date>(new Date());
 
+
+
+const centerLoneBarsPlugin = {
+  id: 'centerLoneBars',
+  beforeDatasetsDraw(chart: any) {
+    const meta0 = chart.getDatasetMeta(0);
+    const meta1 = chart.getDatasetMeta(1);
+    if (!meta0 || !meta1 || meta0.hidden || meta1.hidden) return;
+    
+    for (let i = 0; i < meta0.data.length; i++) {
+      const bar0 = meta0.data[i];
+      const bar1 = meta1.data[i];
+      if (!bar0 || !bar1) continue;
+
+      const val0 = chart.data.datasets[0].data[i];
+      const val1 = chart.data.datasets[1].data[i];
+      
+      const hasVal0 = val0 && val0 > 0;
+      const hasVal1 = val1 && val1 > 0;
+      
+      if (hasVal0 && !hasVal1) {
+        bar0.x = chart.scales.x.getPixelForTick(i);
+      } else if (!hasVal0 && hasVal1) {
+        bar1.x = chart.scales.x.getPixelForTick(i);
+      }
+    }
+  }
+};
+
+const periodLabel = computed(() => {
+  if (selectedTime.value === "Tất cả") return "Tất cả";
+  if (selectedTime.value === "1 ngày") return `${fmtDate(fromDate.value)}`;
+  return `${fmtDate(fromDate.value)} - ${fmtDate(toDate.value)}`;
+});
+
+const isNextDisabled = computed(() => {
+  const todayEnd = getTodayEnd();
+  return toDate.value >= todayEnd || selectedTime.value === "Tất cả";
+});
+
+const prevPeriod = () => {
+  if (selectedTime.value === "Tất cả") return;
+  const days = selectedTime.value === "1 ngày" ? 1 : selectedTime.value === "7 ngày" ? 7 : 30;
+  const newFrom = new Date(fromDate.value);
+  const newTo = new Date(toDate.value);
+  newFrom.setDate(newFrom.getDate() - days);
+  newTo.setDate(newTo.getDate() - days);
+  fromDate.value = newFrom;
+  toDate.value = newTo;
+  loadReportData();
+};
+
+const nextPeriod = () => {
+  if (isNextDisabled.value || selectedTime.value === "Tất cả") return;
+  const days = selectedTime.value === "7 ngày" ? 7 : 30;
+  const newFrom = new Date(fromDate.value);
+  const newTo = new Date(toDate.value);
+  newFrom.setDate(newFrom.getDate() + days);
+  newTo.setDate(newTo.getDate() + days);
+  
+  const todayEnd = getTodayEnd();
+  if (newTo > todayEnd) {
+    const diff = newTo.getTime() - todayEnd.getTime();
+    newTo.setTime(todayEnd.getTime());
+    newFrom.setTime(newFrom.getTime() - diff);
+  }
+  fromDate.value = newFrom;
+  toDate.value = newTo;
+  loadReportData();
+};
+
+// ── Summary ───────────────────────────────────────────────
+const summaryData = computed(() => {
+  let stockinCount = 0, stockinValue = 0, orderCount = 0, orderValue = 0, totalItems = 0, totalQty = 0;
+  for (const chunk of fullReportData.value) {
+    const stockins = chunk.rawStockins || [];
+    const orders = chunk.rawOrders || [];
+    stockinCount += stockins.length;
+    orderCount += orders.length;
+    for (const s of stockins) {
+      stockinValue += calcStockinTotalValue(s);
+      totalQty += calcStockinTotalQty(s);
+      totalItems += (s.stockInDetails?.length || 0);
+    }
+    for (const o of orders) {
+      orderValue += calcOrderTotalValue(o);
+    }
+  }
+  return { stockinCount, stockinValue, orderCount, orderValue, totalItems, totalQty };
+});
+
 // ── Default range ─────────────────────────────────────────
 const getDefaultRange = (type: string) => {
   const today = new Date();
-  if (type === "Day") {
+  if (type === "1 ngày") {
+    const from = new Date(today); from.setHours(0, 0, 0, 0);
+    const to = new Date(today); to.setHours(23, 59, 59, 999);
+    return { from, to };
+  } else if (type === "7 ngày") {
     const from = new Date(today); from.setDate(today.getDate() - 6); from.setHours(0, 0, 0, 0);
     const to = new Date(today); to.setHours(23, 59, 59, 999);
     return { from, to };
-  } else if (type === "Week") {
-    const dow = today.getDay();
-    const diffToMon = dow === 0 ? -6 : 1 - dow;
-    const thisMon = new Date(today); thisMon.setDate(today.getDate() + diffToMon); thisMon.setHours(0, 0, 0, 0);
-    const from = new Date(thisMon); from.setDate(thisMon.getDate() - 11 * 7); // 12 tuần: tuần hiện tại + 11 tuần trước
-    const thisSun = new Date(thisMon); thisSun.setDate(thisMon.getDate() + 6); thisSun.setHours(23, 59, 59, 999);
-    return { from, to: thisSun };
+  } else if (type === "30 ngày") {
+    const from = new Date(today); from.setDate(today.getDate() - 29); from.setHours(0, 0, 0, 0);
+    const to = new Date(today); to.setHours(23, 59, 59, 999);
+    return { from, to };
   } else {
-    const from = new Date(today.getFullYear(), 0, 1, 0, 0, 0, 0);
-    const to = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
+    const from = new Date(today.getFullYear() - 5, 0, 1, 0, 0, 0, 0);
+    const to = new Date(today); to.setHours(23, 59, 59, 999);
     return { from, to };
   }
 };
 
-// ── Generate chunks — chỉ đến hôm nay ──────────────────
-// Với chế độ Tháng: luôn sinh đủ 12 tháng nhưng cắt tháng tương lai
+// ── Generate chunks ──────────────────────────────────────
 const generateTimeChunks = (
   timeType: string,
   from: Date,
@@ -558,11 +696,11 @@ const generateTimeChunks = (
 ) => {
   const chunks: { label: string; fromDate: Date; toDate: Date }[] = [];
   const todayEnd = getTodayEnd();
+  const effectiveTo = to > todayEnd ? new Date(todayEnd) : new Date(to);
+  effectiveTo.setHours(23, 59, 59, 999);
 
-  if (timeType === "Day") {
+  if (timeType === "1 ngày" || timeType === "7 ngày" || timeType === "30 ngày") {
     const start = new Date(from); start.setHours(0, 0, 0, 0);
-    const effectiveTo = to > todayEnd ? new Date(todayEnd) : new Date(to);
-    effectiveTo.setHours(23, 59, 59, 999);
     const cursor = new Date(start);
     while (cursor <= effectiveTo) {
       const s = new Date(cursor); s.setHours(0, 0, 0, 0);
@@ -570,71 +708,28 @@ const generateTimeChunks = (
       chunks.push({ label: fmtDate(cursor), fromDate: s, toDate: e });
       cursor.setDate(cursor.getDate() + 1);
     }
-
-  } else if (timeType === "Week") {
-    const effectiveTo = to > todayEnd ? new Date(todayEnd) : new Date(to);
-    const cursor = new Date(from);
-    const dow = cursor.getDay();
-    const diffToMon = dow === 0 ? -6 : 1 - dow;
-    cursor.setDate(cursor.getDate() + diffToMon); cursor.setHours(0, 0, 0, 0);
-    while (cursor <= effectiveTo) {
-      const monday = new Date(cursor);
-      const sunday = new Date(cursor); sunday.setDate(cursor.getDate() + 6); sunday.setHours(23, 59, 59, 999);
-      if (monday > todayEnd) break;
-      const chunkTo = sunday > todayEnd ? new Date(todayEnd) : sunday;
-      chunks.push({ label: `${fmtDate(monday)}-${fmtDate(sunday)}`, fromDate: monday, toDate: chunkTo });
-      cursor.setDate(cursor.getDate() + 7);
-    }
-
   } else {
-    // Tháng: luôn sinh đủ 12 tháng. Tháng tương lai bar = 0, label vẫn hiện
-    const year = new Date().getFullYear();
-    for (let m = 0; m < 12; m++) {
-      const start = new Date(year, m, 1, 0, 0, 0, 0);
-      const end = new Date(year, m + 1, 0, 23, 59, 59, 999);
-      // chunkTo: nếu tháng tương lai thì fromDate = toDate = start (không truy vấn dữ liệu)
-      const chunkTo = start > todayEnd ? new Date(start) : end > todayEnd ? new Date(todayEnd) : end;
-      chunks.push({ label: `T${m + 1}/${year}`, fromDate: start, toDate: chunkTo });
+    // Tất cả -> group by month
+    
+    const startYear = from.getFullYear();
+    const endYear = effectiveTo.getFullYear();
+    for (let y = startYear; y <= endYear; y++) {
+      for (let m = 0; m < 12; m++) {
+        const start = new Date(y, m, 1, 0, 0, 0, 0);
+        const end = new Date(y, m + 1, 0, 23, 59, 59, 999);
+        if (end < from) continue;
+        if (start > effectiveTo) break;
+        const chunkTo = end > effectiveTo ? effectiveTo : end;
+        chunks.push({ label: `T${m + 1}/${y}`, fromDate: start, toDate: chunkTo });
+      }
     }
   }
   return chunks;
 };
-// ── Items trend: tính closingStock ───────────────────────
-const computeItemClosingStockAt = (toDate: Date, itemId: number): number => {
-  if (!rawData.value.length) {
-    const currentItem = allItems.value.find(i => i.id === itemId);
-    return currentItem ? currentItem.stockQty : 0;
-  }
 
-  let baseStock: number | null = null;
-  for (const day of rawData.value) {
-    const found = day.items.find(i => i.itemId === itemId);
-    if (found) { baseStock = found.openingStock; break; }
-  }
-
-  // Nếu không tìm thấy MỘT RECORD NÀO của item này trong suốt thời gian qua
-  // -> Món này không có biến động. Tồn kho quá khứ = Tồn kho hiện tại.
-  if (baseStock === null) {
-    const currentItem = allItems.value.find(i => i.id === itemId);
-    return currentItem ? currentItem.stockQty : 0;
-  }
-
-  let total = baseStock;
-  rawData.value.filter(d => new Date(d.date) <= toDate).forEach(day => {
-    const found = day.items.find(i => i.itemId === itemId);
-    if (found) { total += found.totalStockIn; total -= found.totalOrdered; }
-  });
-  return total;
-};
-
-// ── TOTAL TREND ───────────────────────────────────────────
+// ── TOTAL TREND — TIỀN (VND) ──────────────────────────────
 const loadTotalTrend = async () => {
-  console.log("=== loadTotalTrend ===");
-  console.log("selectedTime:", selectedTime.value);
-  console.log("fromDate:", fromDate.value);
-  console.log("toDate:", toDate.value);
   const chunks = generateTimeChunks(selectedTime.value, fromDate.value, toDate.value);
-  console.log("chunks:", chunks.map(c => `${c.label} (${c.fromDate.toLocaleDateString()} - ${c.toDate.toLocaleDateString()})`));
   if (!chunks.length) { fullReportData.value = []; chartData.value = null; return; }
 
   const todayEnd = getTodayEnd();
@@ -647,7 +742,6 @@ const loadTotalTrend = async () => {
     const overallFrom = validChunks[0].fromDate;
     const overallTo = validChunks[validChunks.length - 1].toDate;
     
-    // Gộp tất cả các khoảng thời gian lại fetch 1 lần duy nhất để tối ưu API (N+1 problem fix)
     const [stockinsRes, ordersRes] = await Promise.all([
       stockinAPI.filterStockin(fmtAPI(overallFrom), fmtAPI(overallTo)),
       orderAPI.filterOrders({ fromDate: fmtAPI(overallFrom), toDate: fmtAPI(overallTo), status: "Completed" }),
@@ -662,15 +756,12 @@ const loadTotalTrend = async () => {
   }
 
   const results = chunks.map(chunk => {
-    // Tháng tương lai (fromDate > hôm nay) → trả 0
     if (chunk.fromDate > todayEnd) {
-      return { label: chunk.label, fromDate: chunk.fromDate, toDate: chunk.toDate, totalIn: 0, totalOut: 0, rawStockins: [], rawOrders: [] };
+      return { label: chunk.label, fromDate: chunk.fromDate, toDate: chunk.toDate, totalInValue: 0, totalOutValue: 0, rawStockins: [], rawOrders: [] };
     }
     
-    // Phân nhỏ data theo từng chunk xử lý locally
     const chunkStockins = allStockins.filter((s: any) => {
       const d = new Date(s.stockInDate);
-      // Dùng getTime() để so sánh timestamp chính xác
       return d.getTime() >= chunk.fromDate.getTime() && d.getTime() <= chunk.toDate.getTime();
     });
     const chunkOrders = allOrders.filter((o: any) => {
@@ -678,79 +769,46 @@ const loadTotalTrend = async () => {
       return d >= chunk.fromDate && d <= chunk.toDate;
     });
 
+    // Tính TỔNG TIỀN thay vì đếm số phiếu
+    const totalInValue = chunkStockins.reduce((sum: number, s: any) => sum + calcStockinTotalValue(s), 0);
+    const totalOutValue = chunkOrders.reduce((sum: number, o: any) => sum + calcOrderTotalValue(o), 0);
+
     return { 
       label: chunk.label, 
       fromDate: chunk.fromDate, 
       toDate: chunk.toDate, 
-      totalIn: chunkStockins.length, 
-      totalOut: chunkOrders.length,
+      totalInValue,
+      totalOutValue,
       rawStockins: chunkStockins,
       rawOrders: chunkOrders
     };
   });
 
-  console.log("results:", results.map(r => `${r.label}: in=${r.totalIn} out=${r.totalOut}`));
-  console.log("chartData datasets:", chartData.value?.datasets?.map((d: any) => `${d.label}: [${d.data.join(',')}]`));
+  let finalResults = results;
+  const firstIdx = results.findIndex(r => r.totalInValue > 0 || r.totalOutValue > 0);
+  
+  // Use a simple reverse loop to find lastIndex for older browsers/TS targets
+  let lastIdx = -1;
+  for (let i = results.length - 1; i >= 0; i--) {
+    if (results[i].totalInValue > 0 || results[i].totalOutValue > 0) {
+      lastIdx = i;
+      break;
+    }
+  }
 
-  // Luôn hiển thị đủ tất cả các mốc (kể cả mốc = 0) để chart nhất quán giữa các chế độ
-  fullReportData.value = results;
+  if (firstIdx > -1 && lastIdx > -1) {
+    finalResults = results.slice(firstIdx, lastIdx + 1);
+  } else if (selectedTime.value === "Tất cả") {
+    finalResults = results.slice(-12);
+  }
 
-  chartData.value = {
-    labels: results.map(r => r.label),
-    datasets: [
-      { label: t('reports.chart.dataset.stockinCount'), backgroundColor: "#3b82f6", ...DS, data: results.map(r => r.totalIn) },
-      { label: t('reports.chart.dataset.orderCount'), backgroundColor: "#eab308", ...DS, data: results.map(r => r.totalOut) },
-    ],
-  };
-};
-
-// ── ITEMS TREND ───────────────────────────────────────────
-const loadItemsTrend = async () => {
-  // Fetch từ đầu năm để computeItemClosingStockAt luôn có đủ lịch sử mở kho
-  // (nếu chỉ fetch trong range hiển thị, item không có biến động sẽ mất openingStock)
-  const yearStart = fmtAPI(new Date(new Date().getFullYear(), 0, 1, 0, 0, 0, 0));
-  rawData.value = await itemAPI.getItemRange(yearStart, fmtAPI(toDate.value));
-  buildItemsChart();
-};
-
-const buildItemsChart = () => {
-  const chunks = generateTimeChunks(selectedTime.value, fromDate.value, toDate.value);
-  const trackedId = selectedItem.value?.id;
-  if (!chunks.length || !trackedId) { fullReportData.value = []; chartData.value = null; return; }
-
-  const todayEnd = getTodayEnd();
-
-  fullReportData.value = chunks.map(chunk => {
-    const daysInChunk = rawData.value.filter(d => {
-      const date = new Date(d.date);
-      return date >= chunk.fromDate && date <= chunk.toDate;
-    });
-    let totalIn = 0, totalOut = 0;
-    daysInChunk.forEach(day => {
-      const found = day.items.find(i => i.itemId === trackedId);
-      if (found) { totalIn += found.totalStockIn; totalOut += found.totalOrdered; }
-    });
-    // Chunk thuộc tương lai → không tính tồn kho (chưa có data)
-    const totalStock = chunk.fromDate > todayEnd
-      ? null
-      : computeItemClosingStockAt(chunk.toDate, trackedId);
-    return {
-      label: chunk.label,
-      fromDate: chunk.fromDate,
-      toDate: chunk.toDate,
-      totalIn,
-      totalOut,
-      totalStock,
-      rawDays: daysInChunk,
-    };
-  });
+  fullReportData.value = finalResults;
 
   chartData.value = {
-    labels: fullReportData.value.map(r => r.label),
+    labels: finalResults.map(r => r.label),
     datasets: [
-      { label: t('reports.chart.dataset.importQty'), backgroundColor: "#3b82f6", ...DS, data: fullReportData.value.map(r => r.totalIn) },
-      { label: t('reports.chart.dataset.usageQty'), backgroundColor: "#eab308", ...DS, data: fullReportData.value.map(r => r.totalOut) },
-      { label: t('reports.chart.dataset.remainingQty'), backgroundColor: "#10b981", ...DS, data: fullReportData.value.map(r => r.totalStock) },
+      { label: "Tiền nhập kho (VND)", backgroundColor: "#3b82f6", ...DS, data: finalResults.map(r => r.totalInValue) },
+      { label: "Tiền đơn hàng (VND)", backgroundColor: "#eab308", ...DS, data: finalResults.map(r => r.totalOutValue) },
     ],
   };
 };
@@ -760,8 +818,7 @@ const loadReportData = async () => {
   loading.value = true;
   selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
   try {
-    if (selectedTrend.value === "Total trend") await loadTotalTrend();
-    else await loadItemsTrend();
+    await loadTotalTrend();
   } catch (err) {
     console.error("Failed to load report:", err);
   } finally {
@@ -773,8 +830,6 @@ const loadReportData = async () => {
 const onChartClick = async (event: any, elements: any[], chart: any) => {
   if (!elements.length) return;
 
-  // Với mode="index", elements chứa tất cả dataset ở cùng x
-  // Cần lấy đúng element được click (intersect=true để lấy bar đúng)
   const exactElements = chart.getElementsAtEventForMode(
     event.native ?? event,
     "nearest",
@@ -790,34 +845,47 @@ const onChartClick = async (event: any, elements: any[], chart: any) => {
   selectedChunkLabel.value = clickedChunk.label;
   const label = chartData.value?.datasets?.[datasetIndex]?.label ?? "";
 
-  if (selectedTrend.value === "Total trend") {
-    selectedChartData.value = [];
-    // Sử dụng data lấy được từ lúc init thay vì gọi lại API
-    if (label === t('reports.chart.dataset.stockinCount')) {
-      detailClickedCol.value = "stockin";
-      selectedChartData.value = clickedChunk.rawStockins || [];
-    } else if (label === t('reports.chart.dataset.orderCount')) {
-      detailClickedCol.value = "order";
-      selectedChartData.value = clickedChunk.rawOrders || [];
+  selectedChartData.value = [];
+  if (label === "Tiền nhập kho (VND)") {
+    detailClickedCol.value = "stockin";
+    selectedChartData.value = clickedChunk.rawStockins || [];
+  } else if (label === "Tiền đơn hàng (VND)") {
+    detailClickedCol.value = "order";
+    selectedChartData.value = clickedChunk.rawOrders || [];
+  }
+};
+
+// ── Export Excel ──────────────────────────────────────────
+const onExportExcel = async () => {
+  exporting.value = true;
+  try {
+    const area = selectedArea.value === "ALL" ? undefined : selectedArea.value;
+    
+    let exportFrom = fromDate.value;
+    let exportTo = toDate.value;
+    if (fullReportData.value && fullReportData.value.length > 0) {
+      exportFrom = fullReportData.value[0].fromDate;
+      exportTo = fullReportData.value[fullReportData.value.length - 1].toDate;
     }
-  } else {
-    detailClickedCol.value = "items";
-    const trackedId = selectedItem.value?.id;
-    const isStockInCol = label === t('reports.chart.dataset.importQty');
-    const isOrderCol = label === t('reports.chart.dataset.usageQty');
-    const itemMap = new Map<number, any>();
-    clickedChunk.rawDays?.forEach((day: DailyMovement) => {
-      day.items.forEach((d: DailyMovementItem) => {
-        if (d.itemId !== trackedId) return;
-        if (!itemMap.has(d.itemId)) itemMap.set(d.itemId, { itemId: d.itemId, itemName: d.itemName, item: d.item, totalStockIn: 0, totalOrdered: 0, stockQty: d.closingStock });
-        const entry = itemMap.get(d.itemId)!;
-        entry.totalStockIn += d.totalStockIn; entry.totalOrdered += d.totalOrdered; entry.stockQty = d.closingStock;
-      });
-    });
-    let result = Array.from(itemMap.values());
-    if (isStockInCol) result = result.filter(d => d.totalStockIn > 0);
-    else if (isOrderCol) result = result.filter(d => d.totalOrdered > 0);
-    selectedChartData.value = result;
+
+    // Export both stockin and order
+    await Promise.all([
+      stockinAPI.exportExcel({
+        fromDate: fmtAPI(exportFrom),
+        toDate: fmtAPI(exportTo),
+        areapart: area,
+      }),
+      orderAPI.exportExcel({
+        fromDate: fmtAPI(exportFrom),
+        toDate: fmtAPI(exportTo),
+        status: "Completed",
+        areapart: area,
+      }),
+    ]);
+  } catch (err) {
+    console.error("Export failed:", err);
+  } finally {
+    exporting.value = false;
   }
 };
 
@@ -828,63 +896,23 @@ const onTimeTabClick = (opt: string) => {
   selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
   chartData.value = null;
 
-  // Tính range mới
-  let newFrom: Date, newTo: Date;
-  if (opt === "Month") {
-    const today = new Date();
-    newFrom = new Date(today.getFullYear(), 0, 1, 0, 0, 0, 0);
-    newTo = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
-  } else {
-    const range = getDefaultRange(opt);
-    newFrom = range.from; newTo = range.to;
-  }
+  const range = getDefaultRange(opt);
+  fromDate.value = range.from; toDate.value = range.to;
 
-  // Set ref trước
-  fromDate.value = newFrom;
-  toDate.value = newTo;
-
-  // Gọi load sau
-  loadReportData();
-};
-
-const onRangeChange = () => {
-  if (!fromDate.value || !toDate.value || fromDate.value > toDate.value) return;
-  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
   loadReportData();
 };
 
 const onResetRange = () => {
-  selectedTime.value = "Week";
-  const range = getDefaultRange("Week");
+  selectedTime.value = "1 ngày";
+  const range = getDefaultRange("1 ngày");
   fromDate.value = range.from; toDate.value = range.to;
   selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
   loadReportData();
 };
 
-const onTrendChange = () => {
-  selectedChartData.value = [];
-  selectedChunkLabel.value = "";
-  detailClickedCol.value = "";
-  chartData.value = null;  
-  rawData.value = [];   
-  loadReportData();
-};
-
 const onAreaChange = () => {
   selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
-  if (selectedTrend.value === "Items trend") {
-    if (!itemsByArea.value.find((i) => i.id === selectedItem.value?.id)) {
-      selectedItem.value = itemsByArea.value[0] ?? null;
-    }
-    buildItemsChart();
-  } else {
-    loadReportData();
-  }
-};
-
-const onItemChange = () => {
-  selectedChartData.value = []; selectedChunkLabel.value = ""; detailClickedCol.value = "";
-  buildItemsChart();
+  loadReportData();
 };
 
 // ── Chart options ─────────────────────────────────────────
@@ -893,7 +921,7 @@ const chartOptions = ref({
   maintainAspectRatio: false,
   animation: { duration: 500, easing: "easeOutQuart" },
   plugins: {
-    centerLoneBars: {},   // kích hoạt plugin căn giữa cột đơn lẻ
+    centerLoneBars: {},
     legend: {
       display: true,
       position: "bottom" as const,
@@ -916,6 +944,11 @@ const chartOptions = ref({
         label: (ctx: any) => {
           if (ctx.parsed.y === 0 || ctx.parsed.y === null) return null as any;
           const label = ctx.dataset.label || "";
+          // Format as VND for Total trend, as number for Items trend
+          if (label.includes("VND")) {
+            const val = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(ctx.parsed.y);
+            return ` ${label.replace(" (VND)", "")}: ${val}`;
+          }
           const val = new Intl.NumberFormat("vi-VN").format(ctx.parsed.y);
           return ` ${label}: ${val}`;
         },
@@ -939,7 +972,15 @@ const chartOptions = ref({
       beginAtZero: true,
       stacked: false,
       grid: { color: "#f1f5f9", borderDash: [4, 4] },
-      ticks: { font: { family: "'Inter', sans-serif", size: 11 } },
+      ticks: {
+        font: { family: "'Inter', sans-serif", size: 11 },
+        callback: function(value: any) {
+          // Format Y-axis: abbreviated VND for Total trend
+          if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+          if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+          return value;
+        },
+      },
     },
   },
   interaction: {
@@ -956,7 +997,7 @@ onMounted(async () => {
   const items = await itemAPI.getAll();
   allItems.value = items;
   selectedItem.value = items[0] ?? null;
-  const range = getDefaultRange("Week");
+  const range = getDefaultRange("1 ngày");
   fromDate.value = range.from; toDate.value = range.to;
   await loadReportData();
 });
@@ -1018,6 +1059,102 @@ onUnmounted(() => { window.removeEventListener("resize", handleResize); });
   height: 1.5rem;
   background: #cbd5e1;
   margin: 0 0.25rem;
+}
+
+/* ── Summary Cards ────────────────────────────────────── */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+}
+
+.summary-card-blue {
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-color: #bfdbfe;
+}
+
+.summary-card-yellow {
+  background: linear-gradient(135deg, #fefce8, #fef9c3);
+  border-color: #fde68a;
+}
+
+.summary-card-green {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border-color: #bbf7d0;
+}
+
+.summary-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.summary-card-blue .summary-icon {
+  background: #3b82f6;
+  color: white;
+}
+
+.summary-card-yellow .summary-icon {
+  background: #eab308;
+  color: white;
+}
+
+.summary-card-green .summary-icon {
+  background: #10b981;
+  color: white;
+}
+
+.summary-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.summary-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.summary-unit {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.summary-money {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #059669;
+  margin-top: 2px;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  margin-top: 2px;
 }
 
 /* ── Filter bar ───────────────────────────────────────── */
@@ -1092,32 +1229,7 @@ onUnmounted(() => { window.removeEventListener("resize", handleResize); });
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
 }
 
-/* ── Reset button ─────────────────────────────────────── */
-.reset-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.875rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #64748b;
-  background: transparent;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  white-space: nowrap;
-}
 
-.reset-btn:hover {
-  background: #f1f5f9;
-  color: #334155;
-  border-color: #cbd5e1;
-}
-
-.reset-btn .pi {
-  font-size: 0.75rem;
-}
 
 /* ── Area dropdown ────────────────────────────────────── */
 .area-dropdown {
@@ -1237,6 +1349,34 @@ onUnmounted(() => { window.removeEventListener("resize", handleResize); });
   padding: 1.5rem;
   color: #94a3b8;
   font-size: 0.875rem;
+}
+
+/* ── Detail footer ────────────────────────────────────── */
+.detail-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 0.75rem 0;
+}
+
+.detail-footer-label {
+  font-weight: 600;
+  color: #475569;
+}
+
+.detail-footer-count {
+  font-size: 0.875rem;
+  color: #64748b;
+  padding: 0.2rem 0.6rem;
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+.detail-footer-value {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #059669;
 }
 
 /* ── Calendar & SelectButton overrides ───────────────── */

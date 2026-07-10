@@ -19,6 +19,14 @@
 
         <div style="display: flex; gap: 0.5rem">
           <Button
+            label="Excel"
+            icon="pi pi-file-excel"
+            severity="success"
+            outlined
+            :loading="exporting"
+            @click="onExportExcel"
+          />
+          <Button
             :label="t('reports.common.printReport')"
             icon="pi pi-print"
             severity="secondary"
@@ -1100,6 +1108,21 @@ const getStockStatusColor = (item: any) => {
 // Print report
 const printReport = () => {
   window.print();
+};
+
+const exporting = ref(false);
+const onExportExcel = async () => {
+  exporting.value = true;
+  try {
+    const area = selectedArea.value === "ALL" ? undefined : selectedArea.value;
+    await itemAPI.exportExcel({
+      areapart: area,
+    });
+  } catch (err) {
+    console.error("Export failed:", err);
+  } finally {
+    exporting.value = false;
+  }
 };
 
 // Handle summary card click

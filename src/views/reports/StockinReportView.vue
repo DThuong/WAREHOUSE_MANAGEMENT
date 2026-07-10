@@ -20,6 +20,14 @@
 
         <div style="display: flex; gap: 0.5rem">
           <Button
+            label="Excel"
+            icon="pi pi-file-excel"
+            severity="success"
+            outlined
+            :loading="exporting"
+            @click="onExportExcel"
+          />
+          <Button
             :label="t('reports.common.printReport')"
             icon="pi pi-print"
             severity="secondary"
@@ -387,7 +395,7 @@
                       text-align: center;
                     "
                   >
-                    {{ formatCurrency(parseFloat(detail.item.price || "0")) }}
+                    {{ formatCurrency(parseFloat(detail.price || detail.item.price || "0")) }}
                   </td>
 
                   <!-- Quantity -->
@@ -412,7 +420,7 @@
                   >
                     <strong>{{
                       formatCurrency(
-                        detail.quantity * parseFloat(detail.item.price || "0"),
+                        detail.quantity * parseFloat(detail.price || detail.item.price || "0"),
                       )
                     }}</strong>
                   </td>
@@ -638,7 +646,7 @@ const totalValue = computed(() => {
     return (
       total +
       (stockin.stockInDetails?.reduce((sum, detail) => {
-        const price = parseFloat(detail.item.price || "0");
+        const price = parseFloat((detail as any).price || detail.item.price || "0");
         return sum + detail.quantity * price;
       }, 0) || 0)
     );
@@ -662,6 +670,24 @@ const formatCurrency = (value: number) => {
 // Print report
 const printReport = () => {
   window.print();
+};
+
+// Export Excel
+const exporting = ref(false);
+const onExportExcel = async () => {
+  exporting.value = true;
+  try {
+    const area = selectedArea.value === "ALL" ? undefined : selectedArea.value;
+    await stockinAPI.exportExcel({
+      fromDate: formatDateTimeForAPI(fromDate.value),
+      toDate: formatDateTimeForAPI(toDate.value),
+      areapart: area,
+    });
+  } catch (err) {
+    console.error("Export failed:", err);
+  } finally {
+    exporting.value = false;
+  }
 };
 
 // ===== Trend chart (SMD vs MAINLINE) =====
