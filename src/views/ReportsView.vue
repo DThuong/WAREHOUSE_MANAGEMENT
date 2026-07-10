@@ -790,7 +790,7 @@ const loadTotalTrend = async () => {
     };
   });
 
-  let finalResults = results.filter(r => r.totalInValue > 0 || r.totalOutValue > 0);
+  let finalResults = results.filter(r => r.rawStockins.length > 0 || r.rawOrders.length > 0);
 
   if (finalResults.length === 0) {
     if (selectedTime.value === "Tất cả") {
@@ -962,8 +962,7 @@ const chartOptions = ref({
         maxRotation: 45,
         minRotation: 0,
         font: { family: "'Inter', sans-serif", size: 11 },
-        autoSkip: true,
-        maxTicksLimit: 20,
+        autoSkip: false,
       },
     },
     y: {
@@ -987,6 +986,11 @@ const chartOptions = ref({
     intersect: false,
   },
   onClick: onChartClick,
+  onHover: (event: any, elements: any[], chart: any) => {
+    if (chart && chart.canvas) {
+      chart.canvas.style.cursor = elements && elements.length > 0 ? "pointer" : "default";
+    }
+  },
 });
 
 // ── Lifecycle ─────────────────────────────────────────────
