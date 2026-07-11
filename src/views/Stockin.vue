@@ -316,7 +316,6 @@
           text
           rounded
           severity="danger"
-          disabled
           @click="confirmDelete(data)"
         />
       </div>
@@ -418,7 +417,6 @@
           text
           size="small"
           severity="danger"
-          disabled
           @click="confirmDelete(stockin)"
         />
       </div>
@@ -674,10 +672,9 @@
                     >{{ t("importManagement.createDialog.priceLabel") || 'Đơn giá' }}</label
                   >
                   <input
-                    type="number"
+                    type="text"
+                    inputmode="numeric"
                     v-model="item.price"
-                    min="0"
-                    step="1000"
                     :placeholder="'0'"
                     class="w-full px-3! py-2! border border-gray-300 rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary text-sm"
                   />
