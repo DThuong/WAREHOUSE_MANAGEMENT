@@ -57,13 +57,13 @@
                   v-for="opt in timeOptions" :key="opt"
                   :class="['w-24 h-full text-sm font-medium rounded-md transition-colors flex items-center justify-center', selectedTime === opt ? 'bg-white shadow text-primary' : 'text-slate-600 hover:bg-slate-200']"
                   @click="onTimeTabClick(opt)"
-                >{{ opt === '1 ngày' ? t('reports.chart.period1') : opt === '7 ngày' ? t('reports.chart.period7') : opt === '30 ngày' ? t('reports.chart.period30') : t('reports.chart.periodAll') }}</button>
+                >{{ opt === '1 ngày' ? t('reports.chart.period1') : opt === '7 ngày' ? t('reports.chart.period7') : opt === '30 ngày' ? t('reports.chart.period30') : opt === 'Tuần' ? t('reports.chart.periodWeek') : t('reports.chart.periodMonth') }}</button>
               </div>
 
               <div class="divider-v" style="width: 1px; height: 24px; background: #e2e8f0;"></div>
 
               <div class="flex items-center gap-2" style="height: 40px;">
-                <Button icon="pi pi-chevron-left" text rounded severity="secondary" @click="prevPeriod" :disabled="selectedTime === 'Tất cả'" style="width: 40px; height: 40px;" />
+                <Button icon="pi pi-chevron-left" text rounded severity="secondary" @click="prevPeriod" :disabled="selectedTime === 'Tháng' || selectedTime === 'Tuần'" style="width: 40px; height: 40px;" />
                 <span class="font-bold text-slate-700 min-w-[150px] text-center" v-html="periodLabel"></span>
                 <Button icon="pi pi-chevron-right" text rounded severity="secondary" @click="nextPeriod" :disabled="isNextDisabled" style="width: 40px; height: 40px;" />
               </div>
@@ -420,7 +420,7 @@
           </Column>
         </DataTable>
         <!-- Total -->
-        <div class="mt-4 p-3! bg-yellow-50 rounded-lg border border-yellow-200 flex justify-between items-center">
+        <div class="mt-4! p-3! bg-yellow-50 rounded-lg border border-yellow-200 flex justify-between items-center">
           <span class="font-semibold text-slate-700">{{ t('reports.chart.totalOrderValue') }}</span>
           <span class="text-lg font-bold text-yellow-700">{{ formatCurrency(calcOrderTotalValue(detailOrder)) }}</span>
         </div>
@@ -453,6 +453,7 @@ import { stockinAPI } from "@/services/stockinAPI";
 import { orderAPI } from "@/services/orderAPI";
 import type { Item, DailyMovement, DailyMovementItem } from "@/types/item.types";
 import { useDashboardStore, type AreaKey } from "@/stores/dashboard";
+import * as XLSX from "xlsx";
 
 const router = useRouter();
 const dashboardStore = useDashboardStore();
@@ -560,8 +561,7 @@ const getTodayEnd = () => {
 // ── Dataset config ────────────────────────────────────────
 const DS = {
   barPercentage: 1.0,
-  categoryPercentage: 0.85,
-  maxBarThickness: 80,
+  categoryPercentage: 0.5,
   borderRadius: 2,
   borderWidth: 0,
 };
@@ -571,7 +571,7 @@ const loading = ref(false);
 const detailLoading = ref(false);
 const detailClickedCol = ref("");
 
-const timeOptions = ["1 ngày", "7 ngày", "30 ngày", "Tất cả"];
+const timeOptions = ["1 ngày", "7 ngày", "30 ngày", "Tuần", "Tháng"];
 const selectedTime = ref("1 ngày");
 
 const fullReportData = ref<any[]>([]);
@@ -611,18 +611,18 @@ const centerLoneBarsPlugin = {
 };
 
 const periodLabel = computed(() => {
-  if (selectedTime.value === "Tất cả") return "Tất cả";
+  if (selectedTime.value === "Tháng" || selectedTime.value === "Tuần") return t("reports.chart.periodAll");
   if (selectedTime.value === "1 ngày") return `${fmtDate(fromDate.value)}`;
   return `${fmtDate(fromDate.value)} - ${fmtDate(toDate.value)}`;
 });
 
 const isNextDisabled = computed(() => {
   const todayEnd = getTodayEnd();
-  return toDate.value >= todayEnd || selectedTime.value === "Tất cả";
+  return toDate.value >= todayEnd || selectedTime.value === "Tháng" || selectedTime.value === "Tuần";
 });
 
 const prevPeriod = () => {
-  if (selectedTime.value === "Tất cả") return;
+  if (selectedTime.value === "Tháng" || selectedTime.value === "Tuần") return;
   const days = selectedTime.value === "1 ngày" ? 1 : selectedTime.value === "7 ngày" ? 7 : 30;
   const newFrom = new Date(fromDate.value);
   const newTo = new Date(toDate.value);
@@ -634,7 +634,7 @@ const prevPeriod = () => {
 };
 
 const nextPeriod = () => {
-  if (isNextDisabled.value || selectedTime.value === "Tất cả") return;
+  if (isNextDisabled.value || selectedTime.value === "Tháng" || selectedTime.value === "Tuần") return;
   const days = selectedTime.value === "7 ngày" ? 7 : 30;
   const newFrom = new Date(fromDate.value);
   const newTo = new Date(toDate.value);
@@ -687,6 +687,11 @@ const getDefaultRange = (type: string) => {
     const from = new Date(today); from.setDate(today.getDate() - 29); from.setHours(0, 0, 0, 0);
     const to = new Date(today); to.setHours(23, 59, 59, 999);
     return { from, to };
+  } else if (type === "Tuần") {
+    // Tuần: chỉ lấy 1 năm gần nhất tính từ hôm nay trở lại
+    const from = new Date(today); from.setFullYear(today.getFullYear() - 1); from.setHours(0, 0, 0, 0);
+    const to = new Date(today); to.setHours(23, 59, 59, 999);
+    return { from, to };
   } else {
     const from = new Date(today.getFullYear() - 5, 0, 1, 0, 0, 0, 0);
     const to = new Date(today); to.setHours(23, 59, 59, 999);
@@ -714,9 +719,24 @@ const generateTimeChunks = (
       chunks.push({ label: fmtDate(cursor), fromDate: s, toDate: e });
       cursor.setDate(cursor.getDate() + 1);
     }
+  } else if (timeType === "Tuần") {
+    // Tuần -> group by week (Monday -> Sunday), mỗi cột = 1 tuần
+    const start = new Date(from); start.setHours(0, 0, 0, 0);
+    // lùi về thứ Hai của tuần chứa "from" (getDay: 0=CN, 1=T2, ...)
+    const dow = start.getDay();
+    const diffToMonday = dow === 0 ? -6 : 1 - dow;
+    start.setDate(start.getDate() + diffToMonday);
+    const cursor = new Date(start);
+    while (cursor <= effectiveTo) {
+      const s = new Date(cursor); s.setHours(0, 0, 0, 0);
+      const e = new Date(cursor); e.setDate(e.getDate() + 6); e.setHours(23, 59, 59, 999);
+      const chunkTo = e > effectiveTo ? new Date(effectiveTo) : e;
+      chunks.push({ label: `${fmtDate(s)} - ${fmtDate(e)}`, fromDate: s, toDate: chunkTo });
+      cursor.setDate(cursor.getDate() + 7);
+    }
   } else {
-    // Tất cả -> group by month
-    
+    // Tháng -> group by month
+
     const startYear = from.getFullYear();
     const endYear = effectiveTo.getFullYear();
     for (let y = startYear; y <= endYear; y++) {
@@ -793,7 +813,7 @@ const loadTotalTrend = async () => {
   let finalResults = results.filter(r => r.rawStockins.length > 0 || r.rawOrders.length > 0);
 
   if (finalResults.length === 0) {
-    if (selectedTime.value === "Tất cả") {
+    if (selectedTime.value === "Tháng" || selectedTime.value === "Tuần") {
       finalResults = results.slice(-12);
     } else {
       finalResults = results;
@@ -857,29 +877,58 @@ const onChartClick = async (event: any, elements: any[], chart: any) => {
 const onExportExcel = async () => {
   exporting.value = true;
   try {
-    const area = selectedArea.value === "ALL" ? undefined : selectedArea.value;
-    
-    let exportFrom = fromDate.value;
-    let exportTo = toDate.value;
-    if (fullReportData.value && fullReportData.value.length > 0) {
-      exportFrom = fullReportData.value[0].fromDate;
-      exportTo = fullReportData.value[fullReportData.value.length - 1].toDate;
+    // Gom toàn bộ phiếu nhập + đơn hàng đang hiển thị trên biểu đồ
+    const allStockins: any[] = [];
+    const allOrders: any[] = [];
+    for (const chunk of fullReportData.value) {
+      for (const s of chunk.rawStockins || []) allStockins.push(s);
+      for (const o of chunk.rawOrders || []) allOrders.push(o);
     }
 
-    // Export both stockin and order
-    await Promise.all([
-      stockinAPI.exportExcel({
-        fromDate: fmtAPI(exportFrom),
-        toDate: fmtAPI(exportTo),
-        areapart: area,
-      }),
-      orderAPI.exportExcel({
-        fromDate: fmtAPI(exportFrom),
-        toDate: fmtAPI(exportTo),
-        status: "Completed",
-        areapart: area,
-      }),
-    ]);
+    // Sheet Nhập kho
+    const stockinRows = allStockins.map((s: any) => ({
+      "Mã phiếu": s.id,
+      "Ngày nhập": formatDate(s.stockInDate),
+      "Người tạo": s.account?.username || "-",
+      "Tên sản phẩm": (s.stockInDetails || []).map((d: any) => getItemName(d.item)).join(", "),
+      "Số loại SP": s.stockInDetails?.length || 0,
+      "Tổng số lượng": calcStockinTotalQty(s),
+      "Tổng tiền (VND)": calcStockinTotalValue(s),
+    }));
+
+    // Sheet Đơn hàng
+    const orderRows = allOrders.map((o: any) => ({
+      "Mã đơn": o.id,
+      "Ngày đặt": formatDate(o.orderDate),
+      "Người đặt": o.nameWorker || o.account?.username || "-",
+      "Bộ phận": o.account?.department || "-",
+      "Tên sản phẩm": (o.orderDetails || []).map((d: any) => getItemName(d.item)).join(", "),
+      "Số loại SP": o.orderDetails?.length || 0,
+      "Tổng số lượng": calcOrderTotalQty(o),
+      "Tổng tiền (VND)": calcOrderTotalValue(o),
+    }));
+
+    const wb = XLSX.utils.book_new();
+
+    const wsStockin = XLSX.utils.json_to_sheet(
+      stockinRows.length
+        ? stockinRows
+        : [{ "Mã phiếu": "", "Ngày nhập": "", "Người tạo": "", "Tên sản phẩm": "", "Số loại SP": "", "Tổng số lượng": "", "Tổng tiền (VND)": "" }]
+    );
+    wsStockin["!cols"] = [{ wch: 10 }, { wch: 20 }, { wch: 18 }, { wch: 40 }, { wch: 12 }, { wch: 14 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(wb, wsStockin, "Nhập kho");
+
+    const wsOrder = XLSX.utils.json_to_sheet(
+      orderRows.length
+        ? orderRows
+        : [{ "Mã đơn": "", "Ngày đặt": "", "Người đặt": "", "Bộ phận": "", "Tên sản phẩm": "", "Số loại SP": "", "Tổng số lượng": "", "Tổng tiền (VND)": "" }]
+    );
+    wsOrder["!cols"] = [{ wch: 10 }, { wch: 20 }, { wch: 18 }, { wch: 16 }, { wch: 40 }, { wch: 12 }, { wch: 14 }, { wch: 18 }];
+    XLSX.utils.book_append_sheet(wb, wsOrder, "Đơn hàng");
+
+    const areaSuffix = selectedArea.value === "ALL" ? "" : `_${selectedArea.value}`;
+    const fileName = `bao_cao${areaSuffix}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
   } catch (err) {
     console.error("Export failed:", err);
   } finally {

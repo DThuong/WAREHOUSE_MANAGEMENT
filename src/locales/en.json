@@ -1031,6 +1031,8 @@
       "period7": "7 days",
       "period30": "30 days",
       "periodAll": "All",
+      "periodWeek": "Week",
+      "periodMonth": "Month",
       "detailTitle": "Detailed Data",
       "codePrefix": "Code",
       "badge": {

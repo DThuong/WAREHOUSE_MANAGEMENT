@@ -1033,6 +1033,8 @@
       "period7": "7 일",
       "period30": "30 일",
       "periodAll": "전체",
+      "periodWeek": "주",
+      "periodMonth": "월",
       "detailTitle": "상세 데이터",
       "codePrefix": "코드",
       "badge": {
