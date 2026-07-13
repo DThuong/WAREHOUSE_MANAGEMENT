@@ -1032,6 +1032,7 @@
       "period30": "30 days",
       "periodAll": "All",
       "periodWeek": "Week",
+      "weekShort": "W",
       "periodMonth": "Month",
       "detailTitle": "Detailed Data",
       "codePrefix": "Code",

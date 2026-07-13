@@ -497,6 +497,15 @@ const fmtAPI = (date: Date) => {
   return `${y}-${mo}-${d} ${h}:${mi}`;
 };
 
+const getWeekNumber = (date: Date) => {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+  return { week: weekNo, year: d.getUTCFullYear() };
+};
+
 // ── Price calculators ─────────────────────────────────────
 const calcStockinTotalQty = (stockin: any): number => {
   return (stockin.stockInDetails || []).reduce((sum: number, d: any) => sum + (d.quantity || 0), 0);
@@ -731,7 +740,8 @@ const generateTimeChunks = (
       const s = new Date(cursor); s.setHours(0, 0, 0, 0);
       const e = new Date(cursor); e.setDate(e.getDate() + 6); e.setHours(23, 59, 59, 999);
       const chunkTo = e > effectiveTo ? new Date(effectiveTo) : e;
-      chunks.push({ label: `${fmtDate(s)} - ${fmtDate(e)}`, fromDate: s, toDate: chunkTo });
+      const { week, year } = getWeekNumber(s);
+      chunks.push({ label: `${t('reports.chart.weekShort')}${week}/${year}`, fromDate: s, toDate: chunkTo });
       cursor.setDate(cursor.getDate() + 7);
     }
   } else {

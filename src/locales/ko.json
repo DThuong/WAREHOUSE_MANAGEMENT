@@ -1034,6 +1034,7 @@
       "period30": "30 일",
       "periodAll": "전체",
       "periodWeek": "주",
+      "weekShort": "W",
       "periodMonth": "월",
       "detailTitle": "상세 데이터",
       "codePrefix": "코드",
