@@ -834,10 +834,10 @@ const handleSubmit = async () => {
 
   const payload: CreateItemRequest = {
     type: form.value.type,
-    saveQuantity: form.value.saveQuantity,
+    saveQuantity: form.value.saveQuantity || 0,
     price: form.value.price,
     unit: form.value.unit,
-    stockQty: form.value.stockQty,
+    stockQty: form.value.stockQty || 0,
     areaPart: form.value.areaPart,
     picture: [],
     ...(activeTab.value === 0 
