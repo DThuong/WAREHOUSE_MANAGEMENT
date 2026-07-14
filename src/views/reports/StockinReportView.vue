@@ -125,6 +125,10 @@
             style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem"
           >
             {{ t("reports.importReport.reportTitle") }}
+            <span v-if="selectedChartDate" style="color: #6366f1; font-size: 1.25rem;">
+              ({{ selectedTrendDate }})
+              <Button icon="pi pi-times" text rounded size="small" style="width: 2rem; height: 2rem; padding: 0;" @click="selectedChartDate = null" />
+            </span>
           </h1>
           <p style="font-size: 0.875rem; color: #666">
             {{
@@ -480,34 +484,7 @@
         </div>
       </div>
 
-      <!-- Date detail dialog -->
-      <Dialog
-        v-model:visible="dateDetailVisible"
-        modal
-        :header="t('reports.common.detailDialogTitle', { date: selectedTrendDate })"
-        style="width: 90vw; max-width: 900px"
-      >
-        <DataTable :value="selectedDateStockins" responsiveLayout="scroll">
-          <Column :header="t('reports.importReport.table.receiptCode')">
-            <template #body="{ data }">#{{ data.id }}</template>
-          </Column>
-          <Column field="area" :header="t('reports.common.colArea')" />
-          <Column :header="t('reports.importReport.table.importer')">
-            <template #body="{ data }">{{ data.account?.username || "-" }}</template>
-          </Column>
-          <Column :header="t('reports.common.colQty')">
-            <template #body="{ data }">{{ calculateStockinQty(data) }}</template>
-          </Column>
-          <Column :header="t('reports.common.colAction')" style="width: 80px; text-align: center">
-            <template #body="{ data }">
-              <Button icon="pi pi-eye" text rounded @click="openStockinDetail(data)" />
-            </template>
-          </Column>
-        </DataTable>
-        <div v-if="!selectedDateStockins.length" style="text-align: center; padding: 2rem; color: #999">
-          {{ t("reports.common.noData") }}
-        </div>
-      </Dialog>
+      <!-- Date detail dialog removed, filtering main table directly -->
 
       <!-- Stockin detail dialog -->
       <Dialog
@@ -585,9 +562,12 @@ const formatDateTimeForAPI = (date: Date): string => {
   return `${year}-${month}-${day} ${hours}:${minutes}`;
 };
 
+const selectedChartDate = ref<string | null>(null);
+
 // Load data with filter
 const loadData = async () => {
   loading.value = true;
+  selectedChartDate.value = null; // reset chart selection
   try {
     const from = formatDateTimeForAPI(fromDate.value);
     const to = formatDateTimeForAPI(toDate.value);
@@ -611,10 +591,21 @@ const resetFilter = () => {
 
 // Computed values
 const filteredStockins = computed(() => {
-  if (selectedArea.value === "ALL") return stockinStore.stockins;
-  return stockinStore.stockins.filter(
-    (stockin) => dashboardStore.getStockinArea(stockin) === selectedArea.value,
-  );
+  let result = stockinStore.stockins;
+
+  if (selectedArea.value !== "ALL") {
+    result = result.filter(
+      (stockin) => dashboardStore.getStockinArea(stockin) === selectedArea.value,
+    );
+  }
+
+  if (selectedChartDate.value) {
+    result = result.filter(
+      (stockin) => formatDateKey(stockin.stockInDate) === selectedChartDate.value
+    );
+  }
+
+  return result;
 });
 
 const totalItems = computed(() => {
@@ -743,18 +734,21 @@ const trendMainlineData = computed(() =>
   sortedTrendKeys.value.map((k) => stockinsTrendMap.value.get(k)?.MAINLINE || 0),
 );
 
-const dateDetailVisible = ref(false);
 const selectedTrendDate = ref("");
-const selectedDateStockins = ref<any[]>([]);
 const stockinDetailVisible = ref(false);
 const selectedStockin = ref<any>(null);
 
 const onTrendPointClick = (index: number) => {
   const key = sortedTrendKeys.value[index];
   if (!key) return;
-  selectedTrendDate.value = formatLabel(key);
-  selectedDateStockins.value = stockinsTrendMap.value.get(key)?.stockins || [];
-  dateDetailVisible.value = true;
+  
+  if (selectedChartDate.value === key) {
+    selectedChartDate.value = null;
+    selectedTrendDate.value = "";
+  } else {
+    selectedChartDate.value = key;
+    selectedTrendDate.value = formatLabel(key);
+  }
 };
 
 const openStockinDetail = (stockin: any) => {

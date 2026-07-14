@@ -551,8 +551,8 @@
       "reset": "초기화"
     },
     "typeOptions": {
-      "engineer": "기술 제품",
-      "consumer": "소비자"
+      "engineer": "스폐어 파트",
+      "consumer": "소모품"
     },
     "stockStatusOptions": {
       "inStock": "재고 있음",
@@ -587,7 +587,7 @@
       "area": "공장:"
     },
     "category": {
-      "engineering": "기술 제품",
+      "engineering": "스폐어 파트",
       "consumer": "소모품",
       "uncategorized": "미분류",
       "unknown": "알 수 없음"
@@ -844,7 +844,7 @@
   "addInventory": {
     "title": "새 제품 추가",
     "tabs": {
-      "engineer": "기술 제품",
+      "engineer": "스폐어 파트",
       "consumer": "소모품"
     },
     "fields": {
@@ -922,7 +922,7 @@
       "qc": "QC",
       "kho": "창고",
       "repair": "수리",
-      "engineer": "엔지니어링",
+      "engineer": "스폐어 파트",
       "sanXuatA": "생산 A조",
       "sanXuatB": "생산 B조"
     },
@@ -1143,7 +1143,7 @@
       "filterSearchPlaceholder": "제품명, ID...",
       "typeOptions": {
         "all": "전체 유형",
-        "engineer": "기술 제품",
+        "engineer": "스폐어 파트",
         "consumer": "소모품"
       },
       "factoryOptions": {
@@ -1195,7 +1195,17 @@
       "emptyState": "일치하는 제품 없음",
       "totalProducts": "총 제품 수",
       "productUnit": "개",
-      "totalInventoryValue": "총 재고 가치"
+      "totalInventoryValue": "총 재고 가치",
+      "transactionHistory": {
+        "byWeek": "주별",
+        "byMonth": "월별",
+        "noData": "해당 기간에 데이터가 없습니다",
+        "week": "주",
+        "month": "월",
+        "orderValue": "주문 금액",
+        "stockInValue": "입고 금액",
+        "detail": "세부 사항"
+      }
     },
     "orderReport": {
       "title": "출고 요청 보고서",

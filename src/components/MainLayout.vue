@@ -467,6 +467,7 @@
 
         <!-- Dropdown panel - fixed ngay dưới navbar -->
         <div
+          class="mobile-noti-panel"
           :style="{
             position: 'fixed',
             top: navbarHeight + 'px',
@@ -767,7 +768,12 @@ const deleteAllNoti = async () => {
 
 // Đóng khung thông báo (và dropdown ngôn ngữ mobile) ngay khi user scroll trang,
 // tránh panel "trôi" theo / vỡ layout
-const handleGlobalScroll = () => {
+const handleGlobalScroll = (event: Event) => {
+  const target = event.target as HTMLElement | Document;
+  if (target instanceof Element && (target.closest('.p-overlaypanel') || target.closest('.mobile-noti-panel'))) {
+    return;
+  }
+  
   notificationPanel.value?.hide();
   mobileNotiVisible.value = false;
   langMenuOpen.value = false;

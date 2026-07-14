@@ -367,6 +367,7 @@
               <tr style="background: #f9fafb">
                 <th
                   style="
+                    width: 10%;
                     padding: 0.75rem;
                     text-align: center;
                     border: 1px solid #e5e7eb;
@@ -376,6 +377,7 @@
                 </th>
                 <th
                   style="
+                    width: 10%;
                     padding: 0.75rem;
                     text-align: center;
                     border: 1px solid #e5e7eb;
@@ -385,6 +387,7 @@
                 </th>
                 <th
                   style="
+                    width: 10%;
                     padding: 0.75rem;
                     text-align: center;
                     border: 1px solid #e5e7eb;
@@ -394,6 +397,7 @@
                 </th>
                 <th
                   style="
+                    width: 10%;
                     padding: 0.75rem;
                     text-align: center;
                     border: 1px solid #e5e7eb;
@@ -403,6 +407,7 @@
                 </th>
                 <th
                   style="
+                    width: 10%;
                     padding: 0.75rem;
                     text-align: center;
                     border: 1px solid #e5e7eb;
@@ -410,8 +415,9 @@
                 >
                   {{ t("reports.inventoryReport.table.stock") }}
                 </th>
-                <!-- <th
+                <th
                   style="
+                    width: 10%;
                     padding: 0.75rem;
                     text-align: center;
                     border: 1px solid #e5e7eb;
@@ -420,47 +426,40 @@
                   {{ t("reports.inventoryReport.table.safeStock") }}
                 </th>
                 <th
-                  style="padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb; white-space: nowrap;"
+                  style="width: 10%; padding: 0.75rem; text-align: center; border: 1px solid #e5e7eb; white-space: nowrap;"
                 >
                   {{ t("reports.inventoryReport.table.status") }}
-                </th> -->
-                <!-- <th
+                </th>
+                <th
                   style="
+                    width: 10%;
                     padding: 0.75rem;
                     text-align: center;
                     border: 1px solid #e5e7eb;
                   "
                 >
                   {{ t("reports.inventoryReport.table.unitPrice") }}
-                </th> -->
-                <!-- <th
+                </th>
+                <th
                   style="
+                    width: 10%;
                     padding: 0.75rem;
                     text-align: center;
                     border: 1px solid #e5e7eb;
                   "
                 >
                   {{ t("reports.inventoryReport.table.inventoryValue") }}
-                </th> -->
-                <!-- <th
+                </th>
+                <th
                   style="
+                    width: 10%;
                     padding: 0.75rem;
                     text-align: center;
                     border: 1px solid #e5e7eb;
                   "
                 >
-                  {{ t("reports.inventoryReport.table.orderCount") }}
-                </th> -->
-                <!-- Số lần nhập -->
-                <!-- <th
-                  style="
-                    padding: 0.75rem;
-                    text-align: center;
-                    border: 1px solid #e5e7eb;
-                  "
-                >
-                  {{ t("reports.inventoryReport.table.stockInCount") }}
-                </th> -->
+                  {{ t("reports.inventoryReport.transactionHistory.detail") }}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -542,12 +541,12 @@
                     text-align: center;
                   "
                 >
-                  <!-- <strong>{{ item.stockQty }}</strong> -->
-                  <!-- {{ getUnitLabel(item.unit) }} -->
+                  <strong>{{ item.stockQty }}</strong>
+                  {{ getUnitLabel(item.unit) }}
                 </td>
 
                 <!-- Tồn an toàn -->
-                <!-- <td
+                <td
                   style="
                     padding: 0.75rem;
                     border: 1px solid #e5e7eb;
@@ -555,10 +554,10 @@
                   "
                 >
                   {{ item.saveQuantity }} {{ getUnitLabel(item.unit) }}
-                </td> -->
+                </td>
 
                 <!-- Trạng thái -->
-                <!-- <td style="padding: 0.75rem; border: 1px solid #e5e7eb">
+                <td style="padding: 0.75rem; border: 1px solid #e5e7eb">
                   <span
                     :style="{
                       padding: '0.25rem 0.5rem',
@@ -572,10 +571,10 @@
                   >
                     {{ getStockStatusLabel(item) }}
                   </span>
-                </td> -->
+                </td>
 
                 <!-- Đơn giá -->
-                <!-- <td
+                <td
                   style="
                     padding: 0.75rem;
                     border: 1px solid #e5e7eb;
@@ -583,10 +582,10 @@
                   "
                 >
                   {{ formatCurrency(parseFloat(item.price || "0")) }}
-                </td> -->
+                </td>
 
                 <!-- Giá trị tồn -->
-                <!-- <td
+                <td
                   style="
                     padding: 0.75rem;
                     border: 1px solid #e5e7eb;
@@ -596,51 +595,24 @@
                   <strong>
                     {{ formatCurrency(parseFloat(item.stockPrice || "0")) }}
                   </strong>
-                </td> -->
+                </td>
 
-                <!-- Số lần order -->
-                <!-- <td
+                <!-- Chi tiết Order/Stockin -->
+                <td
                   style="
                     padding: 0.75rem;
                     border: 1px solid #e5e7eb;
                     text-align: center;
                   "
                 >
-                  <span
-                    :style="{
-                      padding: '0.25rem 0.75rem',
-                      borderRadius: '12px',
-                      fontSize: '0.875rem',
-                      fontWeight: '700',
-                      background: item.totalOrdered > 0 ? '#dbeafe' : '#f3f4f6',
-                      color: item.totalOrdered > 0 ? '#1e40af' : '#6b7280',
-                    }"
-                  >
-                    {{ item.totalOrdered || 0 }}
-                  </span>
-                </td> -->
-
-                <!-- Số lần nhập kho -->
-                <!-- <td
-                  style="
-                    padding: 0.75rem;
-                    border: 1px solid #e5e7eb;
-                    text-align: center;
-                  "
-                >
-                  <span
-                    :style="{
-                      padding: '0.25rem 0.75rem',
-                      borderRadius: '12px',
-                      fontSize: '0.875rem',
-                      fontWeight: '700',
-                      background: item.totalStockIn > 0 ? '#d1fae5' : '#f3f4f6',
-                      color: item.totalStockIn > 0 ? '#065f46' : '#6b7280',
-                    }"
-                  >
-                    {{ item.totalStockIn || 0 }}
-                  </span>
-                </td> -->
+                  <Button
+                    icon="pi pi-eye"
+                    text
+                    rounded
+                    severity="info"
+                    @click="openTransactionHistory(item)"
+                  />
+                </td>
               </tr>
             </tbody>
           </table>
@@ -749,6 +721,90 @@
             <strong>{{ t("reports.inventoryReport.table.unitPrice") }}:</strong>
             {{ formatCurrency(parseFloat(selectedMovementItem.item?.price || "0")) }}
           </div>
+        </div>
+      </Dialog>
+
+      <!-- Transaction history dialog -->
+      <Dialog
+        v-model:visible="transactionHistoryVisible"
+        modal
+        :header="transactionHistoryItemName"
+        style="width: 90vw; max-width: 700px"
+      >
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div style="display: flex; justify-content: center; gap: 1rem;">
+            <Button
+              :label="t('reports.inventoryReport.transactionHistory.byWeek')"
+              :outlined="transactionHistoryTab !== 'week'"
+              @click="transactionHistoryTab = 'week'"
+              size="small"
+            />
+            <Button
+              :label="t('reports.inventoryReport.transactionHistory.byMonth')"
+              :outlined="transactionHistoryTab !== 'month'"
+              @click="transactionHistoryTab = 'month'"
+              size="small"
+            />
+          </div>
+
+          <div v-if="transactionHistoryLoading" style="text-align: center; padding: 2rem;">
+            <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+          </div>
+
+          <div v-else-if="transactionHistoryData[transactionHistoryTab].length === 0" style="text-align: center; padding: 2rem;">
+            {{ t("reports.inventoryReport.transactionHistory.noData") }}
+          </div>
+
+          <table v-else class="report-table" style="width: 100%; border-collapse: collapse; text-align: center;">
+            <thead>
+              <tr style="background: #f9fafb;">
+                <th style="padding: 0.75rem; border: 1px solid #e5e7eb;">{{ transactionHistoryTab === 'week' ? t("reports.inventoryReport.transactionHistory.week") : t("reports.inventoryReport.transactionHistory.month") }}</th>
+                <th style="padding: 0.75rem; border: 1px solid #e5e7eb;">{{ t("reports.inventoryReport.table.orderCount") }}</th>
+                <th style="padding: 0.75rem; border: 1px solid #e5e7eb;">{{ t("reports.inventoryReport.transactionHistory.orderValue") }}</th>
+                <th style="padding: 0.75rem; border: 1px solid #e5e7eb;">{{ t("reports.inventoryReport.table.stockInCount") }}</th>
+                <th style="padding: 0.75rem; border: 1px solid #e5e7eb;">{{ t("reports.inventoryReport.transactionHistory.stockInValue") }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, idx) in transactionHistoryData[transactionHistoryTab]" :key="idx">
+                <td style="padding: 0.75rem; border: 1px solid #e5e7eb; font-weight: 600;">{{ row.label }}</td>
+                <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">
+                  <span
+                    :style="{
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '12px',
+                      fontSize: '0.875rem',
+                      fontWeight: '700',
+                      background: row.orderQty > 0 ? '#dbeafe' : '#f3f4f6',
+                      color: row.orderQty > 0 ? '#1e40af' : '#6b7280',
+                    }"
+                  >
+                    {{ row.orderQty }}
+                  </span>
+                </td>
+                <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">
+                  <strong>{{ formatCurrency(row.orderValue) }}</strong>
+                </td>
+                <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">
+                  <span
+                    :style="{
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '12px',
+                      fontSize: '0.875rem',
+                      fontWeight: '700',
+                      background: row.stockInQty > 0 ? '#d1fae5' : '#f3f4f6',
+                      color: row.stockInQty > 0 ? '#065f46' : '#6b7280',
+                    }"
+                  >
+                    {{ row.stockInQty }}
+                  </span>
+                </td>
+                <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">
+                  <strong>{{ formatCurrency(row.stockInValue) }}</strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </Dialog>
     </div>
@@ -875,6 +931,80 @@ const selectedTrendDate = ref("");
 const selectedDateItems = ref<any[]>([]);
 const itemDetailVisible = ref(false);
 const selectedMovementItem = ref<any>(null);
+
+// Transaction History Logic
+const transactionHistoryVisible = ref(false);
+const transactionHistoryLoading = ref(false);
+const transactionHistoryItemName = ref("");
+const transactionHistoryTab = ref<'week' | 'month'>('month');
+const transactionHistoryData = ref<{ week: any[]; month: any[] }>({ week: [], month: [] });
+
+const openTransactionHistory = async (item: any) => {
+  transactionHistoryItemName.value = item.eng?.partname || item.com?.name || '';
+  transactionHistoryVisible.value = true;
+  transactionHistoryLoading.value = true;
+  
+  try {
+    const fromDate = formatDateTimeForAPI(dateRange.value.fromDate);
+    const toDate = formatDateTimeForAPI(dateRange.value.toDate);
+    
+    // Fetch transactions
+    const data = await itemAPI.getTransactions(item.id, { fromDate, toDate });
+    
+    const orders = data.orders || [];
+    const stockIns = data.stockIns || [];
+    
+    const rawEvents = [
+      ...orders.map((o: any) => ({ date: new Date(o.orderDate), type: 'order', qty: o.orderQty || 0 })),
+      ...stockIns.map((s: any) => ({ date: new Date(s.stockInDate), type: 'stockin', qty: s.quantity || 0 }))
+    ];
+    
+    const itemPrice = parseFloat(item.price || "0");
+    
+    const groupedByWeek: Record<string, { orderQty: number, stockInQty: number, orderValue: number, stockInValue: number }> = {};
+    const groupedByMonth: Record<string, { orderQty: number, stockInQty: number, orderValue: number, stockInValue: number }> = {};
+    
+    rawEvents.forEach(evt => {
+       const d = evt.date;
+       const year = d.getFullYear();
+       const month = d.getMonth() + 1;
+       
+       const firstDayOfYear = new Date(year, 0, 1);
+       const pastDaysOfYear = (d.getTime() - firstDayOfYear.getTime()) / 86400000;
+       const weekNum = Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+       
+       const weekKey = `Tuần ${weekNum} - ${year}`;
+       const monthKey = `Tháng ${month}/${year}`;
+       
+       if(!groupedByWeek[weekKey]) groupedByWeek[weekKey] = { orderQty: 0, stockInQty: 0, orderValue: 0, stockInValue: 0 };
+       if(!groupedByMonth[monthKey]) groupedByMonth[monthKey] = { orderQty: 0, stockInQty: 0, orderValue: 0, stockInValue: 0 };
+       
+       const eventValue = evt.qty * itemPrice;
+
+       if(evt.type === 'order') {
+         groupedByWeek[weekKey].orderQty += evt.qty;
+         groupedByMonth[monthKey].orderQty += evt.qty;
+         groupedByWeek[weekKey].orderValue += eventValue;
+         groupedByMonth[monthKey].orderValue += eventValue;
+       } else {
+         groupedByWeek[weekKey].stockInQty += evt.qty;
+         groupedByMonth[monthKey].stockInQty += evt.qty;
+         groupedByWeek[weekKey].stockInValue += eventValue;
+         groupedByMonth[monthKey].stockInValue += eventValue;
+       }
+    });
+    
+    transactionHistoryData.value = {
+      week: Object.entries(groupedByWeek).map(([label, data]) => ({ label, ...data })),
+      month: Object.entries(groupedByMonth).map(([label, data]) => ({ label, ...data }))
+    };
+    
+  } catch(error) {
+    console.error(error);
+  } finally {
+    transactionHistoryLoading.value = false;
+  }
+};
 
 const onTrendPointClick = (index: number) => {
   const key = sortedTrendKeys.value[index];

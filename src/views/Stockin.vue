@@ -959,7 +959,7 @@
         </div>
 
         <div class="mb-4">
-          <h3 class="text-lg font-semibold mb-3">
+          <h3 class="text-lg font-semibold mb-3!">
             {{
               t("importManagement.detailDialog.productList", {
                 count: selectedStockin.stockInDetails?.length || 0,
@@ -972,36 +972,67 @@
           >
             {{ t("importManagement.detailDialog.noProducts") }}
           </div>
-          <div v-else class="flex flex-col gap-2">
-            <div
-              v-for="(data, index) in selectedStockin.stockInDetails"
-              :key="index"
-              class="flex items-center gap-3 p-3! rounded-xl border border-gray-200 bg-gray-50"
-            >
-              <img
-                v-if="data.item?.picture?.length"
-                :src="getItemImageUrl(data.item.picture[0])"
-                class="w-12 h-12 rounded-lg object-cover shrink-0 border border-gray-200"
-              />
-              <div
-                v-else
-                class="w-12 h-12 rounded-lg bg-gray-200 flex items-center justify-center shrink-0"
-              >
-                <i class="pi pi-image text-gray-400"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-sm text-gray-900 truncate">
-                  {{ getDetailItemName(data.item) }}
-                </p>
-                <p class="text-xs text-gray-500">
-                  {{ data.item?.type || "-" }}
-                </p>
-              </div>
-              <Chip
-                :label="`+${data.quantity} ${data.item?.unit || ''}`"
-                class="p-chip-success shrink-0"
-                icon="pi pi-arrow-up"
-              />
+          <div v-else class="border border-gray-200 rounded-xl overflow-hidden">
+            <DataTable :value="selectedStockin.stockInDetails" class="p-datatable-sm w-full" responsiveLayout="scroll">
+              <Column :header="t('importManagement.table.images') || 'Hình ảnh'" class="w-20">
+                <template #body="{ data }">
+                  <img
+                    v-if="data.item?.picture?.length"
+                    :src="getItemImageUrl(data.item.picture[0])"
+                    class="w-10 h-10 rounded-lg object-cover border border-gray-200"
+                  />
+                  <div
+                    v-else
+                    class="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center"
+                  >
+                    <i class="pi pi-image text-gray-400"></i>
+                  </div>
+                </template>
+              </Column>
+
+              <Column :header="t('importManagement.createDialog.productLabel') || 'Sản phẩm'" class="min-w-[200px]">
+                <template #body="{ data }">
+                  <p class="font-semibold text-sm text-gray-900 truncate">
+                    {{ getDetailItemName(data.item) }}
+                  </p>
+                  <p class="text-xs text-gray-500">
+                    {{ data.item?.type || "-" }}
+                  </p>
+                </template>
+              </Column>
+
+              <Column :header="t('importManagement.createDialog.priceLabel') || 'Đơn giá'" class="w-32 text-right">
+                <template #body="{ data }">
+                  <span class="font-semibold text-sm text-orange-600">
+                    {{ data.price ? Number(data.price).toLocaleString() + ' ₫' : '-' }}
+                  </span>
+                </template>
+              </Column>
+
+              <Column :header="t('importManagement.createDialog.quantityLabel') || 'Số lượng'" class="w-24 text-right">
+                <template #body="{ data }">
+                  <span class="font-semibold text-sm text-gray-900">
+                    {{ data.quantity }} {{ data.item?.unit || '' }}
+                  </span>
+                </template>
+              </Column>
+
+              <Column header="Thành tiền" class="w-32 text-right">
+                <template #body="{ data }">
+                  <span class="font-bold text-sm text-primary">
+                    {{ data.price && data.quantity ? (Number(data.price) * Number(data.quantity)).toLocaleString() + ' ₫' : '-' }}
+                  </span>
+                </template>
+              </Column>
+            </DataTable>
+            
+            <div class="bg-gray-50 p-4! border-t border-gray-200 flex justify-end items-center gap-4">
+              <span class="text-gray-600 font-medium">Tổng cộng:</span>
+              <span class="text-xl font-bold text-primary">
+                {{ 
+                  selectedStockin.stockInDetails.reduce((sum, item) => sum + (Number(item.price || 0) * Number(item.quantity || 0)), 0).toLocaleString() + ' ₫'
+                }}
+              </span>
             </div>
           </div>
         </div>

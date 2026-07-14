@@ -1467,11 +1467,11 @@ const addTimestampToImage = (file: File, timestamp: string): Promise<File> => {
   });
 };
 
-const typeOptions = [
+const typeOptions = computed(() => [
   { label: t("inventoryManagement.filters.allTypes"), value: null },
-  { label: "Engineer", value: "ENG" },
-  { label: "Consumer", value: "COM" },
-];
+  { label: t("reports.inventoryReport.typeOptions.engineer", "Engineer"), value: "ENG" },
+  { label: t("reports.inventoryReport.typeOptions.consumer", "Consumer"), value: "COM" },
+]);
 
 const stockStatusOptions = [
   { label: t("inventoryManagement.filters.allStatuses"), value: null },

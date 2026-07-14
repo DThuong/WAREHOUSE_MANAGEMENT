@@ -141,6 +141,10 @@
                 "
               >
                 {{ t("reports.orderReport.reportTitle") }}
+                <span v-if="selectedChartDate" style="color: #6366f1; font-size: 1.25rem;">
+                  ({{ selectedTrendDate }})
+                  <Button icon="pi pi-times" text rounded size="small" style="width: 2rem; height: 2rem; padding: 0;" @click="selectedChartDate = null" />
+                </span>
               </h1>
               <p style="font-size: 0.875rem; color: #666">
                 {{
@@ -455,44 +459,7 @@
         </template>
       </Card>
 
-      <!-- Date detail dialog -->
-      <Dialog
-        v-model:visible="dateDetailVisible"
-        modal
-        :header="t('reports.common.detailDialogTitle', { date: selectedTrendDate })"
-        style="width: 90vw; max-width: 900px"
-      >
-        <DataTable :value="selectedDateOrders" responsiveLayout="scroll">
-          <Column :header="t('reports.orderReport.table.orderCode')">
-            <template #body="{ data }">#{{ data.id }}</template>
-          </Column>
-          <Column field="area" :header="t('reports.common.colArea')" />
-          <Column :header="t('reports.orderReport.table.orderedBy')">
-            <template #body="{ data }">{{ data.nameWorker || "-" }}</template>
-          </Column>
-          <Column :header="t('reports.orderReport.table.status')">
-            <template #body="{ data }">
-              <span
-                class="status-badge"
-                :style="{ background: getStatusColor(data.status) }"
-              >
-                {{ getStatusLabel(data.status) }}
-              </span>
-            </template>
-          </Column>
-          <Column :header="t('reports.common.colQty')">
-            <template #body="{ data }">{{ calculateOrderQty(data) }}</template>
-          </Column>
-          <Column :header="t('reports.common.colAction')" style="width: 80px; text-align: center">
-            <template #body="{ data }">
-              <Button icon="pi pi-eye" text rounded @click="openOrderDetail(data)" />
-            </template>
-          </Column>
-        </DataTable>
-        <div v-if="!selectedDateOrders.length" style="text-align: center; padding: 2rem; color: #999">
-          {{ t("reports.common.noData") }}
-        </div>
-      </Dialog>
+      <!-- Date detail dialog removed, filtering main table directly -->
 
       <!-- Order detail dialog -->
       <Dialog
@@ -586,9 +553,13 @@ const formatDateTimeForAPI = (date: Date): string => {
 
   return `${year}-${month}-${day} ${hours}:${minutes}`;
 };
+
+const selectedChartDate = ref<string | null>(null);
+
 // Load data with filter
 const loadData = async () => {
   loading.value = true;
+  selectedChartDate.value = null; // reset chart selection
   try {
     const from = formatDateTimeForAPI(fromDate.value);
     const to = formatDateTimeForAPI(toDate.value);
@@ -623,6 +594,12 @@ const filteredOrders = computed(() => {
   if (selectedArea.value !== "ALL") {
     orders = orders.filter(
       (order) => dashboardStore.getOrderArea(order) === selectedArea.value,
+    );
+  }
+
+  if (selectedChartDate.value) {
+    orders = orders.filter(
+      (order) => formatDateKey(order.orderDate) === selectedChartDate.value
     );
   }
 
@@ -754,18 +731,21 @@ const trendMainlineData = computed(() =>
   sortedTrendKeys.value.map((k) => ordersTrendMap.value.get(k)?.MAINLINE || 0),
 );
 
-const dateDetailVisible = ref(false);
 const selectedTrendDate = ref("");
-const selectedDateOrders = ref<any[]>([]);
 const orderDetailVisible = ref(false);
 const selectedOrder = ref<any>(null);
 
 const onTrendPointClick = (index: number) => {
   const key = sortedTrendKeys.value[index];
   if (!key) return;
-  selectedTrendDate.value = formatLabel(key);
-  selectedDateOrders.value = ordersTrendMap.value.get(key)?.orders || [];
-  dateDetailVisible.value = true;
+  
+  if (selectedChartDate.value === key) {
+    selectedChartDate.value = null;
+    selectedTrendDate.value = "";
+  } else {
+    selectedChartDate.value = key;
+    selectedTrendDate.value = formatLabel(key);
+  }
 };
 
 const openOrderDetail = (order: any) => {

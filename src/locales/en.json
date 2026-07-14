@@ -1193,7 +1193,17 @@
       "emptyState": "No matching products",
       "totalProducts": "Total Products",
       "productUnit": "products",
-      "totalInventoryValue": "Total Inventory Value"
+      "totalInventoryValue": "Total Inventory Value",
+      "transactionHistory": {
+        "byWeek": "By Week",
+        "byMonth": "By Month",
+        "noData": "No data available for this period",
+        "week": "Week",
+        "month": "Month",
+        "orderValue": "Order Value",
+        "stockInValue": "Stock-in Value",
+        "detail": "Detail"
+      }
     },
     "orderReport": {
       "title": "Order Report",

@@ -1195,7 +1195,17 @@
       "emptyState": "Không có sản phẩm phù hợp",
       "totalProducts": "Tổng số sản phẩm",
       "productUnit": "sản phẩm",
-      "totalInventoryValue": "Tổng giá trị tồn kho"
+      "totalInventoryValue": "Tổng giá trị tồn kho",
+      "transactionHistory": {
+        "byWeek": "Theo Tuần",
+        "byMonth": "Theo Tháng",
+        "noData": "Không có dữ liệu trong khoảng thời gian này",
+        "week": "Tuần",
+        "month": "Tháng",
+        "orderValue": "Giá trị Order",
+        "stockInValue": "Giá trị Nhập",
+        "detail": "Chi tiết"
+      }
     },
     "orderReport": {
       "title": "Báo cáo đơn hàng",
