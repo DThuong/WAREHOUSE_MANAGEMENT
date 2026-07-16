@@ -48,20 +48,7 @@
                   </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-4">
-                  <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Price</label>
-                    <InputText type="number" v-model="form.price" placeholder="0" style="width: 100%;" />
-                  </div>
-                  <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Safe Quantity</label>
-                    <InputText v-model.number="form.saveQuantity" type="number" placeholder="0" style="width: 100%;" />
-                  </div>
-                  <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Inventory Quantity</label>
-                    <InputText v-model.number="form.stockQty" type="number" placeholder="0" style="width: 100%;" />
-                  </div>
-                </div>
+
 
                 <!-- Engineer Specific Fields -->
                 <div style="border-top: 2px solid var(--gray-200); padding-top: 1.5rem; margin-top: 1rem;">
@@ -295,20 +282,7 @@
                   </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-4">
-                  <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Price</label>
-                    <InputText v-model="form.price" type="number" placeholder="0" style="width: 100%;" />
-                  </div>
-                  <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Safe Quantity</label>
-                    <InputText v-model.number="form.saveQuantity" type="number" placeholder="0" style="width: 100%;" />
-                  </div>
-                  <div>
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Inventory Quantity</label>
-                    <InputText v-model.number="form.stockQty" type="number" placeholder="0" style="width: 100%;" />
-                  </div>
-                </div>
+
 
                 <!-- Consumer Specific Fields -->
                 <div style="border-top: 2px solid var(--gray-200); padding-top: 1.5rem; margin-top: 1rem;">
