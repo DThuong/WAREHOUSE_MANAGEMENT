@@ -165,29 +165,8 @@
             />
             <span
               v-if="notificationStore.unreadCount > 0"
-              style="
-                position: absolute;
-                top: -2px;
-                right: -2px;
-                background: #ef4444;
-                color: white;
-                border-radius: 50%;
-                width: 24px;
-                height: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 9px;
-                font-weight: 700;
-                border: 2px solid white;
-                line-height: 1;
-              "
+              class="gold-glow-dot"
             >
-              {{
-                notificationStore.unreadCount > 99
-                  ? "99+"
-                  : notificationStore.unreadCount
-              }}
             </span>
           </div>
 
@@ -1085,6 +1064,37 @@ const toggleNotifications = (event: Event) => {
   border-radius: 8px;
   transition: all 0.2s;
   margin-bottom: 0.25rem;
+}
+
+.empty-state i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Premium Gold Glow Dot */
+.gold-glow-dot {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  width: 10px;
+  height: 10px;
+  background-color: #f59e0b; /* Tailwind Amber-500 */
+  border-radius: 50%;
+  border: 2px solid white;
+  animation: goldPulse 2s infinite;
+  box-sizing: content-box;
+}
+
+@keyframes goldPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
 }
 
 .nav-link:hover {
