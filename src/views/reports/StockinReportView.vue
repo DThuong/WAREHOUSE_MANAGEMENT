@@ -125,7 +125,7 @@
             style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem"
           >
             {{ t("reports.importReport.reportTitle") }}
-            <span v-if="selectedChartDate" style="color: #6366f1; font-size: 1.25rem;">
+            <span v-if="selectedChartDate" style="color: #1e3a5f; font-size: 1.25rem;">
               ({{ selectedTrendDate }})
               <Button icon="pi pi-times" text rounded size="small" style="width: 2rem; height: 2rem; padding: 0;" @click="selectedChartDate = null" />
             </span>
@@ -160,7 +160,7 @@
               border-radius: 8px;
             "
           >
-            <div style="font-size: 2rem; font-weight: 700; color: #6366f1">
+            <div style="font-size: 2rem; font-weight: 700; color: #1e3a5f">
               {{ filteredStockins.length ? filteredStockins.length : 0 }}
             </div>
             <div style="font-size: 0.875rem; color: #666; margin-top: 0.5rem">

@@ -321,9 +321,9 @@ onMounted(() => {
 }
 
 .form-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none !important;
+  border-color: #2d5a8e !important;
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1) !important;
 }
 
 .form-input.p-invalid {
@@ -339,13 +339,13 @@ onMounted(() => {
 
 .forgot-link {
   font-size: 0.875rem;
-  color: #ef4444;
+  color: #1e3a5f;
   text-decoration: none;
   font-weight: 500;
 }
 
 .forgot-link:hover {
-  color: #dc2626;
+  color: #2d5a8e;
 }
 
 .checkbox-input {
@@ -365,7 +365,7 @@ onMounted(() => {
 
 .btn-signin {
   width: 100%;
-  background: #ea580c;
+  background: #1e3a5f;
   border: none;
   border-radius: 8px;
   padding: 0.875rem;
@@ -407,9 +407,9 @@ onMounted(() => {
 }
 
 :deep(.p-password input:focus) {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none !important;
+  border-color: #2d5a8e !important;
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1) !important;
 }
 
 :deep(.p-password.p-invalid input) {
@@ -428,27 +428,27 @@ onMounted(() => {
 
 /* Button */
 :deep(.p-button.btn-signin) {
-  background: #ea580c;
+  background: #1e3a5f;
   border: none !important;
   color: white;
 }
 
 :deep(.p-button.btn-signin:hover) {
-  background: #ca3001;
+  background: #2d5a8e;
   opacity: 0.85;
 }
 
 :deep(.p-button.btn-signin:focus) {
-  background: #ea580c;
-  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.3);
+  background: #1e3a5f;
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.3);
 }
 
 :deep(.p-button.btn-signin:active) {
-  background: #c2410c;
+  background: #0f2744;
 }
 
 :deep(.p-button.btn-signin:disabled) {
-  background: #ea580c;
+  background: #1e3a5f;
   opacity: 0.6;
 }
 

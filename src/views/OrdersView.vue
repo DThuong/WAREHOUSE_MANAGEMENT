@@ -1365,7 +1365,7 @@
         <!-- Summary -->
         <div
           v-if="createOrderForm.items.length > 0"
-          class="mt-4 p-4! bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200"
+          class="mt-4 p-4! bg-linear-to-r from-blue-50 to-slate-50 rounded-lg border border-blue-200"
         >
           <div class="flex items-center justify-between">
             <span class="font-semibold text-gray-700"
@@ -1391,7 +1391,7 @@
             <span class="font-semibold text-gray-800"
               >{{ t("common.form.totalOrderValue") }}:</span
             >
-            <span class="text-2xl font-bold text-indigo-600"
+            <span class="text-2xl font-bold text-slate-700"
               >{{ totalAmount.toLocaleString("vi-VN") }}</span
             >
           </div>

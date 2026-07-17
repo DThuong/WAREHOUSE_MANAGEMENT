@@ -202,7 +202,7 @@
               transition: all 0.2s;
             "
           >
-            <div style="font-size: 2rem; font-weight: 700; color: #6366f1">
+            <div style="font-size: 2rem; font-weight: 700; color: #1e3a5f">
               {{ totalItems }}
             </div>
             <div style="font-size: 0.875rem; color: #666; margin-top: 0.5rem">
@@ -1315,7 +1315,7 @@ onMounted(async () => {
 .summary-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  border-color: #6366f1 !important;
+  border-color: #1e3a5f !important;
 }
 
 .summary-card:active {
@@ -1323,13 +1323,13 @@ onMounted(async () => {
 }
 
 .summary-card-active {
-  border-color: #6366f1 !important;
+  border-color: #1e3a5f !important;
   background: linear-gradient(
     135deg,
-    rgba(99, 102, 241, 0.05) 0%,
-    rgba(99, 102, 241, 0.1) 100%
+    rgba(30, 58, 95, 0.05) 0%,
+    rgba(30, 58, 95, 0.1) 100%
   );
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
 }
 
 .summary-card-active::before {
@@ -1339,7 +1339,7 @@ onMounted(async () => {
   right: 8px;
   width: 24px;
   height: 24px;
-  background: #6366f1;
+  background: #1e3a5f;
   color: white;
   border-radius: 50%;
   display: flex;

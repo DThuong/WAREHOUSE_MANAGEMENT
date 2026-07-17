@@ -131,7 +131,7 @@
             style="color: var(--gray-700)"
           />
           <h1
-            style="font-size: 1.5rem; font-weight: 700; color: var(--gray-900)"
+            style="font-size: 1.25rem; font-weight: 700; color: var(--gray-900)"
           >
             {{ pageTitle }}
           </h1>
@@ -167,18 +167,18 @@
               v-if="notificationStore.unreadCount > 0"
               style="
                 position: absolute;
-                top: -1px;
-                right: 0px;
+                top: -2px;
+                right: -2px;
                 background: #ef4444;
                 color: white;
                 border-radius: 50%;
-                min-width: 18px;
-                padding: 4px;
+                width: 24px;
+                height: 24px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 10px;
-                font-weight: 600;
+                font-size: 9px;
+                font-weight: 700;
                 border: 2px solid white;
                 line-height: 1;
               "
@@ -247,7 +247,7 @@
             style="
               cursor: pointer;
               margin-right: 1rem;
-              background-color: #6366f1;
+              background-color: var(--primary-color);
               color: white;
               font-weight: 600;
             "
@@ -269,7 +269,7 @@
                   shape="circle"
                   size="large"
                   style="
-                    background-color: #6366f1;
+                    background-color: var(--primary-color);
                     color: white;
                     font-weight: 600;
                   "
@@ -366,6 +366,7 @@
       <!-- List -->
       <div
         v-else
+        class="noti-scroll-area"
         style="max-height: 400px; overflow-y: auto; margin: 0 -0.75rem"
       >
         <div
@@ -658,7 +659,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useUserStore } from "@/stores/userStore";
 import { useNotificationStore } from "@/stores/notificationStore";
@@ -708,9 +709,17 @@ const navbarHeight = ref(60); // fallback
 
 // Computed
 const currentUser = computed(() => userStore.currentUser);
-const userAvatar = computed(() => {
-  return currentUser?.value?.username?.charAt(0).toUpperCase() || "U";
-});
+const userAvatar = ref("U");
+
+watch(
+  currentUser,
+  (newUser) => {
+    if (newUser?.username) {
+      userAvatar.value = newUser.username.charAt(0).toUpperCase();
+    }
+  },
+  { immediate: true }
+);
 
 const allNotificationsRead = computed(() => {
   return notificationStore.notifications.every(
@@ -770,7 +779,13 @@ const deleteAllNoti = async () => {
 // tránh panel "trôi" theo / vỡ layout
 const handleGlobalScroll = (event: Event) => {
   const target = event.target as HTMLElement | Document;
-  if (target instanceof Element && (target.closest('.p-overlaypanel') || target.closest('.mobile-noti-panel'))) {
+  if (
+    target instanceof Element &&
+    (target.closest(".p-overlaypanel") ||
+      target.closest(".mobile-noti-panel") ||
+      target.closest(".noti-scroll-area") ||
+      target.closest(".p-popover"))
+  ) {
     return;
   }
   
@@ -845,7 +860,7 @@ const getNotificationColor = (type: string): string => {
     case "user":
       return "#f59e0b";
     default:
-      return "#6366f1";
+      return "#1e3a5f";
   }
 };
 
@@ -1078,8 +1093,9 @@ const toggleNotifications = (event: Event) => {
 }
 
 .nav-link.active {
-  background: var(--primary-color);
-  color: white;
+  background: #e8eef6;
+  color: var(--primary-color);
+  font-weight: 600;
 }
 
 .nav-link i {
@@ -1216,19 +1232,19 @@ const toggleNotifications = (event: Event) => {
 }
 
 .notification-item:hover {
-  background: rgba(159, 197, 241, 0.5) !important;
+  background: rgba(30, 58, 95, 0.08) !important;
 }
 
 .main-content {
   min-width: 0;
-  width: calc(100% - 260px);
-  margin-left: 260px;
-  transition: margin-left 0.2s ease, width 0.2s ease;
+  width: calc(100% - var(--sidebar-width));
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .main-content.expanded {
-  width: calc(100% - 72px);
-  margin-left: 72px;
+  width: calc(100% - var(--sidebar-mini-width));
+  margin-left: var(--sidebar-mini-width);
 }
 
 /* === DESKTOP COLLAPSED SIDEBAR (icons-only) === */

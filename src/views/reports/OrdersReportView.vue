@@ -141,7 +141,7 @@
                 "
               >
                 {{ t("reports.orderReport.reportTitle") }}
-                <span v-if="selectedChartDate" style="color: #6366f1; font-size: 1.25rem;">
+                <span v-if="selectedChartDate" style="color: #1e3a5f; font-size: 1.25rem;">
                   ({{ selectedTrendDate }})
                   <Button icon="pi pi-times" text rounded size="small" style="width: 2rem; height: 2rem; padding: 0;" @click="selectedChartDate = null" />
                 </span>
