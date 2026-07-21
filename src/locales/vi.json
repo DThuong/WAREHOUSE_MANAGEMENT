@@ -1269,6 +1269,18 @@
       "stockinMoney": "Tiền nhập kho (VNĐ)",
       "orderMoney": "Tiền đơn hàng (VNĐ)",
       "productDetail": "Chi tiết sản phẩm"
+    },
+    "exportOptions": {
+      "title": "Tuỳ chọn Xuất Excel",
+      "timeType": "Loại thời gian",
+      "day": "Ngày",
+      "week": "Tuần",
+      "month": "Tháng",
+      "selectDay": "Chọn ngày",
+      "selectWeek": "Chọn tuần (Năm-Tuần)",
+      "selectMonth": "Chọn tháng",
+      "confirmExport": "Xác nhận xuất",
+      "cancel": "Huỷ"
     }
   },
   "mainLayout": {

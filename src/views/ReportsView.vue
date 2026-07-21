@@ -472,6 +472,76 @@
         <Button :label="t('common.close')" icon="pi pi-times" text @click="showOrderDetail = false" />
       </template>
     </Dialog>
+
+    <!-- Export Excel Dialog -->
+    <Dialog
+      v-model:visible="showExportDialog"
+      modal
+      :header="t('reports.exportOptions.title')"
+      :style="{ width: '90vw', maxWidth: '400px' }"
+      class="p-fluid"
+      :dismissableMask="true"
+    >
+      <div class="flex flex-col gap-4 mt-2">
+        <div class="field">
+          <label class="font-medium text-slate-700 block mb-2">{{ t('reports.exportOptions.timeType') }}</label>
+          <div class="flex gap-4">
+            <div class="flex items-center">
+              <RadioButton v-model="exportType" inputId="exDay" name="exportType" value="day" />
+              <label for="exDay" class="ml-2">{{ t('reports.exportOptions.day') }}</label>
+            </div>
+            <div class="flex items-center">
+              <RadioButton v-model="exportType" inputId="exWeek" name="exportType" value="week" />
+              <label for="exWeek" class="ml-2">{{ t('reports.exportOptions.week') }}</label>
+            </div>
+            <div class="flex items-center">
+              <RadioButton v-model="exportType" inputId="exMonth" name="exportType" value="month" />
+              <label for="exMonth" class="ml-2">{{ t('reports.exportOptions.month') }}</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="field flex flex-col gap-3" v-if="exportType === 'day'">
+          <div>
+            <label class="font-medium text-slate-700 block mb-2">Từ ngày</label>
+            <Calendar v-model="exportDateFrom" dateFormat="dd/mm/yy" :showIcon="true" class="w-full" inputClass="w-full" />
+          </div>
+          <div>
+            <label class="font-medium text-slate-700 block mb-2">Đến ngày</label>
+            <Calendar v-model="exportDateTo" dateFormat="dd/mm/yy" :showIcon="true" class="w-full" inputClass="w-full" />
+          </div>
+        </div>
+
+        <div class="field flex flex-col gap-3" v-if="exportType === 'week'">
+          <div>
+            <label class="font-medium text-slate-700 block mb-2">Từ tuần (Năm-Tuần)</label>
+            <input type="week" v-model="exportWeekFrom" class="p-inputtext p-component w-full" />
+          </div>
+          <div>
+            <label class="font-medium text-slate-700 block mb-2">Đến tuần (Năm-Tuần)</label>
+            <input type="week" v-model="exportWeekTo" class="p-inputtext p-component w-full" />
+          </div>
+        </div>
+
+        <div class="field flex flex-col gap-3" v-if="exportType === 'month'">
+          <div>
+            <label class="font-medium text-slate-700 block mb-2">Từ tháng</label>
+            <Calendar v-model="exportMonthFrom" view="month" dateFormat="mm/yy" :showIcon="true" class="w-full" inputClass="w-full" />
+          </div>
+          <div>
+            <label class="font-medium text-slate-700 block mb-2">Đến tháng</label>
+            <Calendar v-model="exportMonthTo" view="month" dateFormat="mm/yy" :showIcon="true" class="w-full" inputClass="w-full" />
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="flex justify-end gap-2 mt-4">
+          <Button :label="t('reports.exportOptions.cancel')" icon="pi pi-times" text @click="showExportDialog = false" />
+          <Button :label="t('reports.exportOptions.confirmExport')" icon="pi pi-check" @click="executeExport" :loading="exporting" />
+        </div>
+      </template>
+    </Dialog>
   </MainLayout>
 </template>
 
@@ -490,6 +560,7 @@ import Calendar from "primevue/calendar";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Chip from "primevue/chip";
+import RadioButton from "primevue/radiobutton";
 import { useI18n } from "vue-i18n";
 import { itemAPI } from "@/services/itemAPI";
 import { stockinAPI } from "@/services/stockinAPI";
@@ -513,6 +584,22 @@ const detailStockin = ref<any>(null);
 const detailOrder = ref<any>(null);
 const detailDialogLoading = ref(false);
 const exporting = ref(false);
+const showExportDialog = ref(false);
+const exportType = ref('day');
+const exportDateFrom = ref<Date>(new Date());
+const exportDateTo = ref<Date>(new Date());
+const exportMonthFrom = ref<Date>(new Date());
+const exportMonthTo = ref<Date>(new Date());
+const getWeekString = (d: Date) => {
+  const dClone = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = dClone.getUTCDay() || 7;
+  dClone.setUTCDate(dClone.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(dClone.getUTCFullYear(),0,1));
+  const weekNo = Math.ceil((((dClone.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
+  return dClone.getUTCFullYear() + '-W' + String(weekNo).padStart(2, '0');
+};
+const exportWeekFrom = ref<string>(getWeekString(new Date()));
+const exportWeekTo = ref<string>(getWeekString(new Date()));
 
 // ── Mobile ────────────────────────────────────────────────
 const isMobile = ref(window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
@@ -927,15 +1014,72 @@ const onChartClick = async (event: any, elements: any[], chart: any) => {
 };
 
 // ── Export Excel ──────────────────────────────────────────
-const onExportExcel = async () => {
+const onExportExcel = () => {
+  showExportDialog.value = true;
+};
+
+const executeExport = async () => {
+  if (exportType.value === 'day' && (!exportDateFrom.value || !exportDateTo.value)) return;
+  if (exportType.value === 'week' && (!exportWeekFrom.value || !exportWeekTo.value)) return;
+  if (exportType.value === 'month' && (!exportMonthFrom.value || !exportMonthTo.value)) return;
+
   exporting.value = true;
   try {
-    const allStockins: any[] = [];
-    const allOrders: any[] = [];
-    for (const chunk of fullReportData.value) {
-      for (const s of chunk.rawStockins || []) allStockins.push(s);
-      for (const o of chunk.rawOrders || []) allOrders.push(o);
+    let exportFrom: Date;
+    let exportTo: Date;
+    let label = '';
+
+    if (exportType.value === 'day') {
+      const dFrom = exportDateFrom.value as Date;
+      const dTo = exportDateTo.value as Date;
+      exportFrom = new Date(dFrom); exportFrom.setHours(0, 0, 0, 0);
+      exportTo = new Date(dTo); exportTo.setHours(23, 59, 59, 999);
+      label = `${fmtAPI(exportFrom)}_${fmtAPI(exportTo)}`;
+    } else if (exportType.value === 'week') {
+      const [yearFromStr, weekFromStr] = exportWeekFrom.value.split('-W');
+      const [yearToStr, weekToStr] = exportWeekTo.value.split('-W');
+      
+      const yearFrom = parseInt(yearFromStr);
+      const weekFrom = parseInt(weekFromStr);
+      const jan4From = new Date(yearFrom, 0, 4);
+      const dayOfWeekFrom = jan4From.getDay() || 7;
+      const week1StartFrom = new Date(yearFrom, 0, 4 - dayOfWeekFrom + 1);
+      exportFrom = new Date(week1StartFrom.getTime() + (weekFrom - 1) * 7 * 86400000);
+      exportFrom.setHours(0, 0, 0, 0);
+
+      const yearTo = parseInt(yearToStr);
+      const weekTo = parseInt(weekToStr);
+      const jan4To = new Date(yearTo, 0, 4);
+      const dayOfWeekTo = jan4To.getDay() || 7;
+      const week1StartTo = new Date(yearTo, 0, 4 - dayOfWeekTo + 1);
+      const exportToStart = new Date(week1StartTo.getTime() + (weekTo - 1) * 7 * 86400000);
+      exportTo = new Date(exportToStart.getTime() + 6 * 86400000);
+      exportTo.setHours(23, 59, 59, 999);
+
+      label = `Tu_Tuan_${weekFrom}_${yearFrom}_Den_Tuan_${weekTo}_${yearTo}`;
+    } else {
+      const mFrom = exportMonthFrom.value as Date;
+      const mTo = exportMonthTo.value as Date;
+      exportFrom = new Date(mFrom.getFullYear(), mFrom.getMonth(), 1);
+      exportFrom.setHours(0, 0, 0, 0);
+      exportTo = new Date(mTo.getFullYear(), mTo.getMonth() + 1, 0);
+      exportTo.setHours(23, 59, 59, 999);
+      label = `Tu_Thang_${String(mFrom.getMonth() + 1).padStart(2, '0')}_${mFrom.getFullYear()}_Den_Thang_${String(mTo.getMonth() + 1).padStart(2, '0')}_${mTo.getFullYear()}`;
     }
+
+    const fDate = fmtAPI(exportFrom);
+    const tDate = fmtAPI(exportTo);
+    
+    let stockinData = await stockinAPI.filterStockin(fDate, tDate);
+    let orderData = await orderAPI.filterOrders({ fromDate: fDate, toDate: tDate, status: "Completed" });
+
+    if (selectedArea.value !== "ALL") {
+      stockinData = stockinData.filter((s: any) => s.area === selectedArea.value);
+      orderData = orderData.filter((o: any) => o.area === selectedArea.value);
+    }
+
+    const allStockins = stockinData || [];
+    const allOrders = orderData || [];
 
     const stockinRows: any[] = [];
     allStockins.forEach((s: any) => {
@@ -1018,8 +1162,10 @@ const onExportExcel = async () => {
     XLSX.utils.book_append_sheet(wb, wsOrder, "Đơn hàng");
 
     const areaSuffix = selectedArea.value === "ALL" ? "" : `_${selectedArea.value}`;
-    const fileName = `bao_cao${areaSuffix}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const fileName = `bao_cao${areaSuffix}_${label}.xlsx`;
     XLSX.writeFile(wb, fileName);
+    
+    showExportDialog.value = false;
   } catch (err) {
     console.error("Export failed:", err);
   } finally {

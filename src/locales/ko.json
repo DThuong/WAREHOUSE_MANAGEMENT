@@ -1269,6 +1269,18 @@
       "stockinMoney": "입고 금액 (VND)",
       "orderMoney": "주문 금액 (VND)",
       "productDetail": "제품 세부 정보"
+    },
+    "exportOptions": {
+      "title": "Excel 내보내기 옵션",
+      "timeType": "시간 유형",
+      "day": "일",
+      "week": "주",
+      "month": "월",
+      "selectDay": "일 선택",
+      "selectWeek": "주 선택 (연-주)",
+      "selectMonth": "월 선택",
+      "confirmExport": "내보내기 확인",
+      "cancel": "취소"
     }
   },
   "mainLayout": {

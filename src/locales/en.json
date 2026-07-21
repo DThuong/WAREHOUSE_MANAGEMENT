@@ -1267,6 +1267,18 @@
       "stockinMoney": "Stock-in Money (VND)",
       "orderMoney": "Order Money (VND)",
       "productDetail": "Product Details"
+    },
+    "exportOptions": {
+      "title": "Export Excel Options",
+      "timeType": "Time Type",
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "selectDay": "Select day",
+      "selectWeek": "Select week (Year-Week)",
+      "selectMonth": "Select month",
+      "confirmExport": "Confirm Export",
+      "cancel": "Cancel"
     }
   },
   "mainLayout": {
