@@ -440,11 +440,11 @@
     </div>
 
     <!-- Order Details Dialog -->
-    <Dialog
+    <Dialog dismissableMask
       v-model:visible="showDetailsDialog"
       :header="`${t('orderManagement.orderDetail.title')} #${selectedOrder?.id || ''}`"
       :blockScroll="true"
-      :style="{ width: '1200px' }"
+      :style="{ width: '1300px' }"
       :breakpoints="{ '1280px': '95vw', '768px': 'calc(100vw - 2rem)' }"
       :modal="true"
       class="order-detail-dialog"
@@ -500,81 +500,87 @@
             v-if="!isTableMobile"
             :value="selectedOrder.orderDetails"
             responsiveLayout="scroll"
+            @row-click="onRowClick"
+            :rowClass="() => 'cursor-pointer hover:bg-slate-50 transition-colors'"
           >
-            <Column :header="t('common.product')">
+            <Column :header="t('common.product')" style="width: 25%" headerStyle="white-space: nowrap">
               <template #body="{ data }">
                 <div class="flex items-center gap-3">
                   <img
                     v-if="data.item?.picture?.length"
                     :src="getItemImageUrl(data.item.picture[0])"
-                    class="w-12 h-12 rounded object-cover"
+                    class="w-12 h-12 rounded object-cover shrink-0 border border-slate-200"
                   />
                   <div
                     v-else
-                    class="w-12 h-12 rounded bg-gray-200 flex items-center justify-center"
+                    class="w-12 h-12 rounded bg-gray-100 border border-slate-200 flex items-center justify-center shrink-0"
                   >
                     <i class="pi pi-image text-gray-400"></i>
                   </div>
-                  <div>
-                    <p class="font-semibold">{{ getItemName(data.item) }}</p>
-                    <p class="text-sm text-gray-500">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-slate-800 truncate leading-snug" :title="getItemName(data.item)">{{ getItemName(data.item) }}</p>
+                    <p class="text-[11px] text-gray-500 truncate mt-0.5" :title="data.item?.itemIndentifyId">
                       {{ data.item?.itemIndentifyId || "-" }}
                     </p>
                   </div>
-                  <Button
-                    icon="pi pi-eye"
-                    text
-                    rounded
-                    size="small"
-                    severity="info"
-                    class="ml-auto shrink-0"
-                    @click="showItemDetail($event, data)"
-                    :title="t('orderManagement.orderDetail.viewPurpose')"
-                  />
                 </div>
               </template>
             </Column>
-            <Column header="Line">
+            <Column header="Line" style="width: 20%" headerStyle="white-space: nowrap">
               <template #body="{ data }">
-                <span class="font-medium">{{ getOrderDetailLineName(data) }}</span>
+                <span class="font-medium block w-full truncate text-sm" :title="getOrderDetailLineName(data)">{{ getOrderDetailLineName(data) }}</span>
               </template>
             </Column>
-            <Column header="Machine">
+            <Column header="Machine" style="width: 20%" headerStyle="white-space: nowrap">
               <template #body="{ data }">
-                <span class="font-medium">{{ getOrderDetailMachineName(data) }}</span>
+                <span class="font-medium block w-full truncate text-sm" :title="getOrderDetailMachineName(data)">{{ getOrderDetailMachineName(data) }}</span>
               </template>
             </Column>
-            <Column field="orderQty" :header="t('common.quantity')">
+            <Column field="orderQty" :header="t('common.quantity')" style="width: 10%" headerStyle="white-space: nowrap" bodyClass="!text-center" headerClass="!text-center">
               <template #body="{ data }">
-                <span class="font-medium"
-                  >{{ data.orderQty }} {{ data.item?.unit || "" }}</span
-                >
+                <span class="font-medium block w-full truncate text-sm" :title="`${data.orderQty} ${data.item?.unit || ''}`">
+                  {{ data.orderQty }} {{ data.item?.unit || "" }}
+                </span>
               </template>
             </Column>
-            <Column :header="t('common.price')">
+            <Column :header="t('common.price')" style="width: 10%" headerStyle="white-space: nowrap" bodyClass="!text-center" headerClass="!text-center">
               <template #body="{ data }">
-                <span v-if="data.item?.price">
+                <span v-if="data.item?.price" class="block w-full truncate text-sm" :title="Number(data.item.price).toLocaleString('vi-VN')">
                   {{ Number(data.item.price).toLocaleString("vi-VN") }}
                 </span>
-                <span v-else class="text-gray-400">{{
+                <span v-else class="text-gray-400 block w-full truncate text-sm">{{
                   t("common.noPrice")
                 }}</span>
               </template>
             </Column>
-            <Column :header="t('common.total')">
+            <Column :header="t('common.total')" style="width: 10%" headerStyle="white-space: nowrap" bodyClass="!text-center" headerClass="!text-center">
               <template #body="{ data }">
                 <span
                   v-if="data.item?.price"
-                  class="font-semibold text-blue-600"
+                  class="font-semibold text-blue-600 block w-full truncate text-sm"
+                  :title="(Number(data.item.price) * data.orderQty).toLocaleString('vi-VN')"
                 >
                   {{
                     (Number(data.item.price) * data.orderQty).toLocaleString(
                       "vi-VN",
                     )
                   }}
-                  
                 </span>
-                <span v-else class="text-gray-400">---</span>
+                <span v-else class="text-gray-400 block w-full truncate text-sm">---</span>
+              </template>
+            </Column>
+            <Column :header="t('common.action')" style="width: 5%" headerStyle="white-space: nowrap" bodyClass="!text-center" headerClass="!text-center">
+              <template #body="{ data }">
+                <Button
+                  icon="pi pi-eye"
+                  text
+                  rounded
+                  size="small"
+                  severity="info"
+                  class="w-8! h-8! p-0!"
+                  @click="showItemDetail($event, data)"
+                  :title="t('orderManagement.orderDetail.viewPurpose')"
+                />
               </template>
             </Column>
           </DataTable>
@@ -584,7 +590,8 @@
             <div
               v-for="(data, index) in selectedOrder.orderDetails"
               :key="index"
-              class="dialog-item-card"
+              class="dialog-item-card cursor-pointer hover:bg-slate-50 transition-colors"
+              @click="showItemDetail($event, data)"
             >
               <!-- Product Info Row -->
               <div class="dialog-item-card-top">
@@ -665,6 +672,14 @@
               </div>
             </div>
           </div>
+          
+          <!-- Order Total Section -->
+          <div class="mt-6! flex justify-end">
+            <div class="bg-emerald-50/50 p-4! rounded-xl w-full md:w-1/3 flex justify-between items-center border border-emerald-100 shadow-sm">
+              <span class="font-bold text-slate-700 text-lg">{{ t('common.form.totalOrderValue') }}:</span>
+              <span class="text-2xl font-bold text-emerald-600">{{ calculateOrderTotal(selectedOrder.orderDetails) }} đ</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -694,7 +709,7 @@
     </Dialog>
 
     <!-- Update Status Dialog -->
-    <Dialog
+    <Dialog dismissableMask
       v-model:visible="showUpdateStatusDialog"
       :header="t('orderManagement.updateStatusOrder')"
       :blockScroll="true"
@@ -814,7 +829,7 @@
     </Dialog>
 
     <!-- Image Management Dialog -->
-    <Dialog
+    <Dialog dismissableMask
       v-model:visible="showImageDialog"
       :header="`${t('orderManagement.imageManagement.title')} #${selectedOrder?.id || ''}`"
       :blockScroll="true"
@@ -1087,7 +1102,7 @@
     </Dialog>
 
     <!-- Create Order Dialog -->
-    <Dialog
+    <Dialog dismissableMask
       v-model:visible="showCreateOrderDialog"
       :header="t('common.createOrderAction.createOrderTitle')"
       :breakpoints="{ '768px': 'calc(100vw - 2rem)' }"
@@ -1514,6 +1529,21 @@ const showItemDetail = (event: Event, data: OrderDetail) => {
     itemName: getItemName(data.item),
   };
   detailPopover.value.toggle(event);
+};
+
+const onRowClick = (event: any) => {
+  showItemDetail(event.originalEvent, event.data);
+};
+
+const calculateOrderTotal = (orderDetails: OrderDetail[] | undefined) => {
+  if (!orderDetails) return "0";
+  let total = 0;
+  orderDetails.forEach(detail => {
+    if (detail.item?.price) {
+      total += Number(detail.item.price) * (detail.orderQty || 0);
+    }
+  });
+  return total.toLocaleString("vi-VN");
 };
 const handleTableResize = () => {
   isTableMobile.value = window.innerWidth < 768;

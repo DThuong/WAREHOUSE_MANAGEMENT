@@ -171,7 +171,7 @@
       "purposeNote": "Mục đích sử dụng",
       "purposeNotePlaceholder": "Nhập mục đích sử dụng...",
       "timeUsed": "Thời gian sử dụng",
-      "timeUsedPlaceholder": "SL",
+      "timeUsedPlaceholder": "Số Lượng",
       "timeUnit": {
         "day": "Ngày",
         "week": "Tuần",
@@ -182,7 +182,7 @@
       "stockLabel": "Tồn",
       "stockRemaining": "Tồn kho: {n}",
       "exceedStock": "Vượt quá SL tồn kho!",
-      "quantity": "SL",
+      "quantity": "Số Lượng",
       "subtotal": "Thành tiền",
       "totalItems": "Tổng số mặt hàng",
       "itemUnit": "mặt hàng",
@@ -222,11 +222,11 @@
     "close": "Đóng",
     "update": "Cập nhật",
     "confirm": "Xác nhận",
-    "action": "Hành động",
+    "action": "Thao tác",
     "status": "Trạng thái",
     "image": "Hình ảnh",
     "product": "Sản phẩm",
-    "quantity": "SL",
+    "quantity": "Số Lượng",
     "price": "Đơn giá",
     "total": "Thành tiền",
     "note": "Ghi chú",
@@ -256,7 +256,7 @@
   "areaTrendChart": {
     "noData": "Không có dữ liệu",
     "hint": "Nhấp vào một điểm trên biểu đồ để xem chi tiết theo ngày",
-    "valueLabel": "SL",
+    "valueLabel": "Số Lượng",
     "period7": "7 ngày",
     "period30": "30 ngày",
     "periodAll": "Tất cả"
@@ -689,7 +689,7 @@
       "colOrderDate": "Ngày đặt",
       "colMachine": "Máy",
       "colLine": "Line SX",
-      "colQty": "SL",
+      "colQty": "Số Lượng",
       "colItemAmount": "Tiền item",
       "colStatus": "Trạng thái",
       "noOrdersHistory": "Chưa có lịch sử đặt đơn trong bộ lọc hiện tại",
@@ -837,7 +837,7 @@
       "productFilter": "Tìm sản phẩm...",
       "stockLabel": "Tồn kho",
       "stockDisplay": "Tồn: {qty} {unit}",
-      "quantityLabel": "SL",
+      "quantityLabel": "Số Lượng",
       "priceLabel": "Đơn giá",
       "summaryItems": "Tổng số mặt hàng:",
       "summaryItemsValue": "{count} mặt hàng",
@@ -1126,7 +1126,7 @@
       "detailDialogTitle": "Chi tiết ngày {date}",
       "viewDetail": "Xem chi tiết",
       "colArea": "Khu vực",
-      "colQty": "SL",
+      "colQty": "Số Lượng",
       "colDate": "Ngày",
       "colOrdered": "Đã đặt",
       "colStockIn": "Đã nhập",
@@ -1233,7 +1233,7 @@
         "image": "Hình ảnh",
         "product": "Sản phẩm",
         "unitPrice": "Đơn giá",
-        "qty": "SL",
+        "qty": "Số Lượng",
         "subtotal": "Thành tiền",
         "status": "Trạng thái"
       },
@@ -1255,12 +1255,20 @@
         "product": "Sản phẩm",
         "image": "Hình ảnh",
         "unitPrice": "Đơn giá",
-        "quantity": "SL",
+        "quantity": "Số Lượng",
         "subtotal": "Thành tiền",
         "note": "Ghi chú"
       },
       "emptyState": "Không có dữ liệu nhập kho trong khoảng thời gian này",
       "totalValue": "Tổng giá trị nhập kho"
+    },
+    "custom": {
+      "totalStockin": "Tổng nhập kho",
+      "totalOrder": "Tổng đơn hàng",
+      "totalImportedProducts": "Tổng SP nhập",
+      "stockinMoney": "Tiền nhập kho (VNĐ)",
+      "orderMoney": "Tiền đơn hàng (VNĐ)",
+      "productDetail": "Chi tiết sản phẩm"
     }
   },
   "mainLayout": {

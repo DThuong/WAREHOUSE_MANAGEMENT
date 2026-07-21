@@ -484,7 +484,7 @@
     </div>
 
     <!-- Edit Dialog -->
-    <Dialog
+    <Dialog dismissableMask
       v-model:visible="showEditDialog"
       :header="t('inventoryManagement.editDialog.header')"
       :style="{ width: '500px' }"

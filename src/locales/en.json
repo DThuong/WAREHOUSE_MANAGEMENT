@@ -222,7 +222,7 @@
     "close": "Close",
     "update": "Update",
     "confirm": "Confirm",
-    "action": "Action",
+    "action": "Actions",
     "status": "Status",
     "image": "Image",
     "product": "Product",
@@ -1259,6 +1259,14 @@
       },
       "emptyState": "No import data in this time range",
       "totalValue": "Total Import Value"
+    },
+    "custom": {
+      "totalStockin": "Total Stock-in",
+      "totalOrder": "Total Orders",
+      "totalImportedProducts": "Total Imported Products",
+      "stockinMoney": "Stock-in Money (VND)",
+      "orderMoney": "Order Money (VND)",
+      "productDetail": "Product Details"
     }
   },
   "mainLayout": {

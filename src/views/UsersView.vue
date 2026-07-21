@@ -53,6 +53,8 @@
               :loading="userStore.loading"
               responsiveLayout="scroll"
               paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+              @row-click="onRowClick"
+              :rowClass="() => 'cursor-pointer hover:bg-slate-50 transition-colors'"
             >
               <!-- Empty State -->
               <template #empty>
@@ -225,7 +227,7 @@
               <div
                 v-for="user in mobilePagination.paginatedList.value"
                 :key="user.id"
-                class="mobile-user-card"
+                class="mobile-user-card cursor-pointer hover:bg-slate-50 transition-colors"
                 @click="viewUser(user)"
               >
                 <!-- Card Top -->
@@ -347,7 +349,7 @@
     </div>
 
     <!-- Add/Edit Dialog -->
-    <Dialog
+    <Dialog dismissableMask
       v-model:visible="showDialog"
       :header="
         isEditing
@@ -478,7 +480,7 @@
     </Dialog>
 
     <!-- View User Dialog -->
-    <Dialog
+    <Dialog dismissableMask
       v-model:visible="showViewDialog"
       :header="t('userManagement.viewDialog.header')"
       :style="{ width: isMobile ? '95vw' : '500px' }"
@@ -568,7 +570,7 @@
     </Dialog>
 
     <!-- Change Password Dialog -->
-    <Dialog
+    <Dialog dismissableMask
       v-model:visible="showPasswordDialog"
       :header="t('userManagement.passwordDialog.header')"
       :style="{ width: isMobile ? '95vw' : '450px' }"
@@ -784,6 +786,10 @@ const openAddDialog = () => {
 const viewUser = (user: User) => {
   selectedUser.value = user;
   showViewDialog.value = true;
+};
+
+const onRowClick = (event: any) => {
+  viewUser(event.data);
 };
 
 const editUser = (user: User) => {

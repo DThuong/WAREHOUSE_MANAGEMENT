@@ -155,109 +155,92 @@
   class="stockin-table"
   @row-click="(event) => viewDetail(event.data)"
 >
-  <Column :header="t('importManagement.table.receipt')" class="w-28 max-w-28">
+  <Column style="width: 10%" bodyClass="!text-center" headerClass="!text-center" bodyStyle="text-align: center">
+    <template #header><div class="w-full text-center font-bold">{{ t('importManagement.table.receipt') }}</div></template>
     <template #body="{ data }">
-      <div class="max-w-24">
-        <p class="font-bold text-gray-900 truncate">
-          #{{ data.id || "-" }}
-        </p>
-        <p class="text-xs text-gray-500 truncate">
-          {{ data.stockInDate ? formatDate(data.stockInDate) : "-" }}
-        </p>
-      </div>
-    </template>
-  </Column>
-
-  <Column :header="t('importManagement.table.area')" class="w-28 max-w-28">
-    <template #body="{ data }">
-      <Chip
-        :label="getStockinAreaPart(data) || '-'"
-        :class="
-          getStockinAreaPart(data) === 'SMD'
-            ? 'chip-warning'
-            : 'chip-normal'
-        "
-      />
-    </template>
-  </Column>
-
-  <Column :header="t('importManagement.table.createdBy')" class="w-36 max-w-36">
-    <template #body="{ data }">
-      <span class="block max-w-32 truncate font-medium text-gray-800">
-        {{ data.account?.username || "-" }}
-      </span>
-    </template>
-  </Column>
-
-  <Column :header="t('importManagement.table.importedProducts')" class="min-w-96 max-w-96">
-    <template #body="{ data }">
-      <div
-        v-if="data.stockInDetails?.length"
-        class="flex flex-col gap-2 max-w-96"
-      >
-        <div
-          v-for="(detail, idx) in data.stockInDetails.slice(0, 3)"
-          :key="idx"
-          class="grid grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 max-w-96"
-        >
-          <img
-            v-if="detail.item?.picture?.length"
-            :src="getItemImageUrl(detail.item.picture[0])"
-            class="w-9 h-9 rounded-lg object-cover shrink-0 border border-gray-200"
-            alt=""
-          />
-          <div
-            v-else
-            class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 border border-gray-200"
-          >
-            <i class="pi pi-box text-gray-400"></i>
-          </div>
-
-          <div class="min-w-0">
-            <p class="font-semibold text-sm text-gray-900 truncate">
-              {{ getDetailItemName(detail.item) || "-" }}
-            </p>
-            <p class="text-xs text-gray-500 truncate">
-              <span v-if="detail.item?.itemIndentifyId">
-                {{ detail.item.itemIndentifyId }}
-              </span>
-            </p>
-          </div>
-
-          <span
-            class="px-2 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold shrink-0 whitespace-nowrap"
-          >
-            +{{ detail.quantity || 0 }} {{ detail.item?.unit || "" }}
-          </span>
+      <div class="flex justify-center w-full mx-auto">
+        <div class="max-w-24">
+          <p class="font-bold text-gray-900 truncate">
+            #{{ data.id || "-" }}
+          </p>
+          <p class="text-xs text-gray-500 truncate">
+            {{ data.stockInDate ? formatDate(data.stockInDate) : "-" }}
+          </p>
         </div>
-
-        <button
-          v-if="data.stockInDetails.length > 3"
-          type="button"
-          class="text-left text-xs font-semibold text-primary hover:underline max-w-fit"
-          @click.stop="viewDetail(data)"
-        >
-          {{ t("importManagement.table.moreProducts", { count: data.stockInDetails.length - 3 }) }}
-        </button>
       </div>
-
-      <span v-else class="text-sm text-gray-400">
-        -
-      </span>
     </template>
   </Column>
 
-  <Column :header="t('importManagement.table.totalQty')" class="w-24 max-w-24">
+  <Column style="width: 8%" bodyClass="!text-center" headerClass="!text-center" bodyStyle="text-align: center">
+    <template #header><div class="w-full text-center font-bold">{{ t('importManagement.table.area') }}</div></template>
     <template #body="{ data }">
-      <span class="block max-w-20 truncate font-bold text-primary">
-        {{ getStockinTotalQuantity(data) || 0 }}
-      </span>
+      <div class="flex justify-center w-full mx-auto">
+        <Chip
+          :label="getStockinAreaPart(data) || '-'"
+          :class="
+            getStockinAreaPart(data) === 'SMD'
+              ? 'chip-warning'
+              : 'chip-normal'
+          "
+        />
+      </div>
     </template>
   </Column>
 
-  <Column :header="t('importManagement.table.images')" class="w-32 max-w-32">
+  <Column style="width: 12%" bodyClass="!text-center" headerClass="!text-center" bodyStyle="text-align: center">
+    <template #header><div class="w-full text-center font-bold">{{ t('importManagement.table.createdBy') }}</div></template>
     <template #body="{ data }">
-      <div class="flex items-center gap-2 max-w-28">
+      <div class="flex justify-center w-full mx-auto">
+        <span class="block max-w-32 truncate font-medium text-gray-800">
+          {{ data.account?.username || "-" }}
+        </span>
+      </div>
+    </template>
+  </Column>
+
+  <Column :header="t('importManagement.table.importedProducts')" style="width: 38%">
+    <template #body="{ data }">
+      <div v-if="data.stockInDetails?.length" class="flex flex-col gap-2! my-1! w-full">
+        <div v-for="(detail, idx) in data.stockInDetails" :key="idx" class="flex items-center gap-3! p-2! bg-white border border-slate-200 hover:border-slate-300 hover:shadow-sm rounded-md transition-all">
+          <div class="shrink-0">
+            <img v-if="detail.item?.picture?.length" :src="getItemImageUrl(detail.item.picture[0])" class="w-8! h-8! object-cover rounded-md shadow-sm border border-slate-200" alt="" />
+            <div v-else class="w-8! h-8! bg-slate-50 rounded-md border border-slate-200 flex items-center justify-center text-[10px] text-slate-400 font-medium">IMG</div>
+          </div>
+          <div class="flex-1 min-w-0 flex flex-row items-center justify-between gap-2!">
+            <div class="min-w-0 flex flex-col">
+              <p class="font-medium text-slate-700 text-xs line-clamp-2 leading-snug pr-2!">
+                {{ getDetailItemName(detail.item) || "-" }}
+              </p>
+              <p v-if="detail.item?.itemIndentifyId" class="text-[10px] text-gray-500 truncate mt-0.5!">
+                {{ detail.item.itemIndentifyId }}
+              </p>
+            </div>
+            <div class="shrink-0 w-20! inline-flex items-center justify-center px-2! py-2! rounded bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200 whitespace-nowrap">
+              +{{ detail.quantity || 0 }} <span class="ml-1! text-[10px] font-semibold opacity-80">{{ detail.item?.unit || "" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span v-else class="text-sm text-gray-400">-</span>
+    </template>
+  </Column>
+
+  <Column style="width: 8%" bodyClass="!text-center" headerClass="!text-center" bodyStyle="text-align: center">
+    <template #header><div class="w-full text-center font-bold">{{ t('importManagement.table.totalQty') }}</div></template>
+    <template #body="{ data }">
+      <div class="flex justify-center w-full mx-auto">
+        <div class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shadow-sm mx-auto">
+          {{ getStockinTotalQuantity(data) || 0 }}
+        </div>
+      </div>
+    </template>
+  </Column>
+
+  <Column style="width: 12%" bodyClass="!text-center" headerClass="!text-center" bodyStyle="text-align: center">
+    <template #header><div class="w-full text-center font-bold">{{ t('importManagement.table.images') }}</div></template>
+    <template #body="{ data }">
+      <div class="flex justify-center w-full mx-auto">
+        <div class="flex items-center justify-center gap-2 max-w-28 mx-auto">
         <button
           v-if="data.image?.length"
           type="button"
@@ -291,17 +274,20 @@
         >
         </button>
       </div>
+      </div>
     </template>
   </Column>
 
-  <Column :header="t('importManagement.table.actions')" class="w-32 max-w-32">
+  <Column style="width: 12%" bodyClass="!text-center" headerClass="!text-center" bodyStyle="text-align: center">
+    <template #header><div class="w-full text-center font-bold">{{ t('importManagement.table.actions') }}</div></template>
     <template #body="{ data }">
-      <div class="flex items-center gap-1" @click.stop>
+      <div class="flex items-center justify-center gap-1 w-full mx-auto" @click.stop>
         <Button
           icon="pi pi-eye"
           text
           rounded
           severity="info"
+          class="w-8! h-8! p-0!"
           @click="viewDetail(data)"
         />
         <Button
@@ -309,6 +295,7 @@
           text
           rounded
           severity="secondary"
+          class="w-8! h-8! p-0!"
           @click="viewImages(data)"
         />
         <Button
@@ -316,6 +303,7 @@
           text
           rounded
           severity="danger"
+          class="w-8! h-8! p-0!"
           @click="confirmDelete(data)"
         />
       </div>
@@ -445,7 +433,7 @@
     </div>
 
     <!-- ==================== CREATE STOCKIN DIALOG ==================== -->
-    <Dialog
+    <Dialog dismissableMask
       v-model:visible="showCreateDialog"
       :header="t('importManagement.createDialog.header')"
       :style="{ width: '900px' }"
@@ -770,7 +758,7 @@
     </Dialog>
 
     <!-- CREATE IMAGE DIALOG -->
-    <Dialog
+    <Dialog dismissableMask
       v-model:visible="showCreateImageDialog"
       :header="t('importManagement.createImageDialog.header')"
       :style="{ width: '800px' }"
@@ -915,7 +903,7 @@
     </Dialog>
 
     <!-- ==================== DETAIL DIALOG ==================== -->
-    <Dialog
+    <Dialog dismissableMask
       v-model:visible="showDetailDialog"
       :header="
         t('importManagement.detailDialog.header', { id: selectedStockin?.id })
@@ -949,12 +937,6 @@
             <p class="font-semibold text-gray-900">
               {{ getStockinAreaPart(selectedStockin) }}
             </p>
-          </div>
-          <div class="col-span-2">
-            <label class="block text-sm text-gray-600 mb-1">{{
-              t("importManagement.detailDialog.note")
-            }}</label>
-            <p class="text-gray-900">{{ selectedStockin.note || "-" }}</p>
           </div>
         </div>
 
@@ -2852,7 +2834,7 @@ watch(
 }
 
 .stockin-table :deep(.p-datatable-tbody > tr > td) {
-  vertical-align: top;
+  vertical-align: middle;
   padding-top: 0.9rem;
   padding-bottom: 0.9rem;
   overflow: hidden;

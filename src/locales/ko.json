@@ -1261,6 +1261,14 @@
       },
       "emptyState": "해당 기간에 입고 데이터가 없습니다",
       "totalValue": "총 입고 금액"
+    },
+    "custom": {
+      "totalStockin": "총 입고",
+      "totalOrder": "총 주문",
+      "totalImportedProducts": "총 입고 상품",
+      "stockinMoney": "입고 금액 (VND)",
+      "orderMoney": "주문 금액 (VND)",
+      "productDetail": "제품 세부 정보"
     }
   },
   "mainLayout": {
