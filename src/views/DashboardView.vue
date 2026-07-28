@@ -34,36 +34,6 @@
         </div>
       </section>
 
-      <!-- Alert banner -->
-      <section
-        v-if="alertTotal > 0"
-        class="alert-banner"
-        role="button"
-        tabindex="0"
-        @click="activeTab = 0"
-        @keyup.enter="activeTab = 0"
-      >
-        <span class="alert-icon"><i class="pi pi-exclamation-triangle"></i></span>
-        <div class="alert-text">
-          <strong>{{ t('dashboard.alertBanner.title', { count: alertTotal }) }}</strong>
-          <span>
-            {{ t('dashboard.alertBanner.subtitle', {
-              critical: current.stockStatus.critical,
-              out: current.stockStatus.outOfStock,
-            }) }}
-          </span>
-        </div>
-        <span class="alert-action">
-          {{ t('dashboard.alertBanner.action') }}
-          <i class="pi pi-arrow-right"></i>
-        </span>
-      </section>
-
-      <section v-else class="ok-banner">
-        <span class="ok-icon"><i class="pi pi-check-circle"></i></span>
-        <span>{{ t('dashboard.alertBanner.ok') }}</span>
-      </section>
-
       <!-- KPI grid -->
       <section class="kpi-grid">
         <button class="kpi-card" type="button" @click="goTo('/inventory')">
@@ -80,22 +50,47 @@
           <small>{{ t('dashboard.kpi.stockValueDetail', { qty: formatNumber(current.totalStockQty) }) }}</small>
         </button>
 
-        <button
+        <div
           class="kpi-card"
           :class="{ danger: alertTotal > 0 }"
-          type="button"
           @click="activeTab = 0"
         >
           <span class="kpi-icon red"><i class="pi pi-exclamation-triangle"></i></span>
           <span class="kpi-label">{{ t('dashboard.kpi.alerts') }}</span>
           <strong>{{ formatNumber(alertTotal) }}</strong>
-          <small>
-            {{ t('dashboard.kpi.alertsDetail', {
-              critical: current.stockStatus.critical,
-              out: current.stockStatus.outOfStock,
-            }) }}
-          </small>
-        </button>
+          
+          <div class="grid grid-cols-2 gap-2 mt-2 w-full">
+            <Chip
+              v-if="current.stockStatus.warning > 0"
+              :label="`${current.stockStatus.warning} (50-100%)`"
+              icon="pi pi-info-circle"
+              class="clickable-chip chip-warning flex justify-center h-full"
+              @click.stop="goToInventoryWithFilter('warning')"
+            />
+            <Chip
+              v-if="current.stockStatus.low > 0"
+              :label="`${current.stockStatus.low} (≤50%)`"
+              icon="pi pi-exclamation-circle"
+              class="clickable-chip chip-low pulse-warning flex justify-center h-full"
+              @click.stop="goToInventoryWithFilter('low')"
+            />
+            <Chip
+              v-if="current.stockStatus.critical > 0"
+              :label="`${current.stockStatus.critical} (≤25%)`"
+              icon="pi pi-exclamation-triangle"
+              class="clickable-chip chip-critical pulse-danger flex justify-center h-full"
+              @click.stop="goToInventoryWithFilter('critical')"
+            />
+            <Chip
+              v-if="current.stockStatus.outOfStock > 0"
+              :label="`${current.stockStatus.outOfStock} ${t('inventoryManagement.stockStatusOptions.outOfStock')}`"
+              icon="pi pi-times-circle"
+              class="clickable-chip chip-out-of-stock pulse-danger flex justify-center h-full"
+              @click.stop="goToInventoryWithFilter('out-of-stock')"
+            />
+          </div>
+        </div>
+
 
         <div class="kpi-card kpi-pending" :class="{ danger: current.pendingOrders > 0 }">
           <span
@@ -141,31 +136,48 @@
         >
           <header class="area-card-header">
             <span class="area-badge" :class="area.key.toLowerCase()">{{ area.key }}</span>
-            <button type="button" class="text-btn" @click="onSelectArea(area.key)">
-              {{ t('dashboard.areaCard.viewDetail') }}
-              <i class="pi pi-arrow-right"></i>
-            </button>
+            <div class="month-selector">
+              <button type="button" class="icon-btn" @click="prevMonth(area.key)">
+                <i class="pi pi-chevron-left"></i>
+              </button>
+              <span class="month-label">{{ t('dashboard.monthYear', { month: area.month + 1, year: area.year }) }}</span>
+              <button type="button" class="icon-btn" @click="nextMonth(area.key)">
+                <i class="pi pi-chevron-right"></i>
+              </button>
+            </div>
           </header>
 
-          <div class="area-card-body">
-            <div class="area-stat">
-              <span class="area-stat-label">{{ t('dashboard.areaCard.stockValue') }}</span>
-              <strong>{{ formatCurrency(area.summary.totalStockValue) }}</strong>
-            </div>
-            <div class="area-stat">
-              <span class="area-stat-label">{{ t('dashboard.areaCard.stockQty') }}</span>
-              <strong>{{ formatNumber(area.summary.totalStockQty) }}</strong>
-            </div>
-            <div class="area-stat">
-              <span class="area-stat-label">{{ t('dashboard.areaCard.items') }}</span>
-              <strong>{{ formatNumber(area.summary.totalItems) }}</strong>
-            </div>
-            <div class="area-stat">
-              <span class="area-stat-label">{{ t('dashboard.areaCard.alerts') }}</span>
-              <strong :class="{ 'text-danger': areaAlertCount(area.summary) > 0 }">
-                {{ formatNumber(areaAlertCount(area.summary)) }}
-              </strong>
-            </div>
+          <div class="area-card-body p-0">
+            <table class="area-metrics-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>{{ t('dashboard.areaCard.currentStock') || 'Tồn kho' }}</th>
+                  <th>{{ t('dashboard.areaCard.issued') || 'Đã xuất' }}</th>
+                  <th>{{ t('dashboard.areaCard.shortage') || 'Còn thiếu' }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="metric-label">{{ t('dashboard.areaCard.itemsCount') || 'Số mặt hàng' }}</td>
+                  <td><strong class="clickable-metric" @click="openMetricDetail(area.key, 'stock', area.month, area.year)">{{ formatNumber(area.summary.totalItems) }}</strong></td>
+                  <td><strong class="clickable-metric" @click="openMetricDetail(area.key, 'issued', area.month, area.year)">{{ formatNumber(area.summary.totalOrderItems) }}</strong></td>
+                  <td><strong class="clickable-metric" :class="{'text-danger': area.summary.shortageItems > 0}" @click="openMetricDetail(area.key, 'shortage', area.month, area.year)">{{ formatNumber(area.summary.shortageItems) }}</strong></td>
+                </tr>
+                <tr>
+                  <td class="metric-label">{{ t('dashboard.areaCard.stockQty') }}</td>
+                  <td><strong class="clickable-metric" @click="openMetricDetail(area.key, 'stock', area.month, area.year)">{{ formatNumber(area.summary.totalStockQty) }}</strong></td>
+                  <td><strong class="clickable-metric" @click="openMetricDetail(area.key, 'issued', area.month, area.year)">{{ formatNumber(area.summary.totalOrderQty) }}</strong></td>
+                  <td><strong class="clickable-metric" :class="{'text-danger': area.summary.shortageQty > 0}" @click="openMetricDetail(area.key, 'shortage', area.month, area.year)">{{ formatNumber(area.summary.shortageQty) }}</strong></td>
+                </tr>
+                <tr>
+                  <td class="metric-label">{{ t('dashboard.areaCard.stockValue') }}</td>
+                  <td class="money-cell"><strong class="clickable-metric" @click="openMetricDetail(area.key, 'stock', area.month, area.year)">{{ formatCurrency(area.summary.totalStockValue) }}</strong></td>
+                  <td class="money-cell"><strong class="clickable-metric" @click="openMetricDetail(area.key, 'issued', area.month, area.year)">{{ formatCurrency(area.summary.totalOrderValue) }}</strong></td>
+                  <td class="money-cell"><strong class="clickable-metric" :class="{'text-danger': area.summary.shortageValue > 0}" @click="openMetricDetail(area.key, 'shortage', area.month, area.year)">{{ formatCurrency(area.summary.shortageValue) }}</strong></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
           <div class="area-card-footer">
@@ -184,6 +196,11 @@
       <!-- Tabs -->
       <section class="dash-tabs">
         <TabView v-model:activeIndex="activeTab">
+          <!-- Analysis Chart Tab -->
+          <TabPanel :header="t('dashboard.tabs.charts')">
+            <AnalysisChart />
+          </TabPanel>
+
           <!-- Alerts tab -->
           <TabPanel :header="t('dashboard.tabs.alerts')">
             <div class="tab-head">
@@ -248,78 +265,10 @@
             </DataTable>
           </TabPanel>
 
-          <!-- Activity tab -->
-          <TabPanel :header="t('dashboard.tabs.activity')">
-            <div class="activity-grid">
-              <article class="panel list-panel">
-                <div class="panel-header">
-                  <div>
-                    <h3>{{ t('dashboard.activity.recentOrders') }}</h3>
-                    <p>{{ t('dashboard.activity.recentOrdersDesc') }}</p>
-                  </div>
-                  <button type="button" class="text-btn" @click="goTo('/orders')">
-                    {{ t('dashboard.activity.viewAll') }}
-                  </button>
-                </div>
-
-                <div v-if="dashboardStore.recentOrderStatus.length === 0" class="empty-state">
-                  <i class="pi pi-list"></i>
-                  <p>{{ t('dashboard.activity.noOrders') }}</p>
-                </div>
-
-                <div v-else class="simple-list">
-                  <button
-                    v-for="order in dashboardStore.recentOrderStatus"
-                    :key="order.id"
-                    type="button"
-                    class="simple-row"
-                    @click="goTo(`/orders?orderId=${order.id}`)"
-                  >
-                    <div>
-                      <strong>#{{ order.id }} · <span class="area-badge" :class="order.areaPart.toLowerCase()">{{ order.areaPart }}</span></strong>
-                      <span>{{ order.workerName }} · {{ formatDate(order.orderDate) }}</span>
-                    </div>
-                    <span :class="['order-status', order.status.toLowerCase()]">
-                      {{ getOrderStatusLabel(order.status) }}
-                    </span>
-                  </button>
-                </div>
-              </article>
-
-              <article class="panel list-panel">
-                <div class="panel-header">
-                  <div>
-                    <h3>{{ t('dashboard.activity.recentStockins') }}</h3>
-                    <p>{{ t('dashboard.activity.recentStockinsDesc') }}</p>
-                  </div>
-                  <button type="button" class="text-btn" @click="goTo('/stockin')">
-                    {{ t('dashboard.activity.viewAll') }}
-                  </button>
-                </div>
-
-                <div v-if="dashboardStore.recentStockins.length === 0" class="empty-state">
-                  <i class="pi pi-inbox"></i>
-                  <p>{{ t('dashboard.activity.noStockins') }}</p>
-                </div>
-
-                <div v-else class="simple-list">
-                  <button
-                    v-for="stockin in dashboardStore.recentStockins"
-                    :key="stockin.id"
-                    type="button"
-                    class="simple-row"
-                    @click="goTo('/stockin')"
-                  >
-                    <div>
-                      <strong>#{{ stockin.id }} · <span class="area-badge" :class="stockin.areaPart.toLowerCase()">{{ stockin.areaPart }}</span></strong>
-                      <span>{{ stockin.creatorName }} · {{ formatDate(stockin.stockInDate) }}</span>
-                    </div>
-                    <b>{{ formatNumber(stockin.totalQty) }}</b>
-                  </button>
-                </div>
-              </article>
-
-              <article class="panel list-panel wide">
+          
+          <!-- Top Ordered Tab -->
+          <TabPanel :header="t('dashboard.activity.topOrdered')">
+            <article class="panel list-panel wide">
                 <div class="panel-header">
                   <div>
                     <h3>{{ t('dashboard.activity.topOrdered') }}</h3>
@@ -349,121 +298,6 @@
                   </div>
                 </div>
               </article>
-            </div>
-          </TabPanel>
-
-          <!-- Charts tab -->
-          <TabPanel :header="t('dashboard.tabs.charts')">
-            <div class="chart-grid single">
-              <article class="panel chart-panel wide">
-                <div class="chart-panel-header">
-                  <div>
-                    <h3>{{ t('dashboard.charts.dailyMovement') }}</h3>
-                    <p class="chart-panel-desc">{{ t('dashboard.charts.dailyMovementDesc') }}</p>
-                  </div>
-                  <SelectButton
-                    v-model="chartRange"
-                    :options="rangeOptions"
-                    optionLabel="label"
-                    optionValue="value"
-                    :allowEmpty="false"
-                  />
-                </div>
-                <div class="chart-box">
-                  <LineChart :chart-data="dailyChart.chartData" @point-click="onChartPointClick" />
-                </div>
-              </article>
-            </div>
-
-            <!-- Detail theo ngày được chọn -->
-            <div v-if="selectedDateKey" class="date-detail-grid">
-              <article class="panel list-panel">
-                <div class="panel-header">
-                  <div>
-                    <h3>
-                      <span class="dot green"></span>
-                      {{ t('dashboard.charts.stockinOnDate', { date: formatDateLabel(selectedDateKey) }) }}
-                    </h3>
-                  </div>
-                </div>
-
-                <div v-if="stockinsForSelectedDate.length === 0" class="empty-state">
-                  <i class="pi pi-inbox"></i>
-                  <p>{{ t('dashboard.charts.noStockinOnDate') }}</p>
-                </div>
-
-                <div v-else class="simple-list">
-                  <button
-                    v-for="stockin in stockinsForSelectedDate"
-                    :key="stockin.id"
-                    type="button"
-                    class="simple-row"
-                    @click="goTo('/stockin')"
-                  >
-                    <div>
-                      <strong>#{{ stockin.id }} · <span class="area-badge" :class="stockin.areaPart.toLowerCase()">{{ stockin.areaPart }}</span></strong>
-                      <span>{{ stockin.account?.username || '-' }} · {{ formatDate(stockin.stockInDate) }}</span>
-                    </div>
-                    <b>{{ formatNumber(stockinTotalQty(stockin)) }}</b>
-                  </button>
-                </div>
-              </article>
-
-              <article class="panel list-panel">
-                <div class="panel-header">
-                  <div>
-                    <h3>
-                      <span class="dot orange"></span>
-                      {{ t('dashboard.charts.orderOnDate', { date: formatDateLabel(selectedDateKey) }) }}
-                    </h3>
-                  </div>
-                </div>
-
-                <div v-if="ordersForSelectedDate.length === 0" class="empty-state">
-                  <i class="pi pi-shopping-cart"></i>
-                  <p>{{ t('dashboard.charts.noOrderOnDate') }}</p>
-                </div>
-
-                <template v-else>
-                  <div class="simple-list">
-                    <div
-                      v-for="order in pagedOrders"
-                      :key="order.id"
-                      class="simple-row order-row"
-                    >
-                      <div>
-                        <strong>#{{ order.id }} · <span class="area-badge" :class="dashboardStore.getOrderArea(order).toLowerCase()">{{ dashboardStore.getOrderArea(order) }}</span></strong>
-                        <span>{{ order.account?.username || order.nameWorker || '-' }} · {{ formatDate(order.orderDate) }}</span>
-                      </div>
-                      <span :class="['order-status', order.status.toLowerCase()]">
-                        {{ getOrderStatusLabel(order.status) }}
-                      </span>
-                      <button
-                        type="button"
-                        class="icon-btn"
-                        :title="t('dashboard.charts.colAction')"
-                        @click="openOrderModal(order)"
-                      >
-                        <i class="pi pi-eye"></i>
-                      </button>
-                    </div>
-                  </div>
-
-                  <Paginator
-                    v-if="ordersForSelectedDate.length > pageSize"
-                    :rows="pageSize"
-                    :totalRecords="ordersForSelectedDate.length"
-                    :first="(orderPage - 1) * pageSize"
-                    @page="onOrderPageChange"
-                  />
-                </template>
-              </article>
-            </div>
-
-            <div v-else class="select-date-hint">
-              <i class="pi pi-info-circle"></i>
-              <span>{{ t('dashboard.charts.selectDateHint') }}</span>
-            </div>
           </TabPanel>
         </TabView>
       </section>
@@ -473,6 +307,7 @@
     <Dialog
       v-model:visible="orderModalVisible"
       modal
+      dismissableMask
       :header="orderModalTitle"
       :style="{ width: '720px', maxWidth: '95vw' }"
     >
@@ -550,6 +385,38 @@
         </div>
       </div>
     </Dialog>
+
+    <!-- Metric Detail Modal -->
+    <Dialog v-model:visible="metricModalVisible" modal dismissableMask :header="metricModalHeader" :style="{ width: '1000px', maxWidth: '95vw' }" class="metric-detail-dialog">
+      <DataTable :value="metricModalData" paginator :rows="10" class="metric-detail-table">
+        <Column field="name" :header="t('dashboard.metricModal.colName')" :style="{ width: metricModalType === 'shortage' ? '35%' : '45%' }"></Column>
+        
+        <Column v-if="metricModalType === 'shortage'" field="stockQty" :header="t('dashboard.metricModal.colStockQty')" style="width: 12%">
+          <template #body="{ data }">{{ formatNumber(data.stockQty) }}</template>
+        </Column>
+        <Column v-if="metricModalType === 'shortage'" field="safeQty" :header="t('dashboard.metricModal.colSafetyStock')" style="width: 12%">
+          <template #body="{ data }">{{ formatNumber(data.safeQty) }}</template>
+        </Column>
+        
+        <Column field="qty" :header="metricQtyHeader" class="text-right" :style="{ width: metricModalType === 'shortage' ? '13%' : '15%' }">
+          <template #body="{ data }">
+            <strong :class="{ 'text-danger': metricModalType === 'shortage' }">
+              {{ formatNumber(data.qty) }}
+            </strong>
+          </template>
+        </Column>
+        <Column field="price" :header="t('dashboard.metricModal.colPrice')" class="text-right" :style="{ width: metricModalType === 'shortage' ? '13%' : '15%' }">
+          <template #body="{ data }">{{ formatCurrency(data.price) }}</template>
+        </Column>
+        <Column field="totalValue" :header="t('dashboard.metricModal.colTotalValue')" class="text-right" :style="{ width: metricModalType === 'shortage' ? '15%' : '25%' }">
+          <template #body="{ data }">
+            <strong :class="{ 'text-danger': metricModalType === 'shortage' }">
+              {{ formatCurrency(data.totalValue) }}
+            </strong>
+          </template>
+        </Column>
+      </DataTable>
+    </Dialog>
   </MainLayout>
 </template>
 
@@ -558,6 +425,7 @@ import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import MainLayout from "@/components/MainLayout.vue";
+import AnalysisChart from "@/components/AnalysisChart.vue";
 import SelectButton from "primevue/selectbutton";
 import Button from "primevue/button";
 import TabView from "primevue/tabview";
@@ -566,6 +434,7 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Dialog from "primevue/dialog";
 import Paginator from "primevue/paginator";
+import Chip from "primevue/chip";
 import LineChart from "@/components/charts/LineChart.vue";
 
 import { useDashboardStore, type AreaKey, type AreaSummary } from "@/stores/dashboard";
@@ -607,19 +476,51 @@ const onSelectArea = (area: AreaKey) => {
 
 const current = computed(() => dashboardStore.currentSummary);
 
+const currentDate = new Date();
+const smdMonth = ref(currentDate.getMonth());
+const smdYear = ref(currentDate.getFullYear());
+const mainlineMonth = ref(currentDate.getMonth());
+const mainlineYear = ref(currentDate.getFullYear());
+
+const prevMonth = (areaKey: AreaKey) => {
+  if (areaKey === 'SMD') {
+    if (smdMonth.value === 0) { smdMonth.value = 11; smdYear.value--; } else smdMonth.value--;
+  } else {
+    if (mainlineMonth.value === 0) { mainlineMonth.value = 11; mainlineYear.value--; } else mainlineMonth.value--;
+  }
+};
+
+const nextMonth = (areaKey: AreaKey) => {
+  if (areaKey === 'SMD') {
+    if (smdMonth.value === 11) { smdMonth.value = 0; smdYear.value++; } else smdMonth.value++;
+  } else {
+    if (mainlineMonth.value === 11) { mainlineMonth.value = 0; mainlineYear.value++; } else mainlineMonth.value++;
+  }
+};
+
 const areaCards = computed(() => [
-  { key: "SMD" as AreaKey, summary: dashboardStore.areaSummaries.SMD },
-  { key: "MAINLINE" as AreaKey, summary: dashboardStore.areaSummaries.MAINLINE },
+  { 
+    key: "SMD" as AreaKey, 
+    summary: dashboardStore.buildAreaSummary("SMD", smdMonth.value, smdYear.value),
+    month: smdMonth.value,
+    year: smdYear.value
+  },
+  { 
+    key: "MAINLINE" as AreaKey, 
+    summary: dashboardStore.buildAreaSummary("MAINLINE", mainlineMonth.value, mainlineYear.value),
+    month: mainlineMonth.value,
+    year: mainlineYear.value
+  },
 ]);
 
 const areaAlertCount = (summary: AreaSummary) => {
   const s = summary.stockStatus;
-  return s.critical + s.low + s.warning + s.outOfStock + s.notConfigured;
+  return s.critical + s.low + s.warning + s.outOfStock;
 };
 
 const alertTotal = computed(() => {
   const s = current.value.stockStatus;
-  return s.critical + s.low + s.warning + s.outOfStock + s.notConfigured;
+  return s.critical + s.low + s.warning + s.outOfStock;
 });
 
 const localeMap: Record<string, string> = {
@@ -695,6 +596,102 @@ const goToPendingOrders = (area: "SMD" | "MAINLINE") => {
     },
   });
 };
+
+const goToInventoryWithFilter = (status: string) => {
+  const query: Record<string, string> = { stockStatus: status };
+  if (dashboardStore.selectedArea !== "ALL") {
+    query.area = dashboardStore.selectedArea;
+  }
+  router.push({ path: "/inventory", query });
+};
+
+// ===== Metric Detail Modal =====
+const metricModalVisible = ref(false);
+const metricModalType = ref<'stock' | 'issued' | 'shortage'>('stock');
+const metricModalArea = ref<AreaKey>('SMD');
+const metricModalData = ref<any[]>([]);
+
+const openMetricDetail = (area: AreaKey, type: 'stock' | 'issued' | 'shortage', month: number, year: number) => {
+  metricModalType.value = type;
+  metricModalArea.value = area;
+  
+  const items = dashboardStore.getItemsByArea(area);
+  
+  if (type === 'stock') {
+    metricModalData.value = items.map(item => ({
+      code: dashboardStore.getItemCode(item),
+      name: dashboardStore.getItemName(item),
+      qty: Number(item.stockQty || 0),
+      price: Number(item.price || 0),
+      totalValue: Number(item.stockQty || 0) * Number(item.price || 0)
+    })).filter(x => x.qty > 0 || x.totalValue > 0);
+  } else if (type === 'issued') {
+    let orders = dashboardStore.getOrdersByArea(area);
+    orders = orders.filter((order) => {
+      const orderDate = new Date(order.orderDate || (order as any).createdAt || new Date());
+      return orderDate.getMonth() === month && orderDate.getFullYear() === year;
+    });
+    
+    const issuedMap = new Map<number, any>();
+    orders.forEach(order => {
+      (order.orderDetails || []).forEach(detail => {
+        const item = detail.item;
+        if (!item) return;
+        const itemId = item.id || 0;
+        const qty = Number(detail.orderQty || 0);
+        if (issuedMap.has(itemId)) {
+          issuedMap.get(itemId).qty += qty;
+          issuedMap.get(itemId).totalValue += qty * Number(item.price || 0);
+        } else {
+          issuedMap.set(itemId, {
+            code: dashboardStore.getItemCode(item),
+            name: dashboardStore.getItemName(item),
+            qty: qty,
+            price: Number(item.price || 0),
+            totalValue: qty * Number(item.price || 0)
+          });
+        }
+      });
+    });
+    metricModalData.value = Array.from(issuedMap.values());
+  } else if (type === 'shortage') {
+    metricModalData.value = items.filter(item => {
+      const stock = Number(item.stockQty || 0);
+      const safe = Number(item.saveQuantity || 0);
+      return safe > 0 && stock < safe;
+    }).map(item => {
+      const stock = Number(item.stockQty || 0);
+      const safe = Number(item.saveQuantity || 0);
+      const missing = safe - stock;
+      return {
+        code: dashboardStore.getItemCode(item),
+        name: dashboardStore.getItemName(item),
+        stockQty: stock,
+        safeQty: safe,
+        qty: missing,
+        price: Number(item.price || 0),
+        totalValue: missing * Number(item.price || 0)
+      };
+    });
+  }
+  
+  metricModalVisible.value = true;
+};
+
+const metricModalHeader = computed(() => {
+  if (metricModalType.value === 'stock') return t('dashboard.metricModal.stockTitle', { area: metricModalArea.value });
+  if (metricModalType.value === 'shortage') return t('dashboard.metricModal.shortageTitle', { area: metricModalArea.value });
+  
+  const month = metricModalArea.value === 'SMD' ? smdMonth.value : mainlineMonth.value;
+  const year = metricModalArea.value === 'SMD' ? smdYear.value : mainlineYear.value;
+  return t('dashboard.metricModal.issuedTitle', { area: metricModalArea.value, month: month + 1, year });
+});
+
+const metricQtyHeader = computed(() => {
+  if (metricModalType.value === 'stock') return t('dashboard.metricModal.colStockQty');
+  if (metricModalType.value === 'shortage') return t('dashboard.metricModal.colShortageQty');
+  return t('dashboard.metricModal.colIssuedQty');
+});
 
 // ===== Daily movement chart (Vấn đề 1) =====
 const chartRange = ref<"7d" | "30d" | "all">("7d");
@@ -1006,7 +1003,8 @@ onMounted(async () => {
 .kpi-card {
   position: relative;
   display: flex;
-  min-height: 140px;
+  min-height: 200px;
+  height: 100%;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.45rem;
@@ -1130,31 +1128,124 @@ onMounted(async () => {
 }
 
 .area-card-body {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  display: block;
 }
 
-.area-stat {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+.area-metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  table-layout: fixed;
 }
 
-.area-stat-label {
-  color: #94a3b8;
-  font-size: 0.75rem;
+.area-metrics-table th,
+.area-metrics-table td {
+  padding: 0.6rem 0.25rem;
+  border-bottom: 1px dashed #e2e8f0;
+  text-align: right;
+  vertical-align: middle;
+  word-wrap: break-word;
+}
+
+.area-metrics-table tr:last-child td {
+  border-bottom: none;
+}
+
+.area-metrics-table th:first-child,
+.area-metrics-table td:first-child {
+  text-align: left;
+  padding-left: 0;
+  width: 26%;
+}
+
+.area-metrics-table th:last-child,
+.area-metrics-table td:last-child {
+  padding-right: 0;
+}
+
+.area-metrics-table th {
+  color: #64748b;
   font-weight: 700;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  padding-top: 0;
 }
 
-.area-stat strong {
+.area-metrics-table td strong {
   color: #0f172a;
-  font-size: 1.15rem;
+  font-size: 0.9rem;
   font-weight: 800;
 }
 
-.area-stat strong.text-danger {
+.area-metrics-table td strong.clickable-metric {
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.area-metrics-table td strong.clickable-metric:hover {
+  background-color: rgba(30, 58, 95, 0.1);
+  color: var(--primary-color);
+}
+
+.area-metrics-table td strong.clickable-metric.text-danger:hover {
+  background-color: rgba(220, 38, 38, 0.1);
   color: #dc2626;
+}
+
+.area-metrics-table td strong.text-danger {
+  color: #dc2626;
+}
+
+/* Metric Detail Modal styling is handled in the global style block at the bottom of this file */
+
+.metric-label {
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.month-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8fafc;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+}
+
+.month-selector .icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.month-selector .icon-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.month-selector .icon-btn i {
+  font-size: 0.75rem;
+}
+
+.month-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #0f172a;
+  min-width: 5.5rem;
+  text-align: center;
 }
 
 .area-card-footer {
@@ -1772,6 +1863,37 @@ onMounted(async () => {
 }
 
 /* Responsive */
+/* Custom Chip Hover Effects */
+.clickable-chip {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent !important;
+}
+
+.clickable-chip:hover {
+  transform: translateY(-2px);
+}
+
+.chip-warning.clickable-chip:hover {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.chip-low.clickable-chip:hover {
+  border-color: #f59e0b !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.chip-critical.clickable-chip:hover {
+  border-color: #ef4444 !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.chip-out-of-stock.clickable-chip:hover {
+  border-color: #f43f5e !important;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.2);
+}
+
 @media (max-width: 1180px) {
   .kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1831,5 +1953,43 @@ onMounted(async () => {
 .refresh-btn:hover {
   background: var(--gray-50) !important;
   border-color: var(--primary-light) !important;
+}
+</style>
+
+<style>
+/* Global overrides for teleported Metric Detail Modal */
+.metric-detail-dialog .p-dialog-content {
+  border-bottom-left-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+  padding-bottom: 1rem !important;
+}
+
+.metric-detail-dialog .p-dialog-content::-webkit-scrollbar-track {
+  border-bottom-right-radius: 12px !important;
+  background: transparent !important;
+}
+
+.metric-detail-dialog .p-dialog-content::-webkit-scrollbar-thumb {
+  border-radius: 12px !important;
+}
+
+.metric-detail-table .p-datatable-table {
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+
+.metric-detail-table .p-datatable-thead > tr > th,
+.metric-detail-table .p-datatable-tbody > tr > td {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 0.9rem !important;
+}
+
+.metric-detail-table .p-column-title {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
 }
 </style>

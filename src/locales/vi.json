@@ -343,12 +343,16 @@
     },
     "areaCard": {
       "viewDetail": "Xem chi tiết",
-      "stockValue": "Giá trị tồn",
-      "stockQty": "SL tồn",
+      "stockValue": "Giá trị",
+      "stockQty": "Số lượng",
       "items": "Số mặt hàng",
       "alerts": "Cảnh báo",
       "lines": "{count} line",
-      "machines": "{count} máy"
+      "machines": "{count} máy",
+      "currentStock": "Tồn kho",
+      "issued": "Đã xuất",
+      "shortage": "Còn thiếu",
+      "itemsCount": "Số mặt hàng"
     },
     "tabs": {
       "alerts": "Cảnh báo tồn kho",
@@ -412,6 +416,20 @@
       "colNote": "Ghi chú",
       "noImages": "Chưa có hình ảnh",
       "close": "Đóng"
+    },
+    "monthYear": "Tháng {month}, {year}",
+    "metricModal": {
+      "stockTitle": "Chi tiết Tồn kho - {area}",
+      "issuedTitle": "Chi tiết Đã xuất (Tháng {month}, {year}) - {area}",
+      "shortageTitle": "Chi tiết Còn thiếu - {area}",
+      "colCode": "Mã VT",
+      "colName": "Tên VT",
+      "colStockQty": "Tồn kho",
+      "colIssuedQty": "Đã xuất",
+      "colShortageQty": "Còn thiếu",
+      "colPrice": "Đơn giá",
+      "colTotalValue": "Thành tiền",
+      "colSafetyStock": "Tồn an toàn"
     }
   },
   "orderManagement": {

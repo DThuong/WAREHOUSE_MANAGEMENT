@@ -348,7 +348,11 @@
       "items": "품목 수",
       "alerts": "경보",
       "lines": "라인 {count}개",
-      "machines": "설비 {count}개"
+      "machines": "설비 {count}개",
+      "currentStock": "현재 재고",
+      "issued": "출고량",
+      "shortage": "부족량",
+      "itemsCount": "품목 수"
     },
     "tabs": {
       "alerts": "재고 경보",
@@ -412,6 +416,20 @@
       "colNote": "비고",
       "noImages": "이미지가 없습니다",
       "close": "닫기"
+    },
+    "monthYear": "{year}년 {month}월",
+    "metricModal": {
+      "stockTitle": "재고 상세 - {area}",
+      "issuedTitle": "출고 상세 ({year}년 {month}월) - {area}",
+      "shortageTitle": "부족 자재 상세 - {area}",
+      "colCode": "자재 코드",
+      "colName": "자재명",
+      "colStockQty": "현재 재고",
+      "colIssuedQty": "출고 수량",
+      "colShortageQty": "부족 수량",
+      "colPrice": "단가",
+      "colTotalValue": "합계 금액",
+      "colSafetyStock": "안전 재고"
     }
   },
   "orderManagement": {

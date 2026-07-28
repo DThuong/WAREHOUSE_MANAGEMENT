@@ -104,6 +104,11 @@ export interface AreaSummary {
   totalMachines: number;
   linesWithoutMachine: number;
   stockStatus: StockStatusCount;
+  totalOrderValue: number;
+  totalOrderItems: number;
+  shortageItems: number;
+  shortageQty: number;
+  shortageValue: number;
 }
 
 interface ChartData {
@@ -343,12 +348,23 @@ export const useDashboardStore = defineStore("dashboard", () => {
     return count;
   };
 
-  const buildAreaSummary = (area: AreaKey): AreaSummary => {
+  const buildAreaSummary = (area: AreaKey, month?: number, year?: number): AreaSummary => {
     const items = getItemsByArea(area);
-    const orders = getOrdersByArea(area);
-    const stockins = getStockinsByArea(area);
+    let orders = getOrdersByArea(area);
+    let stockins = getStockinsByArea(area);
     const lines = getLinesByArea(area);
     const machines = getMachinesByArea(area);
+
+    if (month !== undefined && year !== undefined) {
+      orders = orders.filter((order) => {
+        const orderDate = new Date(order.orderDate || (order as any).createdAt || new Date());
+        return orderDate.getMonth() === month && orderDate.getFullYear() === year;
+      });
+      stockins = stockins.filter((stockin) => {
+        const stockinDate = new Date(stockin.stockInDate || (stockin as any).createdAt || new Date());
+        return stockinDate.getMonth() === month && stockinDate.getFullYear() === year;
+      });
+    }
 
     const totalStockQty = items.reduce(
       (sum, item) => sum + Number(item.stockQty || 0),
@@ -367,6 +383,40 @@ export const useDashboardStore = defineStore("dashboard", () => {
         }, 0)
       );
     }, 0);
+
+    const totalOrderValue = orders.reduce((sum, order) => {
+      return (
+        sum +
+        (order.orderDetails || []).reduce((detailSum, detail) => {
+          const price = detail.item?.price ? Number(detail.item.price) : 0;
+          return detailSum + Number(detail.orderQty || 0) * price;
+        }, 0)
+      );
+    }, 0);
+
+    const orderedItemsSet = new Set<number>();
+    orders.forEach(order => {
+      (order.orderDetails || []).forEach(detail => {
+        const itemId = detail.item?.id || detail.itemId;
+        if (itemId) orderedItemsSet.add(itemId);
+      });
+    });
+    const totalOrderItems = orderedItemsSet.size;
+
+    let shortageItems = 0;
+    let shortageQty = 0;
+    let shortageValue = 0;
+
+    items.forEach(item => {
+      const stock = Number(item.stockQty || 0);
+      const safe = Number(item.saveQuantity || 0);
+      if (safe > 0 && stock < safe) {
+        const missing = safe - stock;
+        shortageItems += 1;
+        shortageQty += missing;
+        shortageValue += missing * getItemPrice(item);
+      }
+    });
 
     const totalStockinQty = stockins.reduce((sum, stockin) => {
       return (
@@ -410,6 +460,11 @@ export const useDashboardStore = defineStore("dashboard", () => {
       totalMachines: machines.length,
       linesWithoutMachine,
       stockStatus: getStockStatusCount(items),
+      totalOrderValue,
+      totalOrderItems,
+      shortageItems,
+      shortageQty,
+      shortageValue,
     };
   };
 
@@ -977,12 +1032,16 @@ export const useDashboardStore = defineStore("dashboard", () => {
     // Helpers
     normalizeAreaPart,
     getItemArea,
+    getItemName,
+    getItemCode,
     getOrderArea,
     getStockinArea,
     getLineArea,
     getStockStatus,
+    getItemsByArea,
     getOrdersByArea,
     getStockinsByArea,
+    buildAreaSummary,
     getDailyMovementChartData,
     getStockinsForDate,
     getOrdersForDate,

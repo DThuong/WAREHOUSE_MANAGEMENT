@@ -1205,7 +1205,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useItemStore } from "@/stores/itemStore";
 import { itemAPI } from "@/services/itemAPI";
 import { useConfirm } from "primevue/useconfirm";
@@ -1703,11 +1703,33 @@ const pendingImages = ref<File[]>([]);
 const pendingImagePreviews = ref<string[]>([]);
 const imageFileInput = ref<HTMLInputElement | null>(null);
 
+const route = useRoute();
+
 onMounted(async () => {
+  if (route.query.stockStatus) {
+    selectedStockStatus.value = route.query.stockStatus as string;
+  }
+  if (route.query.area) {
+    selectedFactory.value = route.query.area as string;
+  }
+  
   await fetchAllItems();
   window.addEventListener("resize", handleResize);
   document.addEventListener("paste", handleImageDialogPaste);
 });
+
+watch(
+  () => route.query,
+  (newQuery) => {
+    if (newQuery.stockStatus) {
+      selectedStockStatus.value = newQuery.stockStatus as string;
+    }
+    if (newQuery.area) {
+      selectedFactory.value = newQuery.area as string;
+    }
+  },
+  { deep: true }
+);
 
 onUnmounted(() => {
   itemStore.setCurrentItem(null);

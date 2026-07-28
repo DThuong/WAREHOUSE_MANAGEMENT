@@ -343,12 +343,16 @@
     },
     "areaCard": {
       "viewDetail": "View details",
-      "stockValue": "Stock value",
-      "stockQty": "Stock quantity",
+      "stockValue": "Value",
+      "stockQty": "Qty",
       "items": "Items",
       "alerts": "Alerts",
       "lines": "{count} lines",
-      "machines": "{count} machines"
+      "machines": "{count} machines",
+      "currentStock": "Current Stock",
+      "issued": "Issued",
+      "shortage": "Shortage",
+      "itemsCount": "Items"
     },
     "tabs": {
       "alerts": "Stock Alerts",
@@ -412,6 +416,20 @@
       "colNote": "Note",
       "noImages": "No images yet",
       "close": "Close"
+    },
+    "monthYear": "Month {month}, {year}",
+    "metricModal": {
+      "stockTitle": "Stock Details - {area}",
+      "issuedTitle": "Issued Details (Month {month}, {year}) - {area}",
+      "shortageTitle": "Shortage Details - {area}",
+      "colCode": "Code",
+      "colName": "Name",
+      "colStockQty": "Stock Qty",
+      "colIssuedQty": "Issued Qty",
+      "colShortageQty": "Shortage Qty",
+      "colPrice": "Unit Price",
+      "colTotalValue": "Total Value",
+      "colSafetyStock": "Safety Stock"
     }
   },
   "orderManagement": {
