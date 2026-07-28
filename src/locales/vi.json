@@ -153,7 +153,8 @@
       "loading": "Đang tải dữ liệu...",
       "empty": "Machine này chưa sử dụng vật tư nào.",
       "loadError": "Không thể tải dữ liệu thống kê vật tư của machine này."
-    }
+    },
+    "viewDetailsShort": "Xem chi tiết"
   },
   "common": {
     "upload": {

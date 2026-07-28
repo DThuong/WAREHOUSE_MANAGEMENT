@@ -277,16 +277,20 @@
                     </span>
 
                     <span
-                      class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600"
-                    >
-                      ID: {{ line.id }}
-                    </span>
-
-                    <span
                       class="rounded-full bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700"
                     >
                       {{ t("lineMachine.machineCount", { count: getMachinesByLineId(line.id).length }) }}
                     </span>
+
+                    <button
+                      v-if="getMachinesByLineId(line.id).length > 0"
+                      type="button"
+                      class="rounded-full bg-blue-50 hover:bg-blue-100 text-blue-700 px-2.5 py-1 text-xs font-bold transition active:scale-95 flex items-center gap-1 border border-blue-200 ml-2"
+                      @click.stop="openLineAnalyticsModal(line)"
+                    >
+                      <i class="pi pi-eye text-[10px]"></i>
+                      {{ t("lineMachine.viewDetailsShort") || 'Xem chi tiết' }}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -932,18 +936,62 @@
     >
       <div class="lm-modal-card lm-modal-card-wide lm-modal-card-xwide flex flex-col">
         <div class="flex items-start justify-between gap-4">
-          <div>
-            <h3 class="text-lg font-bold text-slate-900">
-              {{ t("lineMachine.analytics.title") }}
-            </h3>
+          <div class="flex flex-col gap-2 md:flex-row md:items-start md:gap-6 min-w-0">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">
+                {{ t("lineMachine.analytics.title") }}
+              </h3>
+              <p class="mt-0.5 text-xs text-slate-500">
+                {{ analyticsModal.line ? `Line: ${analyticsModal.line.lineName} (${analyticsModal.line.areaPart})` : '' }}
+              </p>
+            </div>
 
-            <p class="mt-1 text-sm text-slate-500">
-              {{
-                t("lineMachine.analytics.subtitle", {
-                  name: analyticsModal.machine?.machineName ?? "",
-                })
-              }}
-            </p>
+            <!-- Machine Selector Dropdown -->
+            <div v-if="analyticsModal.line" class="flex flex-wrap items-center gap-3">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Machine:</label>
+              <Dropdown
+                v-model="selectedAnalyticsMachineId"
+                :options="analyticsDropdownOptions"
+                optionLabel="label"
+                optionValue="value"
+                class="min-w-64 select-custom-dropdown"
+                panelClass="select-custom-dropdown-panel"
+                appendTo="body"
+                @change="onAnalyticsMachineChange"
+              >
+                <template #value="slotProps">
+                  <div v-if="slotProps.value" class="flex items-center gap-2 py-0.5">
+                    <span class="font-bold text-slate-800 text-sm">{{ getSelectedMachineLabel(slotProps.value) }}</span>
+                  </div>
+                  <span v-else class="text-slate-400 text-sm">{{ slotProps.placeholder || 'Chọn máy...' }}</span>
+                </template>
+                <template #option="slotProps">
+                  <div class="flex items-center justify-between w-full py-1.5 px-1">
+                    <span 
+                      class="font-semibold text-sm"
+                      :class="slotProps.option.count > 0 ? 'text-slate-900' : 'text-slate-500'"
+                    >
+                      {{ slotProps.option.machineName }}
+                    </span>
+                    <span 
+                      class="text-xs px-2.5 py-1 rounded-full font-bold border whitespace-nowrap ml-4"
+                      :class="slotProps.option.count > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'"
+                    >
+                      {{ slotProps.option.count }} loại VT
+                    </span>
+                  </div>
+                </template>
+              </Dropdown>
+              <span v-if="loadingCounts" class="text-xs text-slate-400 animate-pulse flex items-center gap-1.5 ml-2">
+                <span class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping"></span>
+                Đang quét...
+              </span>
+            </div>
+            <div v-else>
+              <p class="text-sm font-semibold text-slate-700 bg-slate-100 px-3 py-1.5 rounded-xl">
+                {{ analyticsModal.machine?.machineName }}
+              </p>
+            </div>
           </div>
 
           <button
@@ -1019,22 +1067,19 @@
           <table class="w-full table-fixed">
             <thead class="lm-sticky-head bg-slate-50">
               <tr>
-                <th class="w-28 px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                  {{ t("lineMachine.analytics.colCode") }}
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th class="w-1/3 px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                   {{ t("lineMachine.analytics.colName") }}
                 </th>
-                <th class="w-24 px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th class="w-1/6 px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                   {{ t("lineMachine.analytics.colArea") }}
                 </th>
-                <th class="w-24 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th class="w-1/6 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
                   {{ t("lineMachine.analytics.colStock") }}
                 </th>
-                <th class="w-28 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th class="w-1/6 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
                   {{ t("lineMachine.analytics.colUsed") }}
                 </th>
-                <th class="w-28 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th class="w-1/6 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
                   {{ t("lineMachine.analytics.colOrderCount") }}
                 </th>
               </tr>
@@ -1042,19 +1087,19 @@
 
             <tbody>
               <tr v-if="analyticsModal.loading">
-                <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">
+                <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500">
                   {{ t("lineMachine.analytics.loading") }}
                 </td>
               </tr>
 
               <tr v-else-if="analyticsModal.error">
-                <td colspan="6" class="px-4 py-10 text-center text-sm text-red-600">
+                <td colspan="5" class="px-4 py-10 text-center text-sm text-red-600">
                   {{ analyticsModal.error }}
                 </td>
               </tr>
 
               <tr v-else-if="analyticsModal.data.length === 0">
-                <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">
+                <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500">
                   {{ t("lineMachine.analytics.empty") }}
                 </td>
               </tr>
@@ -1065,11 +1110,8 @@
                 :key="row.itemId"
                 class="border-t border-slate-100 transition hover:bg-slate-50"
               >
-                <td class="px-4 py-3 text-sm font-semibold text-slate-700">
-                  {{ row.itemIndentifyId }}
-                </td>
                 <td class="px-4 py-3 text-sm text-slate-900">
-                  <p class="truncate">{{ getUsageItemName(row) }}</p>
+                  <p class="truncate font-semibold">{{ getUsageItemName(row) }}</p>
                   <p class="text-xs text-slate-500">{{ row.unit }}</p>
                 </td>
                 <td class="px-4 py-3 text-sm text-slate-600">
@@ -1096,8 +1138,9 @@
 <script setup lang="ts">
 import MainLayout from "@/components/MainLayout.vue";
 import Toast from "primevue/toast";
+import Dropdown from "primevue/dropdown";
 import { useToast } from "primevue/usetoast";
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useLineMachineStore } from "@/stores/line_machine";
 import type { Line, Machine } from "@/types/line_machine.types";
@@ -1148,16 +1191,64 @@ const copyMachinesModal = reactive<{
 const analyticsModal = reactive<{
   visible: boolean;
   machine: Machine | null;
+  line: Line | null;
   loading: boolean;
   error: string;
   data: MachineUsageItem[];
 }>({
   visible: false,
   machine: null,
+  line: null,
   loading: false,
   error: "",
   data: [],
 });
+
+const selectedAnalyticsMachineId = ref<number | null>(null);
+const loadingCounts = ref(false);
+const machineCounts = ref<Record<number, number>>({});
+
+const analyticsDropdownOptions = computed(() => {
+  if (!analyticsModal.line) return [];
+  const machines = getMachinesByLineId(analyticsModal.line.id);
+  return machines.map(m => ({
+    label: m.machineName,
+    machineName: m.machineName,
+    count: machineCounts.value[m.id] || 0,
+    value: m.id
+  }));
+});
+
+function getSelectedMachineLabel(id: number) {
+  const m = store.machines.find(x => x.id === id);
+  if (!m) return '';
+  const count = machineCounts.value[id] || 0;
+  return `${m.machineName} (${count} loại VT)`;
+}
+
+const fetchLineMachineCounts = async (lineId: number) => {
+  loadingCounts.value = true;
+  const machines = getMachinesByLineId(lineId);
+  
+  // Initialize counts
+  machines.forEach(m => {
+    machineCounts.value[m.id] = 0;
+  });
+  
+  try {
+    await Promise.all(machines.map(async (m) => {
+      try {
+        const data = await itemAPI.getByMachine(m.id);
+        machineCounts.value[m.id] = data.length;
+      } catch (err) {
+        console.error(`Failed to fetch count for machine ${m.id}`, err);
+        machineCounts.value[m.id] = 0;
+      }
+    }));
+  } finally {
+    loadingCounts.value = false;
+  }
+};
 
 const analyticsFilter = reactive<{
   fromDate: string;
@@ -1179,6 +1270,31 @@ const confirmModal = reactive<{
   id: null,
   title: "",
   message: "",
+});
+
+const isAnyModalVisible = computed(() => {
+  return (
+    lineModal.visible ||
+    machineModal.visible ||
+    copyMachinesModal.visible ||
+    analyticsModal.visible ||
+    confirmModal.visible
+  );
+});
+
+watch(isAnyModalVisible, (visible) => {
+  if (visible) {
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+  } else {
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
+  }
+});
+
+onUnmounted(() => {
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
 });
 
 const lineForm = reactive({
@@ -1405,21 +1521,59 @@ function getUsageItemName(row: MachineUsageItem) {
 }
 
 function openAnalyticsModal(machine: Machine) {
+  const line = store.lines.find(l => l.id === machine.lineId) || null;
   analyticsModal.visible = true;
   analyticsModal.machine = machine;
+  analyticsModal.line = line;
   analyticsModal.data = [];
   analyticsModal.error = "";
   analyticsFilter.fromDate = "";
   analyticsFilter.toDate = "";
+  selectedAnalyticsMachineId.value = machine.id;
 
+  if (line) {
+    void fetchLineMachineCounts(line.id);
+  }
   void fetchMachineUsage();
+}
+
+function openLineAnalyticsModal(line: Line) {
+  const machines = getMachinesByLineId(line.id);
+  if (machines.length === 0) {
+    showToast("warn", t("common.warn") || "Cảnh báo", "Line này chưa có máy nào");
+    return;
+  }
+  
+  analyticsModal.visible = true;
+  analyticsModal.line = line;
+  analyticsModal.machine = machines[0];
+  analyticsModal.data = [];
+  analyticsModal.error = "";
+  analyticsFilter.fromDate = "";
+  analyticsFilter.toDate = "";
+  selectedAnalyticsMachineId.value = machines[0].id;
+  
+  void fetchLineMachineCounts(line.id);
+  void fetchMachineUsage();
+}
+
+function onAnalyticsMachineChange() {
+  if (!selectedAnalyticsMachineId.value) return;
+  const machines = getMachinesByLineId(analyticsModal.line?.id || 0);
+  const found = machines.find(m => m.id === selectedAnalyticsMachineId.value);
+  if (found) {
+    analyticsModal.machine = found;
+    void fetchMachineUsage();
+  }
 }
 
 function closeAnalyticsModal() {
   analyticsModal.visible = false;
   analyticsModal.machine = null;
+  analyticsModal.line = null;
   analyticsModal.data = [];
   analyticsModal.error = "";
+  machineCounts.value = {};
 }
 
 function resetAnalyticsFilter() {
@@ -1442,7 +1596,12 @@ async function fetchMachineUsage() {
     );
   } catch (error) {
     analyticsModal.data = [];
-    analyticsModal.error = getErrorMessage(error, t("lineMachine.analytics.loadError"));
+    const rawError = getErrorMessage(error, "");
+    if (rawError.includes("No items found") || rawError.includes("not found")) {
+      analyticsModal.error = "";
+    } else {
+      analyticsModal.error = rawError || t("lineMachine.analytics.loadError");
+    }
   } finally {
     analyticsModal.loading = false;
   }
@@ -1860,3 +2019,61 @@ async function submitConfirmDelete() {
 </script>
 
 <style scoped src="./css/LineMachineView.css"></style>
+
+<style>
+.select-custom-dropdown {
+  border-radius: 12px !important;
+  border-color: #cbd5e1 !important; /* border-slate-300 */
+  box-shadow: none !important;
+  transition: all 0.2s ease-in-out;
+}
+.select-custom-dropdown:hover {
+  border-color: #94a3b8 !important; /* border-slate-400 */
+}
+.select-custom-dropdown.p-focus {
+  border-color: #3b82f6 !important; /* border-blue-500 */
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+}
+.select-custom-dropdown .p-dropdown-label,
+.select-custom-dropdown .p-select-label {
+  padding: 0.5rem 1rem !important;
+}
+.select-custom-dropdown .p-dropdown-trigger,
+.select-custom-dropdown .p-select-dropdown {
+  width: 2.5rem !important;
+  color: #64748b !important;
+}
+
+/* Styling for dropdown options overlay */
+.select-custom-dropdown-panel.p-dropdown-panel,
+.select-custom-dropdown-panel.p-select-overlay {
+  z-index: 110000 !important;
+}
+.p-dropdown-panel,
+.p-select-overlay {
+  border-radius: 12px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid #e2e8f0 !important;
+  margin-top: 4px !important;
+}
+.p-dropdown-panel .p-dropdown-items,
+.p-select-overlay .p-select-list {
+  padding: 0.375rem !important;
+}
+.p-dropdown-panel .p-dropdown-item,
+.p-select-overlay .p-select-option {
+  margin: 2px 0 !important;
+  padding: 0.5rem 0.75rem !important;
+  border-radius: 8px !important;
+  transition: background-color 0.15s ease-in-out;
+}
+.p-dropdown-panel .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover,
+.p-select-overlay .p-select-option:not(.p-select-option-selected):not(.p-disabled):hover {
+  background-color: #f1f5f9 !important; /* bg-slate-100 */
+}
+.p-dropdown-panel .p-dropdown-item.p-highlight,
+.p-select-overlay .p-select-option.p-select-option-selected {
+  background-color: #eff6ff !important; /* bg-blue-50 */
+  color: #1e40af !important; /* text-blue-800 */
+}
+</style>

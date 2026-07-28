@@ -153,7 +153,8 @@
       "loading": "Loading data...",
       "empty": "No items have been used on this machine yet.",
       "loadError": "Unable to load item usage data for this machine."
-    }
+    },
+    "viewDetailsShort": "View details"
   },
   "common": {
     "upload": {
