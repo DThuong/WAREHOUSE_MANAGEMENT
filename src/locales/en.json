@@ -47,7 +47,14 @@
       "machineHint": "Select the line for this machine. You can move it to another line.",
       "machineName": "Machine name",
       "machineNamePlaceholder": "E.g.: SPI, AOI, Reflow...",
-      "belongsToLine": "Belongs to line"
+      "belongsToLine": "Belongs to line",
+      "managementCode": "Management Code",
+      "managementCodePlaceholder": "Enter management code...",
+      "modelMachine": "Machine Model",
+      "modelMachinePlaceholder": "Enter machine model...",
+      "seriNumber": "Serial Number",
+      "seriNumberPlaceholder": "Enter serial number...",
+      "dateInput": "Date Input"
     },
     "copyModal": {
       "title": "Copy machines",

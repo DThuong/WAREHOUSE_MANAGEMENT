@@ -421,7 +421,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import MainLayout from "@/components/MainLayout.vue";
@@ -446,6 +446,7 @@ import { useLineMachineStore } from "@/stores/line_machine";
 import { itemAPI } from "@/services/itemAPI";
 import { orderAPI } from "@/services/orderAPI";
 import { stockinAPI } from "@/services/stockinAPI";
+import type { MonthlyDashboardResponse, MonthlyDashboardArea } from "@/types/item.types";
 
 const router = useRouter();
 const { t, locale } = useI18n();
@@ -474,7 +475,43 @@ const onSelectArea = (area: AreaKey) => {
   dashboardStore.setSelectedArea(area);
 };
 
-const current = computed(() => dashboardStore.currentSummary);
+const globalDashboardData = ref<MonthlyDashboardResponse | null>(null);
+
+const fetchGlobalApiData = async () => {
+  try {
+    const d = new Date();
+    const res = await itemAPI.getMonthlyDashboard(d.getFullYear(), d.getMonth() + 1);
+    globalDashboardData.value = res;
+  } catch (err) {
+    console.error("Failed to fetch global dashboard metrics:", err);
+  }
+};
+
+const current = computed(() => {
+  const storeSummary = dashboardStore.currentSummary;
+  let apiStock = null;
+  
+  if (globalDashboardData.value) {
+    if (dashboardStore.selectedArea === 'ALL') {
+      apiStock = globalDashboardData.value.overall.stock;
+    } else if (dashboardStore.selectedArea === 'SMD') {
+      apiStock = globalDashboardData.value.byArea.find(a => a.areaPart === 'SMD')?.stock;
+    } else if (dashboardStore.selectedArea === 'MAINLINE') {
+      apiStock = globalDashboardData.value.byArea.find(a => a.areaPart === 'MAINLINE')?.stock;
+    }
+  }
+
+  if (apiStock) {
+    return {
+      ...storeSummary,
+      totalItems: apiStock.itemCount,
+      totalStockQty: apiStock.totalQuantity,
+      totalStockValue: apiStock.totalValue
+    };
+  }
+
+  return storeSummary;
+});
 
 const currentDate = new Date();
 const smdMonth = ref(currentDate.getMonth());
@@ -498,20 +535,77 @@ const nextMonth = (areaKey: AreaKey) => {
   }
 };
 
-const areaCards = computed(() => [
-  { 
-    key: "SMD" as AreaKey, 
-    summary: dashboardStore.buildAreaSummary("SMD", smdMonth.value, smdYear.value),
-    month: smdMonth.value,
-    year: smdYear.value
-  },
-  { 
-    key: "MAINLINE" as AreaKey, 
-    summary: dashboardStore.buildAreaSummary("MAINLINE", mainlineMonth.value, mainlineYear.value),
-    month: mainlineMonth.value,
-    year: mainlineYear.value
-  },
-]);
+const smdApiData = ref<MonthlyDashboardArea | null>(null);
+const mainlineApiData = ref<MonthlyDashboardArea | null>(null);
+
+const fetchAreaCardsData = async (area: 'SMD' | 'MAINLINE') => {
+  try {
+    const year = area === 'SMD' ? smdYear.value : mainlineYear.value;
+    const month = area === 'SMD' ? smdMonth.value + 1 : mainlineMonth.value + 1;
+    const res = await itemAPI.getMonthlyDashboard(year, month);
+    
+    if (area === 'SMD') {
+      smdApiData.value = res.byArea.find((a) => a.areaPart === 'SMD') || null;
+    } else {
+      mainlineApiData.value = res.byArea.find((a) => a.areaPart === 'MAINLINE') || null;
+    }
+  } catch (error) {
+    console.error(`Failed to fetch ${area} monthly dashboard:`, error);
+  }
+};
+
+watch([smdMonth, smdYear], () => fetchAreaCardsData('SMD'));
+watch([mainlineMonth, mainlineYear], () => fetchAreaCardsData('MAINLINE'));
+
+const areaCards = computed(() => {
+  const smdStoreSummary = dashboardStore.buildAreaSummary("SMD", smdMonth.value, smdYear.value);
+  const mainlineStoreSummary = dashboardStore.buildAreaSummary("MAINLINE", mainlineMonth.value, mainlineYear.value);
+
+  const smdSummary = {
+    ...smdStoreSummary,
+    totalItems: smdApiData.value?.stock.itemCount ?? 0,
+    totalStockQty: smdApiData.value?.stock.totalQuantity ?? 0,
+    totalStockValue: smdApiData.value?.stock.totalValue ?? 0,
+    
+    totalOrderItems: smdApiData.value?.issued.itemCount ?? 0,
+    totalOrderQty: smdApiData.value?.issued.totalQuantity ?? 0,
+    totalOrderValue: smdApiData.value?.issued.totalValue ?? 0,
+    
+    shortageItems: smdApiData.value?.shortage.itemCount ?? 0,
+    shortageQty: smdApiData.value?.shortage.totalQuantity ?? 0,
+    shortageValue: smdApiData.value?.shortage.totalValue ?? 0,
+  };
+
+  const mainlineSummary = {
+    ...mainlineStoreSummary,
+    totalItems: mainlineApiData.value?.stock.itemCount ?? 0,
+    totalStockQty: mainlineApiData.value?.stock.totalQuantity ?? 0,
+    totalStockValue: mainlineApiData.value?.stock.totalValue ?? 0,
+    
+    totalOrderItems: mainlineApiData.value?.issued.itemCount ?? 0,
+    totalOrderQty: mainlineApiData.value?.issued.totalQuantity ?? 0,
+    totalOrderValue: mainlineApiData.value?.issued.totalValue ?? 0,
+    
+    shortageItems: mainlineApiData.value?.shortage.itemCount ?? 0,
+    shortageQty: mainlineApiData.value?.shortage.totalQuantity ?? 0,
+    shortageValue: mainlineApiData.value?.shortage.totalValue ?? 0,
+  };
+
+  return [
+    { 
+      key: "SMD" as AreaKey, 
+      summary: smdSummary,
+      month: smdMonth.value,
+      year: smdYear.value
+    },
+    { 
+      key: "MAINLINE" as AreaKey, 
+      summary: mainlineSummary,
+      month: mainlineMonth.value,
+      year: mainlineYear.value
+    },
+  ];
+});
 
 const areaAlertCount = (summary: AreaSummary) => {
   const s = summary.stockStatus;
@@ -626,11 +720,17 @@ const openMetricDetail = (area: AreaKey, type: 'stock' | 'issued' | 'shortage', 
       totalValue: Number(item.stockQty || 0) * Number(item.price || 0)
     })).filter(x => x.qty > 0 || x.totalValue > 0);
   } else if (type === 'issued') {
-    let orders = dashboardStore.getOrdersByArea(area);
-    orders = orders.filter((order) => {
-      const orderDate = new Date(order.orderDate || (order as any).createdAt || new Date());
-      return orderDate.getMonth() === month && orderDate.getFullYear() === year;
-    });
+    const orders = dashboardStore
+    .getOrdersByArea(area)
+    .filter(order => {
+        const date = new Date(order.orderDate)
+
+        return (
+            order.status === "Completed" &&
+            date.getMonth() === month &&
+            date.getFullYear() === year
+        )
+    })
     
     const issuedMap = new Map<number, any>();
     orders.forEach(order => {
@@ -786,6 +886,9 @@ const fetchDashboardData = async () => {
       orderAPI.getAll(),
       stockinAPI.getAllStockin(),
       lineMachineStore.fetchInitialData(),
+      fetchAreaCardsData('SMD'),
+      fetchAreaCardsData('MAINLINE'),
+      fetchGlobalApiData()
     ]);
 
     itemStore.setItems(items);

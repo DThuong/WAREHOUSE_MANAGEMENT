@@ -526,7 +526,6 @@
               v-model="editForm.price"
               class="w-full"
               placeholder="0.00"
-              disabled
             />
           </div>
         </div>
@@ -554,7 +553,6 @@
               type="number"
               class="w-full"
               placeholder="0"
-              disabled
             />
           </div>
         </div>

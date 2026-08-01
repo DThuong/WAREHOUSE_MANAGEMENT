@@ -289,7 +289,7 @@
                       @click.stop="openLineAnalyticsModal(line)"
                     >
                       <i class="pi pi-eye text-[10px]"></i>
-                      {{ t("lineMachine.viewDetailsShort") || 'Xem chi tiết' }}
+                      {{ t("lineMachine.viewDetailsShort") || 'Xem chi tiết' }} ({{ getLineTotalItemCount(line.id) }})
                     </button>
                   </div>
                 </div>
@@ -671,6 +671,57 @@
                 {{ line.lineName }} - {{ line.areaPart }}
               </option>
             </select>
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              {{ t("lineMachine.modal.managementCode") }}
+            </label>
+
+            <input
+              v-model.trim="machineForm.managementCode"
+              type="text"
+              :placeholder="t('lineMachine.modal.managementCodePlaceholder')"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              {{ t("lineMachine.modal.modelMachine") }}
+            </label>
+
+            <input
+              v-model.trim="machineForm.modelMachine"
+              type="text"
+              :placeholder="t('lineMachine.modal.modelMachinePlaceholder')"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              {{ t("lineMachine.modal.seriNumber") }}
+            </label>
+
+            <input
+              v-model.trim="machineForm.seriNumber"
+              type="text"
+              :placeholder="t('lineMachine.modal.seriNumberPlaceholder')"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              {{ t("lineMachine.modal.dateInput") }}
+            </label>
+
+            <input
+              v-model="machineForm.dateInput"
+              type="date"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+            />
           </div>
 
           <div class="grid grid-cols-2 gap-3 pt-2">
@@ -1250,6 +1301,43 @@ const fetchLineMachineCounts = async (lineId: number) => {
   }
 };
 
+const isFetchingAllCounts = ref(false);
+
+const fetchAllMachineCounts = async () => {
+  if (isFetchingAllCounts.value || store.machines.length === 0) return;
+  isFetchingAllCounts.value = true;
+  
+  try {
+    await Promise.all(store.machines.map(async (m) => {
+      if (machineCounts.value[m.id] === undefined) {
+        try {
+          const data = await itemAPI.getByMachine(m.id);
+          machineCounts.value[m.id] = data.length;
+        } catch {
+          machineCounts.value[m.id] = 0;
+        }
+      }
+    }));
+  } finally {
+    isFetchingAllCounts.value = false;
+  }
+};
+
+watch(() => store.machines, (newMachines) => {
+  if (newMachines.length > 0) {
+    fetchAllMachineCounts();
+  }
+}, { immediate: true });
+
+function getLineTotalItemCount(lineId: number) {
+  const machines = getMachinesByLineId(lineId);
+  let total = 0;
+  for (const m of machines) {
+    total += machineCounts.value[m.id] || 0;
+  }
+  return total;
+}
+
 const analyticsFilter = reactive<{
   fromDate: string;
   toDate: string;
@@ -1305,6 +1393,10 @@ const lineForm = reactive({
 const machineForm = reactive({
   machineName: "",
   lineId: 0,
+  managementCode: "",
+  modelMachine: "",
+  seriNumber: "",
+  dateInput: "",
 });
 
 const copyMachinesForm = reactive<{
@@ -1707,6 +1799,10 @@ function openCreateMachineModal(defaultLineId?: number) {
 
   machineForm.machineName = "";
   machineForm.lineId = defaultLineId || store.lines[0]?.id || 0;
+  machineForm.managementCode = "";
+  machineForm.modelMachine = "";
+  machineForm.seriNumber = "";
+  machineForm.dateInput = "";
 }
 
 function openEditMachineModal(machine: Machine) {
@@ -1718,12 +1814,20 @@ function openEditMachineModal(machine: Machine) {
 
   machineForm.machineName = machine.machineName;
   machineForm.lineId = machine.lineId;
+  machineForm.managementCode = machine.managementCode || "";
+  machineForm.modelMachine = machine.modelMachine || "";
+  machineForm.seriNumber = machine.seriNumber || "";
+  machineForm.dateInput = machine.dateInput ? machine.dateInput.substring(0, 10) : "";
 }
 
 function resetMachineForm() {
   machineModal.editingId = null;
   machineForm.machineName = "";
   machineForm.lineId = 0;
+  machineForm.managementCode = "";
+  machineForm.modelMachine = "";
+  machineForm.seriNumber = "";
+  machineForm.dateInput = "";
 }
 
 function closeMachineModal(force = false) {
@@ -1752,11 +1856,17 @@ async function submitMachineForm() {
   const isCreate = machineModal.mode === "create";
 
   try {
+    const payload = {
+      machineName,
+      lineId: machineForm.lineId,
+      managementCode: machineForm.managementCode || null,
+      modelMachine: machineForm.modelMachine || null,
+      seriNumber: machineForm.seriNumber || null,
+      dateInput: machineForm.dateInput ? new Date(machineForm.dateInput).toISOString() : null,
+    };
+
     if (isCreate) {
-      await store.createMachine({
-        machineName,
-        lineId: machineForm.lineId,
-      });
+      await store.createMachine(payload);
     } else {
       if (!machineModal.editingId) {
         showToast(
@@ -1767,10 +1877,7 @@ async function submitMachineForm() {
         return;
       }
 
-      await store.updateMachine(machineModal.editingId, {
-        machineName,
-        lineId: machineForm.lineId,
-      });
+      await store.updateMachine(machineModal.editingId, payload);
     }
 
     await refreshAfterMutation();

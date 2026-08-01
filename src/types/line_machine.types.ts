@@ -9,12 +9,12 @@ export interface Machine {
   id: number
   machineName: string
   lineId: number
-
-  // Có API trả line, có API trả null, có API không trả field này
   line?: Line | null
-
-  // POST /api/Machines đang trả lineName: null
   lineName?: string | null
+  managementCode?: string | null
+  modelMachine?: string | null
+  seriNumber?: string | null
+  dateInput?: string | null
 }
 
 // POST /api/Lines
@@ -33,6 +33,10 @@ export interface UpdateLineRequest {
 export interface CreateAndUpdateMachineRequest {
   machineName: string
   lineId: number
+  managementCode?: string | null
+  modelMachine?: string | null
+  seriNumber?: string | null
+  dateInput?: string | null
 }
 
 // Nếu source cũ đang import chữ thường thì giữ alias này để không lỗi nhiều chỗ

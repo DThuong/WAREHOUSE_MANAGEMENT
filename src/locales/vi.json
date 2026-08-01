@@ -47,7 +47,14 @@
       "machineHint": "Chọn line chứa machine. Có thể chuyển machine sang line khác.",
       "machineName": "Tên Machine",
       "machineNamePlaceholder": "Ví dụ: SPI, AOI, Reflow...",
-      "belongsToLine": "Thuộc Line"
+      "belongsToLine": "Thuộc Line",
+      "managementCode": "Mã quản lý",
+      "managementCodePlaceholder": "Nhập mã quản lý...",
+      "modelMachine": "Model máy",
+      "modelMachinePlaceholder": "Nhập model máy...",
+      "seriNumber": "Số Seri",
+      "seriNumberPlaceholder": "Nhập số seri...",
+      "dateInput": "Ngày nhập"
     },
     "copyModal": {
       "title": "Copy machine",

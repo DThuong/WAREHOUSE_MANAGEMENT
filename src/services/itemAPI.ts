@@ -7,7 +7,8 @@ import type {
   DailyMovement,
   ItemTransactionResponse,
   ItemTransactionQuery,
-  MachineUsageItem
+  MachineUsageItem,
+  MonthlyDashboardResponse
 } from '@/types/item.types'
 
 export const itemAPI = {
@@ -189,6 +190,23 @@ export const itemAPI = {
       })
     } catch (error: any) {
       console.error('Error loading item usage by machine:', error)
+      throw error
+    }
+  },
+
+  // Get monthly dashboard metrics - GET /api/Item/monthly-dashboard
+  getMonthlyDashboard: async (year: number, month: number): Promise<MonthlyDashboardResponse> => {
+    try {
+      const params = new URLSearchParams()
+      params.append('year', year.toString())
+      params.append('month', month.toString())
+      
+      const queryString = params.toString()
+      const url = `/api/Item/monthly-dashboard${queryString ? `?${queryString}` : ''}`
+      
+      return await api.get<MonthlyDashboardResponse>(url)
+    } catch (error: any) {
+      console.error('Error loading monthly dashboard metrics:', error)
       throw error
     }
   },

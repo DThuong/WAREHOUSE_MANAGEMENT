@@ -123,3 +123,25 @@ export interface MachineUsageItem {
   orderCount: number
   item: Item
 }
+
+export interface MonthlyDashboardMetrics {
+  itemCount: number;
+  totalQuantity: number;
+  totalValue: number;
+}
+
+export interface MonthlyDashboardArea {
+  year: number;
+  month: number;
+  areaPart: string | null;
+  stock: MonthlyDashboardMetrics;
+  issued: MonthlyDashboardMetrics;
+  shortage: MonthlyDashboardMetrics;
+}
+
+export interface MonthlyDashboardResponse {
+  year: number;
+  month: number;
+  overall: MonthlyDashboardArea;
+  byArea: MonthlyDashboardArea[];
+}
