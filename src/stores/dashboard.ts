@@ -1045,6 +1045,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
     getDailyMovementChartData,
     getStockinsForDate,
     getOrdersForDate,
+    getItemImageUrl,
 
     // Summary
     smdSummary,

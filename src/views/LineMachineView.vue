@@ -55,7 +55,7 @@
           <div class="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
             <div class="rounded-2xl bg-slate-50 p-4">
               <p
-                class="text-xs font-medium uppercase tracking-wide text-slate-500"
+                class="text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap"
               >
                 {{ t("lineMachine.totalLine") }}
               </p>
@@ -66,7 +66,7 @@
 
             <div class="rounded-2xl bg-slate-50 p-4">
               <p
-                class="text-xs font-medium uppercase tracking-wide text-slate-500"
+                class="text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap"
               >
                 {{ t("lineMachine.totalMachine") }}
               </p>
@@ -77,7 +77,7 @@
 
             <div class="rounded-2xl bg-slate-50 p-4">
               <p
-                class="text-xs font-medium uppercase tracking-wide text-slate-500"
+                class="text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap"
               >
                 SMD
               </p>
@@ -88,7 +88,7 @@
 
             <div class="rounded-2xl bg-slate-50 p-4">
               <p
-                class="text-xs font-medium uppercase tracking-wide text-slate-500"
+                class="text-xs font-medium uppercase tracking-wide text-slate-500 whitespace-nowrap"
               >
                 Mainline
               </p>
@@ -289,7 +289,7 @@
                       @click.stop="openLineAnalyticsModal(line)"
                     >
                       <i class="pi pi-eye text-[10px]"></i>
-                      {{ t("lineMachine.viewDetailsShort") || 'Xem chi tiết' }} ({{ getLineTotalItemCount(line.id) }})
+                      {{ t("lineMachine.viewDetailsShort") || 'Xem chi tiết' }} ({{ store.getLineTotalItemCount(line.id) }})
                     </button>
                   </div>
                 </div>
@@ -336,29 +336,59 @@
                 <!-- DESKTOP MACHINE TABLE - SCROLL RIÊNG TỪNG LINE -->
                 <div class="hidden lg:block">
                   <div class="lm-machine-scroll">
-                    <table class="w-full table-fixed">
+                    <table class="w-full table-auto">
                       <thead class="lm-sticky-head bg-slate-50">
                         <tr>
                           <th
-                            class="w-22 px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
+                            class="w-22 px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap"
                           >
                             ID
                           </th>
 
                           <th
-                            class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
+                            class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap"
                           >
                             {{ t("lineMachine.table.machineName") }}
                           </th>
 
                           <th
-                            class="w-37.5 px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500"
+                            class="w-37.5 px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap"
                           >
                             Line ID
                           </th>
 
                           <th
-                            class="w-55 px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500"
+                            class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap"
+                          >
+                            {{ t("lineMachine.modal.managementCode") }}
+                          </th>
+
+                          <th
+                            class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap"
+                          >
+                            {{ t("lineMachine.modal.modelMachine") }}
+                          </th>
+
+                          <th
+                            class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap"
+                          >
+                            {{ t("lineMachine.modal.seriNumber") }}
+                          </th>
+
+                          <th
+                            class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap"
+                          >
+                            {{ t("lineMachine.table.vendor") }}
+                          </th>
+
+                          <th
+                            class="px-5 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap"
+                          >
+                            {{ t("lineMachine.modal.dateInput") }}
+                          </th>
+
+                          <th
+                            class="w-55 px-5 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap"
                           >
                             {{ t("lineMachine.table.actions") }}
                           </th>
@@ -371,7 +401,7 @@
                           class="border-t border-slate-100"
                         >
                           <td
-                            colspan="4"
+                            colspan="9"
                             class="px-5 py-8 text-center text-sm text-slate-500"
                           >
                             {{ t("lineMachine.table.noMachines") }}
@@ -395,6 +425,26 @@
 
                           <td class="px-5 py-3 text-sm text-slate-600">
                             {{ machine.lineId }}
+                          </td>
+
+                          <td class="px-5 py-3 text-sm text-slate-600">
+                            {{ machine.managementCode || '-' }}
+                          </td>
+
+                          <td class="px-5 py-3 text-sm text-slate-600">
+                            {{ machine.modelMachine || '-' }}
+                          </td>
+
+                          <td class="px-5 py-3 text-sm text-slate-600">
+                            {{ machine.seriNumber || '-' }}
+                          </td>
+
+                          <td class="px-5 py-3 text-sm text-slate-600">
+                            {{ machine.vendor || '-' }}
+                          </td>
+
+                          <td class="px-5 py-3 text-sm text-slate-600 whitespace-nowrap">
+                            {{ formatDate(machine.dateInput) }}
                           </td>
 
                           <td class="px-5 py-3">
@@ -470,6 +520,14 @@
                           <p class="mt-1 text-xs font-medium text-slate-500">
                             ID: {{ machine.id }} · Line ID: {{ machine.lineId }}
                           </p>
+                          
+                          <div class="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-slate-600">
+                            <p><strong>Mã QL:</strong> {{ machine.managementCode || '-' }}</p>
+                            <p><strong>Model:</strong> {{ machine.modelMachine || '-' }}</p>
+                            <p><strong>Seri:</strong> {{ machine.seriNumber || '-' }}</p>
+                            <p><strong>{{ t("lineMachine.modal.vendor") }}:</strong> {{ machine.vendor || '-' }}</p>
+                            <p><strong>Ngày nhập:</strong> {{ formatDate(machine.dateInput) }}</p>
+                          </div>
                         </div>
 
                         <div class="flex shrink-0 gap-2">
@@ -530,7 +588,6 @@
     <div
       v-if="lineModal.visible"
       class="lm-modal-overlay"
-      @click.self="closeLineModal"
     >
       <div class="lm-modal-card">
         <div class="flex items-start justify-between gap-4">
@@ -614,7 +671,6 @@
     <div
       v-if="machineModal.visible"
       class="lm-modal-overlay"
-      @click.self="closeMachineModal"
     >
       <div class="lm-modal-card">
         <div class="flex items-start justify-between gap-4">
@@ -708,6 +764,19 @@
               v-model.trim="machineForm.seriNumber"
               type="text"
               :placeholder="t('lineMachine.modal.seriNumberPlaceholder')"
+              class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+            />
+          </div>
+
+          <div>
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              {{ t("lineMachine.modal.vendor") }}
+            </label>
+
+            <input
+              v-model.trim="machineForm.vendor"
+              type="text"
+              :placeholder="t('lineMachine.modal.vendorPlaceholder')"
               class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
             />
           </div>
@@ -999,7 +1068,7 @@
 
             <!-- Machine Selector Dropdown -->
             <div v-if="analyticsModal.line" class="flex flex-wrap items-center gap-3">
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Machine:</label>
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">{{ t("lineMachine.analytics.machineLabel") }}:</label>
               <Dropdown
                 v-model="selectedAnalyticsMachineId"
                 :options="analyticsDropdownOptions"
@@ -1014,7 +1083,7 @@
                   <div v-if="slotProps.value" class="flex items-center gap-2 py-0.5">
                     <span class="font-bold text-slate-800 text-sm">{{ getSelectedMachineLabel(slotProps.value) }}</span>
                   </div>
-                  <span v-else class="text-slate-400 text-sm">{{ slotProps.placeholder || 'Chọn máy...' }}</span>
+                  <span v-else class="text-slate-400 text-sm">{{ slotProps.placeholder || t("lineMachine.analytics.selectMachine") }}</span>
                 </template>
                 <template #option="slotProps">
                   <div class="flex items-center justify-between w-full py-1.5 px-1">
@@ -1028,14 +1097,14 @@
                       class="text-xs px-2.5 py-1 rounded-full font-bold border whitespace-nowrap ml-4"
                       :class="slotProps.option.count > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'"
                     >
-                      {{ slotProps.option.count }} loại VT
+                      {{ slotProps.option.count }} {{ t("lineMachine.analytics.itemTypes") }}
                     </span>
                   </div>
                 </template>
               </Dropdown>
               <span v-if="loadingCounts" class="text-xs text-slate-400 animate-pulse flex items-center gap-1.5 ml-2">
                 <span class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-ping"></span>
-                Đang quét...
+                {{ t("lineMachine.analytics.scanning") }}
               </span>
             </div>
             <div v-else>
@@ -1115,22 +1184,25 @@
 
         <!-- TABLE -->
         <div class="lm-machine-scroll mt-3 flex-1 rounded-xl border border-slate-200">
-          <table class="w-full table-fixed">
+          <table class="w-full table-auto">
             <thead class="lm-sticky-head bg-slate-50">
               <tr>
-                <th class="w-1/3 px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                  {{ t("lineMachine.analytics.colName") }}
+                <th class="w-20 px-4 py-3 text-center text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap">
+                  Hình ảnh
                 </th>
-                <th class="w-1/6 px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th class="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap">
+                  {{ t("lineMachine.analytics.colItemName") }}
+                </th>
+                <th class="w-1/6 px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap">
                   {{ t("lineMachine.analytics.colArea") }}
                 </th>
-                <th class="w-1/6 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th class="w-1/6 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap">
                   {{ t("lineMachine.analytics.colStock") }}
                 </th>
-                <th class="w-1/6 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th class="w-1/6 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap">
                   {{ t("lineMachine.analytics.colUsed") }}
                 </th>
-                <th class="w-1/6 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500">
+                <th class="w-1/6 px-4 py-3 text-right text-xs font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap">
                   {{ t("lineMachine.analytics.colOrderCount") }}
                 </th>
               </tr>
@@ -1138,19 +1210,19 @@
 
             <tbody>
               <tr v-if="analyticsModal.loading">
-                <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500">
+                <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">
                   {{ t("lineMachine.analytics.loading") }}
                 </td>
               </tr>
 
               <tr v-else-if="analyticsModal.error">
-                <td colspan="5" class="px-4 py-10 text-center text-sm text-red-600">
+                <td colspan="6" class="px-4 py-10 text-center text-sm text-red-600">
                   {{ analyticsModal.error }}
                 </td>
               </tr>
 
               <tr v-else-if="analyticsModal.data.length === 0">
-                <td colspan="5" class="px-4 py-10 text-center text-sm text-slate-500">
+                <td colspan="6" class="px-4 py-10 text-center text-sm text-slate-500">
                   {{ t("lineMachine.analytics.empty") }}
                 </td>
               </tr>
@@ -1161,6 +1233,21 @@
                 :key="row.itemId"
                 class="border-t border-slate-100 transition hover:bg-slate-50"
               >
+                <td class="px-4 py-3 text-center">
+                  <img
+                    v-if="row.item?.picture?.[0]"
+                    :src="row.item.picture[0]"
+                    :alt="getUsageItemName(row)"
+                    class="h-10 w-10 rounded-lg object-cover border border-slate-200 mx-auto"
+                    loading="lazy"
+                  />
+                  <div
+                    v-else
+                    class="h-10 w-10 rounded-lg bg-slate-100 border border-slate-200 mx-auto flex items-center justify-center text-slate-400"
+                  >
+                    <i class="pi pi-image text-lg"></i>
+                  </div>
+                </td>
                 <td class="px-4 py-3 text-sm text-slate-900">
                   <p class="truncate font-semibold">{{ getUsageItemName(row) }}</p>
                   <p class="text-xs text-slate-500">{{ row.unit }}</p>
@@ -1199,6 +1286,21 @@ import { itemAPI } from "@/services/itemAPI";
 import type { MachineUsageItem } from "@/types/item.types";
 
 const { t } = useI18n();
+
+const formatDate = (dateString: string | null | undefined): string => {
+  if (!dateString) return '-';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-';
+    return new Intl.DateTimeFormat('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(date);
+  } catch {
+    return '-';
+  }
+};
 
 type AreaFilter = "ALL" | "SMD" | "Mainline";
 type ModalMode = "create" | "edit";
@@ -1257,7 +1359,6 @@ const analyticsModal = reactive<{
 
 const selectedAnalyticsMachineId = ref<number | null>(null);
 const loadingCounts = ref(false);
-const machineCounts = ref<Record<number, number>>({});
 
 const analyticsDropdownOptions = computed(() => {
   if (!analyticsModal.line) return [];
@@ -1265,7 +1366,7 @@ const analyticsDropdownOptions = computed(() => {
   return machines.map(m => ({
     label: m.machineName,
     machineName: m.machineName,
-    count: machineCounts.value[m.id] || 0,
+    count: store.machineCounts[m.id] || 0,
     value: m.id
   }));
 });
@@ -1273,70 +1374,35 @@ const analyticsDropdownOptions = computed(() => {
 function getSelectedMachineLabel(id: number) {
   const m = store.machines.find(x => x.id === id);
   if (!m) return '';
-  const count = machineCounts.value[id] || 0;
-  return `${m.machineName} (${count} loại VT)`;
+  const count = store.machineCounts[id] || 0;
+  return `${m.machineName} (${count} ${t("lineMachine.analytics.itemTypes")})`;
 }
+
+
 
 const fetchLineMachineCounts = async (lineId: number) => {
   loadingCounts.value = true;
-  const machines = getMachinesByLineId(lineId);
-  
-  // Initialize counts
-  machines.forEach(m => {
-    machineCounts.value[m.id] = 0;
-  });
-  
   try {
-    await Promise.all(machines.map(async (m) => {
-      try {
-        const data = await itemAPI.getByMachine(m.id);
-        machineCounts.value[m.id] = data.length;
-      } catch (err) {
-        console.error(`Failed to fetch count for machine ${m.id}`, err);
-        machineCounts.value[m.id] = 0;
-      }
-    }));
+    // Nếu store chưa fetch, thì fetch luôn
+    await store.fetchAllMachineCounts(itemAPI);
   } finally {
     loadingCounts.value = false;
   }
 };
 
-const isFetchingAllCounts = ref(false);
+onMounted(() => {
+  store.fetchAllMachineCounts(itemAPI);
+});
 
-const fetchAllMachineCounts = async () => {
-  if (isFetchingAllCounts.value || store.machines.length === 0) return;
-  isFetchingAllCounts.value = true;
-  
-  try {
-    await Promise.all(store.machines.map(async (m) => {
-      if (machineCounts.value[m.id] === undefined) {
-        try {
-          const data = await itemAPI.getByMachine(m.id);
-          machineCounts.value[m.id] = data.length;
-        } catch {
-          machineCounts.value[m.id] = 0;
-        }
-      }
-    }));
-  } finally {
-    isFetchingAllCounts.value = false;
-  }
-};
+onUnmounted(() => {
+  store.cancelMachineCountsFetch();
+});
 
 watch(() => store.machines, (newMachines) => {
   if (newMachines.length > 0) {
-    fetchAllMachineCounts();
+    store.fetchAllMachineCounts(itemAPI);
   }
 }, { immediate: true });
-
-function getLineTotalItemCount(lineId: number) {
-  const machines = getMachinesByLineId(lineId);
-  let total = 0;
-  for (const m of machines) {
-    total += machineCounts.value[m.id] || 0;
-  }
-  return total;
-}
 
 const analyticsFilter = reactive<{
   fromDate: string;
@@ -1396,6 +1462,7 @@ const machineForm = reactive({
   managementCode: "",
   modelMachine: "",
   seriNumber: "",
+  vendor: "",
   dateInput: "",
 });
 
@@ -1665,7 +1732,6 @@ function closeAnalyticsModal() {
   analyticsModal.line = null;
   analyticsModal.data = [];
   analyticsModal.error = "";
-  machineCounts.value = {};
 }
 
 function resetAnalyticsFilter() {
@@ -1737,8 +1803,8 @@ function closeLineModal(force = false) {
 async function submitLineForm() {
   const lineName = lineForm.lineName.trim();
 
-  if (!lineName) {
-    showToast("warn", t("lineMachine.toast.missingInfoTitle"), t("lineMachine.toast.missingLineName"));
+  if (!lineName || !lineForm.areaPart) {
+    showToast("warn", t("lineMachine.toast.missingInfoTitle"), t("lineMachine.toast.fillAllInfo"));
     return;
   }
 
@@ -1802,6 +1868,7 @@ function openCreateMachineModal(defaultLineId?: number) {
   machineForm.managementCode = "";
   machineForm.modelMachine = "";
   machineForm.seriNumber = "";
+  machineForm.vendor = "";
   machineForm.dateInput = "";
 }
 
@@ -1817,6 +1884,7 @@ function openEditMachineModal(machine: Machine) {
   machineForm.managementCode = machine.managementCode || "";
   machineForm.modelMachine = machine.modelMachine || "";
   machineForm.seriNumber = machine.seriNumber || "";
+  machineForm.vendor = machine.vendor || "";
   machineForm.dateInput = machine.dateInput ? machine.dateInput.substring(0, 10) : "";
 }
 
@@ -1827,6 +1895,7 @@ function resetMachineForm() {
   machineForm.managementCode = "";
   machineForm.modelMachine = "";
   machineForm.seriNumber = "";
+  machineForm.vendor = "";
   machineForm.dateInput = "";
 }
 
@@ -1840,13 +1909,16 @@ function closeMachineModal(force = false) {
 async function submitMachineForm() {
   const machineName = machineForm.machineName.trim();
 
-  if (!machineName) {
-    showToast("warn", t("lineMachine.toast.missingInfoTitle"), t("lineMachine.toast.missingMachineName"));
-    return;
-  }
-
-  if (!machineForm.lineId) {
-    showToast("warn", t("lineMachine.toast.missingInfoTitle"), t("lineMachine.toast.missingLineSelect"));
+  if (
+    !machineName ||
+    !machineForm.lineId ||
+    !machineForm.managementCode?.trim() ||
+    !machineForm.modelMachine?.trim() ||
+    !machineForm.seriNumber?.trim() ||
+    !machineForm.vendor?.trim() ||
+    !machineForm.dateInput
+  ) {
+    showToast("warn", t("lineMachine.toast.missingInfoTitle"), t("lineMachine.toast.fillAllInfo"));
     return;
   }
 
@@ -1862,6 +1934,7 @@ async function submitMachineForm() {
       managementCode: machineForm.managementCode || null,
       modelMachine: machineForm.modelMachine || null,
       seriNumber: machineForm.seriNumber || null,
+      vendor: machineForm.vendor || null,
       dateInput: machineForm.dateInput ? new Date(machineForm.dateInput).toISOString() : null,
     };
 

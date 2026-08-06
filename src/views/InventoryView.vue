@@ -286,7 +286,7 @@
                 <Chip
                   :label="`${data.stockQty} ${data.unit}`"
                   :class="
-                    data.stockQty < 10 ? 'p-chip-danger' : 'p-chip-success'
+                    Number(data.stockQty || 0) < Number(data.saveQuantity || 0) ? 'p-chip-danger' : 'p-chip-success'
                   "
                 />
               </template>
@@ -407,7 +407,7 @@
                     <Chip
                       :label="`${item.stockQty} ${item.unit}`"
                       :class="
-                        item.stockQty < 10 ? 'p-chip-danger' : 'p-chip-success'
+                        Number(item.stockQty || 0) < Number(item.saveQuantity || 0) ? 'p-chip-danger' : 'p-chip-success'
                       "
                     />
                   </div>
@@ -908,7 +908,7 @@
         selectedTransactionItem?.itemIndentifyId ||
         ''
     })"
-    :style="{ width: '1120px' }"
+    :style="{ width: '1400px', maxWidth: '95vw' }"
     :breakpoints="{ '960px': 'calc(100vw - 2rem)' }"
     :modal="true"
     :dismissableMask="true"
@@ -1063,8 +1063,8 @@
             <Column field="status" :header="t('inventoryManagement.transactionDialog.colStatus')">
               <template #body="{ data }">
                 <Chip
-                  :label="data.status"
-                  :severity="getOrderStatusSeverity(data.status)"
+                  :label="getStatusLabel(data.status)"
+                  :class="getStatusClass(data.status)"
                 />
               </template>
             </Column>
@@ -1958,19 +1958,24 @@ const formatDateTime = (date?: string) => {
   });
 };
 
-const getOrderStatusSeverity = (status: string) => {
-  switch (status) {
-    case "Pending":
-      return "warning";
-    case "Approved":
-      return "info";
-    case "Completed":
-      return "success";
-    case "Rejected":
-      return "danger";
-    default:
-      return "secondary";
-  }
+const getStatusClass = (status: string) => {
+  const classes: Record<string, string> = {
+    Pending: "p-chip-warning",
+    Approved: "p-chip-info",
+    Completed: "p-chip-success",
+    Rejected: "p-chip-danger",
+  };
+  return (classes[status] || "p-chip-secondary") + " status-chip-fixed";
+};
+
+const getStatusLabel = (status: string): string => {
+  const labels: Record<string, string> = {
+    Pending: t("orderManagement.pending"),
+    Approved: t("orderManagement.approved"),
+    Completed: t("orderManagement.completed"),
+    Rejected: t("orderManagement.rejected"),
+  };
+  return labels[status] || status;
 };
 
 const closeImageDialog = () => {
@@ -2523,6 +2528,39 @@ watch(selectedFactory, () => {
   font-weight: 600 !important;
 }
 
+/* Chip Status Styles - Pastel Colors from OrdersView */
+:deep(.p-chip-warning) {
+  background: #fef3c7 !important;
+  color: #d97706 !important;
+  border: 1px solid #fde68a !important;
+  font-weight: 600 !important;
+}
+
+:deep(.p-chip-info) {
+  background: #f8fafc !important; 
+  color: #2563eb !important;
+  font-weight: 600 !important;
+}
+
+:deep(.p-chip-success) {
+  background: #dcfce7 !important;
+  color: #16a34a !important;
+  border: 1px solid #bbf7d0 !important;
+  font-weight: 600 !important;
+}
+
+:deep(.p-chip-danger) {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+  font-weight: 600 !important;
+}
+
+:deep(.status-chip-fixed) {
+  width: 120px !important;
+  justify-content: center !important;
+}
+
 .chip-out-of-stock {
   background: linear-gradient(135deg, #290b0b 0%, #130101 100%) !important;
   color: white !important;
@@ -2611,6 +2649,11 @@ watch(selectedFactory, () => {
 
 .transaction-table :deep(.p-datatable-tbody > tr) {
   cursor: default;
+}
+
+.transaction-table :deep(.p-datatable-thead > tr > th),
+.transaction-table :deep(.p-datatable-tbody > tr > td) {
+  white-space: nowrap;
 }
 
 .transaction-table :deep(.p-datatable-tbody > tr:hover) {

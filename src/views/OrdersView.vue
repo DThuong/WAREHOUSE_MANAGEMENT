@@ -502,6 +502,7 @@
             responsiveLayout="scroll"
             @row-click="onRowClick"
             :rowClass="() => 'cursor-pointer hover:bg-slate-50 transition-colors'"
+            tableStyle="table-layout: fixed; width: 100%; min-width: 800px"
           >
             <Column :header="t('common.product')" style="width: 25%" headerStyle="white-space: nowrap">
               <template #body="{ data }">
@@ -1440,10 +1441,22 @@
         </p>
         <div class="flex flex-col gap-2 mt-2!">
           <div>
+            <p class="text-xs text-gray-500 mb-1!">Line</p>
+            <p class="text-sm font-medium text-gray-800 break-words">
+              {{ selectedItemDetail.lines }}
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 mb-1!">Machine</p>
+            <p class="text-sm font-medium text-gray-800 break-words">
+              {{ selectedItemDetail.machines }}
+            </p>
+          </div>
+          <div>
             <p class="text-xs text-gray-500 mb-1!">
               {{ t("common.form.purposeNote") }}
             </p>
-            <p class="text-sm font-medium text-gray-800">
+            <p class="text-sm font-medium text-gray-800 break-words">
               {{ selectedItemDetail.note }}
             </p>
           </div>
@@ -1451,7 +1464,7 @@
             <p class="text-xs text-gray-500 mb-1!">
               {{ t("common.form.timeUsed") }}
             </p>
-            <p class="text-sm font-medium text-gray-800">
+            <p class="text-sm font-medium text-gray-800 break-words">
               {{ selectedItemDetail.timeUsed }}
             </p>
           </div>
@@ -1520,6 +1533,8 @@ const selectedItemDetail = ref<{
   note: string;
   timeUsed: string;
   itemName: string;
+  lines: string;
+  machines: string;
 } | null>(null);
 
 const showItemDetail = (event: Event, data: OrderDetail) => {
@@ -1527,6 +1542,8 @@ const showItemDetail = (event: Event, data: OrderDetail) => {
     note: data.note || "-",
     timeUsed: data.timeUsed || "-",
     itemName: getItemName(data.item),
+    lines: getOrderDetailLineName(data),
+    machines: getOrderDetailMachineName(data),
   };
   detailPopover.value.toggle(event);
 };
@@ -2153,20 +2170,40 @@ const getTotalQuantity = (order: Order) => {
 };
 
 const getOrderDetailLine = (detail: OrderDetail) => {
+  const machine = detail.machine || (detail.machines && detail.machines.length > 0 ? detail.machines[0] : null)
   return (
-    detail.machine?.line ||
-    lineMachineStore.lines.find((line) => line.id === detail.machine?.lineId) ||
+    machine?.line ||
+    lineMachineStore.lines.find((line) => line.id === machine?.lineId) ||
     null
   );
 };
 
 const getOrderDetailLineName = (detail: OrderDetail) => {
+  if (detail.machines && detail.machines.length > 0) {
+    const lines = new Set<string>();
+    detail.machines.forEach(m => {
+      const lineName = m.line?.lineName || m.lineName || lineMachineStore.lines.find((l) => l.id === m.lineId)?.lineName || "-";
+      lines.add(lineName);
+    });
+    return Array.from(lines).join(', ');
+  }
   const line = getOrderDetailLine(detail);
-  return line?.lineName || detail.machine?.lineName || "-";
+  const machine = detail.machine || (detail.machines && detail.machines.length > 0 ? detail.machines[0] : null)
+  return line?.lineName || machine?.lineName || "-";
 };
 
 const getOrderDetailMachineName = (detail: OrderDetail) => {
-  return detail.machine?.machineName || "-";
+  if (detail.machines && detail.machines.length > 0) {
+    return detail.machines.map(m => {
+      const mName = m.machineName || "-";
+      const lName = m.line?.lineName || m.lineName || "";
+      return lName ? `${mName}-${lName}` : mName;
+    }).join(', ');
+  }
+  const machine = detail.machine || (detail.machines && detail.machines.length > 0 ? detail.machines[0] : null)
+  const mName = machine?.machineName || "-";
+  const lName = machine?.line?.lineName || machine?.lineName || "";
+  return lName ? `${mName}-${lName}` : mName;
 };
 
 const getStatusClass = (status: string) => {
@@ -2176,7 +2213,7 @@ const getStatusClass = (status: string) => {
     Completed: "p-chip-success",
     Rejected: "p-chip-danger",
   };
-  return classes[status] || "p-chip-secondary";
+  return (classes[status] || "p-chip-secondary") + " status-chip-fixed";
 };
 
 // Helper functions for selected items
@@ -3516,6 +3553,11 @@ onUnmounted(() => {
   .create-order-item-row {
     padding: 0.875rem !important;
   }
+}
+
+:deep(.status-chip-fixed) {
+  width: 120px !important;
+  justify-content: center !important;
 }
 
 </style>

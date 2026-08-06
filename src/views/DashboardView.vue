@@ -201,6 +201,11 @@
             <AnalysisChart />
           </TabPanel>
 
+          <!-- Line Machine Chart Tab -->
+          <TabPanel :header="t('dashboard.tabs.lineMachineChart') || 'Phân tích Line & Máy'">
+            <LineMachineOrderChart />
+          </TabPanel>
+
           <!-- Alerts tab -->
           <TabPanel :header="t('dashboard.tabs.alerts')">
             <div class="tab-head">
@@ -269,20 +274,29 @@
           <!-- Top Ordered Tab -->
           <TabPanel :header="t('dashboard.activity.topOrdered')">
             <article class="panel list-panel wide">
-                <div class="panel-header">
+                <div class="panel-header flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
                     <h3>{{ t('dashboard.activity.topOrdered') }}</h3>
                     <p>{{ t('dashboard.activity.topOrderedDesc') }}</p>
                   </div>
+                  
+                  <div class="flex flex-wrap items-center gap-2">
+                    <TimeRangeFilter 
+                      :compact="true" 
+                      :showLabels="false"
+                      @update:fromDate="val => topOrderedFromDate = val"
+                      @update:toDate="val => topOrderedToDate = val"
+                    />
+                  </div>
                 </div>
 
-                <div v-if="dashboardStore.topOrderedItems.length === 0" class="empty-state">
+                <div v-if="filteredTopOrderedItems.length === 0" class="empty-state">
                   <i class="pi pi-chart-bar"></i>
                   <p>{{ t('dashboard.activity.noTopOrdered') }}</p>
                 </div>
 
                 <div v-else class="top-items">
-                  <div v-for="item in dashboardStore.topOrderedItems" :key="item.id" class="top-item">
+                  <div v-for="item in paginatedTopOrderedItems" :key="item.id" class="top-item">
                     <img :src="item.image" :alt="item.name" />
                     <div class="item-main">
                       <strong>{{ item.name }}</strong>
@@ -295,6 +309,17 @@
                       <b>{{ formatNumber(item.totalOrdered) }}</b>
                       <small>{{ t('dashboard.activity.ordered') }}</small>
                     </div>
+                    <div class="ml-2 flex items-center">
+                      <Button icon="pi pi-history" text rounded severity="secondary" @click="openTransactionDialog(item)" />
+                    </div>
+                  </div>
+                  
+                  <div class="mt-4" v-if="filteredTopOrderedItems.length > 10">
+                    <Paginator 
+                      v-model:first="topOrderedPaginatorFirst" 
+                      :rows="10" 
+                      :totalRecords="filteredTopOrderedItems.length" 
+                    />
                   </div>
                 </div>
               </article>
@@ -389,7 +414,17 @@
     <!-- Metric Detail Modal -->
     <Dialog v-model:visible="metricModalVisible" modal dismissableMask :header="metricModalHeader" :style="{ width: '1000px', maxWidth: '95vw' }" class="metric-detail-dialog">
       <DataTable :value="metricModalData" paginator :rows="10" class="metric-detail-table">
-        <Column field="name" :header="t('dashboard.metricModal.colName')" :style="{ width: metricModalType === 'shortage' ? '35%' : '45%' }"></Column>
+        <Column :header="t('common.image')" style="width: 80px; text-align: center">
+          <template #body="{ data }">
+            <div style="display: flex; justify-content: center;">
+              <img v-if="data.image" :src="data.image" :alt="data.name" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0;" />
+              <div v-else style="width: 40px; height: 40px; border-radius: 6px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0;">
+                <i class="pi pi-image" style="color: #94a3b8; font-size: 1.2rem;"></i>
+              </div>
+            </div>
+          </template>
+        </Column>
+        <Column field="name" :header="t('dashboard.metricModal.colName')" :style="{ width: metricModalType === 'shortage' ? '30%' : '40%' }"></Column>
         
         <Column v-if="metricModalType === 'shortage'" field="stockQty" :header="t('dashboard.metricModal.colStockQty')" style="width: 12%">
           <template #body="{ data }">{{ formatNumber(data.stockQty) }}</template>
@@ -417,6 +452,11 @@
         </Column>
       </DataTable>
     </Dialog>
+    <ItemTransactionDialog
+      v-model:visible="transactionDialogVisible"
+      :item-id="transactionItemId"
+      :item-code="transactionItemCode"
+    />
   </MainLayout>
 </template>
 
@@ -426,16 +466,19 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import MainLayout from "@/components/MainLayout.vue";
 import AnalysisChart from "@/components/AnalysisChart.vue";
+import LineMachineOrderChart from "@/components/LineMachineOrderChart.vue";
 import SelectButton from "primevue/selectbutton";
 import Button from "primevue/button";
 import TabView from "primevue/tabview";
 import TabPanel from "primevue/tabpanel";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-import Dialog from "primevue/dialog";
 import Paginator from "primevue/paginator";
+import TimeRangeFilter from '@/components/common/TimeRangeFilter.vue';
+import Dialog from "primevue/dialog";
 import Chip from "primevue/chip";
 import LineChart from "@/components/charts/LineChart.vue";
+import ItemTransactionDialog from "@/components/ItemTransactionDialog.vue";
 
 import { useDashboardStore, type AreaKey, type AreaSummary } from "@/stores/dashboard";
 import { useItemStore } from "@/stores/itemStore";
@@ -699,6 +742,83 @@ const goToInventoryWithFilter = (status: string) => {
   router.push({ path: "/inventory", query });
 };
 
+// ===== Top Ordered Items Filter & Pagination =====
+const topOrderedFromDate = ref("");
+const topOrderedToDate = ref("");
+const topOrderedPaginatorFirst = ref(0);
+
+watch([
+  topOrderedFromDate, topOrderedToDate, 
+  selectedAreaModel
+], () => {
+  topOrderedPaginatorFirst.value = 0;
+});
+
+const filteredTopOrderedItems = computed(() => {
+  let orders = dashboardStore.getOrdersByArea(dashboardStore.selectedArea);
+  
+  if (topOrderedFromDate.value || topOrderedToDate.value) {
+    let start: Date | null = null;
+    let end: Date | null = null;
+    if (topOrderedFromDate.value) start = new Date(topOrderedFromDate.value);
+    if (topOrderedToDate.value) {
+      end = new Date(topOrderedToDate.value);
+      end.setHours(23, 59, 59, 999);
+    }
+    
+    orders = orders.filter(order => {
+      const d = new Date(order.orderDate || (order as any).createdAt || new Date());
+      if (start && end) return d >= start && d <= end;
+      if (start) return d >= start;
+      if (end) return d <= end;
+      return true;
+    });
+  }
+
+  const orderItemMap = new Map<number, number>();
+  orders
+    .filter(order => order.status === "Completed")
+    .forEach((order) => {
+      (order.orderDetails || []).forEach((detail) => {
+        const itemId = detail.item?.id || detail.itemId;
+        if (!itemId) return;
+        orderItemMap.set(
+          itemId,
+          (orderItemMap.get(itemId) || 0) + Number(detail.orderQty || 0)
+        );
+      });
+    });
+    
+  const items = dashboardStore.getItemsByArea(dashboardStore.selectedArea)
+    .map(item => ({
+      item,
+      totalOrdered: orderItemMap.get(item.id || 0) || 0,
+    }))
+    .filter(entry => entry.totalOrdered > 0)
+    .sort((a, b) => b.totalOrdered - a.totalOrdered);
+    
+  const maxOrdered = items[0]?.totalOrdered || 1;
+  const limit = 50; 
+  
+  return items.slice(0, limit).map(({ item, totalOrdered }) => ({
+    id: item.id || 0,
+    name: dashboardStore.getItemName(item),
+    code: dashboardStore.getItemCode(item),
+    areaPart: dashboardStore.getItemArea(item),
+    totalOrdered,
+    percentage: Math.round((totalOrdered / maxOrdered) * 100),
+    image: dashboardStore.getItemImageUrl(item),
+    stockQty: Number(item.stockQty || 0),
+    safetyStock: Number(item.saveQuantity || 0),
+    unit: item.unit || "",
+  }));
+});
+
+const paginatedTopOrderedItems = computed(() => {
+  const first = topOrderedPaginatorFirst.value;
+  return filteredTopOrderedItems.value.slice(first, first + 10);
+});
+
 // ===== Metric Detail Modal =====
 const metricModalVisible = ref(false);
 const metricModalType = ref<'stock' | 'issued' | 'shortage'>('stock');
@@ -713,6 +833,7 @@ const openMetricDetail = (area: AreaKey, type: 'stock' | 'issued' | 'shortage', 
   
   if (type === 'stock') {
     metricModalData.value = items.map(item => ({
+      image: item.picture && item.picture.length > 0 ? getItemImageUrl(item.picture[0]) : null,
       code: dashboardStore.getItemCode(item),
       name: dashboardStore.getItemName(item),
       qty: Number(item.stockQty || 0),
@@ -744,6 +865,7 @@ const openMetricDetail = (area: AreaKey, type: 'stock' | 'issued' | 'shortage', 
           issuedMap.get(itemId).totalValue += qty * Number(item.price || 0);
         } else {
           issuedMap.set(itemId, {
+            image: item.picture && item.picture.length > 0 ? getItemImageUrl(item.picture[0]) : null,
             code: dashboardStore.getItemCode(item),
             name: dashboardStore.getItemName(item),
             qty: qty,
@@ -764,6 +886,7 @@ const openMetricDetail = (area: AreaKey, type: 'stock' | 'issued' | 'shortage', 
       const safe = Number(item.saveQuantity || 0);
       const missing = safe - stock;
       return {
+        image: item.picture && item.picture.length > 0 ? getItemImageUrl(item.picture[0]) : null,
         code: dashboardStore.getItemCode(item),
         name: dashboardStore.getItemName(item),
         stockQty: stock,
@@ -792,6 +915,17 @@ const metricQtyHeader = computed(() => {
   if (metricModalType.value === 'shortage') return t('dashboard.metricModal.colShortageQty');
   return t('dashboard.metricModal.colIssuedQty');
 });
+
+// ===== Transaction Detail Modal =====
+const transactionDialogVisible = ref(false);
+const transactionItemId = ref<number | null>(null);
+const transactionItemCode = ref("");
+
+const openTransactionDialog = (item: any) => {
+  transactionItemId.value = item.id;
+  transactionItemCode.value = item.code || item.itemIndentifyId;
+  transactionDialogVisible.value = true;
+};
 
 // ===== Daily movement chart (Vấn đề 1) =====
 const chartRange = ref<"7d" | "30d" | "all">("7d");

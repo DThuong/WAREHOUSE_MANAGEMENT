@@ -12,7 +12,8 @@ export interface OrderDetail {
   note: string
   timeUsed: string
   machineId: number
-  machine: machine
+  machine?: machine
+  machines?: machine[]
 }
 
 // Order

@@ -14,6 +14,7 @@ export interface Machine {
   managementCode?: string | null
   modelMachine?: string | null
   seriNumber?: string | null
+  vendor?: string | null
   dateInput?: string | null
 }
 
@@ -36,6 +37,7 @@ export interface CreateAndUpdateMachineRequest {
   managementCode?: string | null
   modelMachine?: string | null
   seriNumber?: string | null
+  vendor?: string | null
   dateInput?: string | null
 }
 

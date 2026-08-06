@@ -2,18 +2,12 @@
       <!-- FILTER BAR (TOP) -->
       <Card v-if="!isMobile" class="mb-6">
         <template #content>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <div class="flex items-center gap-2">
-                <i class="pi pi-filter text-slate-500"></i>
-                <span class="font-semibold text-slate-700">Bộ lọc:</span>
-              </div>
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-4">
               <Dropdown
                 v-model="selectedArea" :options="areaOptions" optionLabel="label" optionValue="value"
                 class="w-40" style="height: 40px; display: flex; align-items: center;" @change="onAreaChange"
               />
-              
-              <div class="divider-v" style="width: 1px; height: 24px; background: #e2e8f0;"></div>
               
               <div class="flex items-center bg-slate-100 rounded-lg p-1! gap-1" style="height: 40px;">
                 <button
@@ -23,10 +17,22 @@
                 >{{ opt === '1 ngày' ? t('reports.chart.period1') : opt === '7 ngày' ? t('reports.chart.period7') : opt === '30 ngày' ? t('reports.chart.period30') : opt === 'Tuần' ? t('reports.chart.periodWeek') : t('reports.chart.periodMonth') }}</button>
               </div>
 
-              <div class="divider-v" style="width: 1px; height: 24px; background: #e2e8f0;"></div>
+              <Dropdown v-if="selectedTime === 'Tuần' || selectedTime === 'Tháng'" v-model="filterYear" :options="yearOptions" optionLabel="label" optionValue="value" class="w-[130px]" style="height: 40px; display: flex; align-items: center;" />
 
-              <div class="flex items-center gap-2" style="height: 40px;">
-                <Button icon="pi pi-chevron-left" text rounded severity="secondary" @click="prevPeriod" :disabled="selectedTime === 'Tháng' || selectedTime === 'Tuần'" style="width: 40px; height: 40px;" />
+              <div v-if="selectedTime === 'Tuần'" class="flex items-center gap-2" style="height: 40px;">
+                <Dropdown v-model="filterWeekFrom" @change="applyWeekMonthFilter" :options="weekOptions" optionLabel="label" optionValue="value" class="w-[210px] custom-date-dropdown" panelClass="custom-dropdown-panel" filter :filterPlaceholder="t('common.search')" />
+                <span class="font-bold text-slate-500">-</span>
+                <Dropdown v-model="filterWeekTo" @change="applyWeekMonthFilter" :options="weekOptions" optionLabel="label" optionValue="value" class="w-[210px] custom-date-dropdown" panelClass="custom-dropdown-panel" filter :filterPlaceholder="t('common.search')" />
+              </div>
+
+              <div v-else-if="selectedTime === 'Tháng'" class="flex items-center gap-2" style="height: 40px;">
+                <Dropdown v-model="filterMonthFrom" @change="applyWeekMonthFilter" :options="monthOptions" optionLabel="label" optionValue="value" class="w-[160px] custom-date-dropdown" panelClass="custom-dropdown-panel" />
+                <span class="font-bold text-slate-500">-</span>
+                <Dropdown v-model="filterMonthTo" @change="applyWeekMonthFilter" :options="monthOptions" optionLabel="label" optionValue="value" class="w-[160px] custom-date-dropdown" panelClass="custom-dropdown-panel" />
+              </div>
+
+              <div v-else class="flex items-center gap-2" style="height: 40px;">
+                <Button icon="pi pi-chevron-left" text rounded severity="secondary" @click="prevPeriod" style="width: 40px; height: 40px;" />
                 <span class="font-bold text-slate-700 min-w-[150px] text-center" v-html="periodLabel"></span>
                 <Button icon="pi pi-chevron-right" text rounded severity="secondary" @click="nextPeriod" :disabled="isNextDisabled" style="width: 40px; height: 40px;" />
               </div>
@@ -53,7 +59,7 @@
         <div class="summary-card summary-card-blue">
           <div class="summary-icon"><i class="pi pi-cart-arrow-down"></i></div>
           <div class="summary-info">
-            <div class="summary-value">{{ summaryData.stockinCount }} <span class="summary-unit">phiếu</span></div>
+            <div class="summary-value">{{ summaryData.stockinCount }} <span class="summary-unit">{{ t('reports.custom.receipt') || 'phiếu' }}</span></div>
             <div class="summary-money">{{ formatCurrency(summaryData.stockinValue) }}</div>
             <div class="summary-label">{{ t('reports.custom.totalStockin') }}</div>
           </div>
@@ -61,7 +67,7 @@
         <div class="summary-card summary-card-yellow">
           <div class="summary-icon"><i class="pi pi-shopping-cart"></i></div>
           <div class="summary-info">
-            <div class="summary-value">{{ summaryData.orderCount }} <span class="summary-unit">đơn</span></div>
+            <div class="summary-value">{{ summaryData.orderCount }} <span class="summary-unit">{{ t('reports.custom.orderUnit') || 'đơn' }}</span></div>
             <div class="summary-money">{{ formatCurrency(summaryData.orderValue) }}</div>
             <div class="summary-label">{{ t('reports.custom.totalOrder') }}</div>
           </div>
@@ -69,8 +75,8 @@
         <div class="summary-card summary-card-green">
           <div class="summary-icon"><i class="pi pi-box"></i></div>
           <div class="summary-info">
-            <div class="summary-value">{{ summaryData.totalItems }} <span class="summary-unit">loại</span></div>
-            <div class="summary-money">{{ formatNumber(summaryData.totalQty) }} sản phẩm</div>
+            <div class="summary-value">{{ summaryData.totalItems }} <span class="summary-unit">{{ t('reports.custom.typeUnit') || 'loại' }}</span></div>
+            <div class="summary-money">{{ formatNumber(summaryData.totalQty) }} {{ t('reports.custom.productUnit') || 'sản phẩm' }}</div>
             <div class="summary-label">{{ t('reports.custom.totalImportedProducts') }}</div>
           </div>
         </div>
@@ -498,7 +504,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import Chart from "primevue/chart";
 import ProgressSpinner from "primevue/progressspinner";
 import Dialog from "primevue/dialog";
@@ -664,6 +670,98 @@ const selectedChartData = ref<any[]>([]);
 const selectedChunkLabel = ref("");
 const fromDate = ref<Date>(new Date());
 const toDate = ref<Date>(new Date());
+
+const filterWeekFrom = ref<string>("");
+const filterWeekTo = ref<string>("");
+const filterMonthFrom = ref<string>("");
+const filterMonthTo = ref<string>("");
+
+const filterYear = ref<number>(new Date().getFullYear());
+const yearOptions = computed(() => {
+  const y = new Date().getFullYear();
+  return [y, y - 1, y - 2, y - 3, y - 4].map(v => ({ label: v.toString(), value: v }));
+});
+
+watch(filterYear, (newYear) => {
+  if (selectedTime.value === 'Tuần') {
+    filterWeekFrom.value = `${newYear}-W01`;
+    filterWeekTo.value = newYear !== new Date().getFullYear() ? `${newYear}-W52` : getWeekString(new Date());
+    applyWeekMonthFilter();
+  } else if (selectedTime.value === 'Tháng') {
+    filterMonthFrom.value = `${newYear}-01`;
+    filterMonthTo.value = newYear !== new Date().getFullYear() ? `${newYear}-12` : `${newYear}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`;
+    applyWeekMonthFilter();
+  }
+});
+
+const getDateFromWeek = (weekStr: string) => {
+  if (!weekStr) return new Date();
+  const [yearStr, weekNumStr] = weekStr.split('-W');
+  const year = parseInt(yearStr);
+  const week = parseInt(weekNumStr);
+  const simple = new Date(Date.UTC(year, 0, 1 + (week - 1) * 7));
+  const dow = simple.getUTCDay();
+  const ISOweekStart = simple;
+  if (dow <= 4)
+    ISOweekStart.setUTCDate(simple.getUTCDate() - simple.getUTCDay() + 1);
+  else
+    ISOweekStart.setUTCDate(simple.getUTCDate() + 8 - simple.getUTCDay());
+  return ISOweekStart;
+};
+
+const weekOptions = computed(() => {
+  const opts = [];
+  const year = filterYear.value;
+  for (let week = 1; week <= 52; week++) {
+    const from = getDateFromWeek(`${year}-W${week.toString().padStart(2, '0')}`);
+    const to = new Date(from);
+    to.setDate(to.getDate() + 6);
+    opts.push({
+      label: `${t('reports.chart.periodWeek')} ${week} (${fmtDate(from)}-${fmtDate(to)})`,
+      value: `${year}-W${week.toString().padStart(2, '0')}`,
+      yearVal: year,
+      weekVal: week
+    });
+  }
+  return opts.sort((a, b) => b.yearVal - a.yearVal || b.weekVal - a.weekVal); // Newest first
+});
+
+const monthOptions = computed(() => {
+  const opts = [];
+  const year = filterYear.value;
+  for (let month = 1; month <= 12; month++) {
+    opts.push({
+      label: `${t('reports.chart.periodMonth')} ${month}`,
+      value: `${year}-${month.toString().padStart(2, '0')}`,
+      yearVal: year,
+      monthVal: month
+    });
+  }
+  return opts; // ascending
+});
+
+const applyWeekMonthFilter = () => {
+  if (selectedTime.value === "Tuần") {
+    const from = getDateFromWeek(filterWeekFrom.value);
+    const to = getDateFromWeek(filterWeekTo.value);
+    to.setDate(to.getDate() + 6);
+    to.setHours(23, 59, 59, 999);
+    fromDate.value = from;
+    toDate.value = to;
+  } else if (selectedTime.value === "Tháng") {
+    if (filterMonthFrom.value && filterMonthTo.value) {
+      const [yFrom, mFrom] = filterMonthFrom.value.split('-');
+      const from = new Date(parseInt(yFrom), parseInt(mFrom) - 1, 1, 0, 0, 0, 0);
+      
+      const [yTo, mTo] = filterMonthTo.value.split('-');
+      const to = new Date(parseInt(yTo), parseInt(mTo), 0, 23, 59, 59, 999);
+      
+      fromDate.value = from;
+      toDate.value = to;
+    }
+  }
+  loadReportData();
+};
 
 
 
@@ -1146,10 +1244,21 @@ const onTimeTabClick = (opt: string) => {
   selectedTime.value = opt;
   chartData.value = null;
 
-  const range = getDefaultRange(opt);
-  fromDate.value = range.from; toDate.value = range.to;
-
-  loadReportData();
+  if (opt === "Tuần") {
+    filterWeekFrom.value = getWeekString(new Date(new Date().getFullYear(), 0, 1)); 
+    filterWeekTo.value = getWeekString(new Date());
+    applyWeekMonthFilter();
+  } else if (opt === "Tháng") {
+    const y = new Date().getFullYear();
+    const m = new Date().getMonth() + 1;
+    filterMonthFrom.value = `${y}-01`;
+    filterMonthTo.value = `${y}-${m.toString().padStart(2, '0')}`;
+    applyWeekMonthFilter();
+  } else {
+    const range = getDefaultRange(opt);
+    fromDate.value = range.from; toDate.value = range.to;
+    loadReportData();
+  }
 };
 
 const onResetRange = () => {
@@ -1269,6 +1378,25 @@ onUnmounted(() => { window.removeEventListener("resize", handleResize); });
   padding: 0 !important;
   max-width: none !important;
   margin: 0 !important;
+}
+
+:deep(.custom-date-dropdown) {
+  height: 40px;
+  align-items: center;
+  border-radius: 6px;
+  border-color: #cbd5e1;
+}
+
+:deep(.custom-date-dropdown .p-dropdown-label) {
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  display: flex;
+  align-items: center;
+}
+
+:deep(.custom-dropdown-panel .p-dropdown-item) {
+  font-size: 14px;
 }
 
 /* ── Card wrapper ─────────────────────────────────────── */

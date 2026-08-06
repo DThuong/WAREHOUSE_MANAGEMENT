@@ -16,6 +16,8 @@ interface LineMachineState {
   selectedMachine: Machine | null
   loading: boolean
   error: string | null
+  machineCounts: Record<number, number>
+  isFetchingAllCounts: boolean
 }
 
 export const useLineMachineStore = defineStore('lineMachine', {
@@ -26,6 +28,8 @@ export const useLineMachineStore = defineStore('lineMachine', {
     selectedMachine: null,
     loading: false,
     error: null,
+    machineCounts: {},
+    isFetchingAllCounts: false,
   }),
 
   getters: {
@@ -45,6 +49,17 @@ export const useLineMachineStore = defineStore('lineMachine', {
       return (lineId: number) =>
         state.machines.filter((machine) => machine.lineId === lineId)
     },
+    
+    getLineTotalItemCount: (state) => {
+      return (lineId: number) => {
+        const machines = state.machines.filter((machine) => machine.lineId === lineId)
+        let total = 0
+        for (const m of machines) {
+          total += state.machineCounts[m.id] || 0
+        }
+        return total
+      }
+    }
   },
 
   actions: {
@@ -62,6 +77,47 @@ export const useLineMachineStore = defineStore('lineMachine', {
 
     clearError() {
       this.error = null
+    },
+    
+    async fetchAllMachineCounts(itemAPI: any) {
+      if (this.isFetchingAllCounts || this.machines.length === 0) return;
+      this.isFetchingAllCounts = true;
+      
+      const queue = [...this.machines];
+      const maxConcurrent = 3;
+      
+      const worker = async () => {
+        while (queue.length > 0 && this.isFetchingAllCounts) {
+          const m = queue.shift();
+          if (!m || this.machineCounts[m.id] !== undefined) continue;
+          
+          try {
+            const data = await itemAPI.getByMachine(m.id);
+            if (this.isFetchingAllCounts) {
+              this.machineCounts[m.id] = data.length;
+            }
+          } catch {
+            if (this.isFetchingAllCounts) {
+              this.machineCounts[m.id] = 0;
+            }
+          }
+        }
+      };
+
+      const workers = [];
+      for (let i = 0; i < maxConcurrent; i++) {
+        workers.push(worker());
+      }
+      
+      await Promise.all(workers);
+      
+      if (this.isFetchingAllCounts) {
+        this.isFetchingAllCounts = false;
+      }
+    },
+    
+    cancelMachineCountsFetch() {
+      this.isFetchingAllCounts = false;
     },
 
     // =====================
